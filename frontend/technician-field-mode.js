@@ -426,6 +426,132 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "nowCurrent": [
+    "Visita atual",
+    "Current visit",
+    "Visite actuelle",
+    "Visita actual",
+    "Aktueller Besuch"
+  ],
+  "nowStateTODO": [
+    "Por iniciar",
+    "Not started",
+    "À commencer",
+    "Por iniciar",
+    "Noch nicht begonnen"
+  ],
+  "nowStateTRAVEL": [
+    "A caminho",
+    "On the way",
+    "En route",
+    "En camino",
+    "Unterwegs"
+  ],
+  "nowStateIN_PROGRESS": [
+    "Em intervenção",
+    "Work in progress",
+    "Intervention en cours",
+    "Intervención en curso",
+    "Arbeiten im Gange"
+  ],
+  "nowStateWATER_OPEN": [
+    "Água aberta",
+    "Water running",
+    "Eau ouverte",
+    "Agua abierta",
+    "Wasser läuft"
+  ],
+  "nowStateWAITING_MATERIAL": [
+    "A aguardar material",
+    "Waiting for materials",
+    "En attente de matériel",
+    "Esperando material",
+    "Warten auf Material"
+  ],
+  "nowStateCRITICAL": [
+    "Alerta crítico",
+    "Critical alert",
+    "Alerte critique",
+    "Alerta crítica",
+    "Kritischer Hinweis"
+  ],
+  "nowStateDONE": [
+    "Concluída",
+    "Completed",
+    "Terminée",
+    "Completada",
+    "Abgeschlossen"
+  ],
+  "nowStateINCOMPLETE": [
+    "Por concluir",
+    "Incomplete",
+    "À terminer",
+    "Por completar",
+    "Noch abzuschließen"
+  ],
+  "nowFree": [
+    "Hoje está livre",
+    "No visits pending today",
+    "Aucune visite en attente aujourd’hui",
+    "Sin visitas pendientes hoy",
+    "Heute keine ausstehenden Besuche"
+  ],
+  "nowFreeAction": [
+    "Ver agenda ou comunicar com o administrador",
+    "View the schedule or contact the administrator",
+    "Consulter le planning ou contacter l’administrateur",
+    "Ver la agenda o contactar con el administrador",
+    "Terminplan ansehen oder die Verwaltung kontaktieren"
+  ],
+  "nowFreeTiming": [
+    "Sem intervenção ativa neste momento",
+    "No active intervention at the moment",
+    "Aucune intervention en cours actuellement",
+    "Sin intervención activa en este momento",
+    "Derzeit keine laufenden Arbeiten"
+  ],
+  "nowTechnician": [
+    "Técnico por confirmar",
+    "Technician to be confirmed",
+    "Technicien à confirmer",
+    "Técnico por confirmar",
+    "Techniker noch zu bestätigen"
+  ],
+  "nowResponsible": [
+    "Responsável por confirmar",
+    "Responsible person to be confirmed",
+    "Responsable à confirmer",
+    "Responsable por confirmar",
+    "Zuständige Person noch zu bestätigen"
+  ],
+  "nowRepair": [
+    "Reparação",
+    "Repair",
+    "Réparation",
+    "Reparación",
+    "Reparatur"
+  ],
+  "nowMaintenance": [
+    "Manutenção",
+    "Maintenance",
+    "Entretien",
+    "Mantenimiento",
+    "Wartung"
+  ],
+  "nowNoTime": [
+    "Sem tempo em curso",
+    "No timer running",
+    "Aucun chronométrage en cours",
+    "Sin tiempo en curso",
+    "Keine laufende Zeitmessung"
+  ],
+  "nowElapsed": [
+    "{minutes} minuto(s) em intervenção",
+    "{minutes} minute(s) of work",
+    "{minutes} minute(s) d’intervention",
+    "{minutes} minuto(s) de intervención",
+    "{minutes} Minute(n) im Einsatz"
+  ],
   "chip": [
     "Interrupção operacional",
     "Operational interruption",
@@ -1294,6 +1420,7 @@
   })();
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
+  for (const node of document.querySelectorAll('[data-now-copy]')) alertUi.bind(node, alertUi.value(node.dataset.nowCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -1615,6 +1742,14 @@
     return `${diffMinutes} minuto(s) em intervenção`;
   }
 
+  function elapsedMinutesCopy(startAt) {
+    if (!startAt) return alertUi.value('nowNoTime');
+    const date = new Date(startAt);
+    if (Number.isNaN(date.getTime())) return alertUi.value('nowNoTime');
+    const minutes = Math.max(0, Math.round((Date.now() - date.getTime()) / 60000));
+    return alertUi.value('nowElapsed', { minutes });
+  }
+
   function visitHasWaterOpen(visit) {
     if (!visit) return false;
     const visitId = String(visit.id || "");
@@ -1659,8 +1794,8 @@
     return "TODO";
   }
 
-  function operationalStateLabel(visit) {
-    return POOL_STATE[operationalStateCode(visit)] || POOL_STATE.TODO;
+  function operationalStateCopy(visit) {
+    return alertUi.value('nowState' + operationalStateCode(visit));
   }
 
   function elapsedSinceLabel(isoValue) {
@@ -3875,18 +4010,18 @@
     if (!stateLine || !responsibleLine || !timingLine) return;
 
     if (!visit) {
-      stateLine.textContent = "Hoje está livre";
-      responsibleLine.textContent = "Ver agenda ou comunicar com o administrador";
-      timingLine.textContent = "Sem intervenção ativa neste momento";
+      alertUi.bind(stateLine, alertUi.value('nowFree'));
+      alertUi.bind(responsibleLine, alertUi.value('nowFreeAction'));
+      alertUi.bind(timingLine, alertUi.value('nowFreeTiming'));
       return;
     }
 
-    const stateLabel = operationalStateLabel(visit);
-    const technicianName = visit?.technician?.name || activeTechnician?.name || "Técnico por confirmar";
-    const taskType = pendingProblems.length ? "Reparação" : "Manutenção";
-    stateLine.textContent = `${visit.pool?.name || "Piscina"} · ${stateLabel}`;
-    responsibleLine.textContent = `${technicianName} · ${taskType}`;
-    timingLine.textContent = elapsedMinutesLabel(visit.startAt || startedAt);
+    const stateLabel = operationalStateCopy(visit);
+    const technicianName = visit?.technician?.name || activeTechnician?.name || alertUi.value('nowTechnician');
+    const taskType = alertUi.value(pendingProblems.length ? 'nowRepair' : 'nowMaintenance');
+    alertUi.bind(stateLine, alertUi.join([visit.pool?.name || alertUi.value('sourcePool'), stateLabel], ' · '));
+    alertUi.bind(responsibleLine, alertUi.join([technicianName, taskType], ' · '));
+    alertUi.bind(timingLine, elapsedMinutesCopy(visit.startAt || startedAt));
   }
 
   function renderList() {

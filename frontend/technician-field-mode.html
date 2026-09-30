@@ -1362,13 +1362,13 @@
     </section>
 
     <section class="card next field-panel field-panel-agora">
-      <span class="chip">Visita atual</span>
+      <span class="chip" id="nowBoardLabel" data-now-copy="nowCurrent" data-cw-no-i18n>Visita atual</span>
       <div class="title" id="nextTitle">A carregar...</div>
       <div class="muted" id="nextMeta"></div>
-      <div class="now-board" id="nowBoard">
-        <b id="nowStateLine">Em intervenção</b>
-        <span class="muted" id="nowResponsibleLine">Responsável por confirmar</span>
-        <span class="muted" id="nowTimingLine">Sem tempo em curso</span>
+      <div class="now-board" id="nowBoard" role="group" aria-labelledby="nowBoardLabel" data-cw-no-i18n>
+        <b id="nowStateLine" data-now-copy="nowStateIN_PROGRESS">Em intervenção</b>
+        <span class="muted" id="nowResponsibleLine" data-now-copy="nowResponsible">Responsável por confirmar</span>
+        <span class="muted" id="nowTimingLine" data-now-copy="nowNoTime">Sem tempo em curso</span>
       </div>
       <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
       <nav class="field-step-links" aria-label="Etapas da visita"><button type="button" data-field-jump="accessCard">Acesso</button><button type="button" data-field-jump="cleaningCard">Serviço</button><button type="button" data-field-jump="productsCard">Produtos</button><button type="button" data-field-jump="photosCard">Fotos</button></nav>

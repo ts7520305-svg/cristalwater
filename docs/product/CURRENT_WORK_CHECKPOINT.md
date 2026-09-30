@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK461 local validada / estado da visita atual
+
+**TASK461 / C06-012:**18 entradas/90 textos PT/EN/FR/ES/DE para identificação do quadro, oito estados, responsável, reparação/manutenção, minutos e ausência de visita atual. Apresentador privado existente reutilizado; nomes, notas, registos, prioridades e dados originais conservados. Arredondamento, origem do início, datas e regras C10 inalterados. [Prova461](evidence/20260930_task461_local.json).
+
+**Validação:** seis integrações,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Dois grupos complementares, estados com/sem captura e tempo/contexto sem captura; oito estados nos cinco idiomas, matriz inicial320/390/1440 e casos extensos a320. Mesmos nós/foco/controlos/valores/tokens/bytes/outbox; SQL intacto e sem produtores ao traduzir. REGULAR/EXTRA com o mesmo número, água EXTRA real offline, reparação por rascunho, nomes literais/HTML/fallbacks, ronda vazia e troca de conta. Limites29,999/30/89,999/90 segundos, futuro/ausente/inválido e65 minutos: idioma conserva o valor capturado, atualização existente recalcula. Regressões dashboard/lembretes EXTRA/rascunhos/componente browser aprovadas. Captura alemã320 revista. Cache243/runner353;351 anteriores na ordem exata. Dez ficheiros, três fontes de produto.
+
+**Gates:** TASK459 aceite no código `993c4549`, [CI36683599775](https://github.com/ts7520305-svg/cristalwater/actions/runs/36683599775), job109784303104:350/350 grupos na ordem exata, PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais; cinco fontes verificadas no commit original. TASK457/458 já aceites349/restauro128/51, correção documental458 revalidada; falha histórica454 preservada. CI460 na suite351 após dez etapas aprovadas; restauro pendente.
+
+**Retoma:** publicar461 e exigir gates/restauros460–461; corrigir novas falhas. Próximo funcional: lista da ronda; textos à volta do quadro da visita, equipa/documentos e push/auth/nav continuam pendentes. Não se declara toda a página traduzida. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK460 / CI em execução
 
 TASK460 publicada na branch `work/field-readiness-20260915-simulation`: código `4389454f8e7e5bfa34f2ea3ef352c792942f8daf`, árvore `289ab1a81b1f941fff1bfcf6f0f0917c26451fbe`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task460-20260930`. [CI36688218583](https://github.com/ts7520305-svg/cristalwater/actions/runs/36688218583), job109798932582, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Dashboard com55 entradas/275 textos, causa P0 correta, atualização imediata dos lembretes e cartões móveis legíveis. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache242/runner351. [Prova460](evidence/20260930_task460_local.json).

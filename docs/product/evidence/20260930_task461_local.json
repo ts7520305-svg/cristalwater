@@ -1,0 +1,275 @@
+{
+  "task": 461,
+  "date": "2026-09-30",
+  "base": "562f8a5fe2001886b23bc3ded1c1c0545aded8c6",
+  "item": "C06-012",
+  "scope": {
+    "productSources": 3,
+    "batchFiles": 10,
+    "description": "Presentation of current-visit group, operational state, technician/task type, elapsed minutes and no-current-visit state. Route list, surrounding visit metadata/actions and shared UI remain pending."
+  },
+  "catalogue": {
+    "entries": 18,
+    "texts": 90,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "reusedPoolFallback": "sourcePool",
+    "privatePresentation": "Existing immutable alertUi specifications and literal values; bindings repaint the same nodes."
+  },
+  "negative": {
+    "run": "qa-task461/run-1790757771336",
+    "script": "test-field-current-visit-languages.js",
+    "code": 1,
+    "ms": 1148,
+    "actual": "Piscina · Por iniciar",
+    "expected": "Piscina · Not started",
+    "description": "The real language selector left the current state in Portuguese; the literal pool name must stay unchanged."
+  },
+  "integration": [
+    {
+      "script": "test-field-current-visit-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 67816,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790759326053"
+    },
+    {
+      "script": "test-field-current-visit-time-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 62841,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790759588800"
+    },
+    {
+      "script": "test-field-dashboard-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 38466,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790758364830"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14697,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790758364830"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21115,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790758364830"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 846,
+      "timedOut": false,
+      "evidence": "qa-task461/run-1790758364830"
+    }
+  ],
+  "withoutCapture": {
+    "script": "current-visit-no-capture.cjs",
+    "code": 0,
+    "signal": null,
+    "ms": 67633,
+    "timedOut": false,
+    "evidence": "qa-task461/run-1790759061251"
+  },
+  "withoutCaptureWrapper": "delete process.env.CW_NOW_BOARD_CAPTURE;\nrequire('/workspace/scratch/b364087eee9d/cristalwater-task449/scripts/test-field-current-visit-languages.js');\n",
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 42215,
+      "log": "/workspace/scratch/b364087eee9d/qa-task461/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7631,
+      "log": "/workspace/scratch/b364087eee9d/qa-task461/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 680,
+      "log": "/workspace/scratch/b364087eee9d/qa-task461/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Eight operational states through the real renderer and language selector in all five languages; original DONE > CRITICAL > WATER_OPEN > WAITING_MATERIAL > INCOMPLETE > IN_PROGRESS > TRAVEL > TODO precedence.",
+    "REGULAR/EXTRA share the same number but have different pools. An actual offline EXTRA water reminder does not alter the regular visit state. Reminder source bytes restored exactly before the account returns online.",
+    "Draft repair, maintenance, a literal technician named Técnico por confirmar, literal pool named Piscina, HTML/placeholder-like names and notes, missing-name fallbacks, and an empty route.",
+    "Initial matrix at320/390/1440; critical state, free-route guidance and missing names also checked in all five languages at320px. Same nodes, focus, controls, input values, tokens, raw local bytes and complete own outbox after every language change.",
+    "All SQL rows unchanged across each language matrix, all monitored producers unchanged and only language-preference PUT requests allowed during language changes. No POST/PATCH/DELETE operational API calls in the whole scenario.",
+    "Visit start and draft-start fallback. Missing/invalid/future timestamps,65 minutes,29.999s/30s/89.999s/90s rounding boundaries. Boundary cases use German after full elapsed-copy language coverage. Locale repaint preserves captured minutes; the existing water-state refresh updates them.",
+    "Repeated cache fixtures exercise the existing pageshow persisted/bfcache reload path. Original document/session guard stays active. Fresh navigation restores the exact original route, then switches to a real other account with its own visit and no inherited draft/water state. An actual old-account water reminder remains open locally and byte-for-byte unchanged during the switch.",
+    "State scenario passes with and without capture, time/account scenario passes without capture; page errors empty. Existing dashboard, extra-reminder, modern-draft and field-browser regressions pass."
+  ],
+  "qaCorrections": [
+    "QA dependency symlink initially pointed to repository dependencies, which omit PGlite; corrected to the existing QA runtime before the negative reproduction.",
+    "The combined state/time/account scenario exceeded its110s deadline. It was split into two complementary native groups (states and time/context); locator9s, scenario110s and runner120s budgets are unchanged. Repeated cache fixtures use actual bfcache restoration, aliases/numerical boundaries reuse language coverage, and all eight states retain all five real selector languages. SQL snapshots remain before/after every matrix while DOM/outbox/source checks remain after every language change.",
+    "The final fresh navigation resets instrumentation before its first one-second session-guard callback. The test now waits for that real callback within the original9s locator budget before asserting it; the guard and interval remain enabled.",
+    "The live route API normalizes missing pool/technician names to literal - and Tecnico. The new-account test retains these exact returned values; a separate valid cache fixture with genuinely absent names verifies the translated frontend fallbacks.",
+    "An empty technician name also clears the active display context through the existing route loader, so the expected result is the translated missing-name label, not the former account name. Corrected the fixture expectation without changing product behavior."
+  ],
+  "preservation": {
+    "base": "562f8a5fe2001886b23bc3ded1c1c0545aded8c6",
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "58827a5f706d82c542004c6d60ea994f8c992c140977e8a1af51b6766156aa09"
+      },
+      "frontend/technician-field-mode.html": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "e0396199e6c03c62a143777e1eb96aea57c5f467d2d823ee97f10efcdf6f34cf"
+      },
+      "frontend/sw.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "44a838b641c2c449231a653c608060fa4a81959470bfbb76320cb131f6c7d831"
+      },
+      "scripts/test-field-suite.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "6fbe5b93153f932c3248f84b53ec289f4d9d817bc9940e374904a4e426cdd12d"
+      }
+    },
+    "previousGroups": 351,
+    "newGroups": 353,
+    "priorExactOrderPreserved": true,
+    "unchangedFunctions": [
+      "visitHasWaterOpen",
+      "visitHasCriticalProblem",
+      "visitHasMaterialBlock",
+      "operationalStateCode",
+      "elapsedMinutesLabel",
+      "elapsedSinceLabel",
+      "isVisitDone"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "167aed35c06a441f7e44ab3f482800922a350277c2b622662493666db0aec68c",
+    "frontend/technician-field-mode.html": "fcc2b981308e3d2ae8ecb1d74452646f050d4a12300439b6f1d6117ca29217b8",
+    "frontend/sw.js": "8faff8a8d590f65af80755166b6ee428f9fc66e39fa7798621ba01f0d96cab8d",
+    "scripts/test-field-current-visit-languages.js": "ed6d29b3f0520468f22b2da6fcdd12968f8c5416c88603ad918614cd3dcd1802",
+    "scripts/test-field-current-visit-time-languages.js": "94d18fce7907fe6ee7147d769fdcd59c8b4ad07b2127b00ce68d414799513c5a",
+    "scripts/test-field-suite.js": "ec948e73441855a18e3fe71a87282ff46d07e5d6a3f81863ff302978b427ea31"
+  },
+  "visual": {
+    "capture": "qa-task461/current-visit-de-320.png",
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "target": "nowBoard",
+    "review": "German320px screenshot inspected: all three lines fit, state wraps naturally, original pool/technician names remain literal; no layout change required."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeAccepted": [
+    {
+      "task": 459,
+      "code": "993c454943641bc7c18d92a95d22e2b082dd50d5",
+      "run": 36683599775,
+      "job": 109784303104,
+      "counts": {
+        "total": 350,
+        "passed": 350
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "4f0289edc7f512957315078051e7d73cf483bdd793ae4edc46a7df2dbe990d18",
+      "sourceHashesVerified": {
+        "frontend/technician-field-mode.js": "a1fdd1b11a5cab27e3bc35f14ea0446836f63c13e1dc888bc215b6c692468323",
+        "frontend/cw-field-reminders.js": "b4bc2a18d08d5850bc26decd1684b7aa1b42c1f550945e3761d588586199aabe",
+        "frontend/sw.js": "839cfac2b9ff280ae9e98578bb8191b6fbef08c2ee9fc5add9c5136d09a6607e",
+        "scripts/test-field-alert-source-languages.js": "61ea888e70c79b47e91c8fad2f4423d57ea88c3ef7bbb5851b6da038a2b7df80",
+        "scripts/test-field-suite.js": "4f0289edc7f512957315078051e7d73cf483bdd793ae4edc46a7df2dbe990d18"
+      },
+      "postgres16": true,
+      "additiveUpgrade": true,
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupsEvidenceCount": 350,
+      "groupEvidenceSha256": "5f479389913a2784f372a0eeede9a8b300a9f6658e755d7c4c8787f57518361e"
+    }
+  ],
+  "historicalFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "job": 109756159173,
+    "groupsPassed": 345,
+    "groupsTotal": 346,
+    "restore": "not_run",
+    "fix": 458,
+    "fixAcceptedInTask": 460
+  },
+  "pendingNative": [
+    {
+      "task": 460,
+      "code": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+      "run": 36688218583,
+      "job": 109798932582,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 351,
+      "restore": "pending"
+    },
+    {
+      "task": 461,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 353,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred"
+  }
+}

@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK461 / C06-012, quadro da visita atual
+
+`technician-field-mode.js/html`:18 entradas/90 textos PT/EN/FR/ES/DE para título do grupo, oito estados operacionais, responsável, reparação/manutenção, tempo e ausência de visita. Cópias privadas e bindings no mesmo nó; dados/nomes/HTML literal preservados, sem tradução de palavras persistidas por coincidência. As regras de prioridade e os cálculos/datas permanecem iguais. A lista e os textos à volta do quadro continuam pendentes. [Prova461](evidence/20260930_task461_local.json).
+
+Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Oito estados nos cinco idiomas; matriz inicial320/390/1440, estados extensos/fallbacks/vazio também a320. REGULAR/EXTRA com número igual e água EXTRA real; rascunho/nomes/dados/outbox/SQL intactos, sem produtores por idioma. Valores temporais ausentes/inválidos/futuros,65 minutos e limites de arredondamento; idioma conserva a leitura capturada, evento existente atualiza-a. Guardas ativas e troca real de conta sem herdar rascunhos/água. Ensaio com/sem captura; alemão320 revisto. Cache243/runner353,351 anteriores na ordem exata. Dez ficheiros.
+
+TASK459 aceite350/350 grupos/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, cinco fontes originais verificadas. TASK457/458 já aceites; falha histórica454 preservada. Gates/restauros460–461 pendentes. Próximo: lista da ronda, depois texto envolvente da visita/equipa/documentos; push/auth/nav em C08 e datas em C10. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK460 / C06-012, dashboard e cabeçalho
 
 `technician-field-mode.js/html`:55 entradas/275 textos PT/EN/FR/ES/DE para resumo/cabeçalho, progresso, documentos, envios, ações e nome acessível. Reutiliza o apresentador privado; snapshots imutáveis, nomes/dados/contagens/identidades/histórico originais. Função antiga não chamada `updateFieldDashboardLegacy` inalterada; não se declara toda a página traduzida. [Prova460](evidence/20260930_task460_local.json).
