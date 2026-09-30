@@ -126,6 +126,302 @@
     photoUiLanguage = document.documentElement.lang; repaintPhotoUi();
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
+  // Water presentation captures values; language changes never reload reminders.
+  const waterUi = (() => {
+    const languages = ['pt', 'en', 'fr', 'es', 'de'];
+    const copy = {
+  "title": [
+    "Agua aberta",
+    "Running water",
+    "Eau ouverte",
+    "Agua abierta",
+    "Wasser läuft"
+  ],
+  "chip": [
+    "Água aberta",
+    "Running water",
+    "Eau ouverte",
+    "Agua abierta",
+    "Wasser läuft"
+  ],
+  "hint": [
+    "alarme obrigatorio",
+    "mandatory alarm",
+    "alarme obligatoire",
+    "alarma obligatoria",
+    "Alarm erforderlich"
+  ],
+  "intro": [
+    "Defina tempo ou hora para fechar e evitar esquecimentos.",
+    "Set a delay or closing time so you do not forget.",
+    "Définissez un délai ou une heure de fermeture pour éviter les oublis.",
+    "Indique un plazo o una hora de cierre para no olvidarse.",
+    "Legen Sie eine Frist oder Uhrzeit zum Schließen fest, damit Sie es nicht vergessen."
+  ],
+  "minutesPlaceholder": [
+    "Minutos. Ex: 25",
+    "Minutes. E.g. 25",
+    "Minutes. Ex. : 25",
+    "Minutos. Ej.: 25",
+    "Minuten. Z. B. 25"
+  ],
+  "timeLabel": [
+    "Hora para fechar a água",
+    "Time to turn off the water",
+    "Heure de fermeture de l’eau",
+    "Hora para cerrar el agua",
+    "Uhrzeit zum Abstellen des Wassers"
+  ],
+  "notePlaceholder": [
+    "Nota opcional",
+    "Optional note",
+    "Note facultative",
+    "Nota opcional",
+    "Optionale Notiz"
+  ],
+  "open": [
+    "Marcar água aberta",
+    "Record running water",
+    "Enregistrer l’ouverture de l’eau",
+    "Registrar agua abierta",
+    "Laufendes Wasser erfassen"
+  ],
+  "empty": [
+    "Sem lembretes de agua aberta.",
+    "No running-water reminders.",
+    "Aucun rappel d’eau ouverte.",
+    "No hay recordatorios de agua abierta.",
+    "Keine Erinnerungen an laufendes Wasser."
+  ],
+  "pool": [
+    "Piscina",
+    "Pool",
+    "Piscine",
+    "Piscina",
+    "Pool"
+  ],
+  "client": [
+    "Cliente",
+    "Client",
+    "Client",
+    "Cliente",
+    "Kunde"
+  ],
+  "location": [
+    "Localizacao por confirmar",
+    "Location unconfirmed",
+    "Emplacement à confirmer",
+    "Ubicación por confirmar",
+    "Standort unbestätigt"
+  ],
+  "note": [
+    "Sem nota adicional",
+    "No additional note",
+    "Aucune note supplémentaire",
+    "Sin nota adicional",
+    "Keine weitere Notiz"
+  ],
+  "place": [
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}"
+  ],
+  "pending": [
+    "Por confirmar",
+    "Unconfirmed",
+    "À confirmer",
+    "Por confirmar",
+    "Unbestätigt"
+  ],
+  "recorded": [
+    "Registado",
+    "Recorded",
+    "Enregistré",
+    "Registrado",
+    "Erfasst"
+  ],
+  "syncing": [
+    "A sincronizar",
+    "Synchronizing",
+    "Synchronisation",
+    "Sincronizando",
+    "Synchronisierung"
+  ],
+  "closing": [
+    "Fecho por enviar",
+    "Closure awaiting upload",
+    "Fermeture à envoyer",
+    "Cierre pendiente de envío",
+    "Schließen noch zu übermitteln"
+  ],
+  "alarm": [
+    "ALARME",
+    "ALARM",
+    "ALARME",
+    "ALARMA",
+    "ALARM"
+  ],
+  "opened": [
+    "Aberta",
+    "Open",
+    "Ouverte",
+    "Abierta",
+    "Offen"
+  ],
+  "close": [
+    "Agua fechada",
+    "Water turned off",
+    "Eau fermée",
+    "Agua cerrada",
+    "Wasser abgestellt"
+  ],
+  "alert": [
+    "Alertar equipa",
+    "Alert the team",
+    "Alerter l’équipe",
+    "Avisar al equipo",
+    "Team alarmieren"
+  ],
+  "unknownTime": [
+    "Hora por confirmar",
+    "Time unconfirmed",
+    "Heure à confirmer",
+    "Hora por confirmar",
+    "Uhrzeit unbestätigt"
+  ],
+  "closedLabel": [
+    "Torneira fechada; confirmação no servidor pendente",
+    "Tap closed; server confirmation pending",
+    "Robinet fermé ; confirmation du serveur en attente",
+    "Grifo cerrado; confirmación del servidor pendiente",
+    "Wasserhahn geschlossen; Serverbestätigung ausstehend"
+  ],
+  "overdueLabel": [
+    "Água por confirmar - previsto {when}",
+    "Water status unconfirmed - due {when}",
+    "État de l’eau à confirmer - prévu {when}",
+    "Agua por confirmar - previsto {when}",
+    "Wasserstatus unbestätigt - vorgesehen {when}"
+  ],
+  "lateLabel": [
+    "Atrasado desde {when}",
+    "Overdue since {when}",
+    "En retard depuis {when}",
+    "Atrasado desde {when}",
+    "Überfällig seit {when}"
+  ],
+  "dueLabel": [
+    "Lembrar em {when}",
+    "Reminder at {when}",
+    "Rappel à {when}",
+    "Recordar a las {when}",
+    "Erinnerung um {when}"
+  ],
+  "alarmHeader": [
+    "ALARME: agua aberta por fechar.",
+    "ALARM: running water must be turned off.",
+    "ALARME : l’eau ouverte doit être fermée.",
+    "ALARMA: hay agua abierta por cerrar.",
+    "ALARM: Laufendes Wasser muss abgestellt werden."
+  ],
+  "alarmPool": [
+    "Piscina: {name}",
+    "Pool: {name}",
+    "Piscine : {name}",
+    "Piscina: {name}",
+    "Pool: {name}"
+  ],
+  "alarmClient": [
+    "Cliente: {name}",
+    "Client: {name}",
+    "Client : {name}",
+    "Cliente: {name}",
+    "Kunde: {name}"
+  ],
+  "alarmNote": [
+    "Nota: {note}",
+    "Note: {note}",
+    "Note : {note}",
+    "Nota: {note}",
+    "Notiz: {note}"
+  ],
+  "alarmAction": [
+    "Verificar ou fechar imediatamente.",
+    "Check or turn it off immediately.",
+    "Vérifiez ou fermez immédiatement.",
+    "Compruebe o cierre inmediatamente.",
+    "Sofort prüfen oder abstellen."
+  ],
+  "alarmMessage": [
+    "{header}{pool}{client}{note}\n{action}",
+    "{header}{pool}{client}{note}\n{action}",
+    "{header}{pool}{client}{note}\n{action}",
+    "{header}{pool}{client}{note}\n{action}",
+    "{header}{pool}{client}{note}\n{action}"
+  ],
+  "alarmLine": [
+    "\n{text}",
+    "\n{text}",
+    "\n{text}",
+    "\n{text}",
+    "\n{text}"
+  ],
+  "alarmSaved": [
+    "ALARME: verificar água aberta. A confirmar no servidor.",
+    "ALARM: check the running water. Awaiting server confirmation.",
+    "ALARME : vérifiez l’eau ouverte. En attente de confirmation du serveur.",
+    "ALARMA: compruebe el agua abierta. Pendiente de confirmación del servidor.",
+    "ALARM: Laufendes Wasser prüfen. Serverbestätigung ausstehend."
+  ],
+  "exceptionTitle": [
+    "P0 - Agua aberta",
+    "P0 - Running water",
+    "P0 - Eau ouverte",
+    "P0 - Agua abierta",
+    "P0 - Wasser läuft"
+  ]
+};
+    const specs = new WeakSet(), bindings = new Map();
+    function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
+    function format(entry, language = document.documentElement.lang || 'pt') {
+      if (!specs.has(entry)) return window.CWFieldReminders?.presentation?.format(entry) ?? String(entry ?? '');
+      const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
+      return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key], language));
+    }
+    function clear(node) { const old = bindings.get(node); if (!old) return; bindings.delete(node); node.removeAttribute('data-cw-water-list-copy'); if (!old.protected && !node.hasAttribute('data-cw-water-copy')) node.removeAttribute('data-cw-no-i18n'); }
+    function prune() { for (const node of bindings.keys()) if (!node.isConnected) clear(node); }
+    function clearTree(root) { for (const node of bindings.keys()) if (node === root || root.contains(node) || !node.isConnected) clear(node); }
+    function bind(node, entry, attribute = '') {
+      if (!node) return;
+      const previous = bindings.get(node), rendered = format(entry), protectedNode = previous ? previous.protected : node.hasAttribute('data-cw-no-i18n');
+      node.setAttribute('data-cw-water-list-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+      if (attribute) { if (node.getAttribute(attribute) !== rendered) node.setAttribute(attribute, rendered); }
+      else if (node.textContent !== rendered) node.textContent = rendered;
+      bindings.set(node, { entry, attribute, rendered, protected: protectedNode, textNode: node.firstChild });
+    }
+    function paint() {
+      for (const [node, item] of bindings) {
+        const current = item.attribute ? node.getAttribute(item.attribute) : node.textContent;
+        if (!node.isConnected || current !== item.rendered || (!item.attribute && node.firstChild !== item.textNode)) { clear(node); continue; }
+        bind(node, item.entry, item.attribute);
+      }
+    }
+    function notify(entry) { toast(format(entry)); bind($('#toast'), entry); }
+    function error(error) { notify(window.CWFieldReminders?.presentation?.error(error) ?? String(error?.message ?? '')); }
+    function showAlarm(entry) {
+      const message = format(entry), previous = new Set(document.querySelectorAll('.cw-ui-toast'));
+      ui.error(message);
+      const created = Array.from(document.querySelectorAll('.cw-ui-toast')).filter(node => !previous.has(node) && node.textContent === message);
+      if (created.length === 1) { prune(); bind(created[0], entry); }
+    }
+    window.addEventListener('cw-language-change', paint);
+    let lastLanguage = document.documentElement.lang;
+    new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    return { value, format, bind, clear, clearTree, prune, notify, error, showAlarm };
+  })();
+
   let visits = [];
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
@@ -156,6 +452,7 @@
   let visitPhotosByKey = {};
   let waterReminders = [];
   let waterRemindersError = '';
+  let waterRemindersErrorCopy = '';
   let usedProducts = [];
   let productCatalogue = null;
   let activeWorkGuide = null;
@@ -658,6 +955,7 @@
       ui.info(message);
       return;
     }
+    waterUi.clear(node);
     clearPhotoError(node);
     clearPhotoUi(node);
     node.textContent = message;
@@ -1618,6 +1916,8 @@
     }).join("");
 
     list.innerHTML = (warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '') + exceptionsHtml;
+    waterUi.prune();
+    for (const node of list.querySelectorAll('[data-exception-category="WATER_OPEN"] > strong')) waterUi.bind(node, waterUi.value('exceptionTitle'));
   }
 
   function mapsSearchUrl(visit) {
@@ -2309,74 +2609,91 @@
   function reminderBelongsToCurrentContext() { return sameFieldSession(); }
 
   function loadWaterRemindersFromStorage() {
-    try { waterReminders = window.CWFieldReminders?.list('WATER_OPEN') || []; waterRemindersError = ''; }
-    catch (error) { waterReminders = []; waterRemindersError = error.message; }
+    try { waterReminders = window.CWFieldReminders?.list('WATER_OPEN') || []; waterRemindersError = ''; waterRemindersErrorCopy = ''; }
+    catch (error) { waterReminders = []; waterRemindersError = error.message; waterRemindersErrorCopy = window.CWFieldReminders?.presentation?.error(error) ?? error.message; }
   }
 
-  function waterReminderLabel(reminder) {
+  function waterReminderLabelCopy(reminder) {
     const due = new Date(reminder.dueAt);
-    if (Number.isNaN(due.getTime())) return "Hora por confirmar";
+    if (Number.isNaN(due.getTime())) return waterUi.value('unknownTime');
     const now = new Date();
-    if (reminder.status === "CLOSED") return "Torneira fechada; confirmação no servidor pendente";
-    if (reminder.status === "OVERDUE") return `Água por confirmar - previsto ${formatDate(due)}`;
-    if (due <= now && reminder.status !== "CLOSED") return `Atrasado desde ${formatDate(due)}`;
-    return `Lembrar em ${formatDate(due)}`;
+    if (reminder.status === "CLOSED") return waterUi.value('closedLabel');
+    if (reminder.status === "OVERDUE") return waterUi.value('overdueLabel', { when: formatDate(due) });
+    if (due <= now && reminder.status !== "CLOSED") return waterUi.value('lateLabel', { when: formatDate(due) });
+    return waterUi.value('dueLabel', { when: formatDate(due) });
   }
+  function waterReminderLabel(reminder) { return waterUi.format(waterReminderLabelCopy(reminder), 'pt'); }
 
   function waterReminderSyncBadge(reminder) {
-    if (reminder.syncError) return '<span class="chip" style="background:#fce4e4;border-color:#bd6464;color:#842020">Por confirmar</span>';
-    if (reminder.serverId) return '<span class="chip" style="background:#ddf4e7;border-color:#68a880;color:#185a30">Registado</span>';
-    return '<span class="chip" style="background:#fff0c6;border-color:#bd9c45;color:#604800">A sincronizar</span>';
+    if (reminder.syncError) return '<span class="chip" data-water-list-text="sync" style="background:#fce4e4;border-color:#bd6464;color:#842020">Por confirmar</span>';
+    if (reminder.serverId) return '<span class="chip" data-water-list-text="sync" style="background:#ddf4e7;border-color:#68a880;color:#185a30">Registado</span>';
+    return '<span class="chip" data-water-list-text="sync" style="background:#fff0c6;border-color:#bd9c45;color:#604800">A sincronizar</span>';
   }
 
   function showWaterAlarmPopup(reminder) {
-    const message = [
-      "ALARME: agua aberta por fechar.",
-      reminder.poolName ? `Piscina: ${reminder.poolName}` : "",
-      reminder.clientName ? `Cliente: ${reminder.clientName}` : "",
-      reminder.note ? `Nota: ${reminder.note}` : "",
-      "Verificar ou fechar imediatamente.",
-    ].filter(Boolean).join("\n");
-    setTimeout(() => ui.error(message), 80);
+    const message = waterUi.value('alarmMessage', {
+      header: waterUi.value('alarmHeader'),
+      pool: reminder.poolName ? waterUi.value('alarmLine', { text: waterUi.value('alarmPool', { name: reminder.poolName }) }) : '',
+      client: reminder.clientName ? waterUi.value('alarmLine', { text: waterUi.value('alarmClient', { name: reminder.clientName }) }) : '',
+      note: reminder.note ? waterUi.value('alarmLine', { text: waterUi.value('alarmNote', { note: reminder.note }) }) : '',
+      action: waterUi.value('alarmAction'),
+    });
+    setTimeout(() => waterUi.showAlarm(message), 80);
   }
 
   function renderWaterReminders() {
     const list = $("#waterReminderList");
     if (!list) return;
+    waterUi.clearTree(list); list.setAttribute('data-cw-no-i18n', '');
     loadWaterRemindersFromStorage();
-    if (waterRemindersError) { list.textContent = waterRemindersError; return; }
+    if (waterRemindersError) { waterUi.bind(list, waterRemindersErrorCopy); return; }
     const active = waterReminders.filter(row=>row.status!=="CLOSED" || !row.closeSyncedAt).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
     if (!active.length) {
       list.innerHTML = '<div class="muted">Sem lembretes de agua aberta.</div>';
+      waterUi.bind(list.firstElementChild, waterUi.value('empty'));
       renderInterruptBoard();
       return;
     }
 
+    const rowCopies = new Map();
     list.innerHTML = active.map((reminder) => {
       const overdue = reminder.status === "OVERDUE" || new Date(reminder.dueAt) <= new Date();
+      const label = waterReminderLabelCopy(reminder);
+      rowCopies.set(String(reminder.localId), {
+        pool: reminder.poolName || waterUi.value('pool'),
+        place: waterUi.value('place', { client: reminder.clientName || waterUi.value('client'), location: reminder.location || waterUi.value('location') }),
+        note: reminder.note || waterUi.value('note'),
+        status: waterUi.value(reminder.status === 'CLOSED' ? 'closing' : overdue ? 'alarm' : 'opened'),
+        sync: waterUi.value(reminder.syncError ? 'pending' : reminder.serverId ? 'recorded' : 'syncing'),
+        due: label, close: waterUi.value('close'), alert: waterUi.value('alert'),
+      });
       return `
         <div class="water-item ${overdue ? "overdue" : ""}" data-water-id="${esc(reminder.localId)}">
           <div class="water-line">
             <div>
-              <strong>${esc(reminder.poolName || "Piscina")}</strong>
-              <div class="muted">${esc(reminder.clientName || "Cliente")} - ${esc(reminder.location || "Localizacao por confirmar")}</div>
-              <div class="muted">${esc(reminder.note || "Sem nota adicional")}</div>
+              <strong data-water-list-text="pool">${esc(reminder.poolName || "Piscina")}</strong>
+              <div class="muted" data-water-list-text="place">${esc(reminder.clientName || "Cliente")} - ${esc(reminder.location || "Localizacao por confirmar")}</div>
+              <div class="muted" data-water-list-text="note">${esc(reminder.note || "Sem nota adicional")}</div>
               ${reminder.syncError ? `<div class="muted" style="color:#842020;background:#fce4e4;padding:4px;border-radius:4px"> ${esc(reminder.syncError)}</div>` : ""}
             </div>
             <div style="display:grid;gap:6px;justify-items:end">
-              <span class="chip">${reminder.status === "CLOSED" ? "Fecho por enviar" : overdue ? "ALARME" : "Aberta"}</span>
+              <span class="chip" data-water-list-text="status">${reminder.status === "CLOSED" ? "Fecho por enviar" : overdue ? "ALARME" : "Aberta"}</span>
               ${waterReminderSyncBadge(reminder)}
             </div>
           </div>
-          <div class="doc-number" style="font-size:18px">${esc(waterReminderLabel(reminder))}</div>
+          <div class="doc-number" data-water-list-text="due" style="font-size:18px">${esc(waterUi.format(label, 'pt'))}</div>
           <div class="water-actions" style="${reminder.status === "CLOSED" ? "display:none" : ""}">
-            <button class="close" type="button" data-water-close="${esc(reminder.localId)}">Agua fechada</button>
-            <button class="alarm" type="button" data-water-alarm="${esc(reminder.localId)}">Alertar equipa</button>
+            <button class="close" type="button" data-water-list-text="close" data-water-close="${esc(reminder.localId)}">Agua fechada</button>
+            <button class="alarm" type="button" data-water-list-text="alert" data-water-alarm="${esc(reminder.localId)}">Alertar equipa</button>
           </div>
         </div>
       `;
     }).join("");
 
+    for (const row of list.querySelectorAll('[data-water-id]')) {
+      const values = rowCopies.get(row.dataset.waterId);
+      for (const node of row.querySelectorAll('[data-water-list-text]')) waterUi.bind(node, values[node.dataset.waterListText]);
+    }
     list.querySelectorAll("[data-water-close]").forEach((button) => {
       button.addEventListener("click", () => closeWaterReminder(button.dataset.waterClose));
     });
@@ -2409,11 +2726,11 @@
   }
 
   async function createWaterReminder() {
-    try { await window.CWWaterReminders?.open(); } catch (error) { toast(error.message); }
+    try { await window.CWWaterReminders?.open(); } catch (error) { waterUi.error(error); }
   }
 
   async function closeWaterReminder(localId) {
-    try { await window.CWWaterReminders?.close(localId); } catch (error) { toast(error.message); }
+    try { await window.CWWaterReminders?.close(localId); } catch (error) { waterUi.error(error); }
   }
 
   async function escalateWaterReminder(localId, manual) {
@@ -2423,10 +2740,10 @@
     try {
       await window.CWFieldReminders.mark('WATER_OPEN',localId,'alarm');
       if (navigator.vibrate) navigator.vibrate([300,120,300]);
-      toast('ALARME: verificar água aberta. A confirmar no servidor.');
+      waterUi.notify(waterUi.value('alarmSaved'));
       if (!manual) showWaterAlarmPopup(reminder);
       await window.CWFieldReminders.sync();
-    } catch (error) { toast(error.message); }
+    } catch (error) { waterUi.error(error); }
   }
 
   function renderDocumentSection(kind, section, source, vehicleId) {
@@ -3234,6 +3551,11 @@
     markFieldSection(".crew-card", "field-panel-docs", "Tecnico", "viatura e documentos");
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");
+    const waterCard = $('#waterReminderList')?.closest('section');
+    for (const [selector, key] of [['.field-tab-title h2', 'title'], ['.field-tab-title span', 'hint'], [':scope > .chip', 'chip'], [':scope > .muted', 'intro'], ['#openWaterBtn', 'open']]) waterUi.bind(waterCard?.querySelector(selector), waterUi.value(key));
+    waterUi.bind($('#waterMinutes'), waterUi.value('minutesPlaceholder'), 'placeholder');
+    waterUi.bind($('#waterCloseTime'), waterUi.value('timeLabel'), 'aria-label');
+    waterUi.bind($('#waterNote'), waterUi.value('notePlaceholder'), 'placeholder');
     markFieldSection("#adminAlertMessage", "field-panel-more", "Avisos", "admin e stock");
     markFieldSection("#problemPanel", "field-panel-more", "Extras / problemas", "separado do servico");
 

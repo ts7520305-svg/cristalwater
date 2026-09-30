@@ -1,0 +1,250 @@
+{
+  "task": "TASK456",
+  "date": "2026-09-30",
+  "base": "9dfc5890bf41fee3183d4abccaa6a38a7d4fd2d3",
+  "item": "C06-012 water list; typed exception detail in shared shell C08-026",
+  "scope": "Own water labels/status/empty/fallbacks/actions/alarm popup and helper error presentation. Typed REGULAR/EXTRA exception display now resolves its matching reminder; operational IDs/payloads/guards unchanged.",
+  "negative": [
+    {
+      "script": "test-field-water-list-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1514,
+      "timedOut": false,
+      "logSha256": "70ab6d314905194d654a79e37942a9bb4e8ed4877fc96c8a0c97745edbf3f678"
+    }
+  ],
+  "negativeDescription": "The real water-open button remains Portuguese after selecting English.",
+  "integration": [
+    {
+      "script": "test-field-water-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 25055,
+      "timedOut": false,
+      "logSha256": "52bb844bd5f5ea8cb259671620d99c974d513ef38ad151a789cf257e4ac7ec6f"
+    },
+    {
+      "script": "test-field-water-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21316,
+      "timedOut": false,
+      "logSha256": "8d7caa2824f056f6cb160fde3034227ec9b446e33573c4bbf96bd4bda0128e33"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15900,
+      "timedOut": false,
+      "logSha256": "48c1350d06832035b364abf337296b56caea5a12c7773ca6d3c98c262156a944"
+    },
+    {
+      "script": "test-field-water-api.js",
+      "code": 0,
+      "signal": null,
+      "ms": 7940,
+      "timedOut": false,
+      "logSha256": "990d32907566b2e68ba8817ac21167825919466a7c4aff710caf708084cccc62"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 912,
+      "timedOut": false,
+      "logSha256": "7f8ca6ca8f301dabec2c046015d0d4f18489ba40130b39a970f88b0a1c61d572"
+    }
+  ],
+  "withCapture": [
+    {
+      "script": "test-field-water-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 27409,
+      "timedOut": false,
+      "logSha256": "52bb844bd5f5ea8cb259671620d99c974d513ef38ad151a789cf257e4ac7ec6f"
+    }
+  ],
+  "intermediate": {
+    "failedRun": "run-1790748743262",
+    "cause": "The new test selected the alert row and three buttons sharing data-exception-id. It now selects the WATER_OPEN category row and still requires exactly one. No business guard or assertion removed."
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 41488,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6391,
+      "logSha256": "4382b04b42aaa5850e41479c0fd8175ed0030c13af16a652940ab7f8a66593da"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 585,
+      "logSha256": "00d37bd05ee0ef3c8a631d0887b6c235f953d4d5a6b9f1c9d66d4711a80626b4"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "catalogue": {
+    "entries": 36,
+    "texts": 180,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "storedDataChanged": false
+  },
+  "coverage": [
+    "Real water list and language selector at320/390/1440:titles/accessible labels/buttons, empty/closed/overdue/recorded/syncing/pending states, names/location/note fallbacks and literal stored failures. Same nodes/focus/selection/flow/note/typed IDs/credentials/local bytes/SQL; only expected language preference requests and no reminder producers during language changes.",
+    "Malformed/invalid stored reminders use trusted helper Error identity; an external matching Error with forged copy stays literal. Historical syncError and user note matching a UI word remain literal. Temporary fallback/server-badge fixtures restore the original reminder bytes before network.",
+    "Actual scheduled alarm callback and real CwUi.error popup; language changes repaint one alert without repeating it. Real manual alarm, five-language cancellation and physical offline closure. Timer and popup lifetime alone isolated for deterministic QA; session guards remain active. Existing message sanitizer preserved; only an actually created matching toast is bound.",
+    "REGULAR/EXTRA same numeric visit ID, separate pools/UUIDs, offline cache reload,403 literal error matching UI copy, actual held/lost response, identical create replay and malformed close acknowledgement rejection. Two SQL reminders, one OPEN/one CLOSED each, exactly one server OVERDUE history record.",
+    "Fixed presentation lookup for typed exception identity; supports the original untyped local ID as compatibility. Previous water-control test now requires the real typed alert detail for open rows and zero for closed rows; its former conditional selector could match nothing. The stricter group passes.",
+    "Date text keeps the existing pt-PT formatter and captured date value; no C10 date/time semantics changed. Raw waterReminderLabel() default output preserved. Reversing presentation transformations restores complete core/shell sources; helper/backend/schema/workflow unchanged."
+  ],
+  "preservation": {
+    "frontend/technician-field-mode.js": {
+      "operationalCodeReversedExactly": true,
+      "baseSha256": "69a79f8658ab9e2675ec43c04b8da350cf2702d631a0a01115373d01b5d9f21c"
+    },
+    "frontend/crystal-os-v2-shell.js": {
+      "operationalCodeReversedExactly": true,
+      "baseSha256": "2a9c6ada7c70d14305826385d515d9e8a35e373a7c869cafc8d47c53b96761c6"
+    },
+    "suite": {
+      "previous": 347,
+      "current": 348,
+      "previousOrderExact": true
+    },
+    "unchanged": [
+      "frontend/technician-field-mode.html",
+      "frontend/cw-field-reminders.js",
+      "frontend/cw-pump-reminders.js",
+      "frontend/cw-field-write-store.js",
+      "frontend/cw-i18n.js",
+      "frontend/cw-ui-feedback.js",
+      "src/services/waterReminderService.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "7e76361b39a7c1a03c8385dd2a0b14f20433c789036707f9ee3be3867f53d461",
+    "frontend/crystal-os-v2-shell.js": "006d4f4d719498cc0a827756bbf9f3b78dc13c6a369dbf76f87bb3429a92b31c",
+    "frontend/sw.js": "3f4af6e78389cb4ece2164d2b0f01ad3cde16df746adab7204234e56179b81d2",
+    "scripts/test-field-water-list-languages.js": "e7b5f36a590a648efcbcc358a4ddde37af4e192042379afb5723542afe99f0d2",
+    "scripts/test-field-water-panel-languages.js": "27030553c3a32792f63039f4ab65542303af2a176ebe93fd715a246d5f08e1de",
+    "scripts/test-field-suite.js": "c047e906bcc114f220ce862d6f8ab9f0373737e4873d86d1e36bd88bbd784b1f"
+  },
+  "visual": {
+    "captureSha256": "497e5ff908e6dafd93184933613f5109f49aca7c9489901511592b25d56f2e2a",
+    "reviewed": true,
+    "finding": "German title/actions/closed badge wrap within320px; names/note/persisted Portuguese errors remain literal. Shared fixed navigation and authentication notices still overlap the tall capture and remain C08; push enrollment text belongs to its own consumer. Not full-page/theme/device approval."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "email/WhatsApp/notifications/fiscal/webhooks/background jobs disabled"
+  },
+  "nativeAccepted": {
+    "task": 452,
+    "code": "87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5",
+    "run": 36671372520,
+    "job": 109746883916,
+    "counts": {
+      "total": 344,
+      "passed": 344
+    },
+    "failures": [],
+    "exactGroupOrderVerified": true,
+    "suiteSha256": "5d0057a3ea296033a4c097e1dc4a33a796f5fed32c9cbdf2d2ac7991964a46c5",
+    "restore": {
+      "status": "success",
+      "tables": 128,
+      "uploadedFiles": 51,
+      "databaseRowsAndFileHashesMatch": true,
+      "excerpt": "PASS restored 128 tables and 51 uploaded files; database rows and file hashes match"
+    },
+    "sourceHashesVerified": {
+      "frontend/technician-gps.js": "aaeaa5d848cec8eebf5a5ef0a9fa4576e40754544a82c0b476f4ba7dcd26b2fd",
+      "frontend/technician-gps.html": "f722e95146d4f41e13b0c3eddf243a0f79e9105eab5e088cbbe6f51f08af34ed",
+      "frontend/sw.js": "f0bca6d8a3109770aba3cb307e7551b0cbe7ac46d2667e396d6e3f6872295c19",
+      "scripts/test-field-suite.js": "5d0057a3ea296033a4c097e1dc4a33a796f5fed32c9cbdf2d2ac7991964a46c5",
+      "scripts/test-field-gps-languages.js": "af55c048936239124ae528e390d2d96e85997becadcda57d5f4b59c626989ac9",
+      "scripts/test-field-gps-page-languages.js": "63ba6124b834b9342985fe56468ce9e89bee2767bbf45550a818925adb694d0a"
+    },
+    "groupsEvidenceSha256": "44a8fc2860087a1642de71e387e4987691f5863348b64692b30350f968858168"
+  },
+  "pendingNative": [
+    {
+      "task": 453,
+      "run": 36673052696,
+      "job": 109752028731,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 345,
+      "restore": "pending"
+    },
+    {
+      "task": 454,
+      "run": 36674413317,
+      "job": 109756159173,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 346,
+      "restore": "pending"
+    },
+    {
+      "task": 455,
+      "run": 36675696482,
+      "job": 109760049353,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 347,
+      "restore": "pending"
+    }
+  ],
+  "limits": [
+    "Publication and native PostgreSQL16/upgrade/full348-group suite/full database and uploaded-file restore for TASK456 remain pending. PGlite does not replace these gates.",
+    "Common alert-board reading states/responsibility/actions/history and shared push/auth/navigation messages require their own batches. Reading acknowledgement is not physical closure. Persisted/external text remains literal; date policy C10 unchanged.",
+    "TASK452 native acceptance is recorded here with exact-run logs, all344 groups/order, restored128 tables/51 files and six source hashes verified at its code commit. Its old evidence file remains the historical publication snapshot.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

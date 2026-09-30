@@ -217,7 +217,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
           const node = page.locator(`[data-water-id="${row.localId}"]`), open = text('openSince',index,{elapsed:elapsed(row,index)}), flow = words[flowKeys[row.flowState] || 'unknownFlow'][index];
           assert.equal(await node.locator('.doc-number').textContent(), row.status === 'CLOSED' ? words.closedPending[index] : open);
           assert.equal(await node.locator('[data-water-flow-detail]').textContent(), text('flowDetail',index,{flow,note:row.userNote ? ' · '+row.userNote : ''}));
-          const detail = page.locator(`[data-exception-id="water-open:${row.localId}"] > strong + div`);
+          const detail = page.locator(`[data-exception-id="water-open:${row.visitType}:${row.localId}"] > strong + div`);
+          assert.equal(await detail.count(), row.status === 'CLOSED' ? 0 : 1);
           if (await detail.count()) assert.equal(await detail.textContent(), text('interrupt',index,{pool:row.poolName||words.pool[index],client:row.clientName||words.client[index],open,flow:text('flowDetail',index,{flow,note:''})}));
         }
         assert.equal(await raw(), stored); assert.deepEqual(await state(), before); assert.deepEqual(await database(), db); assert(await page.evaluate(() => qaWaterNodes.every(node => node.isConnected)));

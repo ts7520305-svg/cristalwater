@@ -186,7 +186,7 @@
         const language = (document.documentElement?.lang || 'pt').toLowerCase().split('-')[0];
         return copy[entry.key][Math.max(0, languages.indexOf(language))].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key]));
       }
-      function clear(node) { const old = bindings.get(node); if (!old) return; bindings.delete(node); node.removeAttribute('data-cw-water-copy'); if (!old.protected) node.removeAttribute('data-cw-no-i18n'); }
+      function clear(node) { const old = bindings.get(node); if (!old) return; bindings.delete(node); node.removeAttribute('data-cw-water-copy'); if (!old.protected && !node.hasAttribute('data-cw-water-list-copy')) node.removeAttribute('data-cw-no-i18n'); }
       function bind(node, entry, attribute = '') {
         if (!node) return;
         const previous = bindings.get(node), rendered = format(entry), protectedNode = previous ? previous.protected : node.hasAttribute('data-cw-no-i18n');
@@ -282,7 +282,7 @@
       });
       document.querySelectorAll('#interruptList [data-exception-category="WATER_OPEN"]').forEach((node) => {
         const localId = String(node.dataset.exceptionId || '').replace(/^water-open:/, '');
-        const reminder = byId(localId);
+        const reminder = rows().find(row => `${row.visitType}:${row.localId}` === localId || row.localId === localId);
         const detail = node.querySelector('strong')?.nextElementSibling;
         if (reminder && detail) waterCopy.bind(detail, waterCopy.value('interrupt', { pool: reminder.poolName || waterCopy.value('pool'), client: reminder.clientName || waterCopy.value('client'), open: waterCopy.value('openSince', { elapsed: elapsed(reminder.createdAt) }), flow: waterCopy.value('flowDetail', { flow: FLOW[reminder.flowState] || waterCopy.value('unknownFlow'), note: '' }) }));
       });
