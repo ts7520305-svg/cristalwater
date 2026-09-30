@@ -426,6 +426,244 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "crewAria": [
+    "Identificação e documentos do técnico",
+    "Technician identity and documents",
+    "Identité et documents du technicien",
+    "Identificación y documentos del técnico",
+    "Identität und Dokumente des Technikers"
+  ],
+  "crewHeading": [
+    "Técnico e viatura",
+    "Technician and vehicle",
+    "Technicien et véhicule",
+    "Técnico y vehículo",
+    "Techniker und Fahrzeug"
+  ],
+  "crewDescription": [
+    "Estado documental e veículo do dia.",
+    "Document status and today's vehicle.",
+    "État des documents et véhicule du jour.",
+    "Estado documental y vehículo del día.",
+    "Dokumentenstatus und Fahrzeug des Tages."
+  ],
+  "crewSectionHint": [
+    "viatura e documentos",
+    "vehicle and documents",
+    "véhicule et documents",
+    "vehículo y documentos",
+    "Fahrzeug und Dokumente"
+  ],
+  "crewVehicle": [
+    "Viatura",
+    "Vehicle",
+    "Véhicule",
+    "Vehículo",
+    "Fahrzeug"
+  ],
+  "crewSafetyManuals": [
+    "Fichas e manuais",
+    "Safety sheets and manuals",
+    "Fiches et manuels",
+    "Fichas y manuales",
+    "Datenblätter und Handbücher"
+  ],
+  "crewUnidentified": [
+    "Por identificar",
+    "Not yet identified",
+    "À identifier",
+    "Por identificar",
+    "Noch zu identifizieren"
+  ],
+  "crewUnknownTechnician": [
+    "Tecnico por identificar",
+    "Technician not yet identified",
+    "Technicien à identifier",
+    "Técnico por identificar",
+    "Techniker noch zu identifizieren"
+  ],
+  "crewUnknownTechnicianId": [
+    "ID técnico por confirmar",
+    "Technician ID needs confirmation",
+    "Identifiant du technicien à confirmer",
+    "ID del técnico por confirmar",
+    "Techniker-ID noch zu bestätigen"
+  ],
+  "crewUnknownPlate": [
+    "Matricula por confirmar",
+    "Registration plate needs confirmation",
+    "Immatriculation à confirmer",
+    "Matrícula por confirmar",
+    "Kennzeichen noch zu bestätigen"
+  ],
+  "crewVehicleInitial": [
+    "Escolha ou carregue a viatura do dia.",
+    "Choose or load today's vehicle.",
+    "Choisissez ou chargez le véhicule du jour.",
+    "Elige o carga el vehículo del día.",
+    "Wählen oder laden Sie das Fahrzeug des Tages."
+  ],
+  "crewTransportInitial": [
+    "Guia de transporte por carregar.",
+    "Transport document not loaded yet.",
+    "Bon de transport à charger.",
+    "Guía de transporte por cargar.",
+    "Transportbeleg noch zu laden."
+  ],
+  "crewWorkInitial": [
+    "Guia de obra por abrir.",
+    "Work guide not opened yet.",
+    "Bon de travail à ouvrir.",
+    "Guía de trabajo por abrir.",
+    "Arbeitsbeleg noch zu öffnen."
+  ],
+  "crewInsuranceInitial": [
+    "Seguro da viatura por validar.",
+    "Vehicle insurance needs validation.",
+    "Assurance du véhicule à valider.",
+    "Seguro del vehículo por validar.",
+    "Fahrzeugversicherung noch zu prüfen."
+  ],
+  "crewInspectionInitial": [
+    "Sem inspeção visível para esta viatura.",
+    "No inspection is visible for this vehicle.",
+    "Aucun contrôle technique visible pour ce véhicule.",
+    "No hay una inspección visible para este vehículo.",
+    "Für dieses Fahrzeug ist keine Hauptuntersuchung sichtbar."
+  ],
+  "crewSafetyInitial": [
+    "Fichas de segurança/manuais por confirmar.",
+    "Safety sheets and manuals need confirmation.",
+    "Fiches de sécurité et manuels à confirmer.",
+    "Fichas de seguridad y manuales por confirmar.",
+    "Sicherheitsdatenblätter und Handbücher noch zu bestätigen."
+  ],
+  "crewGreen": [
+    "Verde",
+    "Green",
+    "Vert",
+    "Verde",
+    "Grün"
+  ],
+  "crewRed": [
+    "Vermelha",
+    "Red",
+    "Rouge",
+    "Roja",
+    "Rot"
+  ],
+  "crewAssociated": [
+    "associada",
+    "linked",
+    "associé",
+    "asociada",
+    "verknüpft"
+  ],
+  "crewTransportReady": [
+    "AT {code} disponivel para apresentar.",
+    "AT {code} available to show.",
+    "AT {code} disponible à présenter.",
+    "AT {code} disponible para presentar.",
+    "AT {code} kann vorgelegt werden."
+  ],
+  "crewTransportMissing": [
+    "Guia de transporte AT em falta ou por associar.",
+    "AT transport document missing or not yet linked.",
+    "Bon de transport AT manquant ou à associer.",
+    "Guía de transporte AT ausente o por asociar.",
+    "AT-Transportbeleg fehlt oder ist noch nicht verknüpft."
+  ],
+  "crewWorkLinked": [
+    "Guia de obra #{id} ligada a AT.",
+    "Work guide #{id} linked to AT.",
+    "Bon de travail n°{id} associé à AT.",
+    "Guía de trabajo #{id} vinculada a AT.",
+    "Arbeitsbeleg #{id} mit AT verknüpft."
+  ],
+  "crewWorkProvisional": [
+    "Guia de obra #{id} provisoria, falta AT.",
+    "Work guide #{id} is provisional; AT is missing.",
+    "Bon de travail n°{id} provisoire, AT manquant.",
+    "Guía de trabajo #{id} provisional; falta AT.",
+    "Arbeitsbeleg #{id} ist vorläufig; AT fehlt."
+  ],
+  "crewWorkMissing": [
+    "Sem guia de obra aberta para esta viatura.",
+    "No open work guide for this vehicle.",
+    "Aucun bon de travail ouvert pour ce véhicule.",
+    "No hay una guía de trabajo abierta para este vehículo.",
+    "Kein offener Arbeitsbeleg für dieses Fahrzeug."
+  ],
+  "crewInsuranceReady": [
+    "Seguro válido para operação.",
+    "Insurance is valid for operation.",
+    "Assurance valide pour l’activité.",
+    "Seguro válido para operar.",
+    "Versicherung für den Betrieb gültig."
+  ],
+  "crewInsuranceWarning": [
+    "Seguro ausente, pendente ou expirado.",
+    "Insurance is missing, pending or expired.",
+    "Assurance absente, en attente ou expirée.",
+    "Seguro ausente, pendiente o vencido.",
+    "Versicherung fehlt, ist ausstehend oder abgelaufen."
+  ],
+  "crewInspectionReady": [
+    "Inspeção válida para circulação.",
+    "Inspection is valid for road use.",
+    "Contrôle technique valide pour circuler.",
+    "Inspección válida para circular.",
+    "Hauptuntersuchung für den Straßenverkehr gültig."
+  ],
+  "crewInspectionWarning": [
+    "Inspeção ausente, pendente ou expirada.",
+    "Inspection is missing, pending or expired.",
+    "Contrôle technique absent, en attente ou expiré.",
+    "Inspección ausente, pendiente o vencida.",
+    "Hauptuntersuchung fehlt, ist ausstehend oder abgelaufen."
+  ],
+  "crewSafetyReady": [
+    "Fichas de segurança e manuais disponíveis.",
+    "Safety sheets and manuals are available.",
+    "Fiches de sécurité et manuels disponibles.",
+    "Fichas de seguridad y manuales disponibles.",
+    "Sicherheitsdatenblätter und Handbücher sind verfügbar."
+  ],
+  "crewSafetyWarning": [
+    "Fichas de segurança/manuais pendentes ou indisponíveis.",
+    "Safety sheets or manuals are pending or unavailable.",
+    "Fiches de sécurité ou manuels en attente ou indisponibles.",
+    "Fichas de seguridad o manuales pendientes o no disponibles.",
+    "Sicherheitsdatenblätter oder Handbücher sind ausstehend oder nicht verfügbar."
+  ],
+  "crewPendingDocument": [
+    "Documento pendente para operação segura.",
+    "Document pending for safe operation.",
+    "Document en attente pour une activité sûre.",
+    "Documento pendiente para operar con seguridad.",
+    "Dokument für einen sicheren Betrieb noch ausstehend."
+  ],
+  "crewIdentity": [
+    "ID {id}",
+    "ID {id}",
+    "ID {id}",
+    "ID {id}",
+    "ID {id}"
+  ],
+  "crewVehicleId": [
+    "Viatura ID {id}",
+    "Vehicle ID {id}",
+    "Véhicule ID {id}",
+    "Vehículo ID {id}",
+    "Fahrzeug-ID {id}"
+  ],
+  "crewVehicleDay": [
+    "Viatura associada a este dia/ronda.",
+    "Vehicle linked to this day or round.",
+    "Véhicule associé à ce jour ou à cette tournée.",
+    "Vehículo asociado a este día o ronda.",
+    "Fahrzeug diesem Tag oder dieser Runde zugeordnet."
+  ],
   "productLineLimit": [
     "Registe no máximo 50 linhas de produtos por visita.",
     "Record no more than 50 product lines per visit.",
@@ -1925,6 +2163,7 @@
   for (const node of document.querySelectorAll('[data-now-copy]')) alertUi.bind(node, alertUi.value(node.dataset.nowCopy));
   for (const node of document.querySelectorAll('[data-round-copy]')) alertUi.bind(node, alertUi.value(node.dataset.roundCopy));
   for (const node of document.querySelectorAll('[data-visit-copy]')) alertUi.bind(node, alertUi.value(node.dataset.visitCopy));
+  for (const node of document.querySelectorAll('[data-crew-copy]')) alertUi.bind(node, alertUi.value(node.dataset.crewCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -2841,19 +3080,21 @@
     node.classList.toggle("warn", !ok);
     const valueNode = $(`#${valueId}`);
     const metaNode = $(`#${metaId}`);
-    if (valueNode) valueNode.textContent = value || (ok ? "Verde" : "Vermelha");
-    if (metaNode) metaNode.textContent = meta || "";
+    if (valueNode) alertUi.bind(valueNode, value || alertUi.value(ok ? "crewGreen" : "crewRed"));
+    if (metaNode) alertUi.bind(metaNode, meta || "");
   }
 
   function setCrewDocState(selector, valueId, metaId, state, okMeta, warnMeta) {
     const isOk = state?.code === "VALID";
+    const labels = { VALID: "sourceDocValid", UNAVAILABLE: "sourceDocUnavailable", EXPIRED: "sourceDocExpired", PENDING: "sourceDocPending" };
+    const label = Object.hasOwn(labels, state?.code) ? alertUi.value(labels[state.code]) : (state?.label || alertUi.value("sourceDocUnavailable"));
     setCrewDocStatus(
       selector,
       isOk,
       valueId,
       metaId,
-      state?.label || "Indisponível",
-      isOk ? okMeta : (warnMeta || "Documento pendente para operação segura.")
+      label,
+      isOk ? okMeta : (warnMeta || alertUi.value("crewPendingDocument"))
     );
   }
 
@@ -2884,7 +3125,7 @@
     const technicianInputValue = ($("#technicianId")?.value || localStorage.getItem("cwTechnicianId") || "").trim();
     const vehicle = activeVehicle || activeWorkGuide?.vehicle || activeTransportGuide?.vehicle || null;
     const technician = activeTechnician || activeWorkGuide?.technician || current()?.technician || null;
-    const plate = vehicle?.plate || activeWorkGuide?.vehicle?.plate || activeTransportGuide?.vehicle?.plate || vehicleInputValue || "Matricula por confirmar";
+    const plate = vehicle?.plate || activeWorkGuide?.vehicle?.plate || activeTransportGuide?.vehicle?.plate || vehicleInputValue || alertUi.value("crewUnknownPlate");
     const vehicleName = [vehicle?.name, vehicle?.status].filter(Boolean).join(" - ");
     const compliance = computeDocsCompliance();
     docsCompliance = compliance;
@@ -2897,18 +3138,18 @@
     const vehiclePlate = $("#fieldVehiclePlate");
     const vehicleMeta = $("#fieldVehicleMeta");
 
-    if (technicianName) technicianName.textContent = technician?.name || "Tecnico por identificar";
-    if (technicianMeta) technicianMeta.textContent = technician?.id ? `ID ${technician.id}` : (technicianInputValue ? `ID ${technicianInputValue}` : "ID tecnico por confirmar");
-    if (vehiclePlate) vehiclePlate.textContent = plate;
-    if (vehicleMeta) vehicleMeta.textContent = vehicleName || (vehicle?.id ? `Viatura ID ${vehicle.id}` : "Viatura associada a este dia/ronda.");
+    if (technicianName) alertUi.bind(technicianName, technician?.name || alertUi.value("crewUnknownTechnician"));
+    if (technicianMeta) alertUi.bind(technicianMeta, technician?.id ? alertUi.value("crewIdentity", { id: technician.id }) : (technicianInputValue ? alertUi.value("crewIdentity", { id: technicianInputValue }) : alertUi.value("crewUnknownTechnicianId")));
+    if (vehiclePlate) alertUi.bind(vehiclePlate, plate);
+    if (vehicleMeta) alertUi.bind(vehicleMeta, vehicleName || (vehicle?.id ? alertUi.value("crewVehicleId", { id: vehicle.id }) : alertUi.value("crewVehicleDay")));
 
     setCrewDocStatus(
       "#fieldTransportGuideStatus",
       atOk,
       "fieldTransportGuideValue",
       "fieldTransportGuideMeta",
-      atOk ? "Verde" : "Vermelha",
-      atOk ? `AT ${atCode || "associada"} disponivel para apresentar.` : "Guia de transporte AT em falta ou por associar."
+      alertUi.value(atOk ? "crewGreen" : "crewRed"),
+      atOk ? alertUi.value("crewTransportReady", { code: atCode || alertUi.value("crewAssociated") }) : alertUi.value("crewTransportMissing")
     );
 
     setCrewDocStatus(
@@ -2916,8 +3157,8 @@
       workOk,
       "fieldWorkGuideValue",
       "fieldWorkGuideMeta",
-      workOk ? "Verde" : "Vermelha",
-      workOk ? `Guia de obra #${activeWorkGuide.id} ${activeWorkGuide.guideId ? "ligada a AT." : "provisoria, falta AT."}` : "Sem guia de obra aberta para esta viatura."
+      alertUi.value(workOk ? "crewGreen" : "crewRed"),
+      workOk ? alertUi.value(activeWorkGuide.guideId ? "crewWorkLinked" : "crewWorkProvisional", { id: activeWorkGuide.id }) : alertUi.value("crewWorkMissing")
     );
 
     setCrewDocState(
@@ -2925,8 +3166,8 @@
       "fieldInsuranceValue",
       "fieldInsuranceMeta",
       compliance.states.insurance,
-      "Seguro válido para operação.",
-      "Seguro ausente, pendente ou expirado."
+      alertUi.value("crewInsuranceReady"),
+      alertUi.value("crewInsuranceWarning")
     );
 
     setCrewDocState(
@@ -2934,8 +3175,8 @@
       "fieldInspectionValue",
       "fieldInspectionMeta",
       compliance.states.inspection,
-      "Inspeção válida para circulação.",
-      "Inspeção ausente, pendente ou expirada."
+      alertUi.value("crewInspectionReady"),
+      alertUi.value("crewInspectionWarning")
     );
 
     const safetyAggregate = compliance.states.safety.code === "VALID" && compliance.states.manuals.code === "VALID"
@@ -2946,8 +3187,8 @@
       "fieldSafetyValue",
       "fieldSafetyMeta",
       safetyAggregate,
-      "Fichas de segurança e manuais disponíveis.",
-      "Fichas de segurança/manuais pendentes ou indisponíveis."
+      alertUi.value("crewSafetyReady"),
+      alertUi.value("crewSafetyWarning")
     );
 
     const center = $("#documentCenterBox");
@@ -5150,6 +5391,8 @@
     alertUi.bind($('#dayVisitsCard .field-tab-title h2'), alertUi.value('roundTitle'));
     alertUi.bind($('#dayVisitsCard .field-tab-title span'), alertUi.value('roundHint'));
     markFieldSection(".crew-card", "field-panel-docs", "Tecnico", "viatura e documentos");
+    alertUi.bind($('.crew-card .field-tab-title h2'), alertUi.value('dashTechnician'));
+    alertUi.bind($('.crew-card .field-tab-title span'), alertUi.value('crewSectionHint'));
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");
     const waterCard = $('#waterReminderList')?.closest('section');

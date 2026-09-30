@@ -370,6 +370,8 @@
       align-items: flex-start;
     }
 
+    .crew-head { flex-wrap: wrap; }
+
     .crew-grid,
     .crew-status-grid,
     .checks,
@@ -1384,65 +1386,66 @@
       <nav class="field-step-links" id="visitSteps" aria-labelledby="visitStepsLabel" data-cw-no-i18n><button type="button" data-field-jump="accessCard" data-visit-copy="visitAccess">Acesso</button><button type="button" data-field-jump="cleaningCard" data-visit-copy="visitService">Serviço</button><button type="button" data-field-jump="productsCard" data-visit-copy="visitProducts">Produtos</button><button type="button" data-field-jump="photosCard" data-visit-copy="visitPhotos">Fotos</button></nav>
     </section>
 
-    <section class="card crew-card field-panel field-panel-docs" aria-label="Identificação e documentos do técnico">
+    <section class="card crew-card field-panel field-panel-docs" aria-labelledby="fieldCrewLabel" data-cw-no-i18n>
+      <span id="fieldCrewLabel" data-crew-copy="crewAria" hidden>Identificação e documentos do técnico</span>
       <div class="crew-head">
         <div>
-          <span class="chip">Técnico e viatura</span>
-          <div class="muted" style="margin-top:8px">Estado documental e veículo do dia.</div>
+          <span class="chip" data-crew-copy="crewHeading">Técnico e viatura</span>
+          <div class="muted" style="margin-top:8px" data-crew-copy="crewDescription">Estado documental e veículo do dia.</div>
         </div>
-        <button class="cw-v2-btn" id="refreshCrewStatus" type="button">Atualizar</button>
+        <button class="cw-v2-btn" id="refreshCrewStatus" data-crew-copy="dashRefresh" type="button">Atualizar</button>
       </div>
       <div class="crew-grid">
         <div class="crew-info">
-          <span>Técnico</span>
-          <b id="fieldTechnicianName">Por identificar</b>
-          <small id="fieldTechnicianMeta">ID técnico por confirmar</small>
+          <span data-crew-copy="dashTechnician">Técnico</span>
+          <b id="fieldTechnicianName" data-crew-copy="crewUnidentified">Por identificar</b>
+          <small id="fieldTechnicianMeta" data-crew-copy="crewUnknownTechnicianId">ID técnico por confirmar</small>
         </div>
         <div class="crew-info">
-          <span>Viatura</span>
-          <b id="fieldVehiclePlate">Matrícula por confirmar</b>
-          <small id="fieldVehicleMeta">Escolha ou carregue a viatura do dia.</small>
+          <span data-crew-copy="crewVehicle">Viatura</span>
+          <b id="fieldVehiclePlate" data-crew-copy="crewUnknownPlate">Matrícula por confirmar</b>
+          <small id="fieldVehicleMeta" data-crew-copy="crewVehicleInitial">Escolha ou carregue a viatura do dia.</small>
         </div>
       </div>
       <div class="crew-status-grid">
         <div class="crew-doc-status warn" id="fieldTransportGuideStatus">
           <i class="signal" aria-hidden="true"></i>
           <div>
-            <span class="label">Guia AT</span>
-            <b id="fieldTransportGuideValue">Vermelha</b>
-            <small id="fieldTransportGuideMeta">Guia de transporte por carregar.</small>
+            <span class="label" data-crew-copy="sourceDocTransport">Guia AT</span>
+            <b id="fieldTransportGuideValue" data-crew-copy="crewRed">Vermelha</b>
+            <small id="fieldTransportGuideMeta" data-crew-copy="crewTransportInitial">Guia de transporte por carregar.</small>
           </div>
         </div>
         <div class="crew-doc-status warn" id="fieldWorkGuideStatus">
           <i class="signal" aria-hidden="true"></i>
           <div>
-            <span class="label">Guia de obra</span>
-            <b id="fieldWorkGuideValue">Vermelha</b>
-            <small id="fieldWorkGuideMeta">Guia de obra por abrir.</small>
+            <span class="label" data-crew-copy="sourceDocWork">Guia de obra</span>
+            <b id="fieldWorkGuideValue" data-crew-copy="crewRed">Vermelha</b>
+            <small id="fieldWorkGuideMeta" data-crew-copy="crewWorkInitial">Guia de obra por abrir.</small>
           </div>
         </div>
         <div class="crew-doc-status warn" id="fieldInsuranceStatus">
           <i class="signal" aria-hidden="true"></i>
           <div>
-            <span class="label">Seguro</span>
-            <b id="fieldInsuranceValue">Pendente</b>
-            <small id="fieldInsuranceMeta">Seguro da viatura por validar.</small>
+            <span class="label" data-crew-copy="sourceDocInsurance">Seguro</span>
+            <b id="fieldInsuranceValue" data-crew-copy="sourceDocPending">Pendente</b>
+            <small id="fieldInsuranceMeta" data-crew-copy="crewInsuranceInitial">Seguro da viatura por validar.</small>
           </div>
         </div>
         <div class="crew-doc-status warn" id="fieldInspectionStatus">
           <i class="signal" aria-hidden="true"></i>
           <div>
-            <span class="label">Inspeção</span>
-            <b id="fieldInspectionValue">Indisponível</b>
-            <small id="fieldInspectionMeta">Sem inspeção visível para esta viatura.</small>
+            <span class="label" data-crew-copy="sourceDocInspection">Inspeção</span>
+            <b id="fieldInspectionValue" data-crew-copy="sourceDocUnavailable">Indisponível</b>
+            <small id="fieldInspectionMeta" data-crew-copy="crewInspectionInitial">Sem inspeção visível para esta viatura.</small>
           </div>
         </div>
         <div class="crew-doc-status warn" id="fieldSafetyStatus">
           <i class="signal" aria-hidden="true"></i>
           <div>
-            <span class="label">Fichas e manuais</span>
-            <b id="fieldSafetyValue">Pendente</b>
-            <small id="fieldSafetyMeta">Fichas de segurança/manuais por confirmar.</small>
+            <span class="label" data-crew-copy="crewSafetyManuals">Fichas e manuais</span>
+            <b id="fieldSafetyValue" data-crew-copy="sourceDocPending">Pendente</b>
+            <small id="fieldSafetyMeta" data-crew-copy="crewSafetyInitial">Fichas de segurança/manuais por confirmar.</small>
           </div>
         </div>
       </div>

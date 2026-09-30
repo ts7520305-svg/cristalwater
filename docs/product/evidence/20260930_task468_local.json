@@ -1,0 +1,523 @@
+{
+  "task": 468,
+  "date": "2026-09-30",
+  "base": "5b7d39820a349ba6e09b4a7382045a2957f6d980",
+  "item": "C06-015",
+  "scope": {
+    "productSources": 3,
+    "testScripts": 2,
+    "documentationFiles": 4,
+    "batchFiles": 9,
+    "description": "Translate owned technician/vehicle/document-status card text with private presenter bindings and a wrapping header for narrow screens. Document center and its body/provenance/warnings are outside this batch."
+  },
+  "catalogue": {
+    "entries": 34,
+    "texts": 170,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "previousEntries": 207,
+    "totalEntries": 241,
+    "reusedEntries": 10,
+    "previousEntriesUnchanged": true,
+    "presentation": "Only owned keys and private descriptors translate. Raw technician name, plate, vehicle name/status and AT code remain literal text, including HTML-looking strings and a vehicle named Verde."
+  },
+  "negativeAndPreparation": [
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1506,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770122355",
+      "description": "Real English selector left AT metadata in Portuguese before product changes."
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1564,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770271010",
+      "description": "Same negative repeated after preparation script refused an ambiguous catalogue anchor and wrote no product changes."
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1488,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770310037",
+      "description": "Test initially compared language metadata inside both raw user aliases. Corrected to preserve identity, explicitly verify selected language and retain exact token/operational-source comparisons."
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1854,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770411331",
+      "description": "German320px crew card overflow after translation."
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1927,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770682948",
+      "description": "Geometry and screenshot identify refreshCrewStatus/Aktualisieren as the overflowing140px button. Crew header now wraps; layout assertions retained."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16839,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770728895"
+    },
+    {
+      "script": "test-field-document-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 6490,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770768646"
+    },
+    {
+      "script": "test-field-document-summary-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 25794,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770768646"
+    },
+    {
+      "script": "test-field-visit-feedback-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12306,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770768646"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 920,
+      "timedOut": false,
+      "evidence": "qa-task468/run-1790770768646"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 40398,
+      "log": "/workspace/scratch/b364087eee9d/qa-task468/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6565,
+      "log": "/workspace/scratch/b364087eee9d/qa-task468/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 584,
+      "log": "/workspace/scratch/b364087eee9d/qa-task468/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Actual PT/EN/FR/ES/DE selector: live card at320/390/1440 and nine additional scenarios at320,60 locale checks. Static card and generated section titles, accessible label, raw identities, AT/work/insurance/inspection/safety statuses and metadata verified.",
+    "Real isolated SQL fixtures produce valid, expired insurance, pending inspection, provisional work without AT, missing work and restored states. Closing fixture guides or changing fixture due dates/statuses occurs explicitly between locale matrices; production classifiers and dates are unchanged.",
+    "503 work endpoint retains the original cached work confirmation timestamp; mixed source, genuine offline cached reload, exact malformed document bytes and cache recovery tested. Unavailable vehicle retains its input ID and day fallback without invented identity.",
+    "Same-number REGULAR/EXTRA have distinct pool/type and separate notes. Offline EXTRA selection preserves the original REGULAR draft. Session switch followed by the original guarded refresh callback performs no HTTP and retains old source bytes.",
+    "Every locale matrix preserves crew nodes and refresh handler, focus, operational inputs, status classes, source markers/timestamps, field storage, full outbox and SQL rows. Instrumented document/reminder/photo/route producers do not rerun on locale changes. Only expected language-preference PUTs occur during matrices; user-alias language metadata changes intentionally, while identity and both tokens remain invariant.",
+    "No page errors or POST/PATCH/DELETE requests. Existing one-second session guard stays active; only periodic15/30/60s timers disabled by fixture. Scenario110s, locators9s and runner120s remain unchanged.",
+    "Original document recovery, document summary UI, visit feedback and field browser integration tests also pass. Node syntax and complete unit/technician commands run on this product version.",
+    "Card/tile width assertions retained for every matrix. German320px overflow was reproduced and diagnosed as the refresh button, fixed only with crew-head flex-wrap. Before/after live and blocked screenshots reviewed; button and text wrap without truncation. Existing toast/navigation outside the card remain outside this translation scope."
+  ],
+  "preservation": {
+    "base": "5b7d39820a349ba6e09b4a7382045a2957f6d980",
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920"
+      },
+      "frontend/technician-field-mode.html": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "270e680af0b7f12c2cc70cc0f2a2f103862092afcc8d2ac0f93e5cef025bb14d"
+      },
+      "frontend/sw.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61"
+      }
+    },
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "renderList": "094fdcb010e8631720e90854264b4b63e442e412cfdba8a11c81eca564b86ed5",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5",
+      "openAssistVisit": "1e51a1133089112bc202d92ac95a054909a3399b1235b31ab334a6b7fe2c1d2c",
+      "loadAssistOptions": "93e4676ad06eed6fab4b6fdaef40d53e5d02caa68930d8c64ddd00fe47ceb272",
+      "computeDocsCompliance": "14c85f19c3bfb50df113dfb2ebf39245bb0897a6f86aa111737a27309995e780",
+      "persistModernRoute": "65faa325b7f690a0252412123b7af59d0abc4a02218e1d76188cbf0313a4a42d",
+      "mergeVisitSnapshot": "88e14c9c1dd72ccae80c8928daaeb78199a5472e2c0cd1ccf7ce31fb32217fc7",
+      "savedVisitDraft": "3d7c1480e76fbd08b2fae3451a305ce871ed301986bd7a6f0b5796b426be6681",
+      "saveCurrentDraft": "60d8216a6b6186571fc521d84efeecd3cb3a0467724de0143901b689e4137ed7",
+      "syncPendingPhotos": "a720bc001b2e019ddeb90e4e8f53d46accf2f06842eb8f80376142f12ad41429",
+      "setTileTone": "b9221e9d6d10ec4af57199b5fd3c7257aca5d4c23232c91d5bf12d9d566b6c39",
+      "guideHasTransportReference": "12a314c88b4bf9255a674b6eed5db7cdc77f93527d8098f395f8ec9c9668e18e",
+      "clearFieldDocuments": "3b9627019565be7f32facdd182f64c48ba1c2f19950273cc09bd951c38e77e2f",
+      "parseDateSafe": "9ac572d62cfa28487007055e4b70e922af82b65814dfdf530a8e18a465f51bd7",
+      "firstDocDate": "92565b5050f014a9ee9232c2f583af9978dc0367aeba46be17266d2c7bc1faed",
+      "normalizeDocStatus": "3f2e26ac24cf7b16c0a96113714bcd9a436c4c0abbbb3a20f0def561986b035e",
+      "loadGuides": "d37e6e3f4d5beb7ab5482569cf91c2788c2463f12b11130a68747bff9f8fd8b7",
+      "paintDocumentText": "887994c53da537617128832030acfb1779eb68f8d860579c6723fc2afdcb167b",
+      "renderCorrectionSummary": "f596da9f01bc140a37b39b7f2b715380e1124e986411b70aa58b5dff89e5a30b",
+      "productsLabel": "31b9eab144f4e5b9eb49875252d917ac8e36728394cd742e527e479d0e3752c7",
+      "doneChecksLabel": "db7b1d7ecd0db127362b08bba63703fb1d763aac947e4596ef6b8e171780ca24",
+      "waterPresentation": "577bba599e55944b794d4a7b70567a07d3c2c250d35d017ebc91ef0cf7584ce3",
+      "visitActionHandlers": "9515f5409b713337aa326580dccf8b6e001b076cf052795c3ab8514516e32e9e",
+      "documentCenter": "b83c87949b212ec601212cd5bea4cf7136ddfc326e42ae8674418adf9dc76c2a"
+    },
+    "previousCatalogueEntries": 207,
+    "addedCatalogueEntries": 34,
+    "totalCatalogueEntries": 241,
+    "previousCatalogueUnchanged": true,
+    "previousGroups": 360,
+    "newGroups": 361,
+    "priorExactOrderPreserved": true,
+    "limitations": "Only crew-card presentation changes. Existing document-center/body/warning/provenance messages remain outside this batch. Existing locale listener still re-renders product inputs; crew-card nodes and operational sources are tested as stable. Safety/manual valid states and unreachable identity fallbacks are source-reviewed because the current owned guide projection does not supply those optional arrays."
+  },
+  "visual": [
+    {
+      "path": "qa-task468/crew-de-320-overflow.png",
+      "sha256": "c66384d25dd6a64583c6c226d6f13327c06f36ba75603e2efcb7c5a37175d556"
+    },
+    {
+      "path": "qa-task468/crew-de-320-live.png",
+      "sha256": "8aefa690596b68a3a788177af812c3e154d41cbb7b112ccfb8fd8414309ff9d6"
+    },
+    {
+      "path": "qa-task468/crew-de-320-blocked.png",
+      "sha256": "b6ce58a0da0005542e5489ce9d7cc038b38ea8bdf9ac5f44c03da0e5eaa6f120"
+    }
+  ],
+  "reviewedOnly": [
+    "Valid optional safety/manual arrays and rare identity fallbacks are source-reviewed because the current owned guide projection does not supply those optional arrays. No unsupported projection fields injected or scope guard bypassed.",
+    "Existing language listener still re-renders product inputs. Their values remain stable; node-stability claims cover the crew card only."
+  ],
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "cbc293fc8eb13bcf5bde5de6ee43f7600ffadbd7e1bdde7e34804811e390c007",
+    "frontend/technician-field-mode.html": "72b9440f96593b663de4a453de5a063ecab3a8e2f0ce70302a2d3cfa00368472",
+    "frontend/sw.js": "6b95ab64c5f38ec106227186f1c4a361f02d23c1d9446d2b72e30891a2269ff9",
+    "scripts/test-field-crew-status-languages.js": "467260a51a812acc0e67b66e4965607cd1cc000f9793636fc4b2080d9d26d6ad",
+    "scripts/test-field-suite.js": "1b94d16458e297c6b703365477d6d32bc05679a62a2218fc6f2e6a2668f4fafe"
+  },
+  "cache": 248,
+  "runner": {
+    "before": 360,
+    "after": 361,
+    "previousExactOrderPreserved": true,
+    "perScriptDeadlineMs": 120000,
+    "workflowBudgetMinutes": 90
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeIncomplete464": {
+    "task": 464,
+    "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
+    "run": 36704725001,
+    "job": 109852165087,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "0fbbcd59dba14181a9eb562b6c29e851216711dfca40585b0a22b4a800704e87",
+      "frontend/sw.js": "68f3300b2eaf5945d0a2b8698f3f97c30f1420da7db3ebf9f01756bb8120c781",
+      "scripts/test-field-visit-feedback-languages.js": "47c3cd6287cfca4754d219a043811ae9a7106684af768eed65c6f0624b476ea5",
+      "scripts/test-field-visit-completion-languages.js": "5b8dc71b4bba4b498471cc3624320483e809dc6d8829ec778e3ccd0127824f78",
+      "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "21e612371d875fa3e20383cd1a2e5777c16ccd92",
+      "frontend/sw.js": "7d135ed5e80a6c71664f0fec2a2c871e231a7c7e",
+      "scripts/test-field-visit-feedback-languages.js": "69aac78dc6717e6c70416d764bd4cad619899c3f",
+      "scripts/test-field-visit-completion-languages.js": "d48c3a55dd2078499b7919e8bb4284f15362de53",
+      "scripts/test-field-suite.js": "addbbb3efb02cf97820d3c8a36bf587f2ce0e614"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 359,
+    "completedGroups": 347,
+    "passedGroups": 343,
+    "failedGroups": [
+      {
+        "script": "test-field-photo-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 17562
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 21768
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14478
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14752
+      }
+    ],
+    "missingGroups": [
+      "test-field-repair-revenue.js",
+      "test-field-repair-execution.js",
+      "test-field-repair-execution-revenue.js",
+      "test-field-repair-execution-command.js",
+      "test-field-repair-no-materials.js",
+      "test-field-repair-execution-ui.js",
+      "test-field-visit-report-origin.js",
+      "test-field-product-identity.js",
+      "test-field-product-identity-ui.js",
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T10:49:10Z",
+    "updatedAt": "2026-09-30T11:59:45Z",
+    "cancellationReason": "unconfirmed",
+    "finishedScriptMinutes": 66.13,
+    "alreadyLocallyRepairedIn": {
+      "test-field-photo-panel-languages.js": 465,
+      "test-field-round-navigation-languages.js": 465,
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467
+    },
+    "remainingInvestigation": [],
+    "logSha256": "c4ad61fa98f3624f53849411537f3fb4fa764811c68b1c275a13552980957e0d",
+    "errors": {
+      "test-field-photo-panel-languages.js": "Timeout7000ms for Extra / after selecting German; repaired465 with typed exact-index selection.",
+      "test-field-round-navigation-languages.js": "Actual empty notes instead of saved literal note; repaired465 with original-value wait and full stored-draft equality.",
+      "test-field-visit-briefing.js": "Timeout10000ms for obsolete Besuch starten; repaired467 with owned Besuch beginnen.",
+      "test-field-vehicle-assignment-ui.js": "Timeout12000ms selecting destination absent from first25; repaired467 through exact live UI plate search."
+    }
+  },
+  "nativeIncomplete463": {
+    "task": 463,
+    "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+    "run": 36701344336,
+    "job": 109841249507,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "6884a48d125d5a095b338b4bc4dee0f8742d19e1b0f73a69615546282cfa9862",
+      "frontend/technician-field-mode.html": "270e680af0b7f12c2cc70cc0f2a2f103862092afcc8d2ac0f93e5cef025bb14d",
+      "frontend/sw.js": "052f6e1afc30f2b162b859ba743d7dfc41fa47601c826bcc31f33b358fb226bf",
+      "scripts/test-field-visit-shell-languages.js": "06269eb0ee546c64c01ffc539999f96a822304a9254dbfed27b050201f7ffd3e",
+      "scripts/test-field-visit-actions-languages.js": "d17515c1b9c296f40770d2cab61d6ae6b3d9cd43e23655da77077ebe3bd9c71e",
+      "scripts/test-field-suite.js": "17f989623c23c842350d4f08dbe8876b73d759974044821874dc0e6fb616a112"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "7cb63e672ce43cad0e5abc040b8ba912423cd7e5",
+      "frontend/technician-field-mode.html": "8403d2f578d198b0ed86dc70f9a7d150d897b887",
+      "frontend/sw.js": "4e43f461eada42ff4807aa323f7c9f178f485d85",
+      "scripts/test-field-visit-shell-languages.js": "3de34dc4fad94e2be1f81d6fceb8bca82bf3775f",
+      "scripts/test-field-visit-actions-languages.js": "d8150844e411783357320e9a928576771f8d6b0d",
+      "scripts/test-field-suite.js": "5bb8790a510fc0b83e48cc025d3e2cd22e9ce09f"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 357,
+    "completedGroups": 354,
+    "passedGroups": 349,
+    "failedGroups": [
+      {
+        "script": "test-field-photo-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 17621
+      },
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 24021
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 20401
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14496
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 15037
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T10:15:54Z",
+    "updatedAt": "2026-09-30T11:26:22Z",
+    "cancellationReason": "No cause established from the run metadata or job log; no acceptance claimed.",
+    "alreadyLocallyRepairedIn": {
+      "test-field-photo-panel-languages.js": 465,
+      "test-field-round-navigation-languages.js": 465
+    },
+    "remainingInvestigation": [
+      "test-field-water-panel-languages.js",
+      "test-field-visit-briefing.js",
+      "test-field-vehicle-assignment-ui.js"
+    ],
+    "groupsSha256": "8f47d760cd2d54de8d3b962c2e284a6558165bf6070017da5c14098599a34b66",
+    "errors": {
+      "test-field-photo-panel-languages.js": "German fixture still searched Extra /; repaired in465.",
+      "test-field-water-panel-languages.js": "Timeout8000ms waiting for physical close confirmation dialog at line258.",
+      "test-field-round-navigation-languages.js": "Read empty notes after REGULAR selection at line97; same symptom covered by465 stored-draft/form wait repair.",
+      "test-field-visit-briefing.js": "Timeout10000ms waiting for German start label Besuch starten at line125.",
+      "test-field-vehicle-assignment-ui.js": "Timeout12000ms: destination option absent in form at line16, called line21."
+    }
+  },
+  "previousNativeAcceptance": {
+    "task": 461,
+    "groups": 353,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "proof": "20260930_task464_local.json"
+  },
+  "pendingNative": [
+    {
+      "task": 465,
+      "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+      "run": 36708004453,
+      "job": 109862765829,
+      "status": "in_progress",
+      "fullSuiteGroups": 359,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "workflowBudgetMinutes": 70,
+      "restore": "pending",
+      "predatesAllTask467Repairs": true
+    },
+    {
+      "task": 466,
+      "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+      "run": 36708610951,
+      "job": 109864746875,
+      "status": "in_progress",
+      "fullSuiteGroups": 360,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "workflowBudgetMinutes": 70,
+      "restore": "pending",
+      "predatesAllTask467Repairs": true
+    },
+    {
+      "task": 467,
+      "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+      "run": 36710186213,
+      "job": 109869850165,
+      "status": "in_progress",
+      "fullSuiteGroups": 360,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "workflowBudgetMinutes": 90,
+      "restore": "pending",
+      "predatesAllTask467Repairs": false
+    },
+    {
+      "task": 468,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 361,
+      "workflowBudgetMinutes": 90,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Require exact361 groups/restore468 and inspect467. Historical465/466 predate all467 repairs; do not relaunch faulty versions. Next functional scope: remaining document center/body/provenance/warnings, correction-summary own text, shared push/auth/navigation."
+  }
+}
