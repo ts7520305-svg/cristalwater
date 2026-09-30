@@ -1272,6 +1272,7 @@
     #incompleteVisitCard .big{width:100%;white-space:normal;background:#075c4c!important;color:#fff!important;min-height:48px}
     #incompleteVisitCard :is(select,textarea){width:100%;box-sizing:border-box;margin:8px 0 12px}
     #incompleteVisitCard label{display:block;margin-top:8px}
+    @media(max-width:380px){#visitSteps{grid-template-columns:repeat(2,minmax(0,1fr))}}
   </style>
 </head>
 <body class="cw-tech-field-page" data-field-tab="hoje" data-required-role="TECHNICIAN">
@@ -1282,7 +1283,7 @@
           <img class="brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
           <div>
             <div class="brand" id="fieldPageTitle">O meu dia</div>
-            <div class="progress" id="progressText">A preparar ronda...</div>
+            <div class="progress" id="progressText" data-visit-copy="visitPreparing" data-cw-no-i18n>A preparar ronda...</div>
           </div>
         </div>
         <span class="chip" id="connectionState">Online</span>
@@ -1293,10 +1294,10 @@
       <button type="button" id="fieldPriorityNotice" hidden></button>
     </header>
 
-    <section class="field-load-feedback" id="fieldLoadError" role="alert" hidden><strong>Não foi possível atualizar a ronda</strong><p id="fieldLoadErrorText"></p><button class="big ghost" id="fieldReloadBtn" type="button">Tentar novamente</button></section>
+    <section class="field-load-feedback" id="fieldLoadError" role="alert" data-cw-no-i18n hidden><strong data-visit-copy="visitLoadErrorTitle">Não foi possível atualizar a ronda</strong><p id="fieldLoadErrorText"></p><button class="big ghost" id="fieldReloadBtn" type="button" data-visit-copy="visitRetry">Tentar novamente</button></section>
     <div class="field-load-feedback" id="fieldRouteAge" role="status" hidden></div>
     <div class="field-load-feedback" id="fieldDraftHistory" role="status" data-cw-state-managed="manual" hidden>Existem rascunhos antigos sem conta e tipo de visita confirmados. Foram conservados para revisão pelo escritório; não limpe os dados da aplicação.</div>
-    <div class="field-load-feedback" id="fieldExtraVisitNotice" role="status" data-cw-state-managed="manual" hidden></div>
+    <div class="field-load-feedback" id="fieldExtraVisitNotice" data-cw-no-i18n role="status" data-cw-state-managed="manual" hidden></div>
 
     <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-labelledby="fieldDashboardLabel" data-cw-no-i18n>
       <span id="fieldDashboardLabel" data-dashboard-copy="dashSummary" hidden>Resumo do dia em campo</span>
@@ -1340,11 +1341,12 @@
       <div class="interrupt-list" id="interruptList"></div>
     </section>
 
-    <section class="field-action-sticky field-panel field-panel-agora" aria-label="Ações principais da visita">
+    <section class="field-action-sticky field-panel field-panel-agora" id="visitActions" aria-labelledby="visitActionsLabel">
+      <span id="visitActionsLabel" data-visit-copy="visitActions" data-cw-no-i18n hidden>Ações principais da visita</span>
       <div id="fieldSaveStatus" role="status" data-cw-state-managed="manual">Registe apenas o trabalho realizado nesta visita.</div>
       <div class="actions">
-        <button class="big ok" id="startBtn" type="button">Iniciar visita</button>
-        <button class="big bad" id="finishBtn" type="button">Concluir visita</button>
+        <button class="big ok" id="startBtn" type="button" data-visit-copy="visitStart" data-cw-no-i18n>Iniciar visita</button>
+        <button class="big bad" id="finishBtn" type="button" data-visit-copy="visitFinish" data-cw-no-i18n>Concluir visita</button>
       </div>
     </section>
 
@@ -1368,17 +1370,18 @@
       <button type="button" id="incompleteRetry" class="big" style="background:#075c4c;color:white">Reenviar registos pendentes</button>
     </section>
 
-    <section class="card next field-panel field-panel-agora">
+    <section class="card next field-panel field-panel-agora" id="visitContext">
       <span class="chip" id="nowBoardLabel" data-now-copy="nowCurrent" data-cw-no-i18n>Visita atual</span>
-      <div class="title" id="nextTitle">A carregar...</div>
-      <div class="muted" id="nextMeta"></div>
+      <div class="title" id="nextTitle" data-visit-copy="visitLoading" data-cw-no-i18n>A carregar...</div>
+      <div class="muted" id="nextMeta" data-cw-no-i18n></div>
       <div class="now-board" id="nowBoard" role="group" aria-labelledby="nowBoardLabel" data-cw-no-i18n>
         <b id="nowStateLine" data-now-copy="nowStateIN_PROGRESS">Em intervenção</b>
         <span class="muted" id="nowResponsibleLine" data-now-copy="nowResponsible">Responsável por confirmar</span>
         <span class="muted" id="nowTimingLine" data-now-copy="nowNoTime">Sem tempo em curso</span>
       </div>
       <div class="visit-notice-strip" id="visitNoticeStrip" hidden></div>
-      <nav class="field-step-links" aria-label="Etapas da visita"><button type="button" data-field-jump="accessCard">Acesso</button><button type="button" data-field-jump="cleaningCard">Serviço</button><button type="button" data-field-jump="productsCard">Produtos</button><button type="button" data-field-jump="photosCard">Fotos</button></nav>
+      <span id="visitStepsLabel" data-visit-copy="visitSteps" data-cw-no-i18n hidden>Etapas da visita</span>
+      <nav class="field-step-links" id="visitSteps" aria-labelledby="visitStepsLabel" data-cw-no-i18n><button type="button" data-field-jump="accessCard" data-visit-copy="visitAccess">Acesso</button><button type="button" data-field-jump="cleaningCard" data-visit-copy="visitService">Serviço</button><button type="button" data-field-jump="productsCard" data-visit-copy="visitProducts">Produtos</button><button type="button" data-field-jump="photosCard" data-visit-copy="visitPhotos">Fotos</button></nav>
     </section>
 
     <section class="card crew-card field-panel field-panel-docs" aria-label="Identificação e documentos do técnico">

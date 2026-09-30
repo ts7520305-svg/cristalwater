@@ -426,6 +426,223 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "visitPreparing": [
+    "A preparar ronda...",
+    "Preparing the round...",
+    "Préparation de la tournée...",
+    "Preparando la ronda...",
+    "Tour wird vorbereitet..."
+  ],
+  "visitLoading": [
+    "A carregar...",
+    "Loading...",
+    "Chargement...",
+    "Cargando...",
+    "Wird geladen..."
+  ],
+  "visitProgress": [
+    "{done} de {total} visitas concluídas",
+    "{done} of {total} visits completed",
+    "Visites terminées : {done} / {total}",
+    "{done} de {total} visitas completadas",
+    "Besuche abgeschlossen: {done} / {total}"
+  ],
+  "visitNoAssigned": [
+    "Sem visitas atribuídas",
+    "No assigned visits",
+    "Aucune visite attribuée",
+    "Sin visitas asignadas",
+    "Keine zugewiesenen Besuche"
+  ],
+  "visitFreeTitle": [
+    "Hoje livre",
+    "No visits pending today",
+    "Aucune visite en attente aujourd’hui",
+    "Sin visitas pendientes hoy",
+    "Heute keine ausstehenden Besuche"
+  ],
+  "visitFreeMeta": [
+    "Não tens visitas atribuídas. Atualiza a agenda, vê o calendário ou comunica com o administrador.",
+    "You have no assigned visits. Refresh the schedule, view the calendar or contact the administrator.",
+    "Aucune visite ne vous est attribuée. Actualisez le planning, consultez le calendrier ou contactez l’administrateur.",
+    "No tienes visitas asignadas. Actualiza la agenda, consulta el calendario o contacta con el administrador.",
+    "Ihnen sind keine Besuche zugewiesen. Aktualisieren Sie den Terminplan, sehen Sie im Kalender nach oder kontaktieren Sie die Verwaltung."
+  ],
+  "visitStart": [
+    "Iniciar visita",
+    "Start visit",
+    "Commencer la visite",
+    "Iniciar visita",
+    "Besuch beginnen"
+  ],
+  "visitFinish": [
+    "Concluir visita",
+    "Complete visit",
+    "Terminer la visite",
+    "Completar visita",
+    "Besuch abschließen"
+  ],
+  "visitReview": [
+    "Rever registo",
+    "Review record",
+    "Revoir le compte rendu",
+    "Revisar registro",
+    "Datensatz prüfen"
+  ],
+  "visitView": [
+    "Consultar registo",
+    "View record",
+    "Consulter le compte rendu",
+    "Consultar registro",
+    "Datensatz ansehen"
+  ],
+  "visitCorrect": [
+    "Corrigir registo",
+    "Correct record",
+    "Corriger le compte rendu",
+    "Corregir registro",
+    "Datensatz korrigieren"
+  ],
+  "visitSaveCorrection": [
+    "Guardar correção",
+    "Save correction",
+    "Enregistrer la correction",
+    "Guardar corrección",
+    "Korrektur speichern"
+  ],
+  "visitRefresh": [
+    "Atualizar agenda",
+    "Refresh schedule",
+    "Actualiser le planning",
+    "Actualizar agenda",
+    "Terminplan aktualisieren"
+  ],
+  "visitHelp": [
+    "Ajudar {name}",
+    "Help {name}",
+    "Aider {name}",
+    "Ayudar a {name}",
+    "{name} unterstützen"
+  ],
+  "visitColleague": [
+    "colega",
+    "colleague",
+    "collègue",
+    "colega",
+    "Kollegen"
+  ],
+  "visitNextDay": [
+    "Ronda do próximo dia",
+    "Next day’s round",
+    "Tournée du lendemain",
+    "Ronda del día siguiente",
+    "Tour des nächsten Tages"
+  ],
+  "visitCorrectionOpen": [
+    "Feita / correção aberta",
+    "Completed / correction open",
+    "Terminée / correction ouverte",
+    "Completada / corrección abierta",
+    "Abgeschlossen / Korrektur offen"
+  ],
+  "visitExtraNotice": [
+    "Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “{correction}” para rever os valores. Pode registar impedimentos e combinar o regresso com o escritório.",
+    "Extra visit: record the work, measurements, products and photographs. You can also record equipment checks, running water or a pump in manual mode. After completing the visit, use “{correction}” to review the values. You can record obstacles and arrange a return with the office.",
+    "Visite supplémentaire : consignez le travail, les mesures, les produits et les photos. Vous pouvez aussi consigner les contrôles d’équipement, l’eau ouverte ou une pompe en mode manuel. Après la visite, utilisez « {correction} » pour revoir les valeurs. Vous pouvez consigner les empêchements et convenir d’un retour avec le bureau.",
+    "Visita extra: registra el trabajo, las mediciones, los productos y las fotografías. También puedes registrar revisiones de equipos, agua abierta o una bomba en modo manual. Después de completar la visita, usa «{correction}» para revisar los valores. Puedes registrar impedimentos y coordinar el regreso con la oficina.",
+    "Zusatzbesuch: Erfassen Sie Arbeiten, Messwerte, Produkte und Fotos. Sie können auch Geräteprüfungen, laufendes Wasser oder eine Pumpe im Handbetrieb erfassen. Nutzen Sie nach Abschluss „{correction}“, um die Werte zu prüfen. Sie können Hindernisse erfassen und eine Rückkehr mit dem Büro vereinbaren."
+  ],
+  "visitActions": [
+    "Ações principais da visita",
+    "Main visit actions",
+    "Actions principales de la visite",
+    "Acciones principales de la visita",
+    "Hauptaktionen des Besuchs"
+  ],
+  "visitSteps": [
+    "Etapas da visita",
+    "Visit steps",
+    "Étapes de la visite",
+    "Pasos de la visita",
+    "Besuchsschritte"
+  ],
+  "visitAccess": [
+    "Acesso",
+    "Access",
+    "Accès",
+    "Acceso",
+    "Zugang"
+  ],
+  "visitService": [
+    "Serviço",
+    "Service",
+    "Service",
+    "Servicio",
+    "Service"
+  ],
+  "visitProducts": [
+    "Produtos",
+    "Products",
+    "Produits",
+    "Productos",
+    "Produkte"
+  ],
+  "visitPhotos": [
+    "Fotos",
+    "Photos",
+    "Photos",
+    "Fotos",
+    "Fotos"
+  ],
+  "visitLoadFailed": [
+    "Não foi possível carregar",
+    "Could not load",
+    "Chargement impossible",
+    "No se pudo cargar",
+    "Laden nicht möglich"
+  ],
+  "visitCheckConnection": [
+    "Verificar ligação",
+    "Check connection",
+    "Vérifier la connexion",
+    "Comprobar conexión",
+    "Verbindung prüfen"
+  ],
+  "visitLoadErrorTitle": [
+    "Não foi possível atualizar a ronda",
+    "Could not refresh the round",
+    "Actualisation de la tournée impossible",
+    "No se pudo actualizar la ronda",
+    "Tour konnte nicht aktualisiert werden"
+  ],
+  "visitRetry": [
+    "Tentar novamente",
+    "Try again",
+    "Réessayer",
+    "Volver a intentar",
+    "Erneut versuchen"
+  ],
+  "visitSelectedRegular": [
+    "Visita feita aberta para corrigir.",
+    "Completed visit opened for correction.",
+    "Visite terminée ouverte pour correction.",
+    "Visita completada abierta para corregir.",
+    "Abgeschlossener Besuch zur Korrektur geöffnet."
+  ],
+  "visitSelectedExtra": [
+    "Registo da visita extra concluída.",
+    "Record of the completed extra visit.",
+    "Compte rendu de la visite supplémentaire terminée.",
+    "Registro de la visita extra completada.",
+    "Datensatz des abgeschlossenen Zusatzbesuchs."
+  ],
+  "visitChoose": [
+    "Escolha uma visita.",
+    "Choose a visit.",
+    "Choisissez une visite.",
+    "Elige una visita.",
+    "Wählen Sie einen Besuch."
+  ],
   "roundChip": [
     "Piscinas do dia",
     "Today’s pools",
@@ -1562,6 +1779,7 @@
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
   for (const node of document.querySelectorAll('[data-now-copy]')) alertUi.bind(node, alertUi.value(node.dataset.nowCopy));
   for (const node of document.querySelectorAll('[data-round-copy]')) alertUi.bind(node, alertUi.value(node.dataset.roundCopy));
+  for (const node of document.querySelectorAll('[data-visit-copy]')) alertUi.bind(node, alertUi.value(node.dataset.visitCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -1580,7 +1798,7 @@
   window.addEventListener('pagehide', () => { ++fieldWriteGeneration; ++routeRevision; });
   const sameFieldSession = () => window.CWFieldWriteStore?.same(fieldWriteSession);
   const startingVisits = new Set();
-  const extraVisitNotice = 'Visita extra: registe o trabalho, as medições, os produtos e as fotografias. Pode também registar revisões de equipamento, água aberta ou bomba em manual. Depois de concluir, use “Corrigir registo” para rever os valores. Pode registar impedimentos e combinar o regresso com o escritório.';
+  const extraVisitNotice = alertUi.value('visitExtraNotice', { correction: alertUi.value('visitCorrect') });
   window.CWFieldVisitContext = () => sameFieldSession() && current() ? { id:current().id, visitType:current().visitType || 'REGULAR', poolId:current().poolId || current().pool?.id, clientId:current().clientId || current().client?.id || current().pool?.clientId, poolName:current().pool?.name, clientName:current().client?.name, technicianName:activeTechnician?.name || current().technician?.name } : null;
   let visitPhotos = [];
   let currentDraftEntry = null;
@@ -2068,7 +2286,7 @@
 
   function requireRegularVisit(visit = current()) {
     if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return false; }
-    if (!isRegularVisit(visit)) { toast(visit ? extraVisitNotice : 'Escolha uma visita.'); return false; }
+    if (!isRegularVisit(visit)) { alertUi.notify(visit ? extraVisitNotice : alertUi.value('visitChoose')); return false; }
     return true;
   }
 
@@ -4172,6 +4390,7 @@
       IN_PROGRESS: 'nowStateIN_PROGRESS', STARTED: 'nowStateIN_PROGRESS', ACTIVE: 'nowStateIN_PROGRESS',
       ON_ROUTE: 'nowStateTRAVEL', TRAVEL: 'nowStateTRAVEL', EM_TRANSITO: 'nowStateTRAVEL', A_CAMINHO: 'nowStateTRAVEL',
       INCOMPLETE: 'nowStateINCOMPLETE',
+      DONE: 'nowStateDONE', COMPLETED: 'nowStateDONE', CONCLUIDA: 'nowStateDONE',
     };
     const key = Object.hasOwn(keys, status) ? keys[status] : null;
     return key ? alertUi.value(key) : (status || alertUi.value('roundPending'));
@@ -4476,7 +4695,7 @@
     render();
     if (isVisitDone(current())) {
       switchFieldTab("agora");
-      toast(isRegularVisit(current()) ? 'Visita feita aberta para corrigir.' : 'Registo da visita extra concluída.');
+      alertUi.notify(alertUi.value(isRegularVisit(current()) ? 'visitSelectedRegular' : 'visitSelectedExtra'));
     }
   }
 
@@ -4495,26 +4714,26 @@
     document.body.classList.toggle('field-extra-selected',extra);
     const readOnly = !visit || !sameFieldSession() || (extra && isVisitDone(visit));
     $('#fieldExtraVisitNotice').hidden = !extra;
-    $('#fieldExtraVisitNotice').textContent = extra ? extraVisitNotice : '';
+    alertUi.bind($('#fieldExtraVisitNotice'), extra ? extraVisitNotice : '');
     for (const selector of [...draftFieldIds.map(id=>'#'+id),...checkIds.map(id=>'#'+id),'#startBtn','#finishBtn','#incompleteSave','#problemBtn','#saveProblemBtn','#openWaterBtn','#pumpReminderCreate','#sendAdminAlertBtn','#addDoseBtn','#galleryPhotoBtn','#photoInput','#galleryPhotoInput','[data-photo-type]','#doseRows input','#doseRows select','#doseRows button']) document.querySelectorAll(selector).forEach(node=>{node.disabled=readOnly;});
     for(const selector of ['#openWaterBtn','#pumpReminderCreate'])document.querySelectorAll(selector).forEach(node=>{node.disabled=!visit || !sameFieldSession();});
     if(extra)for(const selector of ['#problemBtn','#saveProblemBtn','#sendAdminAlertBtn'])document.querySelectorAll(selector).forEach(node=>{node.disabled=true;});
     window.CWFieldStockRequest?.contextChanged();
     window.CWFieldProblemReport?.contextChanged();
-    $("#progressText").textContent = visits.length ? `${visits.filter(isVisitDone).length} de ${visits.length} visitas concluídas` : "Sem visitas atribuídas";
+    alertUi.bind($('#progressText'), visits.length ? alertUi.value('visitProgress', { done: visits.filter(isVisitDone).length, total: visits.length }) : alertUi.value('visitNoAssigned'));
 
     if (!visit) {
-      $("#nextTitle").textContent = "Hoje livre";
+      alertUi.bind($('#nextTitle'), alertUi.value('visitFreeTitle'));
       void technicalProposalEditor.open(null);
-      $("#nextMeta").textContent = "Não tens visitas atribuídas. Atualiza a agenda, vê o calendário ou comunica com o administrador.";
+      alertUi.bind($('#nextMeta'), alertUi.value('visitFreeMeta'));
       if ($("#startBtn")) {
         $("#startBtn").disabled = false;
-        $("#startBtn").textContent = "Atualizar agenda";
+        alertUi.bind($('#startBtn'), alertUi.value('visitRefresh'));
         $("#startBtn").dataset.cwCheckinRequired = 'false';
         delete $("#startBtn").dataset.cwCheckinTarget;
       }
       $("#finishBtn").disabled = false;
-      $("#finishBtn").textContent = "Ver agenda";
+      alertUi.bind($('#finishBtn'), alertUi.value('dashAgenda'));
       updateFieldConnection();
       renderCorrectionSummary(null);
       renderAccessCard(null);
@@ -4531,18 +4750,19 @@
 
     $("#finishBtn").disabled = !sameFieldSession();
     updateFieldConnection();
-    $("#nextTitle").textContent = visit.pool?.name || "Piscina";
+    alertUi.bind($('#nextTitle'), visit.pool?.name || alertUi.value('sourcePool'));
     const sourceLabel = visit.assistSource === "otherToday"
-      ? `Ajudar ${visit.technician?.name || visit.technicianName || "colega"}`
-      : (visit.assistSource === "tomorrow" ? "Ronda do proximo dia" : (visit.technician?.name || "Tecnico"));
-    $("#nextMeta").textContent = `${visit.client?.name || "Cliente"} - ${sourceLabel} - ${readOnly ? 'Extra / ' + (visit.status || 'Pendente') : isVisitDone(visit) ? "Feita / correcao aberta" : (visit.status || "Pendente")}`;
+      ? alertUi.value('visitHelp', { name: visit.technician?.name || visit.technicianName || alertUi.value('visitColleague') })
+      : (visit.assistSource === "tomorrow" ? alertUi.value('visitNextDay') : (visit.technician?.name || alertUi.value('roundTechnician')));
+    const statusLabel = readOnly ? alertUi.value('roundExtraStatus', { status: roundStatusCopy(visit.status) }) : isVisitDone(visit) ? alertUi.value('visitCorrectionOpen') : roundStatusCopy(visit.status);
+    alertUi.bind($('#nextMeta'), alertUi.join([visit.client?.name || alertUi.value('sourceClient'), sourceLabel, statusLabel], ' - '));
     if ($("#startBtn")) {
-      $("#startBtn").textContent = readOnly ? "Consultar registo" : isVisitDone(visit) ? "Rever registo" : "Iniciar visita";
+      alertUi.bind($('#startBtn'), alertUi.value(readOnly ? 'visitView' : isVisitDone(visit) ? 'visitReview' : 'visitStart'));
       $("#startBtn").dataset.cwCheckinRequired = String(!isVisitDone(visit));
       $("#startBtn").dataset.cwCheckinTarget = JSON.stringify([visit.visitType || 'REGULAR', visit.id, visit.pool?.id]);
       $("#startBtn").disabled = readOnly || startingVisits.has(visitKey(visit));
     }
-    $("#finishBtn").textContent = readOnly ? "Corrigir registo" : isVisitDone(visit) ? "Guardar correção" : "Concluir visita";
+    alertUi.bind($('#finishBtn'), alertUi.value(readOnly ? 'visitCorrect' : isVisitDone(visit) ? 'visitSaveCorrection' : 'visitFinish'));
     renderAssistPanel();
     renderCorrectionSummary(visit);
     renderAccessCard(visit);
@@ -4665,9 +4885,9 @@
       render();
       renderPhotoList();
       $("#fieldLoadError").hidden = false; $("#fieldLoadErrorText").textContent = error.message;
-      $("#nextTitle").textContent = "Não foi possível carregar";
-      $("#nextMeta").textContent = error.message;
-      $("#progressText").textContent = "Verificar ligacao";
+      alertUi.bind($('#nextTitle'), alertUi.value('visitLoadFailed'));
+      alertUi.bind($('#nextMeta'), error.message);
+      alertUi.bind($('#progressText'), alertUi.value('visitCheckConnection'));
       $("#connectionState").textContent = error.denied ? "Sessão por validar" : "Offline";
       renderCrewStatus();
     }

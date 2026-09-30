@@ -1,5 +1,19 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK463 local validada / apresentação e ações da visita
+
+**TASK463 / C06-012:** apresentação da visita atual com31 entradas/155 textos PT/EN/FR/ES/DE. Título/metadados, progresso da ronda, rótulos e nomes acessíveis das ações, atalhos, instruções EXTRA, avisos de seleção concluída e falha de carregamento. Nomes, estados desconhecidos e erros externos permanecem literais. [Prova463](evidence/20260930_task463_local.json)
+
+**Preservação e correção:** handlers de início/conclusão e23 funções verificados byte a byte; as157 entradas de catálogo anteriores e o apresentador da água conservados. Reutiliza o apresentador privado, acrescentando só rótulos aos códigos DONE/COMPLETED/CONCLUIDA. Sem alterações a payloads, stock, datas/C10, confirmações físicas ou emissão fiscal. O atalho «Produtos» ultrapassava59px com65px de conteúdo a320px; os quatro atalhos passam a duas colunas abaixo381px, mantendo os alvos de48px e os mesmos handlers.
+
+**Validação:** seis integrações,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. PT/EN/FR/ES/DE, matriz inicial320/390/1440, registos concluídos/fallbacks/erro a320. Mesmos nós/foco/onclick/check-in/controlos/valores/tokens/bytes/outbox; sem produtores ou escritas operacionais ao mudar idioma, com linhas de visitas/lembretes/histórico técnico preservadas. REGULAR/EXTRA de igual número, água EXTRA real offline e fontes restauradas antes da rede. Botão EXTRA abre o diálogo de correção sem submeter; revisão regular conserva a nota do registo concluído e o rascunho. Atalhos reais, ronda vazia oculta, erro403 literal e retry que recupera a primeira EXTRA pendente. Três capturas alemãs320 revistas. Cache245/runner357,355 grupos anteriores na ordem exata. Dez ficheiros, três fontes de produto.
+
+**Limite de assistência:** ronda do dia seguinte aberta pelo percurso UI/API existente com visita própria real; apenas a resposta de hoje é uma fixture vazia. O apoio não entra no cache autoritativo do dia, e as fontes originais são repostas. A proteção que recusa assistSource no cache mantém-se. Textos otherToday/colega e rótulos iniciais anteriores à resposta foram revistos no código; não se declara acesso entre técnicos nem cobertura browser desse ramo. O endpoint de hoje conserva o âmbito da conta.
+
+**Gates:** TASK461 na suite353 e TASK462 na suite355, ambas após dez etapas aprovadas; restauros pendentes. TASK460 já aceite351/351/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, fontes verificadas na Prova462. TASK457–459 já aceites; falha histórica454 conservada e correção458 revalidada.
+
+**Retoma:** publicar463 e exigir gates/restauros461–463; corrigir novas falhas. Próximo funcional: mensagens e bloqueios de início/conclusão, depois equipa/documentos e restantes percursos partilhados. Não se declara toda a página traduzida. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK462 / CI em execução
 
 TASK462 publicada na branch `work/field-readiness-20260915-simulation`: código `e2e70d8cda65cee46aa78266dfd490d54524b4f5`, árvore `a48fe146ef5c2b764d0ca5765fff3b9d4f0af444`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task462-20260930`. [CI36698494469](https://github.com/ts7520305-svg/cristalwater/actions/runs/36698494469), job109832087499, no commit exato: 2 etapas iniciais aprovadas; `Run actions/checkout@v4` em execução na consulta. Lista da ronda/filtros com20 entradas/100 textos, oito estados, localização/GPS e vazios; dados e regras conservados. Overflow dos filtros móveis corrigido. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache244/runner355. [Prova462](evidence/20260930_task462_local.json)

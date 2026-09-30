@@ -1,0 +1,308 @@
+{
+  "task": 463,
+  "date": "2026-09-30",
+  "base": "4f3322c3da098f373b1d1e188e1394be41dfbe9b",
+  "item": "C06-012",
+  "scope": {
+    "productSources": 3,
+    "batchFiles": 10,
+    "description": "Current-visit title/metadata, round progress, primary-action labels and accessible names, visit shortcuts, EXTRA notice, completed-visit selection notices and route-loading failure presentation. Start/completion handlers, stock, physical confirmations and fiscal boundaries unchanged."
+  },
+  "catalogue": {
+    "entries": 31,
+    "texts": 155,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "reused": "Private alertUi, literal values, round status labels, schedule action, pool/client/technician fallbacks.",
+    "extendedExactProtocolCodes": [
+      "DONE",
+      "COMPLETED",
+      "CONCLUIDA"
+    ],
+    "unknownStatusesAndErrors": "Literal original strings, rendered as text.",
+    "privatePresentation": "Immutable presentation descriptions repaint the same nodes; no render, data producer, count recomputation, navigation or operational request on locale changes."
+  },
+  "negative": {
+    "run": "qa-task463/run-1790762439720",
+    "script": "test-field-visit-shell-languages.js",
+    "code": 1,
+    "ms": 1274,
+    "actual": "0 de 2 visitas concluídas",
+    "expected": "0 of 2 visits completed",
+    "description": "The real English language selector left the round progress in Portuguese."
+  },
+  "layoutCorrection": {
+    "negativeRun": "qa-task463/run-1790762558110",
+    "viewport": 320,
+    "language": "pt",
+    "text": "Produtos",
+    "buttonClientWidth": 59,
+    "scrollWidth": 65,
+    "fix": "Only visitSteps switches from four columns to two below381px; existing48px touch targets and action handlers retained."
+  },
+  "integration": [
+    {
+      "script": "test-field-visit-shell-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 41558,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    },
+    {
+      "script": "test-field-visit-actions-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 46545,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    },
+    {
+      "script": "test-field-round-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20454,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    },
+    {
+      "script": "test-field-extra-correction.js",
+      "code": 0,
+      "signal": null,
+      "ms": 8551,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19216,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 850,
+      "timedOut": false,
+      "evidence": "qa-task463/run-1790762967138"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 39379,
+      "log": "/workspace/scratch/b364087eee9d/qa-task463/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7039,
+      "log": "/workspace/scratch/b364087eee9d/qa-task463/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 551,
+      "log": "/workspace/scratch/b364087eee9d/qa-task463/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Real language selector in PT/EN/FR/ES/DE, initial320/390/1440 matrix, regular/extra visits, planned/started/completed and unknown statuses, absent names/status, literal names/HTML-like placeholders, progress totals0/1/2 and one completed visit. Completed and missing-name cases at320.",
+    "Same text and button nodes, focus, original onclick handlers, check-in targets, disabled/hidden controls, typed current visit, notes, water input, tokens, source local bytes, complete own outbox and cw:tech-field session navigation records after every language change. Visit/reminder/technical-history rows and monitored producers unchanged; only language-preference PUTs permitted during matrices.",
+    "REGULAR and EXTRA have the same number but different pools. Initial list navigation preserves the regular draft. An actual EXTRA offline water reminder stays open and byte-for-byte unchanged through all locale/state checks. Original route/reminder bytes restored before going online.",
+    "Completed EXTRA button opens the actual typed correction dialog offline, with the correct literal pool name; no correction submitted. Completed regular start/review button opens the correction-mode record and keeps its draft bytes. All four real jump buttons retain the current visit and reach visible target sections.",
+    "Free mode preserves the existing hidden visit panel/actions. A403 route response displays the exact HTML-like server error as text in both error locations while owned title/progress/retry labels translate. The real retry button recovers the first pending typed EXTRA according to original schedule ordering.",
+    "Tomorrow assistance is opened through the existing real UI/API path using a real owned next-day SQL visit; only the current-day response is an explicit empty-route fixture. The five-language/320px metadata shows tomorrow context, and the assistance visit never enters the authoritative current-day cache. That cache and original reminder source are restored exactly.",
+    "Existing round-list, full EXTRA-correction, modern-draft and browser-component regressions pass. New presentation profile includes three visual captures; action profile does not capture. Both retain9s locator/110s scenario/120s runner budgets, active session guard, no page errors and zero operational POST/PATCH/DELETE requests."
+  ],
+  "reviewedOnly": [
+    "otherToday help/colleague metadata and initial pre-response preparing/loading labels: translated through the same private adapter and reviewed in source; no claim of live cross-technician access. The today API keeps the technician owner scope."
+  ],
+  "qaCorrections": [
+    "Assistance is forbidden in the authoritative route-cache schema. Removed the invalid assistance cache fixture rather than weakening validation; tomorrow coverage now uses the actual owned next-day API and its existing button in the Documents tab. Cross-technician help remains source-reviewed.",
+    "A completed regular visit opens a CORRECTION draft based on its completed record. The fixture now provides a literal completed note and verifies that note and unchanged draft bytes instead of expecting a prior WORK-mode note.",
+    "After a denied route clears selection, successful retry selects the first pending EXTRA in the original schedule order. The assertion follows that existing behavior rather than forcing REGULAR."
+  ],
+  "preservation": {
+    "base": "4f3322c3da098f373b1d1e188e1394be41dfbe9b",
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "3b9c17630d4350a7c5d25e40033bba4c28177dacb634d69f2a880c9912fb6984"
+      },
+      "frontend/technician-field-mode.html": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "d6c42a4c15349c79caed2a1f8e87340846c60745a290a229daeda4c762fd0b5b"
+      },
+      "frontend/sw.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "bc9eb42bb388f13cc5c91edc7de93f3fb3d216c4160699aca376062a6c1ccc05"
+      },
+      "scripts/test-field-suite.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "c93e052384a7f854e024f2979c91c0dcf6d75a2a6a6860819cb52dd6dba829bf"
+      }
+    },
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "requireExecutableVisit": "98368f9742145542424daa25ec3dd8a92880c65cc9c7945c3583c2a790168fba",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "renderList": "094fdcb010e8631720e90854264b4b63e442e412cfdba8a11c81eca564b86ed5",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5",
+      "openAssistVisit": "1e51a1133089112bc202d92ac95a054909a3399b1235b31ab334a6b7fe2c1d2c",
+      "loadAssistOptions": "93e4676ad06eed6fab4b6fdaef40d53e5d02caa68930d8c64ddd00fe47ceb272"
+    },
+    "unchangedStartAndIntermediateHandlersSha256": "30389ee76989535e130a245acf285f357904c96f1faf41494df6c0ea3a44704f",
+    "unchangedFinishAndFollowingHandlersSha256": "9ecb18ab1a2cc18b50e565e6e08a2ee1c721560e4f80116de50e8c8afa8b24a7",
+    "waterPresentationUnchanged": true,
+    "previousCatalogueEntries": 157,
+    "previousCataloguePreserved": true,
+    "addedCatalogueEntries": 31,
+    "previousGroups": 355,
+    "newGroups": 357,
+    "priorExactOrderPreserved": true
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "6884a48d125d5a095b338b4bc4dee0f8742d19e1b0f73a69615546282cfa9862",
+    "frontend/technician-field-mode.html": "270e680af0b7f12c2cc70cc0f2a2f103862092afcc8d2ac0f93e5cef025bb14d",
+    "frontend/sw.js": "052f6e1afc30f2b162b859ba743d7dfc41fa47601c826bcc31f33b358fb226bf",
+    "scripts/test-field-visit-shell-languages.js": "06269eb0ee546c64c01ffc539999f96a822304a9254dbfed27b050201f7ffd3e",
+    "scripts/test-field-visit-actions-languages.js": "d17515c1b9c296f40770d2cab61d6ae6b3d9cd43e23655da77077ebe3bd9c71e",
+    "scripts/test-field-suite.js": "17f989623c23c842350d4f08dbe8876b73d759974044821874dc0e6fb616a112"
+  },
+  "visual": {
+    "captures": [
+      {
+        "path": "qa-task463/visit-de-320-context.png",
+        "sha256": "410958620c2f485da1b7cd7a83b0a29e62086e2ff94c9fa641b7ff84525a16ca"
+      },
+      {
+        "path": "qa-task463/visit-de-320-actions.png",
+        "sha256": "d5c9f6dee5fe30aac9e54924b2d9a1b3e23ea2239fbbb9201c786fcd24de1b0a"
+      },
+      {
+        "path": "qa-task463/visit-de-320-extra-notice.png",
+        "sha256": "1456ec25016bf6f5d52150d6124a8073c40f2210a1ce9a76e8de52a91004b629"
+      }
+    ],
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "review": "German320px context, primary buttons and EXTRA notice inspected. Two-column shortcuts and action labels fit; long literal names and notice wrap; raw HTML-like text remains literal."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeAcceptedThisBatch": [],
+  "previousNativeAcceptance": {
+    "task": 460,
+    "code": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+    "run": 36688218583,
+    "job": 109798932582,
+    "groups": 351,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "proof": "20260930_task462_local.json"
+  },
+  "historicalFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "job": 109756159173,
+    "groupsPassed": 345,
+    "groupsTotal": 346,
+    "restore": "not_run",
+    "fix": 458,
+    "fixAcceptedInTask": 460
+  },
+  "pendingNative": [
+    {
+      "task": 461,
+      "code": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "run": 36694971218,
+      "job": 109820630724,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 353,
+      "restore": "pending"
+    },
+    {
+      "task": 462,
+      "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+      "run": 36698494469,
+      "job": 109832087499,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 355,
+      "restore": "pending"
+    },
+    {
+      "task": 463,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 357,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Start/completion feedback and guards; remaining crew/documents and shared push/auth/navigation."
+  }
+}
