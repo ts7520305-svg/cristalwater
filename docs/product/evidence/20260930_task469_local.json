@@ -1,0 +1,415 @@
+{
+  "task": 469,
+  "date": "2026-09-30",
+  "base": "b497df0aafda9b3d2f46ae51c9683115c1cd9ebf",
+  "item": "C06 draft persistence regression",
+  "scope": {
+    "productSources": 2,
+    "testScripts": 2,
+    "documentationFiles": 4,
+    "batchFiles": 8,
+    "description": "Mark cleaningCard as a managed form using the existing generic navigation exclusion. No owned persistence algorithm changes."
+  },
+  "diagnosis": {
+    "observedSetter": "frontend/ui/core/navigation-context.js:25 restoreFields -> restoreContext -> DOMContentLoaded",
+    "sequence": [
+      "Owned typed draft bind returns the saved REGULAR note.",
+      "applyVisitForm sets the correct note.",
+      "Generic page-wide restore replaces the note with an empty previous page snapshot.",
+      "A real EXTRA selection saves the now-empty REGULAR form."
+    ],
+    "diagnostic": "CPU throttle2 with logging around original setters, bind and storage; no forced clicks or data-producer replacements.",
+    "newRegression": "Delay only the unchanged navigation script until the owned form is populated; its real DOMContentLoaded listener causes the original race. Service workers blocked only here for deterministic script ordering; original navigation test separately verifies offline reload."
+  },
+  "negativeAndPreparation": [
+    {
+      "evidence": "qa-task469/run-1790772461705",
+      "description": "Original navigation test passed before the fix: intermittent race.",
+      "results": [
+        {
+          "script": "test-field-round-navigation-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 21146,
+          "timedOut": false
+        }
+      ]
+    },
+    {
+      "evidence": "qa-task469/run-1790772628436",
+      "description": "Diagnostic wrapper preparation SyntaxError only; fixed async catch before product diagnosis.",
+      "results": [
+        {
+          "script": "round-diagnostics.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 60,
+          "timedOut": false
+        }
+      ]
+    },
+    {
+      "evidence": "qa-task469/run-1790772663446",
+      "description": "Original navigation profile under CPU2 reproduces empty saved REGULAR note.",
+      "results": [
+        {
+          "script": "round-diagnostics.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 29697,
+          "timedOut": false
+        }
+      ]
+    },
+    {
+      "evidence": "qa-task469/run-1790772751426",
+      "description": "Instrumented CPU2 run proves navigation-context.restoreFields replaces the correctly loaded owned draft at DOMContentLoaded; real EXTRA selection persists the replaced REGULAR note.",
+      "results": [
+        {
+          "script": "round-diagnostics.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 23016,
+          "timedOut": false
+        }
+      ]
+    },
+    {
+      "evidence": "qa-task469/run-1790773032591",
+      "description": "New deterministic regression fails on unmodified TASK468 product after delayed unchanged navigation script: STALE notes replaces owned REGULAR note in1111ms.",
+      "results": [
+        {
+          "script": "test-field-draft-navigation-memory.js",
+          "code": 1,
+          "signal": null,
+          "ms": 1111,
+          "timedOut": false
+        }
+      ]
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-draft-navigation-memory.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2242,
+      "timedOut": false,
+      "evidence": "qa-task469/run-1790773290917"
+    },
+    {
+      "script": "round-diagnostics.cjs",
+      "code": 0,
+      "signal": null,
+      "ms": 24739,
+      "timedOut": false,
+      "evidence": "qa-task469/run-1790773290917"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19712,
+      "timedOut": false,
+      "evidence": "qa-task469/run-1790773290917"
+    },
+    {
+      "script": "test-field-modern-visit-draft-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18421,
+      "timedOut": false,
+      "evidence": "qa-task469/run-1790773290917"
+    },
+    {
+      "script": "test-field-round-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22697,
+      "timedOut": false,
+      "evidence": "qa-task469/run-1790773290917"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 42571,
+      "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6921,
+      "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 589,
+      "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "All seven values and six checkboxes retain their exact owned values; numeric zero preserved.",
+    "REGULAR and EXTRA have the same numeric id but different pools, notes, readings and checks. Three alternating reloads preserve complete original draft bytes; a real owned edit survives the fourth reload and leaves the other visit unchanged.",
+    "Stale generic session snapshots no longer restore or recollect managed fields. A synthetic unmanaged control outside cleaningCard still restores and persists through the real generic handler.",
+    "No operational API writes or page errors; unchanged SQL visits and empty outbox. Generic navigation source and both owned draft manager and page JS unchanged.",
+    "Original navigation scenario passes under CPU2 including genuine service-worker offline reload; existing modern draft, draft languages and list languages integrations pass.",
+    "Scenario110s, locators9s, runner120s and outer CI90min unchanged. One-second session guard active; only periodic15/30/60s fixture intervals disabled."
+  ],
+  "preservation": {
+    "base": "b497df0aafda9b3d2f46ae51c9683115c1cd9ebf",
+    "htmlChange": "single managed-form attribute on cleaningCard",
+    "cacheChange": "248 to249 only",
+    "previousGroupsExactOrderPreserved": 361,
+    "groups": 362,
+    "unchangedSources": [
+      "frontend/technician-field-mode.js",
+      "frontend/cw-field-visit-drafts.js",
+      "frontend/ui/core/navigation-context.js"
+    ],
+    "operationalChanges": false
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.html": "1154410a7291ed65669308cd37edd3b4dde848e46e56798d0e414c6792670755",
+    "frontend/sw.js": "38b8b99f77b2660c8fe039f8e8e29590e719d29dffe765ffc6074131ca22b353",
+    "scripts/test-field-draft-navigation-memory.js": "a7ac8cb47cb0e9724c14c505340dc84433419f92e7ce97295d98bbe051971765",
+    "scripts/test-field-suite.js": "26a9aa1e4c35f1854db97dae18ec604c18ba6242b5ec4618ce3e8970a3045e00"
+  },
+  "cache": 249,
+  "runner": {
+    "before": 361,
+    "after": 362,
+    "previousExactOrderPreserved": true,
+    "perScriptDeadlineMs": 120000,
+    "workflowBudgetMinutes": 90
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeIncomplete465": {
+    "task": 465,
+    "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+    "run": 36708004453,
+    "job": 109862765829,
+    "sourceSha256": {
+      "scripts/test-field-round-list-languages.js": "5854ff6bed839203d851f88633513d36ffb7f5aa44617863a1ce592bdc4d81f6",
+      "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf",
+      "scripts/test-field-photo-panel-languages.js": "d2665fd9e0126bff0eca8b4f4d215d8ccb66f4ff20f54a4f9104a8b8bc4af37a"
+    },
+    "gitBlobs": {
+      "scripts/test-field-round-list-languages.js": "330dc2d9deed0b468f52c19f989c8292659184c3",
+      "scripts/test-field-suite.js": "addbbb3efb02cf97820d3c8a36bf587f2ce0e614",
+      "scripts/test-field-photo-panel-languages.js": "dd9654f8484eeb921a5e2437159d3c3a96eaf06d"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 359,
+    "completedGroups": 347,
+    "passedGroups": 345,
+    "failedGroups": [
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14642
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14775
+      }
+    ],
+    "missingGroups": [
+      "test-field-repair-revenue.js",
+      "test-field-repair-execution.js",
+      "test-field-repair-execution-revenue.js",
+      "test-field-repair-execution-command.js",
+      "test-field-repair-no-materials.js",
+      "test-field-repair-execution-ui.js",
+      "test-field-visit-report-origin.js",
+      "test-field-product-identity.js",
+      "test-field-product-identity-ui.js",
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:21:08Z",
+    "updatedAt": "2026-09-30T12:31:37Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467
+    },
+    "remainingInvestigation": [],
+    "logSha256": "f0b68a13825e7ec64d6e63a95b1f270aa04fea5fc3d8a36c64c79fa68bff269c"
+  },
+  "nativeIncomplete466": {
+    "task": 466,
+    "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+    "run": 36708610951,
+    "job": 109864746875,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920",
+      "scripts/test-field-visit-validation-languages.js": "5eaa67086dbea6146a164256763281dbf8e86bd2c47549174af599373aeab2b7",
+      "frontend/sw.js": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "frontend/cw-field-visit-drafts.js": "5d375c49e1486ece9a8aba25cfbaee8c6e5c6810883a5345710de9e641a91744",
+      "frontend/cw-visit-product-identity.js": "d1bb5522aa207cc75675d2adf6375ab3bc88f392e48acbd49c66662bb11071da"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "ed57622024992d24c36ce9df6f4092283e45c42c",
+      "scripts/test-field-visit-validation-languages.js": "2aeacee1943f369eb0d9f2b6c90fcd1c14f74983",
+      "frontend/sw.js": "500c118d4c60b9a01246ee4f89415caca43dbe88",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "frontend/cw-field-visit-drafts.js": "0bdfde3d0a1085c2452e8c0bc2ad9aafefa98f7c",
+      "frontend/cw-visit-product-identity.js": "7260cfdb9355ba8252a3590fa6992b6ed9f8dff9"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 360,
+    "completedGroups": 357,
+    "passedGroups": 353,
+    "failedGroups": [
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 23807
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 18496
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14546
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14798
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:27:03Z",
+    "updatedAt": "2026-09-30T12:37:40Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-water-panel-languages.js": 467,
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467,
+      "test-field-round-navigation-languages.js": 469
+    },
+    "remainingInvestigation": [],
+    "logSha256": "40f2e4e82a8040139db994bdc063d3c3bdf359c1d6dde7452a184aab21341896",
+    "repair469NativeAcceptance": "pending"
+  },
+  "previousNativeAcceptance": {
+    "task": 467,
+    "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+    "run": 36710186213,
+    "job": 109869850165,
+    "sourceSha256": {
+      ".github/workflows/field-readiness.yml": "c96037b58679aa58ea85759b31124104b9da596722d52f60910550c9822a4d83",
+      "scripts/test-field-water-panel-languages.js": "d29631bbb16044c530f7083e71239d9dc7d0062bcdd255f20118fc3a9be4dc70",
+      "scripts/test-field-vehicle-assignment-ui.js": "fbd027a12eaad159c797ad4b50802e22e842b87cdc4ea38108d36f77cfdce183",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "scripts/test-field-visit-briefing.js": "45649e8e32354fe862989c3d00f09ddb8d0d2146e50e6332ac53a694b0372a0d"
+    },
+    "gitBlobs": {
+      ".github/workflows/field-readiness.yml": "95a13c10f3147a71158e0385b6f549d0134792ec",
+      "scripts/test-field-water-panel-languages.js": "a8cc24896c9675fb7d133f2c0c11c10dc814c20d",
+      "scripts/test-field-vehicle-assignment-ui.js": "aa555346e2e1334ab7bb475fffb57b895029930b",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "scripts/test-field-visit-briefing.js": "de07c953a3dcf31891062857c6f4ce706245eb00"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 360,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T11:42:26Z",
+    "updatedAt": "2026-09-30T12:55:23Z",
+    "sourceSha256Verified": true
+  },
+  "pendingNative": [
+    {
+      "task": 468,
+      "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+      "run": 36714652539,
+      "job": 109884485856,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 361,
+      "restore": "pending"
+    },
+    {
+      "task": 469,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 362,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Require exact362 groups/restore469; resume prepared document-center translation as470 without losing managed-form fix."
+  }
+}

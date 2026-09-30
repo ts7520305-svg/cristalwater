@@ -1,5 +1,17 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK469 / preservação dos rascunhos
+
+**TASK469:** corrigida uma corrida real de perda de dados exposta pelo CI466. Depois de o rascunho da visita estar carregado, a memória genérica da página podia repor valores antigos no formulário; a seleção seguinte gravava esses valores sobre o rascunho. O cartão de registo recebe o atributo de formulário gerido já respeitado pela navegação. Sete valores e seis caixas ficam exclusivamente sob o gestor de rascunhos existente. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova469](evidence/20260930_task469_local.json)
+
+**Validação:** regressão determinística falha antes em 1 111 ms e passa depois. Cinco integrações aprovadas, incluindo navegação original com CPU2, rascunhos, idiomas dos rascunhos e lista. REGULAR/EXTRA com o mesmo número conservam os 13 campos e bytes completos; edição real persiste sem alterar a outra visita. Memória dos restantes campos continua funcional. Zero escritas operacionais/erros de página; visitas SQL e outbox preservadas. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe 695/308/44 aprovados.
+
+**Preservação:** JavaScript da página, gestor de rascunhos e navegação genérica iguais byte a byte. Única mudança de interface é o atributo no cartão; cache249. Runner362 conserva a ordem dos361 grupos anteriores; limites120s/90min sem alteração. Datas/C10, UUIDs, pedidos, valores, identidades e regras intactos. A memória genérica elimina apenas cópias obsoletas dos campos geridos, segundo a regra que já existia; os rascunhos originais mantêm-se.
+
+**Gates:** TASK467 aceite:360/360 grupos exatos, cinco fontes/blobs/hashes, PostgreSQL16/upgrade e restauro128 tabelas/51 ficheiros com linhas/hashes iguais. O sucesso anterior não invalida a corrida intermitente agora reproduzida. TASK468 ainda na suite361 após dez etapas aprovadas. TASK465 cancelada:347/359 terminados,345 aprovados/duas falhas já corrigidas467/12 não terminados. TASK466 cancelada:357/360 terminados,353 aprovados/quatro falhas/três não terminados; água/briefing/viatura corrigidos467, perda do rascunho corrigida neste lote. Restauros465/466 não executados, causas do cancelamento não confirmadas; histórico454/462–464 conservado.
+
+**Retoma:** publicar469 e exigir362 grupos/restauro; acompanhar468. A tradução do centro documental já preparada e validada ficou preservada para TASK470, a restaurar sobre esta correção. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Repositório público durante o desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK468 / cartão de técnico e documentos
 
 TASK468 publicada na branch `work/field-readiness-20260915-simulation`: código `b563f4820a1a6ba04b514cc126a3d3c0c65c40c3`, árvore `b09b3dfcd42dfd02f1e432ddde72d9728bd82594`, igual à validada. Histórico local conservado em `work/local-task468-20260930`. [CI36714652539](https://github.com/ts7520305-svg/cristalwater/actions/runs/36714652539), job109884485856, no commit exato: 2 etapas iniciais aprovadas; `Run actions/checkout@v4` em execução na consulta. Cartão de técnico/viatura/documentos com 34 entradas novas/170 textos e dez reutilizadas; cabeçalho alemão a 320 px corrigido. Cinco integrações, 1 356 unitários/quatro técnicos/sintaxe aprovados. Regras e fontes operacionais conservadas; cache248/runner361. [Prova468](evidence/20260930_task468_local.json)

@@ -8,6 +8,18 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK469 / preservação dos rascunhos
+
+**TASK469:** corrigida uma corrida real de perda de dados exposta pelo CI466. Depois de o rascunho da visita estar carregado, a memória genérica da página podia repor valores antigos no formulário; a seleção seguinte gravava esses valores sobre o rascunho. O cartão de registo recebe o atributo de formulário gerido já respeitado pela navegação. Sete valores e seis caixas ficam exclusivamente sob o gestor de rascunhos existente. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova469](evidence/20260930_task469_local.json)
+
+**Validação:** regressão determinística falha antes em 1 111 ms e passa depois. Cinco integrações aprovadas, incluindo navegação original com CPU2, rascunhos, idiomas dos rascunhos e lista. REGULAR/EXTRA com o mesmo número conservam os 13 campos e bytes completos; edição real persiste sem alterar a outra visita. Memória dos restantes campos continua funcional. Zero escritas operacionais/erros de página; visitas SQL e outbox preservadas. 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe 695/308/44 aprovados.
+
+**Preservação:** JavaScript da página, gestor de rascunhos e navegação genérica iguais byte a byte. Única mudança de interface é o atributo no cartão; cache249. Runner362 conserva a ordem dos361 grupos anteriores; limites120s/90min sem alteração. Datas/C10, UUIDs, pedidos, valores, identidades e regras intactos. A memória genérica elimina apenas cópias obsoletas dos campos geridos, segundo a regra que já existia; os rascunhos originais mantêm-se.
+
+**Gates:** TASK467 aceite:360/360 grupos exatos, cinco fontes/blobs/hashes, PostgreSQL16/upgrade e restauro128 tabelas/51 ficheiros com linhas/hashes iguais. O sucesso anterior não invalida a corrida intermitente agora reproduzida. TASK468 ainda na suite361 após dez etapas aprovadas. TASK465 cancelada:347/359 terminados,345 aprovados/duas falhas já corrigidas467/12 não terminados. TASK466 cancelada:357/360 terminados,353 aprovados/quatro falhas/três não terminados; água/briefing/viatura corrigidos467, perda do rascunho corrigida neste lote. Restauros465/466 não executados, causas do cancelamento não confirmadas; histórico454/462–464 conservado.
+
+**Retoma:** publicar469 e exigir362 grupos/restauro; acompanhar468. A tradução do centro documental já preparada e validada ficou preservada para TASK470, a restaurar sobre esta correção. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Repositório público durante o desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK468 / C06-015, cartão de técnico e documentos
 
 **TASK468 / C06-015:** cartão de técnico, viatura e estado documental com 34 entradas novas/170 textos PT/EN/FR/ES/DE e dez entradas reutilizadas. Catálogo anterior de 207 entradas intacto; total 241. Nomes, matrículas, estado bruto da viatura, códigos AT e dados semelhantes a HTML mantêm-se literais. Cabeçalho passa a permitir duas linhas após reprodução de overflow do botão alemão a 320 px. Três fontes de produto, dois scripts e quatro documentos; nove ficheiros. [Prova468](evidence/20260930_task468_local.json)

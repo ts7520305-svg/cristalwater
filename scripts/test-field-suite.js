@@ -162,7 +162,7 @@ scripts.push('test-field-extra-reminders.js');
 scripts.push('test-field-extra-correction.js');
 scripts.push('test-field-extra-equipment.js');
 scripts.push('test-field-extra-incomplete.js');
-scripts.push('test-field-modern-visit-drafts.js','test-field-modern-visit-draft-languages.js');
+scripts.push('test-field-modern-visit-drafts.js','test-field-draft-navigation-memory.js','test-field-modern-visit-draft-languages.js');
 scripts.push('test-field-team-leader-entry.js');
 scripts.push('test-field-complete-daily-route.js');
 scripts.push('test-field-document-recovery.js');
