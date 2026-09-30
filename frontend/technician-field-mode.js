@@ -426,6 +426,146 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "centerTitle": [
+    "Centro documental",
+    "Document overview",
+    "Vue d’ensemble des documents",
+    "Resumen documental",
+    "Dokumentenübersicht"
+  ],
+  "centerReady": [
+    "Operacional",
+    "Ready for work",
+    "Opérationnel",
+    "Operativo",
+    "Betriebsbereit"
+  ],
+  "centerBlocked": [
+    "Bloqueado",
+    "Blocked",
+    "Bloqué",
+    "Bloqueado",
+    "Gesperrt"
+  ],
+  "centerSource": [
+    "Fonte: {source}",
+    "Source: {source}",
+    "Source : {source}",
+    "Fuente: {source}",
+    "Quelle: {source}"
+  ],
+  "centerLive": [
+    "online",
+    "online",
+    "en ligne",
+    "en línea",
+    "online"
+  ],
+  "centerCache": [
+    "cópia guardada",
+    "saved copy",
+    "copie enregistrée",
+    "copia guardada",
+    "gespeicherte Kopie"
+  ],
+  "centerMixed": [
+    "parcial — consulte cada documento",
+    "partial — check each document",
+    "partielle — consultez chaque document",
+    "parcial — consulta cada documento",
+    "teilweise — prüfen Sie jedes Dokument"
+  ],
+  "centerUnconfirmed": [
+    "por confirmar",
+    "awaiting confirmation",
+    "à confirmer",
+    "por confirmar",
+    "noch zu bestätigen"
+  ],
+  "centerSafety": [
+    "Fichas",
+    "Safety sheets",
+    "Fiches de sécurité",
+    "Fichas de seguridad",
+    "Sicherheitsdatenblätter"
+  ],
+  "centerManuals": [
+    "Manuais",
+    "Manuals",
+    "Manuels",
+    "Manuales",
+    "Handbücher"
+  ],
+  "centerValidated": [
+    "Documentação obrigatória validada para iniciar e concluir.",
+    "Required documents validated for starting and completing work.",
+    "Documents obligatoires validés pour commencer et terminer l’intervention.",
+    "Documentación obligatoria validada para iniciar y finalizar el trabajo.",
+    "Erforderliche Dokumente für Beginn und Abschluss der Arbeit geprüft."
+  ],
+  "centerInitial": [
+    "Resumo de estados: válido, pendente, expirado ou indisponível.",
+    "Status overview: valid, pending, expired or unavailable.",
+    "Résumé des états : valide, en attente, expiré ou indisponible.",
+    "Resumen de estados: válido, pendiente, vencido o no disponible.",
+    "Statusübersicht: gültig, ausstehend, abgelaufen oder nicht verfügbar."
+  ],
+  "centerWorkStock": [
+    "Guia de obra/stock",
+    "Work guide/stock",
+    "Bon de travail/stock",
+    "Guía de trabajo/stock",
+    "Arbeitsbeleg/Bestand"
+  ],
+  "centerInsuranceInspection": [
+    "Seguro/inspeção",
+    "Insurance/inspection",
+    "Assurance/contrôle technique",
+    "Seguro/inspección",
+    "Versicherung/Fahrzeugprüfung"
+  ],
+  "centerConsulted": [
+    "{name}: consultado em {date}",
+    "{name}: checked on {date}",
+    "{name} : consulté le {date}",
+    "{name}: consultado el {date}",
+    "{name}: abgerufen am {date}"
+  ],
+  "centerCachedAt": [
+    "{name}: cópia consultada em {date}",
+    "{name}: copy checked on {date}",
+    "{name} : copie consultée le {date}",
+    "{name}: copia consultada el {date}",
+    "{name}: Kopie abgerufen am {date}"
+  ],
+  "centerCacheWarning": [
+    "A cópia guardada não confirma alterações recentes. Os PDFs precisam de ligação.",
+    "The saved copy does not confirm recent changes. PDFs require a connection.",
+    "La copie enregistrée ne confirme pas les changements récents. Les PDF nécessitent une connexion.",
+    "La copia guardada no confirma cambios recientes. Los PDF requieren conexión.",
+    "Die gespeicherte Kopie bestätigt keine aktuellen Änderungen. PDFs benötigen eine Verbindung."
+  ],
+  "centerVehicleConfirm": [
+    "Confirme a viatura atribuída antes de consultar documentos.",
+    "Confirm the assigned vehicle before viewing documents.",
+    "Confirmez le véhicule attribué avant de consulter les documents.",
+    "Confirma el vehículo asignado antes de consultar documentos.",
+    "Bestätigen Sie das zugewiesene Fahrzeug, bevor Sie Dokumente abrufen."
+  ],
+  "centerUpdated": [
+    "Guias atualizadas.",
+    "Documents refreshed.",
+    "Documents actualisés.",
+    "Documentos actualizados.",
+    "Dokumente aktualisiert."
+  ],
+  "centerRefreshUnconfirmed": [
+    "Documentação com dados por confirmar. Consulte a origem de cada informação.",
+    "Some document data needs confirmation. Check the source of each item.",
+    "Certaines données documentaires restent à confirmer. Consultez la source de chaque information.",
+    "Hay datos documentales por confirmar. Consulta la fuente de cada información.",
+    "Einige Dokumentangaben sind noch zu bestätigen. Prüfen Sie die Quelle jeder Angabe."
+  ],
   "crewAria": [
     "Identificação e documentos do técnico",
     "Technician identity and documents",
@@ -2114,23 +2254,26 @@
     "Besuch öffnen"
   ]
 };
-    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap(), delegatedCopies = new WeakMap();
+    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap(), delegatedCopies = new WeakMap(), documentDates = new WeakMap();
     function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
     function join(parts, separator = ' | ') { const entry = Object.freeze({ parts: Object.freeze([...parts]), separator }); specs.add(entry); return entry; }
     function reminder(value) { const entry = Object.freeze({}); reminderSpecs.set(entry, value); return entry; }
     // Only errors created here own translated presentation; original Error.message stays literal.
     function error(message, entry) { const failure = Error(message); errorCopies.set(failure, entry); return failure; }
     function delegated(source, entry) { const value = Object.freeze({}); delegatedCopies.set(value, { source, entry }); return value; }
+    function documentDate(raw) { const entry = Object.freeze({}); documentDates.set(entry, String(raw ?? '')); return entry; }
+    function documentWarning(result) { const source = window.CWFieldDocuments.presentation; return delegated(source, source.warning(result) ?? result.warning); }
     function draftStatus(node) { const source = window.CWFieldVisitDrafts.presentation; return delegated(source, source.copy(node)); }
     function failure(error, fallback = '') {
       if (errorCopies.has(error)) return errorCopies.get(error);
-      for (const source of [window.CWFieldVisitDrafts?.presentation, window.CWVisitProductIdentity?.presentation]) {
+      for (const source of [window.CWFieldVisitDrafts?.presentation, window.CWVisitProductIdentity?.presentation, window.CWFieldDocuments?.presentation]) {
         const entry = source?.error(error); if (entry) return delegated(source, entry);
       }
       return error?.message || fallback;
     }
     function format(entry, language = document.documentElement.lang || 'pt') {
       const delegated = delegatedCopies.get(entry); if (delegated) return delegated.source.format(delegated.entry, language);
+      if (documentDates.has(entry)) return window.CWFieldDocumentCopy.date(documentDates.get(entry), language);
       if (reminderSpecs.has(entry)) return window.CWFieldReminders.presentation.format(reminderSpecs.get(entry), language);
       if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
       if (entry.parts) return entry.parts.map(part => format(part, language)).join(entry.separator);
@@ -2156,7 +2299,7 @@
     window.addEventListener('cw-language-change', paint);
     let lastLanguage = document.documentElement.lang;
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return { value, join, reminder, error, failure, draftStatus, format, bind, clear, clearTree, notify };
+    return { value, join, reminder, error, failure, draftStatus, documentDate, documentWarning, format, bind, clear, clearTree, notify };
   })();
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
@@ -2164,6 +2307,7 @@
   for (const node of document.querySelectorAll('[data-round-copy]')) alertUi.bind(node, alertUi.value(node.dataset.roundCopy));
   for (const node of document.querySelectorAll('[data-visit-copy]')) alertUi.bind(node, alertUi.value(node.dataset.visitCopy));
   for (const node of document.querySelectorAll('[data-crew-copy]')) alertUi.bind(node, alertUi.value(node.dataset.crewCopy));
+  for (const node of document.querySelectorAll('[data-center-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.centerInitialCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -2207,6 +2351,7 @@
   let technicalProposals = [];
   let docsSource = "live";
   let docsContext = null, docsRevision = 0, docsDetail = '', docsWarning = '';
+  let docsDetailCopy = '', docsWarningCopy = '';
   let docsCompliance = null;
   let documentsLoaded = false;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
@@ -2967,6 +3112,7 @@
     ++docsRevision; docsContext = null; documentsLoaded = false;
     activeTransportGuide = null; activeWorkGuide = null; activeWorkStock = []; activeInsurance = null; activeVehicle = null;
     docsSource = 'unavailable'; docsDetail = ''; docsWarning = message;
+    docsDetailCopy = ''; docsWarningCopy = message;
     ['transport', 'work', 'insurance'].forEach(kind => renderDocumentSection(kind, null, 'unavailable', ''));
     renderDoseRows(); renderCrewStatus(); updateFieldDashboard(current());
   }
@@ -3193,21 +3339,31 @@
 
     const center = $("#documentCenterBox");
     if (center) {
+      alertUi.clearTree(center);
       center.innerHTML = `
-        <div class="doc-head"><span class="chip">Centro documental</span><strong class="${compliance.readyForOperation ? "status-ok" : "status-warn"}">${compliance.readyForOperation ? "Operacional" : "Bloqueado"}</strong></div>
-        <div class="doc-number">Fonte: ${esc(({live:'online',cache:'cópia guardada',mixed:'parcial — consulte cada documento',unavailable:'por confirmar'})[docsSource] || 'por confirmar')}</div>
-        ${docsDetail ? `<div class="muted">${esc(docsDetail)}</div>` : ''}
-        ${docsWarning ? `<div class="muted" role="status">${esc(docsWarning)}</div>` : ''}
+        <div class="doc-head"><span class="chip" data-center-copy="title"></span><strong class="${compliance.readyForOperation ? "status-ok" : "status-warn"}" data-center-copy="state"></strong></div>
+        <div class="doc-number" data-center-copy="source"></div>
+        ${docsDetail ? '<div class="muted" data-center-copy="detail"></div>' : ''}
+        ${docsWarning ? '<div class="muted" role="status" data-center-copy="warning"></div>' : ''}
         <div class="doc-meta">
-          <span>Guia AT: ${esc(compliance.states.transport.label)}</span>
-          <span>Guia obra: ${esc(compliance.states.workGuide.label)}</span>
-          <span>Seguro: ${esc(compliance.states.insurance.label)}</span>
-          <span>Inspeção: ${esc(compliance.states.inspection.label)}</span>
-          <span>Fichas: ${esc(compliance.states.safety.label)}</span>
-          <span>Manuais: ${esc(compliance.states.manuals.label)}</span>
+          ${['transport', 'workGuide', 'insurance', 'inspection', 'safety', 'manuals'].map(kind => `<span data-center-state="${kind}"></span>`).join('')}
         </div>
-        ${compliance.reason ? `<div class="muted" data-doc-lock-reason="1">${esc(compliance.reason)}</div>` : '<div class="muted">Documentação obrigatória validada para iniciar e concluir.</div>'}
+        ${compliance.reason ? '<div class="muted" data-doc-lock-reason="1" data-center-copy="reason"></div>' : '<div class="muted" data-center-copy="validated"></div>'}
       `;
+      const sources = { live: 'centerLive', cache: 'centerCache', mixed: 'centerMixed', unavailable: 'centerUnconfirmed' };
+      const values = {
+        title: alertUi.value('centerTitle'), state: alertUi.value(compliance.readyForOperation ? 'centerReady' : 'centerBlocked'),
+        source: alertUi.value('centerSource', { source: alertUi.value(Object.hasOwn(sources, docsSource) ? sources[docsSource] : 'centerUnconfirmed') }),
+        detail: docsDetailCopy || docsDetail, warning: docsWarningCopy || docsWarning,
+        reason: documentSourceCopies.get(compliance) || compliance.reason, validated: alertUi.value('centerValidated'),
+      };
+      for (const node of center.querySelectorAll('[data-center-copy]')) alertUi.bind(node, values[node.dataset.centerCopy]);
+      const names = { transport: 'sourceDocTransport', workGuide: 'sourceDocWork', insurance: 'sourceDocInsurance', inspection: 'sourceDocInspection', safety: 'centerSafety', manuals: 'centerManuals' };
+      const states = { UNAVAILABLE: 'sourceDocUnavailable', EXPIRED: 'sourceDocExpired', PENDING: 'sourceDocPending', VALID: 'sourceDocValid' };
+      for (const node of center.querySelectorAll('[data-center-state]')) {
+        const kind = node.dataset.centerState, state = compliance.states[kind];
+        alertUi.bind(node, alertUi.value('sourceDocBlocker', { name: alertUi.value(names[kind]), state: Object.hasOwn(states, state.code) ? alertUi.value(states[state.code]) : state.label }));
+      }
     }
   }
 
@@ -4690,7 +4846,7 @@
     const vehicleInput = $('#vehicleId'), technicianInput = $('#technicianId');
     const vehicleId = Number(vehicleInput?.value || localStorage.getItem('cwVehicleId'));
     clearFieldDocuments();
-    if (!Number.isSafeInteger(vehicleId) || vehicleId < 1) { docsWarning = 'Confirme a viatura atribuída antes de consultar documentos.'; renderCrewStatus(); return; }
+    if (!Number.isSafeInteger(vehicleId) || vehicleId < 1) { docsWarning = 'Confirme a viatura atribuída antes de consultar documentos.'; docsWarningCopy = alertUi.value('centerVehicleConfirm'); renderCrewStatus(); return; }
     const context = window.CWFieldDocuments.scope(fieldWriteSession, vehicleId), revision = docsRevision;
     const relevant = () => revision === docsRevision && window.CWFieldDocuments.same(context) && Number(vehicleInput?.value) === vehicleId;
     docsContext = context;
@@ -4715,10 +4871,15 @@
       const title = ({transport:'Guia AT',work:'Guia de obra/stock',insurance:'Seguro/inspeção'})[kind], section = result.sections[kind];
       return title + ': ' + (section ? (result.sources[kind] === 'cache' ? 'cópia consultada em ' : 'consultado em ') + window.CWFieldDocumentCopy.date(section.confirmedAt) : 'indisponível');
     }).join(' · ');
+    docsDetailCopy = alertUi.join(['transport', 'work', 'insurance'].map(kind => {
+      const name = alertUi.value(({ transport: 'sourceDocTransport', work: 'centerWorkStock', insurance: 'centerInsuranceInspection' })[kind]), section = result.sections[kind];
+      return section ? alertUi.value(result.sources[kind] === 'cache' ? 'centerCachedAt' : 'centerConsulted', { name, date: alertUi.documentDate(section.confirmedAt) }) : alertUi.value('sourceDocBlocker', { name, state: alertUi.value('sourceDocUnavailable') });
+    }), ' · ');
     docsWarning = [result.warning, hasCache ? 'A cópia guardada não confirma alterações recentes. Os PDFs precisam de ligação.' : ''].filter(Boolean).join(' ');
+    docsWarningCopy = alertUi.join([result.warning ? alertUi.documentWarning(result) : '', hasCache ? alertUi.value('centerCacheWarning') : ''].filter(Boolean), ' ');
     documentsLoaded = true;
     renderCrewStatus(); updateFieldDashboard(current()); visitDraftManager.paint(currentDraftEntry);
-    if (showFeedback) toast(result.denied ? result.warning : docsSource === 'live' ? (result.warning || 'Guias atualizadas.') : 'Documentação com dados por confirmar. Consulte a origem de cada informação.');
+    if (showFeedback) alertUi.notify(result.denied ? alertUi.documentWarning(result) : docsSource === 'live' ? (result.warning ? alertUi.documentWarning(result) : alertUi.value('centerUpdated')) : alertUi.value('centerRefreshUnconfirmed'));
   }
 
   function resetForm() {

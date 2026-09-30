@@ -1,0 +1,890 @@
+{
+  "task": 470,
+  "date": "2026-09-30",
+  "base": "bc2702b3e465e7dc579d43e1975a8a734b2fdbb9",
+  "item": "C06-015",
+  "scope": {
+    "productSources": 4,
+    "testScripts": 2,
+    "documentationFiles": 4,
+    "batchFiles": 10,
+    "description": "Translate document overview, provenance, refresh feedback and owned cache/access/save warnings with private presentation metadata."
+  },
+  "catalogue": {
+    "entries": 34,
+    "texts": 170,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newMainEntries": 20,
+    "newSourceWarningEntries": 14,
+    "reusedEntries": 10,
+    "previousMainEntries": 241,
+    "totalMainEntries": 261,
+    "previousEntriesUnchanged": true
+  },
+  "preparation": {
+    "record": {
+      "task": 470,
+      "preparedBase": "b497df0aafda9b3d2f46ae51c9683115c1cd9ebf",
+      "stash": "f7513e236c6ced9b2744fca00e1bc001f9efea84",
+      "renamedFrom": "qa-task469",
+      "integrations": 6,
+      "newScenarioMatrices": 16,
+      "localeChecks": 90,
+      "unitTests": 1356,
+      "unitFiles": 138,
+      "technicianTests": 4,
+      "syntax": "695/308/44",
+      "reason": "Priority native466 round-navigation failure at saved-draft line98 discovered after full local translation validation. All six feature sources saved with SHA256 before stash. Do not apply twice."
+    },
+    "negative": {
+      "evidence": "qa-task470/run-1790771988461",
+      "results": [
+        {
+          "script": "test-field-document-center-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 1391,
+          "timedOut": false
+        }
+      ],
+      "description": "Real English selector left document-center title Portuguese before feature edits."
+    },
+    "integration": [
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21111,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772132970"
+      },
+      {
+        "script": "test-field-document-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6308,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772181069"
+      },
+      {
+        "script": "test-field-document-summary-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26176,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772181069"
+      },
+      {
+        "script": "test-field-guide-read-scope-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14813,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772181069"
+      },
+      {
+        "script": "test-field-crew-status-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16778,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772181069"
+      },
+      {
+        "script": "test-field-visit-validation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20224,
+        "timedOut": false,
+        "evidence": "qa-task470/run-1790772181069"
+      }
+    ],
+    "gatesMetadata": [
+      {
+        "name": "syntax",
+        "code": 0,
+        "signal": null,
+        "ms": 41791,
+        "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-syntax.log"
+      },
+      {
+        "name": "unit",
+        "code": 0,
+        "signal": null,
+        "ms": 6737,
+        "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-unit.log"
+      },
+      {
+        "name": "technician",
+        "code": 0,
+        "signal": null,
+        "ms": 576,
+        "log": "/workspace/scratch/b364087eee9d/qa-task469/gate-technician.log"
+      }
+    ],
+    "historicalPaths": "Prepared runs were made in qa-task469 before relocation to qa-task470 and priority469 fix. Run IDs/timings preserved. Prepared gate metadata retains historical paths; current raw gate logs belong to the fresh integrated run below.",
+    "merge": {
+      "base": "bc2702b3e465e7dc579d43e1975a8a734b2fdbb9",
+      "stash": "f7513e236c6ced9b2744fca00e1bc001f9efea84",
+      "sources": {
+        "frontend/cw-field-documents.js": {
+          "prepared": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+          "current": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+          "exact": true
+        },
+        "frontend/sw.js": {
+          "prepared": "38b8b99f77b2660c8fe039f8e8e29590e719d29dffe765ffc6074131ca22b353",
+          "current": "9c227f2c9e0e22195265653fade1abf3c1720e4947614c26b0275f63104b5818",
+          "exact": false
+        },
+        "frontend/technician-field-mode.html": {
+          "prepared": "9b211f0089838336a0457d10306ba0bde1cc36ce46a58dba31dd07a98c7ae8df",
+          "current": "c82293aa07310112b8be8a6b3167837d79b7093eed4fdafe400b14fc37703fa2",
+          "exact": false
+        },
+        "frontend/technician-field-mode.js": {
+          "prepared": "5c6d55b77245f9adfb419b8dab251738f50c6481b466b10ab5f5af0536f66149",
+          "current": "5c6d55b77245f9adfb419b8dab251738f50c6481b466b10ab5f5af0536f66149",
+          "exact": true
+        },
+        "scripts/test-field-suite.js": {
+          "prepared": "398a3fce2430c21771139da6f4c28d250bc1bc66121f0f43c3f6bd37bd1b32ee",
+          "current": "3cef920d41f4c35e43c35fab1db7c28a4c24c550491b6aea5b26e049d262e3ed",
+          "exact": false
+        },
+        "scripts/test-field-document-center-languages.js": {
+          "prepared": "3b0fddeea3cd4d65601c22e7489c31a070d99a0ea57bb8fdcad4cc2c980e0b47",
+          "current": "3b0fddeea3cd4d65601c22e7489c31a070d99a0ea57bb8fdcad4cc2c980e0b47",
+          "exact": true
+        }
+      },
+      "draftMemoryAttributePreserved": true,
+      "draftMemoryRegressionPreserved": true,
+      "cache": 250,
+      "groups": 363,
+      "historicalEvidence": "Original prepared tests retain original run IDs/timings; QA directory was renamed from469 to470 before priority fix. Original prepared gates/preservation/transforms backed up."
+    }
+  },
+  "integration": [
+    {
+      "script": "test-field-document-center-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20118,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-draft-navigation-memory.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2320,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-document-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 6214,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-document-summary-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 27231,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14893,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-visit-validation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19871,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823"
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16845,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773840980"
+    }
+  ],
+  "environmentFailureAndRecovery": [
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 391,
+      "timedOut": false,
+      "evidence": "qa-task470/run-1790773730823",
+      "description": "Prisma/PGlite unexpected message from server during transportGuide.create fixture setup, before browser launch. No product or assertion change; identical test passed16845ms in a new isolated PGlite instance. Exact underlying socket cause unconfirmed."
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 41117,
+      "log": "/workspace/scratch/b364087eee9d/qa-task470/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7271,
+      "log": "/workspace/scratch/b364087eee9d/qa-task470/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 694,
+      "log": "/workspace/scratch/b364087eee9d/qa-task470/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "matrices": [
+    {
+      "label": "live",
+      "source": "centerLive",
+      "warning": null,
+      "widths": [
+        320,
+        390,
+        1440
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "blocked",
+      "source": "centerLive",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "provisional",
+      "source": "centerLive",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "missing-work",
+      "source": "centerLive",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "restored",
+      "source": "centerLive",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "mixed",
+      "source": "centerMixed",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "offline-cache",
+      "source": "centerCache",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "unavailable",
+      "source": "centerUnconfirmed",
+      "warning": "storedUnreadable",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "cache-recovered",
+      "source": "centerCache",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "quota-literal",
+      "source": "centerLive",
+      "warning": {
+        "key": "saveWarning",
+        "detail": "Os documentos guardados estão ilegíveis. Foram preservados. <b>{detail}</b>"
+      },
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "unconfirmed-save",
+      "source": "centerLive",
+      "warning": {
+        "key": "saveWarning",
+        "detailKey": "saveUnconfirmed"
+      },
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "missing-locks",
+      "source": "centerLive",
+      "warning": {
+        "key": "saveWarning",
+        "detailKey": "locksUnavailable"
+      },
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "denied",
+      "source": "centerUnconfirmed",
+      "warning": "accessDenied",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "foreign-copy",
+      "source": "centerUnconfirmed",
+      "warning": "storedContext",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "old-access-rules",
+      "source": "centerUnconfirmed",
+      "warning": "storedAccessRules",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "typed-extra",
+      "source": "centerCache",
+      "warning": null,
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    }
+  ],
+  "localeChecks": 90,
+  "coverage": [
+    "Actual five-language selector on live overview at320/390/1440 and15 further states at320. Six document states, source, blockers, source timestamps, locally owned warnings and refresh feedback verified.",
+    "Real SQL fixtures produce expired insurance, pending inspection, provisional/missing work guides and recovery; operational classifiers/dates unchanged.",
+    "Mixed503 source retains original cached work timestamp; real service-worker offline reload preserves exact source bytes. Malformed/foreign/old-access-rule bytes are retained and never falsely accepted. Real save exceptions, no-op persistence and missing navigator.locks produce warnings.403 keeps local originals.",
+    "Private immutable snapshots leave Error.message/result.warning, own keys and JSON serialization unchanged. Cloned results, changed raw warning text and forged descriptors are rejected. An external error with the same Portuguese wording and HTML-looking suffix stays literal inside the translated save prefix.",
+    "Each locale matrix preserves center nodes/handler/focus, form values, status classes, provenance/timestamps, identities/tokens, full operational storage, outbox and SQL rows. Document/reminder/photo/route producers do not run because of language changes. Only expected language-preference PUTs occur; user-alias language metadata intentionally changes.",
+    "Same numeric REGULAR/EXTRA id has distinct pool/type/notes, including offline navigation. Original session guard callback refuses a changed session without HTTP or loss of old source bytes.",
+    "TASK469 managed-form attribute and deterministic regression retained and passed on the integrated feature. No new operational API writes or page errors; scenario110s, locators9s, runner120s, outer90min and active one-second guard retained.",
+    "Document recovery, summary, guide-read scope, crew card and visit-validation integrations pass. Crew test had an earlier PGlite protocol failure in fixture preparation; identical code passes in a fresh instance. Full native PostgreSQL16 gate remains required.",
+    "German320px live, blocked, raw quota warning and unavailable screenshots reviewed on the prepared identical presentation sources; no CSS changes. Blocked capture includes a transient outside toast overlap; other captures clean. Width assertions remain for all matrices."
+  ],
+  "preservation": {
+    "base": "bc2702b3e465e7dc579d43e1975a8a734b2fdbb9",
+    "sources": {
+      "frontend/cw-field-documents.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "994e546ae3d700ca809802b59f951849c0faca54ad7d336e34c92616b0df1a9d"
+      },
+      "frontend/technician-field-mode.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "cbc293fc8eb13bcf5bde5de6ee43f7600ffadbd7e1bdde7e34804811e390c007"
+      },
+      "frontend/technician-field-mode.html": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "1154410a7291ed65669308cd37edd3b4dde848e46e56798d0e414c6792670755"
+      },
+      "frontend/sw.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "38b8b99f77b2660c8fe039f8e8e29590e719d29dffe765ffc6074131ca22b353"
+      }
+    },
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "renderList": "094fdcb010e8631720e90854264b4b63e442e412cfdba8a11c81eca564b86ed5",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5",
+      "openAssistVisit": "1e51a1133089112bc202d92ac95a054909a3399b1235b31ab334a6b7fe2c1d2c",
+      "loadAssistOptions": "93e4676ad06eed6fab4b6fdaef40d53e5d02caa68930d8c64ddd00fe47ceb272",
+      "computeDocsCompliance": "14c85f19c3bfb50df113dfb2ebf39245bb0897a6f86aa111737a27309995e780",
+      "persistModernRoute": "65faa325b7f690a0252412123b7af59d0abc4a02218e1d76188cbf0313a4a42d",
+      "mergeVisitSnapshot": "88e14c9c1dd72ccae80c8928daaeb78199a5472e2c0cd1ccf7ce31fb32217fc7",
+      "savedVisitDraft": "3d7c1480e76fbd08b2fae3451a305ce871ed301986bd7a6f0b5796b426be6681",
+      "saveCurrentDraft": "60d8216a6b6186571fc521d84efeecd3cb3a0467724de0143901b689e4137ed7",
+      "syncPendingPhotos": "a720bc001b2e019ddeb90e4e8f53d46accf2f06842eb8f80376142f12ad41429",
+      "setTileTone": "b9221e9d6d10ec4af57199b5fd3c7257aca5d4c23232c91d5bf12d9d566b6c39",
+      "guideHasTransportReference": "12a314c88b4bf9255a674b6eed5db7cdc77f93527d8098f395f8ec9c9668e18e",
+      "parseDateSafe": "9ac572d62cfa28487007055e4b70e922af82b65814dfdf530a8e18a465f51bd7",
+      "firstDocDate": "92565b5050f014a9ee9232c2f583af9978dc0367aeba46be17266d2c7bc1faed",
+      "normalizeDocStatus": "3f2e26ac24cf7b16c0a96113714bcd9a436c4c0abbbb3a20f0def561986b035e",
+      "paintDocumentText": "887994c53da537617128832030acfb1779eb68f8d860579c6723fc2afdcb167b",
+      "renderCorrectionSummary": "f596da9f01bc140a37b39b7f2b715380e1124e986411b70aa58b5dff89e5a30b",
+      "productsLabel": "31b9eab144f4e5b9eb49875252d917ac8e36728394cd742e527e479d0e3752c7",
+      "doneChecksLabel": "db7b1d7ecd0db127362b08bba63703fb1d763aac947e4596ef6b8e171780ca24",
+      "setCrewDocStatus": "d675745d75876931e5e767717aae49b394dfce08c31b3eed793f9ff71f4e9826",
+      "setCrewDocState": "a9bbbfd9c482ff23b6a2e36402fd1ad945e71ddedc276d011fb6519d39bba9f0",
+      "renderDocumentSection": "b8d81b5136efb90e094dac72d4031ec7a8d7ad64ec709687737a0ca65ae9a756",
+      "renderTransportGuide": "367ddc559b41099f4e26d95e082d35f48504f917df6239a7dc71a1171a68d122",
+      "renderWorkGuide": "46e5310562b68567479f1c19a531249e89ef180c54699cd145313113c6a7a696",
+      "renderInsurance": "975faf08862bfe0fb4a0912f04f8c21a478bd94d80374c8cd182d5afd2974cfd",
+      "waterPresentation": "577bba599e55944b794d4a7b70567a07d3c2c250d35d017ebc91ef0cf7584ce3",
+      "visitActionHandlers": "9515f5409b713337aa326580dccf8b6e001b076cf052795c3ab8514516e32e9e",
+      "crewCard": "0f07d56616a33e041a317495d74663264a8041d3c376a1ae97cedd20b4feafd7"
+    },
+    "previousCatalogueEntries": 241,
+    "addedMainCatalogueEntries": 20,
+    "totalMainCatalogueEntries": 261,
+    "addedDocumentErrorEntries": 14,
+    "previousCatalogueUnchanged": true,
+    "originalDocumentErrorMessagesRetained": true,
+    "previousGroups": 362,
+    "newGroups": 363,
+    "priorExactOrderPreserved": true,
+    "limits": "Only document overview/provenance/warning presentation changes. Scope, validation, HTTP, cache write/read and merge rules remain equivalent after reversing documented presentation-only transforms. Raw Error.message/result.warning preserved; warning snapshots are private and immutable. Guide/insurance bodies and shared navigation remain outside this batch. Product-input rerender on locale remains existing behavior."
+  },
+  "visual": [
+    {
+      "path": "qa-task470/center-de-320-live.png",
+      "sha256": "f6511c2696e0158dc41fd2703ac72ee3dfa3d34a3cbdeb9a8df34e208266f326"
+    },
+    {
+      "path": "qa-task470/center-de-320-blocked.png",
+      "sha256": "9cb48a215d9f99f35abed0d9e6594800c9de814a2b2bd08c8f5e840df2322311"
+    },
+    {
+      "path": "qa-task470/center-de-320-quota-literal.png",
+      "sha256": "cbc3cccf4c938894b0c5d1a71be2818c380d09248db82ecb6dede2a0b1e68e5e"
+    },
+    {
+      "path": "qa-task470/center-de-320-unavailable.png",
+      "sha256": "54bb6168bd39e69a7d0e586589a65aad9bf2a458338573543681ac883384e9c2"
+    }
+  ],
+  "reviewedOnly": [
+    "Rare scope and response-header errors, legacy v1 warning, initial fallback labels and valid optional safety/manual arrays are source-reviewed, not all driven through real UI. Current owned guide projection does not supply optional safety/manual arrays.",
+    "Existing language listener still recreates product inputs; values are stable, node-stability claims cover document overview only."
+  ],
+  "sourceSha256": {
+    "frontend/cw-field-documents.js": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+    "frontend/technician-field-mode.js": "5c6d55b77245f9adfb419b8dab251738f50c6481b466b10ab5f5af0536f66149",
+    "frontend/technician-field-mode.html": "c82293aa07310112b8be8a6b3167837d79b7093eed4fdafe400b14fc37703fa2",
+    "frontend/sw.js": "9c227f2c9e0e22195265653fade1abf3c1720e4947614c26b0275f63104b5818",
+    "scripts/test-field-document-center-languages.js": "3b0fddeea3cd4d65601c22e7489c31a070d99a0ea57bb8fdcad4cc2c980e0b47",
+    "scripts/test-field-suite.js": "3cef920d41f4c35e43c35fab1db7c28a4c24c550491b6aea5b26e049d262e3ed"
+  },
+  "cache": 250,
+  "runner": {
+    "before": 362,
+    "after": 363,
+    "previousExactOrderPreserved": true,
+    "perScriptDeadlineMs": 120000,
+    "workflowBudgetMinutes": 90
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeIncomplete465": {
+    "task": 465,
+    "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+    "run": 36708004453,
+    "job": 109862765829,
+    "sourceSha256": {
+      "scripts/test-field-round-list-languages.js": "5854ff6bed839203d851f88633513d36ffb7f5aa44617863a1ce592bdc4d81f6",
+      "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf",
+      "scripts/test-field-photo-panel-languages.js": "d2665fd9e0126bff0eca8b4f4d215d8ccb66f4ff20f54a4f9104a8b8bc4af37a"
+    },
+    "gitBlobs": {
+      "scripts/test-field-round-list-languages.js": "330dc2d9deed0b468f52c19f989c8292659184c3",
+      "scripts/test-field-suite.js": "addbbb3efb02cf97820d3c8a36bf587f2ce0e614",
+      "scripts/test-field-photo-panel-languages.js": "dd9654f8484eeb921a5e2437159d3c3a96eaf06d"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 359,
+    "completedGroups": 347,
+    "passedGroups": 345,
+    "failedGroups": [
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14642
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14775
+      }
+    ],
+    "missingGroups": [
+      "test-field-repair-revenue.js",
+      "test-field-repair-execution.js",
+      "test-field-repair-execution-revenue.js",
+      "test-field-repair-execution-command.js",
+      "test-field-repair-no-materials.js",
+      "test-field-repair-execution-ui.js",
+      "test-field-visit-report-origin.js",
+      "test-field-product-identity.js",
+      "test-field-product-identity-ui.js",
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:21:08Z",
+    "updatedAt": "2026-09-30T12:31:37Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467
+    },
+    "remainingInvestigation": [],
+    "logSha256": "f0b68a13825e7ec64d6e63a95b1f270aa04fea5fc3d8a36c64c79fa68bff269c"
+  },
+  "nativeIncomplete466": {
+    "task": 466,
+    "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+    "run": 36708610951,
+    "job": 109864746875,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920",
+      "scripts/test-field-visit-validation-languages.js": "5eaa67086dbea6146a164256763281dbf8e86bd2c47549174af599373aeab2b7",
+      "frontend/sw.js": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "frontend/cw-field-visit-drafts.js": "5d375c49e1486ece9a8aba25cfbaee8c6e5c6810883a5345710de9e641a91744",
+      "frontend/cw-visit-product-identity.js": "d1bb5522aa207cc75675d2adf6375ab3bc88f392e48acbd49c66662bb11071da"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "ed57622024992d24c36ce9df6f4092283e45c42c",
+      "scripts/test-field-visit-validation-languages.js": "2aeacee1943f369eb0d9f2b6c90fcd1c14f74983",
+      "frontend/sw.js": "500c118d4c60b9a01246ee4f89415caca43dbe88",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "frontend/cw-field-visit-drafts.js": "0bdfde3d0a1085c2452e8c0bc2ad9aafefa98f7c",
+      "frontend/cw-visit-product-identity.js": "7260cfdb9355ba8252a3590fa6992b6ed9f8dff9"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 360,
+    "completedGroups": 357,
+    "passedGroups": 353,
+    "failedGroups": [
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 23807
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 18496
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14546
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14798
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:27:03Z",
+    "updatedAt": "2026-09-30T12:37:40Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-water-panel-languages.js": 467,
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467,
+      "test-field-round-navigation-languages.js": 469
+    },
+    "remainingInvestigation": [],
+    "logSha256": "40f2e4e82a8040139db994bdc063d3c3bdf359c1d6dde7452a184aab21341896",
+    "repair469NativeAcceptance": "pending"
+  },
+  "previousNativeAcceptance": {
+    "task": 467,
+    "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+    "run": 36710186213,
+    "job": 109869850165,
+    "sourceSha256": {
+      ".github/workflows/field-readiness.yml": "c96037b58679aa58ea85759b31124104b9da596722d52f60910550c9822a4d83",
+      "scripts/test-field-water-panel-languages.js": "d29631bbb16044c530f7083e71239d9dc7d0062bcdd255f20118fc3a9be4dc70",
+      "scripts/test-field-vehicle-assignment-ui.js": "fbd027a12eaad159c797ad4b50802e22e842b87cdc4ea38108d36f77cfdce183",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "scripts/test-field-visit-briefing.js": "45649e8e32354fe862989c3d00f09ddb8d0d2146e50e6332ac53a694b0372a0d"
+    },
+    "gitBlobs": {
+      ".github/workflows/field-readiness.yml": "95a13c10f3147a71158e0385b6f549d0134792ec",
+      "scripts/test-field-water-panel-languages.js": "a8cc24896c9675fb7d133f2c0c11c10dc814c20d",
+      "scripts/test-field-vehicle-assignment-ui.js": "aa555346e2e1334ab7bb475fffb57b895029930b",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "scripts/test-field-visit-briefing.js": "de07c953a3dcf31891062857c6f4ce706245eb00"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 360,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T11:42:26Z",
+    "updatedAt": "2026-09-30T12:55:23Z",
+    "sourceSha256Verified": true
+  },
+  "pendingNative": [
+    {
+      "task": 468,
+      "job": 109884485856,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+      "run": 36714652539,
+      "fullSuiteGroups": 361,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 469,
+      "job": 109899721783,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "ac625a05c14b4ffea16dfdf24baab21601529690",
+      "run": 36719222682,
+      "fullSuiteGroups": 362,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 470,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 363,
+      "workflowBudgetMinutes": 90,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Require exact363 groups/restore470 and362/restore469; inspect468. Remaining document guide/insurance bodies, PDF buttons, day/vehicle-change notices, correction summary and shared push/auth/navigation remain open."
+  }
+}
