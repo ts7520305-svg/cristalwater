@@ -426,6 +426,8 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "routeSessionChanged": ["A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.","The session changed. Saved data has been preserved. Reopen field mode with the current account.","La session a changé. Les données enregistrées ont été conservées. Rouvrez le mode terrain avec le compte actuel.","La sesión ha cambiado. Se han conservado los datos guardados. Vuelve a abrir el modo de campo con la cuenta actual.","Die Sitzung hat sich geändert. Gespeicherte Daten bleiben erhalten. Öffnen Sie den Außendienstmodus erneut mit dem aktuellen Konto."],
+  "routeSessionReopen": ["Reabrir modo de campo","Reopen field mode","Rouvrir le mode terrain","Volver a abrir el modo de campo","Außendienstmodus erneut öffnen"],
   "correctionSaved": ["Registo guardado", "Saved record", "Enregistrement sauvegardé", "Registro guardado", "Gespeicherter Eintrag"],
   "correctionHelp": ["Esta visita já foi feita. Pode ajustar e guardar correção.", "This visit is complete. You can adjust it and save a correction.", "Cette visite est terminée. Vous pouvez la modifier et enregistrer une correction.", "Esta visita ya se ha realizado. Puedes ajustarla y guardar una corrección.", "Dieser Besuch ist abgeschlossen. Sie können ihn anpassen und eine Korrektur speichern."],
   "correctionDone": ["Feita", "Completed", "Terminée", "Completada", "Abgeschlossen"],
@@ -5727,8 +5729,8 @@
       routeSessionBlocked = true; ++routeRevision; visits = []; index = 0; routeConfirmedAt = null; routeSnapshot = null;
       const main = document.querySelector('main.field'); main.inert = true; main.style.setProperty('display', 'none', 'important');
       const banner = document.createElement('section'); banner.id = 'fieldRouteSessionChanged'; banner.setAttribute('role', 'alert'); banner.style.cssText = 'padding:20px;background:#fff4ce;color:#624400';
-      const text = document.createElement('p'); text.textContent = 'A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.';
-      const link = document.createElement('a'); link.href = '/technician-field-mode'; link.textContent = 'Reabrir modo de campo'; banner.append(text, link); document.body.prepend(banner);
+      const text = document.createElement('p'); alertUi.bind(text, alertUi.value('routeSessionChanged'));
+      const link = document.createElement('a'); link.href = '/technician-field-mode'; alertUi.bind(link, alertUi.value('routeSessionReopen')); banner.append(text, link); document.body.prepend(banner);
     } else if (routeContext && routeContext.day !== window.CWFieldRouteCache.today()) {
       ++routeRevision; visits = []; index = 0; routeConfirmedAt = null; routeSnapshot = null; routeContext = null;
       loadCurrentDraft(); render(); void load();
