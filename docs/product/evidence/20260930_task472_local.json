@@ -1,0 +1,617 @@
+{
+  "task": 472,
+  "date": "2026-09-30",
+  "base": "21c61160689249150f7686cdebe4ad33b7f2d61f",
+  "item": "C06-015",
+  "scope": {
+    "productSources": 3,
+    "testScripts": 2,
+    "documentationFiles": 4,
+    "batchFiles": 9,
+    "description": "Translate owned transport/work/insurance card bodies, metadata labels, missing-state guidance, date presentation, initial placeholders and PDF/action captions. Preserve original file/PDF content and protected URLs."
+  },
+  "catalogue": {
+    "entries": 40,
+    "texts": 200,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "reusedEntries": 3,
+    "previousMainEntries": 263,
+    "totalMainEntries": 303,
+    "previousEntriesUnchanged": true
+  },
+  "negative": {
+    "evidence": "qa-task472/run-1790777396815",
+    "results": [
+      {
+        "script": "test-field-document-body-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1495,
+        "timedOut": false
+      }
+    ],
+    "description": "Pre-change browser failed1495ms on original Portuguese Tecnico/Inicio labels versus corrected accented owned text, before later languages."
+  },
+  "preliminary": {
+    "evidence": "qa-task472/run-1790777531064",
+    "results": [
+      {
+        "script": "test-field-document-body-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13624,
+        "timedOut": false
+      }
+    ],
+    "notFinalAcceptance": "First broad scenario passed but review showed the insurance fixture still matched the real classifier through its title. Final test removes all insurance cues only from the synthetic record and asserts actual absent payloads and source states. Refresh now waits for the original load promise to finish, not merely to start. No product classifier, guard, assertion or deadline was relaxed."
+  },
+  "integration": [
+    {
+      "script": "test-field-document-body-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19943,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777758508"
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 24634,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777613153"
+    },
+    {
+      "script": "test-field-document-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 7032,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777613153"
+    },
+    {
+      "script": "test-field-guide-pdf.js",
+      "code": 0,
+      "signal": null,
+      "ms": 1396,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777613153"
+    },
+    {
+      "script": "test-field-document-transition-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14289,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777798197"
+    }
+  ],
+  "environmentFailureAndRecovery": [
+    {
+      "script": "test-field-document-transition-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 478,
+      "timedOut": false,
+      "evidence": "qa-task472/run-1790777613153",
+      "description": "Prisma/PGlite unexpected server message during transportGuide fixture creation, before browser launch. Same unchanged transition test passes14289ms in a new isolated instance. Exact socket cause unconfirmed."
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 42842,
+      "log": "/workspace/scratch/b364087eee9d/qa-task472/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7646,
+      "log": "/workspace/scratch/b364087eee9d/qa-task472/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 723,
+      "log": "/workspace/scratch/b364087eee9d/qa-task472/gate-technician.log"
+    }
+  ],
+  "gateScope": "Gates ran on the final identical product sources. Subsequent changes affected only the new integration test; final test syntax and complete strengthened scenario rerun successfully.",
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "matrices": [
+    {
+      "label": "live",
+      "widths": [
+        320,
+        390,
+        1440
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "official",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "provisional",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "missing",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "fallbacks",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "mixed",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "offline",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "denied",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    },
+    {
+      "label": "typed-extra",
+      "widths": [
+        320
+      ],
+      "languages": [
+        "pt",
+        "en",
+        "fr",
+        "es",
+        "de"
+      ]
+    }
+  ],
+  "localeChecks": 55,
+  "coverage": [
+    "Actual selector in five languages, live at320/390/1440 and eight further states at320:official file, provisional guide, missing work/insurance, empty optional fields, mixed503, offline cache,403 denial and typed EXTRA. Each state asserts its actual source markers; provisional/missing/fallback fixtures assert exact projected payloads.",
+    "All displayed metadata derives from real scoped cached sections. Original names, codes, plate, origin, destination, title, notes, file name, status values and HTML-looking text remain literal. Zero quantities retained; no injected b/img nodes. Owned fallback phrases and labels translate.",
+    "Private body-date descriptors preserve the original short date/time precision and default browser time zone. Only locale changes; raw timestamps, date parsing conditions, classifiers and C10 rules stay unchanged.",
+    "The real authenticated download handler opens three PDFs at the expected record URLs and downloads the official inert text attachment byte-for-byte. Authorization headers are present. URL, target, rel and authentication attributes remain stable across language changes. Existing PDF authorization/content regression also passes.",
+    "Locale matrices retain card nodes, refresh handler/focus, values, disabled actions, sources/timestamps, raw operational storage, complete outbox and SQL rows. No document loads on locale change. Only expected language-preference PUTs; no operational API writes or page errors.",
+    "REGULAR/EXTRA with equal numeric id have separate pools and notes. Source cache survives real offline reload.403 removes document links without deleting cached originals. Document recovery and day/vehicle transition regressions pass on the integrated product.",
+    "German320px metadata, missing insurance and action captions reviewed; no CSS change. Long work-card screenshots contain the shared sticky navigation overlay at different positions; complementary captures show its metadata and final actions. Capture-only viewport height was increased after waiting for the transient toast, without changing product styles.",
+    "Scenario110s, locators9s, runner120s and workflow90min unchanged. One-second guard active; only periodic15/30/60s disabled by fixture."
+  ],
+  "preservation": {
+    "base": "21c61160689249150f7686cdebe4ad33b7f2d61f",
+    "exactReversal": {
+      "frontend/technician-field-mode.js": "4d718d8424d977a263e0d25edba5cf6bac049cfaa5271efa71c01565376c1e78",
+      "frontend/technician-field-mode.html": "c82293aa07310112b8be8a6b3167837d79b7093eed4fdafe400b14fc37703fa2",
+      "frontend/sw.js": "5310dd34db1db98ae9536b83505a8cce76b6b3aeab695d110dec8659799735cb"
+    },
+    "unchangedFunctionSha256": {
+      "formatDate": "c5c56de1913e52a7c65fd0a3f6750ffd2920c69a9f6b4bc816ee3997c8c05c43",
+      "loadGuides": "fed4c45361add6ae9435877eb103eb81435ad537c45aa883e736bf0671277fbc",
+      "clearFieldDocuments": "37d6701c57aa8fa789ca3015a0ff6c3db4d5def0befb56d4099d0ad3f41c8beb",
+      "protectFieldRouteSession": "72479694501a232ba500256e00e7b01b1fd6807c1893d70d7714f2c9c6dd7a03",
+      "renderItems": "88294a32778ef288473eb3173e7ba81901cf80f30a6bd0948d9bd309d2ed8213",
+      "renderUsage": "c4b31d0b43f66025ef184ed6978f526275a68c917390b97854671253ceb3ffb9",
+      "renderMovements": "92aeb5dc2187fed3d577679731bb86b902e6305c657d08198b076119d8886627",
+      "renderStockSummary": "6d441e7385e7841b421661f486965837d4cfeeb41b06560d9fa842113999d014",
+      "movementNotesLabel": "5fa13c700d11d8bea1d05d1ed49ef1b0694b6be2efba77f8519d589297389c1a",
+      "renderCrewStatus": "23902777592e147f9c605fbc3ce23aafa59d8b117a0917caec03f25482bfc3a2",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "parseDateSafe": "9ac572d62cfa28487007055e4b70e922af82b65814dfdf530a8e18a465f51bd7",
+      "guideHasTransportReference": "12a314c88b4bf9255a674b6eed5db7cdc77f93527d8098f395f8ec9c9668e18e"
+    },
+    "unchangedSources": [
+      "frontend/cw-field-documents.js",
+      "frontend/cw-field-guide-projection.js",
+      "frontend/cw-field-document-copy.js",
+      "frontend/cw-auth-download.js",
+      "frontend/cw-field-visit-drafts.js",
+      "frontend/cw-field-route-cache.js",
+      "scripts/test-field-draft-navigation-memory.js"
+    ],
+    "previousCatalogueEntries": 263,
+    "newEntries": 40,
+    "totalCatalogueEntries": 303,
+    "previousEntriesUnchanged": true,
+    "previousGroups": 364,
+    "groups": 365,
+    "previousExactOrderPreserved": true,
+    "datePresentation": "New private body-date descriptors select only locale; original short date/time precision, default browser time zone, raw timestamps, fallback conditions and all operational date rules retained. Original formatDate helper unchanged."
+  },
+  "visual": [
+    {
+      "path": "qa-task472/body-de-320-official-transportGuideBox.png",
+      "sha256": "60a19f54994a33cb972f578c3a4295b74712d2b09702d966873bdcb8151f69fd"
+    },
+    {
+      "path": "qa-task472/body-checked-de-320-official-insuranceBox.png",
+      "sha256": "b20b8a110384ceb46f7b08f25220b2c2f51a5c25b3eda472c564510ebdab5a92"
+    },
+    {
+      "path": "qa-task472/body-checked-de-320-missing-insuranceBox.png",
+      "sha256": "57980815220b4f05cb36544169488796646e0265a1c7238e6b8d1e54c6438f15"
+    },
+    {
+      "path": "qa-task472/body-checked-de-320-official-workGuideBox.png",
+      "sha256": "c12de87c7913a8fb896b215d4ea4d067cf5e58da32260335d9c582a0032cd674"
+    },
+    {
+      "path": "qa-task472/body-de-320-official-workGuideBox.png",
+      "sha256": "985b1cfe0d7f290cec3862d0a6b3ec81f1337c90479ee42eb14b2dbce06705e4"
+    }
+  ],
+  "reviewedOnly": [
+    "Initial loading placeholders, missing positive record IDs/filename, malformed date and rare missing status/name fallbacks are source-reviewed where owned projections do not naturally supply those invalid or missing fields.",
+    "PDF and official file contents are retained unchanged; only their UI action captions translate. Raw stored status values such as ACTIVE/OPEN remain literal. The outer document toolbar and shared download error messages remain pending."
+  ],
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "43b1e79cf3f1ee551fdc01c84599943b1aa7e779cb992f9ab7c29dc6b8e823de",
+    "frontend/technician-field-mode.html": "4b513e3fc9713bdd0bf6cae70fc12f1b100e594e3019daa02f5fef339d6f2730",
+    "frontend/sw.js": "73692e42803d6e8159aaf7bbf643fba0838efeaee0d686b4decd46b686a26f34",
+    "scripts/test-field-document-body-languages.js": "8f6b50988c3c6b36a7e872341758dc6a39a8e99291ee8c49ba19d7074b11d27d",
+    "scripts/test-field-suite.js": "34bd5a9f8e7597575a5fab638e0000d23c7028370c78ab126377ebedcabee519"
+  },
+  "cache": 252,
+  "runner": {
+    "before": 364,
+    "after": 365,
+    "previousExactOrderPreserved": true,
+    "perScriptDeadlineMs": 120000,
+    "workflowBudgetMinutes": 90
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeIncomplete465": {
+    "task": 465,
+    "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+    "run": 36708004453,
+    "job": 109862765829,
+    "sourceSha256": {
+      "scripts/test-field-round-list-languages.js": "5854ff6bed839203d851f88633513d36ffb7f5aa44617863a1ce592bdc4d81f6",
+      "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf",
+      "scripts/test-field-photo-panel-languages.js": "d2665fd9e0126bff0eca8b4f4d215d8ccb66f4ff20f54a4f9104a8b8bc4af37a"
+    },
+    "gitBlobs": {
+      "scripts/test-field-round-list-languages.js": "330dc2d9deed0b468f52c19f989c8292659184c3",
+      "scripts/test-field-suite.js": "addbbb3efb02cf97820d3c8a36bf587f2ce0e614",
+      "scripts/test-field-photo-panel-languages.js": "dd9654f8484eeb921a5e2437159d3c3a96eaf06d"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 359,
+    "completedGroups": 347,
+    "passedGroups": 345,
+    "failedGroups": [
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14642
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14775
+      }
+    ],
+    "missingGroups": [
+      "test-field-repair-revenue.js",
+      "test-field-repair-execution.js",
+      "test-field-repair-execution-revenue.js",
+      "test-field-repair-execution-command.js",
+      "test-field-repair-no-materials.js",
+      "test-field-repair-execution-ui.js",
+      "test-field-visit-report-origin.js",
+      "test-field-product-identity.js",
+      "test-field-product-identity-ui.js",
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:21:08Z",
+    "updatedAt": "2026-09-30T12:31:37Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467
+    },
+    "remainingInvestigation": [],
+    "logSha256": "f0b68a13825e7ec64d6e63a95b1f270aa04fea5fc3d8a36c64c79fa68bff269c"
+  },
+  "nativeIncomplete466": {
+    "task": 466,
+    "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+    "run": 36708610951,
+    "job": 109864746875,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920",
+      "scripts/test-field-visit-validation-languages.js": "5eaa67086dbea6146a164256763281dbf8e86bd2c47549174af599373aeab2b7",
+      "frontend/sw.js": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "frontend/cw-field-visit-drafts.js": "5d375c49e1486ece9a8aba25cfbaee8c6e5c6810883a5345710de9e641a91744",
+      "frontend/cw-visit-product-identity.js": "d1bb5522aa207cc75675d2adf6375ab3bc88f392e48acbd49c66662bb11071da"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "ed57622024992d24c36ce9df6f4092283e45c42c",
+      "scripts/test-field-visit-validation-languages.js": "2aeacee1943f369eb0d9f2b6c90fcd1c14f74983",
+      "frontend/sw.js": "500c118d4c60b9a01246ee4f89415caca43dbe88",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "frontend/cw-field-visit-drafts.js": "0bdfde3d0a1085c2452e8c0bc2ad9aafefa98f7c",
+      "frontend/cw-visit-product-identity.js": "7260cfdb9355ba8252a3590fa6992b6ed9f8dff9"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 360,
+    "completedGroups": 357,
+    "passedGroups": 353,
+    "failedGroups": [
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 23807
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 18496
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14546
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14798
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:27:03Z",
+    "updatedAt": "2026-09-30T12:37:40Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-water-panel-languages.js": 467,
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467,
+      "test-field-round-navigation-languages.js": 469
+    },
+    "remainingInvestigation": [],
+    "logSha256": "40f2e4e82a8040139db994bdc063d3c3bdf359c1d6dde7452a184aab21341896",
+    "repair469NativeAcceptance": "success:362 exact groups and128-table/51-file restore; rows/hashes match"
+  },
+  "nativeAcceptance468": {
+    "task": 468,
+    "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+    "run": 36714652539,
+    "job": 109884485856,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "cbc293fc8eb13bcf5bde5de6ee43f7600ffadbd7e1bdde7e34804811e390c007",
+      "frontend/technician-field-mode.html": "72b9440f96593b663de4a453de5a063ecab3a8e2f0ce70302a2d3cfa00368472",
+      "frontend/sw.js": "6b95ab64c5f38ec106227186f1c4a361f02d23c1d9446d2b72e30891a2269ff9",
+      "scripts/test-field-crew-status-languages.js": "467260a51a812acc0e67b66e4965607cd1cc000f9793636fc4b2080d9d26d6ad",
+      "scripts/test-field-suite.js": "1b94d16458e297c6b703365477d6d32bc05679a62a2218fc6f2e6a2668f4fafe"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "cee24393fae052230dc336bdaf74beb1448536f8",
+      "frontend/technician-field-mode.html": "68320c76e96e24b8d71660716d56062d29776e3d",
+      "frontend/sw.js": "a88f72502a6db198b3e2fafa28e22665f1249160",
+      "scripts/test-field-crew-status-languages.js": "2b981b3997b39cdc88187aa51e8234f4d9154fdd",
+      "scripts/test-field-suite.js": "33390e9d261ad5c387a6e13df5ce90a408e22f2b"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 361,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T12:25:41Z",
+    "updatedAt": "2026-09-30T13:37:45Z",
+    "sourceSha256Verified": true
+  },
+  "previousNativeAcceptance": {
+    "task": 469,
+    "code": "ac625a05c14b4ffea16dfdf24baab21601529690",
+    "run": 36719222682,
+    "job": 109899721783,
+    "sourceSha256": {
+      "frontend/technician-field-mode.html": "1154410a7291ed65669308cd37edd3b4dde848e46e56798d0e414c6792670755",
+      "frontend/sw.js": "38b8b99f77b2660c8fe039f8e8e29590e719d29dffe765ffc6074131ca22b353",
+      "scripts/test-field-draft-navigation-memory.js": "a7ac8cb47cb0e9724c14c505340dc84433419f92e7ce97295d98bbe051971765",
+      "scripts/test-field-suite.js": "26a9aa1e4c35f1854db97dae18ec604c18ba6242b5ec4618ce3e8970a3045e00"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.html": "b3e78aef87c66df2dca862be37952daca24a2be3",
+      "frontend/sw.js": "fe5cb42427363b9beeb2749d8995d10e60a9cdc0",
+      "scripts/test-field-draft-navigation-memory.js": "eaac98fad027700b7aaa6b6b28a55e7724ab1200",
+      "scripts/test-field-suite.js": "caf1e63e65d4376e44635f224f2e75b0f2f4e04c"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 362,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T13:06:01Z",
+    "updatedAt": "2026-09-30T14:12:19Z",
+    "sourceSha256Verified": true
+  },
+  "pendingNative": [
+    {
+      "task": 470,
+      "job": 109902864721,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+      "run": 36720143535,
+      "fullSuiteGroups": 363,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 471,
+      "job": 109912294469,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
+      "run": 36722902396,
+      "fullSuiteGroups": 364,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 472,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 365,
+      "workflowBudgetMinutes": 90,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Require exact365 groups/restore472; inspect470/471. Next:outer document toolbar, correction summary and shared download/push/auth/navigation text. No whole-page translation claim."
+  }
+}

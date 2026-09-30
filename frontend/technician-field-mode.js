@@ -426,6 +426,286 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "bodyMissing": [
+    "Em falta",
+    "Missing",
+    "Manquant",
+    "Falta",
+    "Fehlt"
+  ],
+  "bodyTransportEmpty": [
+    "Sem guia de transporte ativa",
+    "No active transport guide",
+    "Aucun document de transport actif",
+    "Sin guía de transporte activa",
+    "Kein aktives Transportdokument"
+  ],
+  "bodyTransportHelp": [
+    "Pode iniciar o serviço em modo provisório. O administrador fica com alerta para associar a guia AT assim que estiver disponível.",
+    "You can start work provisionally. The administrator is alerted to link the AT guide when available.",
+    "Vous pouvez commencer l’intervention à titre provisoire. L’administrateur est averti pour associer le document AT dès qu’il est disponible.",
+    "Puedes iniciar el servicio de forma provisional. El administrador recibe un aviso para asociar la guía AT cuando esté disponible.",
+    "Sie können die Arbeit vorläufig beginnen. Die Verwaltung wird benachrichtigt, das AT-Dokument zuzuordnen, sobald es verfügbar ist."
+  ],
+  "bodyGuideNumber": [
+    "Guia #{id}",
+    "Guide #{id}",
+    "Document nº {id}",
+    "Guía n.º {id}",
+    "Dokument Nr. {id}"
+  ],
+  "bodyCompany": [
+    "Empresa: {value}",
+    "Company: {value}",
+    "Entreprise : {value}",
+    "Empresa: {value}",
+    "Unternehmen: {value}"
+  ],
+  "bodyVehicle": [
+    "Viatura: {value}",
+    "Vehicle: {value}",
+    "Véhicule : {value}",
+    "Vehículo: {value}",
+    "Fahrzeug: {value}"
+  ],
+  "bodyUnspecified": [
+    "Não indicado",
+    "Not specified",
+    "Non indiqué",
+    "No indicado",
+    "Nicht angegeben"
+  ],
+  "bodyOrigin": [
+    "Origem: {value}",
+    "Origin: {value}",
+    "Origine : {value}",
+    "Origen: {value}",
+    "Ausgangspunkt: {value}"
+  ],
+  "bodyWarehouse": [
+    "Armazém Cristal Water",
+    "Cristal Water warehouse",
+    "Entrepôt Cristal Water",
+    "Almacén Cristal Water",
+    "Lager Cristal Water"
+  ],
+  "bodyDestination": [
+    "Destino: {value}",
+    "Destination: {value}",
+    "Destination : {value}",
+    "Destino: {value}",
+    "Ziel: {value}"
+  ],
+  "bodyRouteClients": [
+    "Clientes em rota",
+    "Clients on the route",
+    "Clients de la tournée",
+    "Clientes de la ruta",
+    "Kunden auf der Route"
+  ],
+  "bodyValidityRange": [
+    "Validade: {from} - {until}",
+    "Validity: {from} - {until}",
+    "Validité : {from} - {until}",
+    "Validez: {from} - {until}",
+    "Gültigkeit: {from} - {until}"
+  ],
+  "bodyOfficialFile": [
+    "Ficheiro AT oficial: {value}",
+    "Official AT file: {value}",
+    "Fichier AT officiel : {value}",
+    "Archivo AT oficial: {value}",
+    "Offizielle AT-Datei: {value}"
+  ],
+  "bodyDocument": [
+    "documento",
+    "document",
+    "document",
+    "documento",
+    "Dokument"
+  ],
+  "bodyOfficialMissing": [
+    "Ficheiro AT oficial: por anexar pelo administrador",
+    "Official AT file: awaiting attachment by the administrator",
+    "Fichier AT officiel : à joindre par l’administrateur",
+    "Archivo AT oficial: pendiente de adjuntar por el administrador",
+    "Offizielle AT-Datei: von der Verwaltung noch anzuhängen"
+  ],
+  "bodyOpenOfficial": [
+    "Abrir guia AT oficial",
+    "Open official AT guide",
+    "Ouvrir le document AT officiel",
+    "Abrir guía AT oficial",
+    "Offizielles AT-Dokument öffnen"
+  ],
+  "bodyOpenGenerated": [
+    "Abrir PDF guia AT gerado",
+    "Open generated AT guide PDF",
+    "Ouvrir le PDF AT généré",
+    "Abrir PDF generado de la guía AT",
+    "Erzeugtes AT-Dokument als PDF öffnen"
+  ],
+  "bodyOpenTransport": [
+    "Abrir PDF guia AT",
+    "Open AT guide PDF",
+    "Ouvrir le PDF du document AT",
+    "Abrir PDF de la guía AT",
+    "AT-Dokument als PDF öffnen"
+  ],
+  "bodyWorkEmpty": [
+    "Sem guia de obra aberta",
+    "No open work guide",
+    "Aucun bon de travail ouvert",
+    "Sin guía de trabajo abierta",
+    "Kein offenes Arbeitsdokument"
+  ],
+  "bodyWorkHelp": [
+    "Abra a gestão de guias para iniciar uma guia de trabalho ligada à viatura.",
+    "Open guide management to start a work guide linked to the vehicle.",
+    "Ouvrez la gestion des documents pour créer un bon de travail lié au véhicule.",
+    "Abre la gestión de guías para iniciar una guía de trabajo vinculada al vehículo.",
+    "Öffnen Sie die Dokumentverwaltung, um ein Arbeitsdokument für das Fahrzeug anzulegen."
+  ],
+  "bodyWorkNumber": [
+    "Obra #{id}",
+    "Work #{id}",
+    "Travail nº {id}",
+    "Trabajo n.º {id}",
+    "Arbeit Nr. {id}"
+  ],
+  "bodyTechnician": [
+    "Técnico: {value}",
+    "Technician: {value}",
+    "Technicien : {value}",
+    "Técnico: {value}",
+    "Techniker: {value}"
+  ],
+  "bodyLinkedGuide": [
+    "Guia AT associada: {value}",
+    "Linked AT guide: {value}",
+    "Document AT associé : {value}",
+    "Guía AT asociada: {value}",
+    "Zugeordnetes AT-Dokument: {value}"
+  ],
+  "bodyLinkLater": [
+    "AT em falta - associar mais tarde",
+    "AT missing - link later",
+    "AT manquant - à associer plus tard",
+    "Falta AT - asociar más adelante",
+    "AT fehlt - später zuordnen"
+  ],
+  "bodyStarted": [
+    "Início: {value}",
+    "Started: {value}",
+    "Début : {value}",
+    "Inicio: {value}",
+    "Beginn: {value}"
+  ],
+  "bodyOpenWork": [
+    "Abrir PDF guia de obra",
+    "Open work guide PDF",
+    "Ouvrir le PDF du bon de travail",
+    "Abrir PDF de la guía de trabajo",
+    "Arbeitsdokument als PDF öffnen"
+  ],
+  "bodyReviewClose": [
+    "Rever fecho da guia",
+    "Review guide closure",
+    "Vérifier la clôture du document",
+    "Revisar el cierre de la guía",
+    "Dokumentabschluss prüfen"
+  ],
+  "bodyPending": [
+    "Por validar",
+    "Awaiting validation",
+    "À valider",
+    "Por validar",
+    "Noch zu prüfen"
+  ],
+  "bodyInsuranceVehicle": [
+    "Seguro da viatura",
+    "Vehicle insurance",
+    "Assurance du véhicule",
+    "Seguro del vehículo",
+    "Fahrzeugversicherung"
+  ],
+  "bodyPlate": [
+    "Matrícula: {value}",
+    "Registration: {value}",
+    "Immatriculation : {value}",
+    "Matrícula: {value}",
+    "Kennzeichen: {value}"
+  ],
+  "bodyInsuranceEmpty": [
+    "Sem seguro registado na ficha da viatura.",
+    "No insurance recorded for this vehicle.",
+    "Aucune assurance enregistrée pour ce véhicule.",
+    "No hay seguro registrado para este vehículo.",
+    "Für dieses Fahrzeug ist keine Versicherung erfasst."
+  ],
+  "bodyOpenInsuranceSheet": [
+    "Abrir ficha do seguro",
+    "Open insurance record",
+    "Ouvrir la fiche d’assurance",
+    "Abrir ficha del seguro",
+    "Versicherungsnachweis öffnen"
+  ],
+  "bodyActive": [
+    "Ativo",
+    "Active",
+    "Actif",
+    "Activo",
+    "Aktiv"
+  ],
+  "bodyValidity": [
+    "Validade: {value}",
+    "Validity: {value}",
+    "Validité : {value}",
+    "Validez: {value}",
+    "Gültigkeit: {value}"
+  ],
+  "bodyRegistered": [
+    "Documento registado na frota.",
+    "Document recorded in fleet records.",
+    "Document enregistré dans le dossier du parc.",
+    "Documento registrado en la flota.",
+    "Dokument in der Fahrzeugverwaltung erfasst."
+  ],
+  "bodyOpenInsurance": [
+    "Abrir PDF seguro",
+    "Open insurance PDF",
+    "Ouvrir le PDF d’assurance",
+    "Abrir PDF del seguro",
+    "Versicherung als PDF öffnen"
+  ],
+  "bodyNoDate": [
+    "Sem data definida",
+    "No date specified",
+    "Aucune date définie",
+    "Sin fecha definida",
+    "Kein Datum festgelegt"
+  ],
+  "bodyTransportInitial": [
+    "Carregue as guias da viatura para ver o documento AT ativo.",
+    "Load the vehicle guides to view the active AT document.",
+    "Chargez les documents du véhicule pour voir le document AT actif.",
+    "Carga las guías del vehículo para ver el documento AT activo.",
+    "Laden Sie die Fahrzeugdokumente, um das aktive AT-Dokument anzuzeigen."
+  ],
+  "bodyWorkInitial": [
+    "Carregue as guias para ver a guia de trabalho aberta e o stock em uso.",
+    "Load the guides to view the open work guide and stock in use.",
+    "Chargez les documents pour voir le bon de travail ouvert et le stock utilisé.",
+    "Carga las guías para ver la guía de trabajo abierta y las existencias en uso.",
+    "Laden Sie die Dokumente, um das offene Arbeitsdokument und den verwendeten Bestand anzuzeigen."
+  ],
+  "bodyInsuranceInitial": [
+    "Carregue as guias para ver seguro, validade e ficha PDF da viatura.",
+    "Load the guides to view the vehicle insurance, validity and PDF record.",
+    "Chargez les documents pour voir l’assurance, la validité et la fiche PDF du véhicule.",
+    "Carga las guías para ver el seguro, la validez y la ficha PDF del vehículo.",
+    "Laden Sie die Dokumente, um Versicherung, Gültigkeit und PDF-Nachweis des Fahrzeugs anzuzeigen."
+  ],
   "centerVehicleChanged": [
     "A viatura mudou. Consulte os documentos antes de iniciar ou concluir.",
     "The vehicle changed. Check the documents before starting or completing work.",
@@ -2268,7 +2548,7 @@
     "Besuch öffnen"
   ]
 };
-    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap(), delegatedCopies = new WeakMap(), documentDates = new WeakMap();
+    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap(), delegatedCopies = new WeakMap(), documentDates = new WeakMap(), documentBodyDates = new WeakMap();
     function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
     function join(parts, separator = ' | ') { const entry = Object.freeze({ parts: Object.freeze([...parts]), separator }); specs.add(entry); return entry; }
     function reminder(value) { const entry = Object.freeze({}); reminderSpecs.set(entry, value); return entry; }
@@ -2276,6 +2556,7 @@
     function error(message, entry) { const failure = Error(message); errorCopies.set(failure, entry); return failure; }
     function delegated(source, entry) { const value = Object.freeze({}); delegatedCopies.set(value, { source, entry }); return value; }
     function documentDate(raw) { const entry = Object.freeze({}); documentDates.set(entry, String(raw ?? '')); return entry; }
+    function documentBodyDate(raw) { const entry = Object.freeze({}); documentBodyDates.set(entry, raw); return entry; }
     function documentWarning(result) { const source = window.CWFieldDocuments.presentation; return delegated(source, source.warning(result) ?? result.warning); }
     function draftStatus(node) { const source = window.CWFieldVisitDrafts.presentation; return delegated(source, source.copy(node)); }
     function failure(error, fallback = '') {
@@ -2288,6 +2569,12 @@
     function format(entry, language = document.documentElement.lang || 'pt') {
       const delegated = delegatedCopies.get(entry); if (delegated) return delegated.source.format(delegated.entry, language);
       if (documentDates.has(entry)) return window.CWFieldDocumentCopy.date(documentDates.get(entry), language);
+      if (documentBodyDates.has(entry)) {
+        const raw = documentBodyDates.get(entry), date = new Date(raw);
+        if (!raw || Number.isNaN(date.getTime())) return copy.bodyNoDate[Math.max(0, languages.indexOf(language))];
+        const locales = window.CWFieldDocumentCopy.locales;
+        return date.toLocaleString(Object.hasOwn(locales, language) ? locales[language] : locales.pt, { dateStyle: 'short', timeStyle: 'short' });
+      }
       if (reminderSpecs.has(entry)) return window.CWFieldReminders.presentation.format(reminderSpecs.get(entry), language);
       if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
       if (entry.parts) return entry.parts.map(part => format(part, language)).join(entry.separator);
@@ -2313,7 +2600,7 @@
     window.addEventListener('cw-language-change', paint);
     let lastLanguage = document.documentElement.lang;
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return { value, join, reminder, error, failure, draftStatus, documentDate, documentWarning, format, bind, clear, clearTree, notify };
+    return { value, join, reminder, error, failure, draftStatus, documentDate, documentBodyDate, documentWarning, format, bind, clear, clearTree, notify };
   })();
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
@@ -4030,9 +4317,9 @@
     ["ph", "chlorine", "alkalinity", "orp"].forEach((id) => updateReferenceStatus($(`#${id}`)));
   }
 
-  function docButton(href, label) {
+  function docButton(href, label, copyKey = '') {
     const protectedDownload = (String(href || "").startsWith("/api/guides/") || String(href || "").startsWith("/api/transport-guide-documents/")) ? " data-auth-download" : "";
-    return `<a class="doc-btn"${protectedDownload} href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`;
+    return `<a class="doc-btn"${copyKey ? ` data-doc-body-copy="${esc(copyKey)}"` : ""}${protectedDownload} href="${esc(href)}" target="_blank" rel="noopener">${esc(label)}</a>`;
   }
 
   function renderItems(items, mode) {
@@ -4739,6 +5026,7 @@
   function renderDocumentSection(kind, section, source, vehicleId) {
     const box = $(({transport:'#transportGuideBox', work:'#workGuideBox', insurance:'#insuranceBox'})[kind]);
     if (!box) return;
+    alertUi.clearTree(box);
     box.dataset.source = section ? source : source === 'loading' ? 'loading' : 'unavailable';
     if (!section) {
       delete box.dataset.confirmedAt;
@@ -4754,15 +5042,23 @@
     paintDocumentText();
   }
 
+  function bindDocumentBody(box, values) {
+    for (const node of box.querySelectorAll('[data-doc-body-copy]')) {
+      const key = node.dataset.docBodyCopy;
+      alertUi.bind(node, Object.hasOwn(values, key) ? values[key] : alertUi.value(key));
+    }
+  }
+
   function renderTransportGuide(guide, items) {
     const box = $("#transportGuideBox");
     if (!box) return;
     if (!guide) {
       box.innerHTML = `
-        <div class="doc-head"><span class="chip">Guia AT</span><strong class="status-warn">Em falta</strong></div>
-        <div class="doc-number">Sem guia de transporte ativa</div>
-        <div class="muted">Pode iniciar o servico em modo provisorio. O administrador fica com alerta para associar a guia AT assim que estiver disponivel.</div>
+        <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocTransport"></span><strong class="status-warn" data-doc-body-copy="bodyMissing"></strong></div>
+        <div class="doc-number" data-doc-body-copy="bodyTransportEmpty"></div>
+        <div class="muted" data-doc-body-copy="bodyTransportHelp"></div>
       `;
+      bindDocumentBody(box, {});
       return;
     }
 
@@ -4772,25 +5068,30 @@
       : `/api/guides/transport/latest/${encodeURIComponent(guide.vehicleId || vehicle.id || "")}/pdf`;
     const officialDocument = guide.officialDocument || guide.transportGuideDocument || null;
     const officialDocumentMeta = officialDocument?.url
-      ? `<span>Ficheiro AT oficial: ${esc(officialDocument.originalName || officialDocument.filename || "documento")}</span>`
-      : `<span>Ficheiro AT oficial: por anexar pelo administrador</span>`;
+      ? '<span data-doc-body-copy="official"></span>'
+      : '<span data-doc-body-copy="bodyOfficialMissing"></span>';
     const officialDocumentButton = officialDocument?.url
-      ? docButton(officialDocument.url, "Abrir guia AT oficial")
+      ? docButton(officialDocument.url, "Abrir guia AT oficial", "bodyOpenOfficial")
       : "";
     box.innerHTML = `
-      <div class="doc-head"><span class="chip">Guia AT</span><strong class="status-ok">${esc(guide.status || "ACTIVE")}</strong></div>
-      <div class="doc-number">${esc(guide.codeAT || `Guia #${guide.id}`)}</div>
+      <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocTransport"></span><strong class="status-ok" data-doc-body-copy="state"></strong></div>
+      <div class="doc-number" data-doc-body-copy="number"></div>
       <div class="doc-meta">
-        <span>Empresa: Cristal Water LDA</span>
-        <span>Viatura: ${esc(vehicle.plate || guide.vehiclePlate || guide.vehicleId || "Nao indicada")}</span>
-        <span>Origem: ${esc(guide.origin || "Armazem Cristal Water")}</span>
-        <span>Destino: ${esc(guide.destination || "Clientes em rota")}</span>
-        <span>Validade: ${esc(formatDate(guide.validFrom))} - ${esc(formatDate(guide.validUntil))}</span>
+        ${['company', 'vehicle', 'origin', 'destination', 'validity'].map(key => `<span data-doc-body-copy="${key}"></span>`).join('')}
         ${officialDocumentMeta}
       </div>
       ${renderItems(items, "transport")}
-      <div class="doc-actions">${officialDocumentButton}${docButton(pdfHref, officialDocument?.url ? "Abrir PDF guia AT gerado" : "Abrir PDF guia AT")}</div>
+      <div class="doc-actions">${officialDocumentButton}${docButton(pdfHref, officialDocument?.url ? "Abrir PDF guia AT gerado" : "Abrir PDF guia AT", officialDocument?.url ? "bodyOpenGenerated" : "bodyOpenTransport")}</div>
     `;
+    bindDocumentBody(box, {
+      state: guide.status || 'ACTIVE', number: guide.codeAT || alertUi.value('bodyGuideNumber', { id: guide.id }),
+      company: alertUi.value('bodyCompany', { value: 'Cristal Water LDA' }),
+      vehicle: alertUi.value('bodyVehicle', { value: vehicle.plate || guide.vehiclePlate || guide.vehicleId || alertUi.value('bodyUnspecified') }),
+      origin: alertUi.value('bodyOrigin', { value: guide.origin || alertUi.value('bodyWarehouse') }),
+      destination: alertUi.value('bodyDestination', { value: guide.destination || alertUi.value('bodyRouteClients') }),
+      validity: alertUi.value('bodyValidityRange', { from: alertUi.documentBodyDate(guide.validFrom), until: alertUi.documentBodyDate(guide.validUntil) }),
+      official: alertUi.value('bodyOfficialFile', { value: officialDocument?.originalName || officialDocument?.filename || alertUi.value('bodyDocument') }),
+    });
   }
 
   function renderWorkGuide(workGuide, stock, data) {
@@ -4798,61 +5099,69 @@
     if (!box) return;
     if (!workGuide) {
       box.innerHTML = `
-        <div class="doc-head"><span class="chip">Guia de obra</span><strong class="status-warn">Em falta</strong></div>
-        <div class="doc-number">Sem guia de obra aberta</div>
-        <div class="muted">Abre a gestao de guias para iniciar uma guia de trabalho ligada a viatura.</div>
+        <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocWork"></span><strong class="status-warn" data-doc-body-copy="bodyMissing"></strong></div>
+        <div class="doc-number" data-doc-body-copy="bodyWorkEmpty"></div>
+        <div class="muted" data-doc-body-copy="bodyWorkHelp"></div>
       `;
+      bindDocumentBody(box, {});
       return;
     }
 
     const stockRows = stock;
     box.innerHTML = `
-      <div class="doc-head"><span class="chip">Guia de obra</span><strong class="${workGuide.guideId ? "status-ok" : "status-warn"}">${esc(workGuide.status || "OPEN")}</strong></div>
-      <div class="doc-number">Obra #${esc(workGuide.id)}</div>
+      <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocWork"></span><strong class="${workGuide.guideId ? "status-ok" : "status-warn"}" data-doc-body-copy="state"></strong></div>
+      <div class="doc-number" data-doc-body-copy="number"></div>
       <div class="doc-meta">
-        <span>Empresa: Cristal Water LDA</span>
-        <span>Tecnico: ${esc(workGuide.technician?.name || workGuide.technicianId || "Nao indicado")}</span>
-        <span>Viatura: ${esc(workGuide.vehicle?.plate || workGuide.vehicleId || "Nao indicada")}</span>
-        <span>Guia AT associada: ${esc(workGuide.guide?.codeAT || workGuide.guideId || "AT em falta - associar mais tarde")}</span>
-        <span>Inicio: ${esc(formatDate(workGuide.createdAt))}</span>
+        ${['company', 'technician', 'vehicle', 'linked', 'started'].map(key => `<span data-doc-body-copy="${key}"></span>`).join('')}
       </div>
       ${renderUsage(stockRows)}
       ${renderMovements(data)}
       ${renderItems(stockRows, "work")}
       ${renderStockSummary(stockRows)}
-      <div class="doc-actions">${docButton(`/api/guides/work/${encodeURIComponent(workGuide.id)}/pdf`, "Abrir PDF guia de obra")} <a class="cw-btn" href="/work-guide-close?workGuideId=${encodeURIComponent(workGuide.id)}">Rever fecho da guia</a></div>
+      <div class="doc-actions">${docButton(`/api/guides/work/${encodeURIComponent(workGuide.id)}/pdf`, "Abrir PDF guia de obra", "bodyOpenWork")} <a class="cw-btn" href="/work-guide-close?workGuideId=${encodeURIComponent(workGuide.id)}" data-doc-body-copy="bodyReviewClose"></a></div>
     `;
+    bindDocumentBody(box, {
+      state: workGuide.status || 'OPEN', number: alertUi.value('bodyWorkNumber', { id: workGuide.id }),
+      company: alertUi.value('bodyCompany', { value: 'Cristal Water LDA' }),
+      technician: alertUi.value('bodyTechnician', { value: workGuide.technician?.name || workGuide.technicianId || alertUi.value('bodyUnspecified') }),
+      vehicle: alertUi.value('bodyVehicle', { value: workGuide.vehicle?.plate || workGuide.vehicleId || alertUi.value('bodyUnspecified') }),
+      linked: alertUi.value('bodyLinkedGuide', { value: workGuide.guide?.codeAT || workGuide.guideId || alertUi.value('bodyLinkLater') }),
+      started: alertUi.value('bodyStarted', { value: alertUi.documentBodyDate(workGuide.createdAt) }),
+    });
   }
 
   function renderInsurance(vehicle, insurance, vehicleId) {
     const box = $("#insuranceBox");
     if (!box) return;
-    const plate = vehicle?.plate || vehicleId || "Nao indicada";
+    const plate = vehicle?.plate || vehicleId || alertUi.value('bodyUnspecified');
     if (!insurance) {
       box.innerHTML = `
-        <div class="doc-head"><span class="chip">Seguro</span><strong class="status-warn">Por validar</strong></div>
-        <div class="doc-number">Seguro da viatura</div>
+        <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocInsurance"></span><strong class="status-warn" data-doc-body-copy="bodyPending"></strong></div>
+        <div class="doc-number" data-doc-body-copy="bodyInsuranceVehicle"></div>
         <div class="doc-meta">
-          <span>Empresa: Cristal Water LDA</span>
-          <span>Matricula: ${esc(plate)}</span>
-          <span>Sem seguro registado na ficha da viatura.</span>
+          <span data-doc-body-copy="company"></span>
+          <span data-doc-body-copy="plate"></span>
+          <span data-doc-body-copy="bodyInsuranceEmpty"></span>
         </div>
-        <div class="doc-actions">${docButton(`/api/guides/vehicles/${encodeURIComponent(vehicleId)}/insurance/pdf`, "Abrir ficha do seguro")}</div>
+        <div class="doc-actions">${docButton(`/api/guides/vehicles/${encodeURIComponent(vehicleId)}/insurance/pdf`, "Abrir ficha do seguro", "bodyOpenInsuranceSheet")}</div>
       `;
+      bindDocumentBody(box, { company: alertUi.value('bodyCompany', { value: 'Cristal Water LDA' }), plate: alertUi.value('bodyPlate', { value: plate }) });
       return;
     }
 
     box.innerHTML = `
-      <div class="doc-head"><span class="chip">Seguro</span><strong class="status-ok">${esc(insurance.status || "Ativo")}</strong></div>
-      <div class="doc-number">${esc(insurance.title || "Seguro da viatura")}</div>
+      <div class="doc-head"><span class="chip" data-doc-body-copy="sourceDocInsurance"></span><strong class="status-ok" data-doc-body-copy="state"></strong></div>
+      <div class="doc-number" data-doc-body-copy="title"></div>
       <div class="doc-meta">
-        <span>Empresa: Cristal Water LDA</span>
-        <span>Matricula: ${esc(plate)}</span>
-        <span>Validade: ${esc(formatDate(insurance.dueDate))}</span>
-        <span>${esc(insurance.notes || "Documento registado na frota.")}</span>
+        ${['company', 'plate', 'validity', 'notes'].map(key => `<span data-doc-body-copy="${key}"></span>`).join('')}
       </div>
-      <div class="doc-actions">${docButton(`/api/guides/vehicles/${encodeURIComponent(vehicleId)}/insurance/pdf`, "Abrir PDF seguro")}</div>
+      <div class="doc-actions">${docButton(`/api/guides/vehicles/${encodeURIComponent(vehicleId)}/insurance/pdf`, "Abrir PDF seguro", "bodyOpenInsurance")}</div>
     `;
+    bindDocumentBody(box, {
+      state: insurance.status || alertUi.value('bodyActive'), title: insurance.title || alertUi.value('bodyInsuranceVehicle'),
+      company: alertUi.value('bodyCompany', { value: 'Cristal Water LDA' }), plate: alertUi.value('bodyPlate', { value: plate }),
+      validity: alertUi.value('bodyValidity', { value: alertUi.documentBodyDate(insurance.dueDate) }), notes: insurance.notes || alertUi.value('bodyRegistered'),
+    });
   }
 
   async function loadGuides(showFeedback = true) {
