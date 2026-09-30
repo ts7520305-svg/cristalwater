@@ -1,0 +1,334 @@
+{
+  "task": 464,
+  "date": "2026-09-30",
+  "base": "ac9515aac547b09324dda9a5c8ba40410787768a",
+  "item": "C06-013",
+  "scope": {
+    "productSources": 2,
+    "batchFiles": 9,
+    "description": "Owned start/completion notifications, session/typed-visit guards, document restriction and legacy incident guard presentation. Conditions, physical confirmations, products, payloads and original Error.message remain unchanged."
+  },
+  "catalogue": {
+    "entries": 14,
+    "texts": 70,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "privatePresentation": "Reuses immutable alertUi descriptions and the existing document-source WeakMap. Two locally created errors own presentation in a private WeakMap; original Error.message and external strings remain literal. No producer/render/navigation/write on locale changes.",
+    "previousEntries": 188,
+    "totalEntries": 202
+  },
+  "negative": {
+    "run": "qa-task464/run-1790764855276",
+    "script": "test-field-visit-feedback-languages.js",
+    "code": 1,
+    "ms": 1415,
+    "actual": "A resposta não confirma o início desta visita. Atualize a rota.",
+    "expected": "The response does not confirm that this visit has started. Refresh the route.",
+    "description": "Real English selector and check-in followed by a mismatched confirmation left the owned rejection in Portuguese."
+  },
+  "integration": [
+    {
+      "script": "test-field-visit-feedback-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12157,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790764937269"
+    },
+    {
+      "script": "test-field-visit-actions-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 46667,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790764937269"
+    },
+    {
+      "script": "test-field-modern-visit-drafts.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21024,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790764937269"
+    },
+    {
+      "script": "test-field-extra-correction.js",
+      "code": 0,
+      "signal": null,
+      "ms": 8494,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790764937269"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 843,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790764937269"
+    },
+    {
+      "script": "test-field-visit-completion-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9589,
+      "timedOut": false,
+      "evidence": "qa-task464/run-1790765115607"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 39299,
+      "log": "/workspace/scratch/b364087eee9d/qa-task464/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6778,
+      "log": "/workspace/scratch/b364087eee9d/qa-task464/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 639,
+      "log": "/workspace/scratch/b364087eee9d/qa-task464/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Actual language selector PT/EN/FR/ES/DE. Start rejection and legacy incident notice at320/390/1440; other notified outcomes at320. Same toast/form/button nodes, original handlers, focus, typed current visit, check-in target/record, fields, tokens, own navigation records, source bytes and full outbox after every locale change.",
+    "Visit/stock/reminder/technical-history rows and instrumented producers unchanged during locale matrices. Only language preference PUTs allowed in these matrices. Real action phases use the existing operational requests in isolated QA.",
+    "Actual check-in confirmation before every planned start. Wrong pool, visit id, technician, status, start date, nonempty endAt and ok:false responses fail without changing SQL or the cached route. API failures with both HTML-like content and an exact Portuguese match to an owned error remain literal across five languages.",
+    "Documents mismatched to the current vehicle block both start and finish using the existing private reason descriptor; no operational request/prepared completion. Successful REGULAR and same-number EXTRA starts remain separate; the EXTRA start keeps its typed payload and confirmed original outbox record.",
+    "Offline REGULAR start reports local persistence; exact-key route quota failure reports memory-only start and preserves the saved route bytes. Locale changes do not create or retry any operation.",
+    "Legacy draft remains disabled for UI completion; invoking its existing callback proves the secondary incident guard still preserves the original draft and opens its existing problem panel. Completed EXTRA start remains disabled; its callback still refuses execution with the translated existing guard.",
+    "Real REGULAR completion records literal notes/readings and one product debit10→9 with one completion audit. Review opens correction mode. Mismatched correction result and same-text external failure preserve SQL; the eventual real correction keeps stock9 and stores literal corrected notes.",
+    "Real same-number EXTRA completion keeps distinct typed completion UUID records, its own pool/payload and one EXTRA completion audit. Two real synchronized water/pump reminders remain exactly unchanged and open after completion; no stock debit for the product-free EXTRA.",
+    "Switching to another real account and invoking the captured finish callback produces the session guard without operational writes or modifying/creating either owner’s draft. The one-second session guard remains active. Existing modern-draft regression covers original offline completion UUID recovery/one stock debit, corrupt data and account callbacks.",
+    "Visit-actions, modern drafts, EXTRA correction and browser component regressions pass. Two German320px toast captures visually reviewed for legibility/wrapping. Scenario110s, runner120s and locator9s budgets retained. Zero page errors."
+  ],
+  "reviewedOnly": [
+    "Missing-document fallback and generic start failure fallback: source-reviewed; normal producers return owned document reasons or nonempty errors. Missing visit guard reuses the existing visitChoose entry. Session message was exercised in German, with all five texts reviewed in source."
+  ],
+  "qaCorrections": [
+    {
+      "run": "run-1790764873139",
+      "detail": "The legacy draft correctly disables finish pending review. Replaced the invalid expectation of a clickable button with a disabled assertion and invocation of the existing callback to test its secondary incident guard; no product rule changed."
+    },
+    {
+      "run": "run-1790764937269",
+      "detail": "Completion scenario exited incomplete after the raw correction-error matrix without assertion detail. Kept the failed result and added phase diagnostics; required a complete independent successful completion profile. Other five integrations passed."
+    },
+    {
+      "run": "run-1790765069827",
+      "detail": "Confirmed correction passed; reminder fixture waited for server ids after create alone. The reminder module intentionally persists first and synchronizes separately. Fixture now explicitly awaits its existing sync operation before comparing real server reminder rows."
+    }
+  ],
+  "preservation": {
+    "base": "ac9515aac547b09324dda9a5c8ba40410787768a",
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "6884a48d125d5a095b338b4bc4dee0f8742d19e1b0f73a69615546282cfa9862"
+      },
+      "frontend/sw.js": {
+        "documentedTransformsReversedExactly": true,
+        "baseSha256": "052f6e1afc30f2b162b859ba743d7dfc41fa47601c826bcc31f33b358fb226bf"
+      }
+    },
+    "unchangedFunctionSha256": {
+      "visitHasWaterOpen": "6bf6a77d4a2427c79c2293da4743fcd1ee7197f36261193f75d65fa05f10fd1f",
+      "visitHasCriticalProblem": "f37a1d75de9869015e08a053813f544b87a4cff0cab844f11d9463becbfe7e96",
+      "visitHasMaterialBlock": "58b8036d869fe060577663e1cadf1907120896d561aee1efdbd3e4859fe472b0",
+      "operationalStateCode": "641a4412d5032cca2b85e93ea881e8b241068dc6e78e68bdc8d691be2d9acbe5",
+      "elapsedMinutesLabel": "df46ca146984208a769e4fbd66baf63940a1d90547313f14638266acb43572d5",
+      "elapsedMinutesCopy": "a890ac56857f5d0f4734e57ccee36da8e27b5c66bea80c201424503e933838e8",
+      "elapsedSinceLabel": "fdeea2ca4b2cef15fbdf49cd8bed6e0f852f9cc1f20934fa0803c5ec4f2667c8",
+      "isVisitDone": "8a6af4ee62a327e7aceb31a5947f6f59b957c22718ffbf12f9768568c98930c0",
+      "isRegularVisit": "e390a4f0b9cac9bd908f06d6cbba4ba638550b39da0e8da0da6802f1591b03c9",
+      "normalizePoolFilter": "0b01ab242458b1eae80a82738344caa3358594b94888b41d9b9b77a37496e584",
+      "persistFieldUiState": "bdc31c38d2c546bdaa6d70d2b7f0a44d042a014022375a1f6d655e1187411fdd",
+      "writeLastExplicitFilter": "8d0fc8e8c9f5df9628abf59667347fff8c59382b9339bda441e1d5f256f11032",
+      "applyVisitSelectionFromId": "b604828a897095864ce5af42d85138fd5c36a90cb2147abdce74a736b44c6ff6",
+      "loadCurrentDraft": "91cffd9831ff43bdf55c61ff43c3538dea3d311a2e60d868dee2b8de89b0fb05",
+      "visitLocation": "5d527a41c9e32f0c4fbc2d2abcbb718d9376ab0b9da818e1f94e242f17de5abc",
+      "syncTechnicianContextFromVisit": "687fefc682a5e2d07938325f9380b2670666b0f6469a2fd3635cf954989659a9",
+      "poolFilterGroup": "d5dc61b28111f3efc29e33bcc0d6df3776d0f19ac25d1191633d23a15892b14b",
+      "renderNowBoard": "c63be02231a13d02e0563242bb86e4592ebe06c766230c9b79e4b1137c500483",
+      "renderList": "094fdcb010e8631720e90854264b4b63e442e412cfdba8a11c81eca564b86ed5",
+      "switchFieldTab": "984c68f994cfaa29ead6878b4fa5d40e8962dbc17d2563795562a1214c2fadf5",
+      "openAssistVisit": "1e51a1133089112bc202d92ac95a054909a3399b1235b31ab334a6b7fe2c1d2c",
+      "loadAssistOptions": "93e4676ad06eed6fab4b6fdaef40d53e5d02caa68930d8c64ddd00fe47ceb272",
+      "computeDocsCompliance": "14c85f19c3bfb50df113dfb2ebf39245bb0897a6f86aa111737a27309995e780",
+      "normalizedUsedProducts": "3fea85550042ad1781f1f402045c95c2fbbadb1313d4584ef8f5fcac01851b53",
+      "validateUsedProducts": "aad5c3ef77f737107d47b0156b7f29de5e8186a93305bd61e93da704e68595a7",
+      "persistModernRoute": "65faa325b7f690a0252412123b7af59d0abc4a02218e1d76188cbf0313a4a42d",
+      "mergeVisitSnapshot": "88e14c9c1dd72ccae80c8928daaeb78199a5472e2c0cd1ccf7ce31fb32217fc7",
+      "savedVisitDraft": "3d7c1480e76fbd08b2fae3451a305ce871ed301986bd7a6f0b5796b426be6681",
+      "saveCurrentDraft": "60d8216a6b6186571fc521d84efeecd3cb3a0467724de0143901b689e4137ed7",
+      "syncPendingPhotos": "a720bc001b2e019ddeb90e4e8f53d46accf2f06842eb8f80376142f12ad41429"
+    },
+    "followingSyncHandlersSha256": "dba1a2092d259b9d9a9768b9f7386ed5db0b20224abf426285c7f61e1282ec6d",
+    "waterPresentationUnchanged": true,
+    "previousCatalogueEntries": 188,
+    "previousCataloguePreserved": true,
+    "addedCatalogueEntries": 14,
+    "previousGroups": 357,
+    "newGroups": 359,
+    "priorExactOrderPreserved": true,
+    "handlerChanges": "Only owned notification calls and presentation metadata on two local errors; original conditions, values, Error.message, API paths/payloads, ordering and returns restored byte-for-byte by reversing the documented substitutions."
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "0fbbcd59dba14181a9eb562b6c29e851216711dfca40585b0a22b4a800704e87",
+    "frontend/sw.js": "68f3300b2eaf5945d0a2b8698f3f97c30f1420da7db3ebf9f01756bb8120c781",
+    "scripts/test-field-visit-feedback-languages.js": "47c3cd6287cfca4754d219a043811ae9a7106684af768eed65c6f0624b476ea5",
+    "scripts/test-field-visit-completion-languages.js": "5b8dc71b4bba4b498471cc3624320483e809dc6d8829ec778e3ccd0127824f78",
+    "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf"
+  },
+  "visual": {
+    "captures": [
+      {
+        "path": "qa-task464/feedback-de-320-actionStartUnconfirmed.png",
+        "sha256": "64a1ecf45b4977402276287eaefc843a1ce73ed401518ae33896e136183d0ba2"
+      },
+      {
+        "path": "qa-task464/feedback-de-320-actionUnconfirmedProblems.png",
+        "sha256": "d5a9779d098092589071f2f4d520a159b4da29ef11fb53860a8aaaa55528096e"
+      }
+    ],
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "review": "German start rejection and long legacy-incident guard fit the existing300px toast and wrap without clipping."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeAcceptedThisBatch": [
+    {
+      "task": 461,
+      "code": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "run": 36694971218,
+      "job": 109820630724,
+      "sourceSha256": {
+        "frontend/technician-field-mode.js": "167aed35c06a441f7e44ab3f482800922a350277c2b622662493666db0aec68c",
+        "frontend/technician-field-mode.html": "fcc2b981308e3d2ae8ecb1d74452646f050d4a12300439b6f1d6117ca29217b8",
+        "frontend/sw.js": "8faff8a8d590f65af80755166b6ee428f9fc66e39fa7798621ba01f0d96cab8d",
+        "scripts/test-field-current-visit-languages.js": "ed6d29b3f0520468f22b2da6fcdd12968f8c5416c88603ad918614cd3dcd1802",
+        "scripts/test-field-current-visit-time-languages.js": "94d18fce7907fe6ee7147d769fdcd59c8b4ad07b2127b00ce68d414799513c5a",
+        "scripts/test-field-suite.js": "ec948e73441855a18e3fe71a87282ff46d07e5d6a3f81863ff302978b427ea31"
+      },
+      "gitBlobs": {
+        "frontend/technician-field-mode.js": "7c3a1bc62e0d5a44102c883b2c0880df95166a98",
+        "frontend/technician-field-mode.html": "ed3448934a879be897b9dd69cc8de312d69096cf",
+        "frontend/sw.js": "44fc78210d0772e1f6b43987381a219679069414",
+        "scripts/test-field-current-visit-languages.js": "5a1eba4c04aae23425bdaa6deca28d30e747efa0",
+        "scripts/test-field-current-visit-time-languages.js": "4a449eb9706fe19f0dbfa9b7a4d563695b0acea7",
+        "scripts/test-field-suite.js": "0be0ced2e35f4724bcf09d4b24992b69d8c10f88"
+      },
+      "status": "completed",
+      "conclusion": "success",
+      "groupCount": 353,
+      "postgres16": true,
+      "upgrade": true,
+      "restoredTables": 128,
+      "restoredFiles": 51,
+      "rowsAndHashesMatch": true,
+      "sourceBlobsVerified": true,
+      "groupsSha256": "e9aaf42c7c3d4a3e96118a97de68af2ee2dad131272c5ace4ff163c445ffeb6c",
+      "exactScriptOrderVerified": true
+    }
+  ],
+  "previousNativeAcceptance": {
+    "task": 460,
+    "code": "4389454f8e7e5bfa34f2ea3ef352c792942f8daf",
+    "run": 36688218583,
+    "job": 109798932582,
+    "groups": 351,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "proof": "20260930_task462_local.json"
+  },
+  "historicalFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "job": 109756159173,
+    "groupsPassed": 345,
+    "groupsTotal": 346,
+    "restore": "not_run",
+    "fix": 458,
+    "fixAcceptedInTask": 460
+  },
+  "pendingNative": [
+    {
+      "task": 462,
+      "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+      "run": 36698494469,
+      "job": 109832087499,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 355,
+      "restore": "pending"
+    },
+    {
+      "task": 463,
+      "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+      "run": 36701344336,
+      "job": 109841249507,
+      "status": "in_progress",
+      "successfulInitialSteps": 10,
+      "fullSuiteGroups": 357,
+      "restore": "pending"
+    },
+    {
+      "task": 464,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 359,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Remaining product/draft validation feedback in the visit handlers; crew/documents and shared push/auth/navigation."
+  }
+}

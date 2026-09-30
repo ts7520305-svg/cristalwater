@@ -8,6 +8,20 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK464 / C06-013, feedback de início e conclusão
+
+**TASK464 / C06-013:** feedback de início/conclusão e bloqueios de sessão/visita/documentos/ocorrências antigas com14 entradas/70 textos PT/EN/FR/ES/DE. Reutiliza o motivo documental privado e o apresentador da visita. Dois erros criados no handler recebem apresentação privada, conservando `Error.message`; erros do servidor, mesmo com texto igual, continuam literais. [Prova464](evidence/20260930_task464_local.json)
+
+**Preservação:**30 funções byte a byte,188 entradas anteriores e apresentador da água conservados; inversão das substituições documentadas restitui as fontes originais exatamente. Condições, ordem, returns, API/payloads, identidades REGULAR/EXTRA, stock, datas/C10 e confirmações físicas inalterados. Só as notificações dos handlers e metadados privados dos dois erros foram alterados. Sem emissão fiscal ou alteração do shell de check-in.
+
+**Validação:** seis integrações aprovadas,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44. Seletor real nos cinco idiomas; rejeição de início e aviso de ocorrências320/390/1440, restantes avisos320. Mesmos nós/foco/handlers/controlo/valores/bytes/outbox; produtores e linhas SQL invariantes ao mudar idioma. Check-in real; confirmação de início rejeita piscina/id/técnico/estado/data/fim/ok inválidos; erros externos coincidentes permanecem literais. Bloqueios documentais impedem pedidos, início offline distingue persistência de memória. Conclusão regular debita10→9 uma vez; correção conserva9. EXTRA de igual número mantém pool/UUID próprios e dois lembretes reais de água/bomba permanecem abertos e iguais. Conta trocada não altera rascunhos. Duas capturas alemãs320 revistas. Cache246/runner359,357 grupos anteriores na ordem exata. Nove ficheiros, duas fontes de produto.
+
+**Limites da prova:** rascunho antigo e EXTRA concluída mantêm botões desativados; os testes invocam o callback existente para verificar a segunda barreira, sem tornar o botão executável. Os fallbacks de erro genérico/documentos ausentes e o guard de visita ausente são revistos no código; a mensagem de sessão foi exercitada em alemão e revista nos cinco idiomas. Feedback próprio restante de validação de produtos/rascunhos fica para o próximo lote; não se declara toda a página traduzida.
+
+**Gate461 aceite:** commit `143060d8a3234c3bc008546f4867a0d6b545fa7a`, CI36694971218/job109820630724:353/353 na ordem exata, PostgreSQL16, upgrade aditivo e restauro128 tabelas/51 ficheiros com linhas e hashes iguais; blobs das fontes verificados no commit. Gates462/463 ainda nas suites355/357 após dez etapas aprovadas; restauros pendentes. TASK460 e457–459 já aceites; falha histórica454 preservada e correção458 revalidada.
+
+**Retoma:** publicar464 e exigir gates/restauros462–464; corrigir novas falhas. Próximo funcional: feedback de validação de produtos/rascunhos nos handlers, depois equipa/documentos e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK463 / C06-012, apresentação da visita e ações
 
 **TASK463 / C06-012:** apresentação da visita atual com31 entradas/155 textos PT/EN/FR/ES/DE. Título/metadados, progresso da ronda, rótulos e nomes acessíveis das ações, atalhos, instruções EXTRA, avisos de seleção concluída e falha de carregamento. Nomes, estados desconhecidos e erros externos permanecem literais. [Prova463](evidence/20260930_task463_local.json)

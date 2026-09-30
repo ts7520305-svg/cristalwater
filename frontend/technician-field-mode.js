@@ -426,6 +426,104 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "actionSessionChanged": [
+    "A sessão mudou. Reabra a página com a conta original.",
+    "The session has changed. Reopen the page with the original account.",
+    "La session a changé. Rouvrez la page avec le compte d’origine.",
+    "La sesión ha cambiado. Vuelve a abrir la página con la cuenta original.",
+    "Die Sitzung hat sich geändert. Öffnen Sie die Seite mit dem ursprünglichen Konto erneut."
+  ],
+  "actionExtraDone": [
+    "Visita extra concluída. Consulte o registo; correções exigem revisão pelo escritório.",
+    "Extra visit completed. View the record; corrections require review by the office.",
+    "Visite supplémentaire terminée. Consultez le compte rendu ; les corrections nécessitent une vérification par le bureau.",
+    "Visita extra completada. Consulta el registro; las correcciones requieren revisión por la oficina.",
+    "Zusatzbesuch abgeschlossen. Sehen Sie den Datensatz ein; Korrekturen müssen vom Büro geprüft werden."
+  ],
+  "actionReview": [
+    "Registo aberto para corrigir.",
+    "Record opened for correction.",
+    "Compte rendu ouvert pour correction.",
+    "Registro abierto para corregir.",
+    "Datensatz zur Korrektur geöffnet."
+  ],
+  "actionDocsMissing": [
+    "Bloqueio operacional: faltam documentos obrigatórios da viatura.",
+    "Work blocked: required vehicle documents are missing.",
+    "Intervention bloquée : des documents obligatoires du véhicule sont manquants.",
+    "Trabajo bloqueado: faltan documentos obligatorios del vehículo.",
+    "Arbeiten gesperrt: Erforderliche Fahrzeugdokumente fehlen."
+  ],
+  "actionStartLocal": [
+    "Visita iniciada neste dispositivo. O registo será enviado ao concluir com ligação.",
+    "Visit started on this device. The record will be sent when you complete it with a connection.",
+    "Visite commencée sur cet appareil. Le compte rendu sera envoyé à la clôture avec une connexion.",
+    "Visita iniciada en este dispositivo. El registro se enviará al completarla con conexión.",
+    "Besuch auf diesem Gerät begonnen. Der Datensatz wird beim Abschluss mit Verbindung gesendet."
+  ],
+  "actionStartMemory": [
+    "Início apenas em memória: a ronda não ficou guardada. Não feche a página.",
+    "Start is only in memory: the round was not saved. Do not close the page.",
+    "Début conservé uniquement en mémoire : la tournée n’a pas été enregistrée. Ne fermez pas la page.",
+    "Inicio solo en memoria: la ronda no se ha guardado. No cierres la página.",
+    "Beginn nur im Arbeitsspeicher: Die Tour wurde nicht gespeichert. Schließen Sie die Seite nicht."
+  ],
+  "actionStartUnconfirmed": [
+    "A resposta não confirma o início desta visita. Atualize a rota.",
+    "The response does not confirm that this visit has started. Refresh the route.",
+    "La réponse ne confirme pas le début de cette visite. Actualisez l’itinéraire.",
+    "La respuesta no confirma el inicio de esta visita. Actualiza la ruta.",
+    "Die Antwort bestätigt den Beginn dieses Besuchs nicht. Aktualisieren Sie die Route."
+  ],
+  "actionStarted": [
+    "{pool}: início confirmado.",
+    "{pool}: start confirmed.",
+    "{pool} : début confirmé.",
+    "{pool}: inicio confirmado.",
+    "{pool}: Beginn bestätigt."
+  ],
+  "actionStartFailed": [
+    "Não foi possível iniciar a visita.",
+    "Could not start the visit.",
+    "Impossible de commencer la visite.",
+    "No se pudo iniciar la visita.",
+    "Der Besuch konnte nicht begonnen werden."
+  ],
+  "actionUnconfirmedProblems": [
+    "Há ocorrências antigas sem confirmação. Preserve as notas e confirme o registo com o escritório antes de concluir.",
+    "There are earlier incidents without confirmation. Preserve the notes and confirm the record with the office before completing the visit.",
+    "Des incidents antérieurs restent sans confirmation. Conservez les notes et confirmez le compte rendu avec le bureau avant de terminer la visite.",
+    "Hay incidencias anteriores sin confirmar. Conserva las notas y confirma el registro con la oficina antes de completar la visita.",
+    "Frühere Vorfälle sind noch unbestätigt. Bewahren Sie die Notizen auf und klären Sie den Datensatz vor dem Abschluss mit dem Büro."
+  ],
+  "actionCorrectionUnconfirmed": [
+    "A resposta não confirma a correção desta visita. Atualize a rota.",
+    "The response does not confirm the correction to this visit. Refresh the route.",
+    "La réponse ne confirme pas la correction de cette visite. Actualisez l’itinéraire.",
+    "La respuesta no confirma la corrección de esta visita. Actualiza la ruta.",
+    "Die Antwort bestätigt die Korrektur dieses Besuchs nicht. Aktualisieren Sie die Route."
+  ],
+  "actionCorrected": [
+    "{pool}: correção guardada e stock reconciliado.",
+    "{pool}: correction saved and stock reconciled.",
+    "{pool} : correction enregistrée et stock rapproché.",
+    "{pool}: corrección guardada y existencias conciliadas.",
+    "{pool}: Korrektur gespeichert und Bestand abgeglichen."
+  ],
+  "actionCompletedStock": [
+    "{pool}: visita concluída e stock atualizado.",
+    "{pool}: visit completed and stock updated.",
+    "{pool} : visite terminée et stock mis à jour.",
+    "{pool}: visita completada y existencias actualizadas.",
+    "{pool}: Besuch abgeschlossen und Bestand aktualisiert."
+  ],
+  "actionCompleted": [
+    "{pool}: visita concluída.",
+    "{pool}: visit completed.",
+    "{pool} : visite terminée.",
+    "{pool}: visita completada.",
+    "{pool}: Besuch abgeschlossen."
+  ],
   "visitPreparing": [
     "A preparar ronda...",
     "Preparing the round...",
@@ -1743,10 +1841,13 @@
     "Besuch öffnen"
   ]
 };
-    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap();
+    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap(), errorCopies = new WeakMap();
     function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
     function join(parts, separator = ' | ') { const entry = Object.freeze({ parts: Object.freeze([...parts]), separator }); specs.add(entry); return entry; }
     function reminder(value) { const entry = Object.freeze({}); reminderSpecs.set(entry, value); return entry; }
+    // Only errors created here own translated presentation; original Error.message stays literal.
+    function error(message, entry) { const failure = Error(message); errorCopies.set(failure, entry); return failure; }
+    function failure(error, fallback = '') { return errorCopies.get(error) || error?.message || fallback; }
     function format(entry, language = document.documentElement.lang || 'pt') {
       if (reminderSpecs.has(entry)) return window.CWFieldReminders.presentation.format(reminderSpecs.get(entry), language);
       if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
@@ -1773,7 +1874,7 @@
     window.addEventListener('cw-language-change', paint);
     let lastLanguage = document.documentElement.lang;
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return { value, join, reminder, format, bind, clear, clearTree, notify };
+    return { value, join, reminder, error, failure, format, bind, clear, clearTree, notify };
   })();
 
   for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
@@ -2285,15 +2386,15 @@
   }
 
   function requireRegularVisit(visit = current()) {
-    if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return false; }
+    if (!sameFieldSession()) { alertUi.notify(alertUi.value('actionSessionChanged')); return false; }
     if (!isRegularVisit(visit)) { alertUi.notify(visit ? extraVisitNotice : alertUi.value('visitChoose')); return false; }
     return true;
   }
 
   function requireExecutableVisit(visit = current()) {
-    if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return false; }
-    if (!visit?.id || !['REGULAR','EXTRA'].includes(visit.visitType || 'REGULAR')) { toast('Escolha uma visita.'); return false; }
-    if (visit.visitType === 'EXTRA' && isVisitDone(visit)) { toast('Visita extra concluída. Consulte o registo; correções exigem revisão pelo escritório.'); return false; }
+    if (!sameFieldSession()) { alertUi.notify(alertUi.value('actionSessionChanged')); return false; }
+    if (!visit?.id || !['REGULAR','EXTRA'].includes(visit.visitType || 'REGULAR')) { alertUi.notify(alertUi.value('visitChoose')); return false; }
+    if (visit.visitType === 'EXTRA' && isVisitDone(visit)) { alertUi.notify(alertUi.value('actionExtraDone')); return false; }
     return true;
   }
   const photoPreviewCache = new Map();
@@ -5199,14 +5300,14 @@
       if (isVisitDone(visit)) {
         switchFieldTab("agora");
         loadCurrentDraft();
-        toast("Registo aberto para corrigir.");
+        alertUi.notify(alertUi.value('actionReview'));
         return;
       }
       docsCompliance = computeDocsCompliance();
       if (!docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
         document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
+        alertUi.notify(documentSourceCopies.get(docsCompliance) || docsCompliance.reason || alertUi.value('actionDocsMissing'));
         return;
       }
       startedAt = new Date();
@@ -5215,7 +5316,7 @@
         saveCurrentDraft();
         const saved = persistModernRoute();
         render();
-        toast(saved ? "Visita iniciada neste dispositivo. O registo será enviado ao concluir com ligação." : "Início apenas em memória: a ronda não ficou guardada. Não feche a página.");
+        alertUi.notify(alertUi.value(saved ? 'actionStartLocal' : 'actionStartMemory'));
         return;
       }
       startBtn.disabled = true;
@@ -5232,16 +5333,16 @@
         });
         if (!sameFieldSession()) return;
         const confirmed = result.visit;
-        if (result.ok !== true || confirmed?.id !== visit.id || confirmed.poolId !== (visit.poolId || visit.pool?.id) || confirmed.technicianId !== fieldWriteSession.technicianId || !['IN_PROGRESS','STARTED','EM_EXECUCAO'].includes(confirmed.status) || !Number.isFinite(Date.parse(confirmed.startAt)) || confirmed.endAt) throw Error('A resposta não confirma o início desta visita. Atualize a rota.');
+        if (result.ok !== true || confirmed?.id !== visit.id || confirmed.poolId !== (visit.poolId || visit.pool?.id) || confirmed.technicianId !== fieldWriteSession.technicianId || !['IN_PROGRESS','STARTED','EM_EXECUCAO'].includes(confirmed.status) || !Number.isFinite(Date.parse(confirmed.startAt)) || confirmed.endAt) throw alertUi.error('A resposta não confirma o início desta visita. Atualize a rota.', alertUi.value('actionStartUnconfirmed'));
         const position = visits.findIndex(row=>visitKey(row)===target);
         if (position < 0) return;
         visits[position] = mergeVisitSnapshot(visits[position], confirmed, 'IN_PROGRESS');
         if (visitKey() === target) { startedAt = new Date(confirmed.startAt); saveCurrentDraft(); }
         persistModernRoute();
         render();
-        toast(`${visit.pool?.name || 'Piscina'}: início confirmado.`);
+        alertUi.notify(alertUi.value('actionStarted', { pool: visit.pool?.name || alertUi.value('sourcePool') }));
       } catch (error) {
-        if (sameFieldSession()) toast(error.message || "Nao foi possivel iniciar visita.");
+        if (sameFieldSession()) alertUi.notify(alertUi.failure(error, alertUi.value('actionStartFailed')));
       } finally {
         startingVisits.delete(target);
         if (sameFieldSession()) startBtn.disabled = (current()?.visitType === 'EXTRA' && isVisitDone(current())) || startingVisits.has(visitKey());
@@ -5353,7 +5454,7 @@
   const finishBtn = $("#finishBtn");
   if (finishBtn) {
     finishBtn.onclick = async () => {
-      if (!sameFieldSession()) { toast('A sessão mudou. Reabra a página com a conta original.'); return; }
+      if (!sameFieldSession()) { alertUi.notify(alertUi.value('actionSessionChanged')); return; }
       const visit = current();
       if (!visit) {
         showAssistMode("tomorrow");
@@ -5361,7 +5462,7 @@
       }
       if(visit.visitType==='EXTRA'&&isVisitDone(visit)){await window.CWExtraVisitCorrection.open(visit,fieldWriteSession);return;}
       if (!requireExecutableVisit(visit)) return;
-      if (pendingProblems.some(problem=>!problem.synced)) { toast('Há ocorrências antigas sem confirmação. Preserve as notas e confirme o registo com o escritório antes de concluir.'); switchFieldTab('more'); showProblemPanel(); return; }
+      if (pendingProblems.some(problem=>!problem.synced)) { alertUi.notify(alertUi.value('actionUnconfirmedProblems')); switchFieldTab('more'); showProblemPanel(); return; }
       const target = visitKey(visit);
       const wasDone = isVisitDone(visit);
       const draftEntry = currentDraftEntry;
@@ -5374,7 +5475,7 @@
       if (!wasDone && !docsCompliance.readyForOperation) {
         switchFieldTab("docs", true);
         document.querySelector("#documentCenterBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        toast(docsCompliance.reason || "Bloqueio operacional: faltam documentos obrigatórios da viatura.");
+        alertUi.notify(documentSourceCopies.get(docsCompliance) || docsCompliance.reason || alertUi.value('actionDocsMissing'));
         return;
       }
       draftEntry.submitting = true;
@@ -5446,7 +5547,7 @@
             body: JSON.stringify(body),
           }));
           if (!sameFieldSession()) return;
-          if (result.visit?.id !== visit.id || result.visit?.poolId !== (visit.poolId || visit.pool?.id)) throw Error('A resposta não confirma a correção desta visita. Atualize a rota.');
+          if (result.visit?.id !== visit.id || result.visit?.poolId !== (visit.poolId || visit.pool?.id)) throw alertUi.error('A resposta não confirma a correção desta visita. Atualize a rota.', alertUi.value('actionCorrectionUnconfirmed'));
           const updatedVisit = {
             ...visit,
             ...(result.visit || {}),
@@ -5468,7 +5569,7 @@
           if (visitKey() === target) loadCurrentDraft();
           persistModernRoute();
           render();
-          toast(`${visit.pool?.name || 'Piscina'}: correção guardada e stock reconciliado.`);
+          alertUi.notify(alertUi.value('actionCorrected', { pool: visit.pool?.name || alertUi.value('sourcePool') }));
           $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current());
           return;
         }
@@ -5489,14 +5590,14 @@
         const position = visits.findIndex(row=>visitKey(row)===target);
         if (position >= 0) visits[position] = completedVisit;
         persistModernRoute();
-        toast(`${visit.pool?.name || 'Piscina'}: ${stockUpdated ? 'visita concluída e stock atualizado.' : 'visita concluída.'}`);
+        alertUi.notify(alertUi.value(stockUpdated ? 'actionCompletedStock' : 'actionCompleted', { pool: visit.pool?.name || alertUi.value('sourcePool') }));
         if (visitKey() === target && position >= 0) {
           index = nextPendingIndex(position);
           loadCurrentDraft();
         }
         render();
       } catch (error) {
-        if (sameFieldSession()) { $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); visitDraftManager.paint(currentDraftEntry);toast(error.message); }
+        if (sameFieldSession()) { $("#finishBtn").disabled = current()?.visitType === 'EXTRA' && isVisitDone(current()); visitDraftManager.paint(currentDraftEntry); alertUi.notify(alertUi.failure(error)); }
       }
       } finally { draftEntry.submitting=false; if(sameFieldSession())visitDraftManager.paint(currentDraftEntry); }
     };
