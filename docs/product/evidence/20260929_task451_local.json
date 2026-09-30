@@ -1,0 +1,235 @@
+{
+  "task": "TASK451",
+  "item": "C06-009",
+  "date": "2026-09-29",
+  "base": "b4eb9a5715a5e5c1bd140511b7e46d368dd8a041",
+  "scope": "GPS helper owned notices/errors in PT/EN/FR/ES/DE, the actual GPS-page error consumer and its real language selector. Page-specific GPS copy and the compatibility entry point remain for subsequent batches.",
+  "negative": [
+    {
+      "script": "test-field-gps-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 3140,
+      "timedOut": false,
+      "logSha256": "3dc2ecdd3c9a9287599c8626c6833770e4b66d223d35004a6ed995fa1aad2b8e"
+    }
+  ],
+  "negativeDescription": "With English selected, the real send-now control saves the point offline but the helper notice stays in Portuguese.",
+  "intermediate": [
+    {
+      "run": [
+        {
+          "script": "test-field-gps-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 91237,
+          "timedOut": false,
+          "logSha256": "d60ca08f98a31ac1301653169c1274c5be67821c69f15358521af05ec97261b0"
+        }
+      ],
+      "reason": "The first fixture cut the connection before waiting for service-worker control; the later cached-reload wait never finished. The fixture now requires the installed cache online before going offline. Product cache/guards/limits unchanged."
+    },
+    {
+      "gates": [
+        {
+          "name": "syntax",
+          "code": 0,
+          "signal": null,
+          "ms": 125425,
+          "log": "/workspace/scratch/b364087eee9d/qa-task451/gate-syntax.log"
+        },
+        {
+          "name": "unit",
+          "code": 1,
+          "signal": null,
+          "ms": 20455,
+          "log": "/workspace/scratch/b364087eee9d/qa-task451/gate-unit.log"
+        }
+      ],
+      "reason": "The initial unit gate failed21/1356 because the pre-existing lightweight GPS harness has no documentElement or MutationObserver. The helper now uses Portuguese fallback and installs its presentation observer only when available. No tests were relaxed or changed."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-gps-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 11950,
+      "timedOut": false,
+      "logSha256": "a83193a90665078e707a20b6f117e5cb5a32dbdc37f8bddb4834905ff6835060"
+    },
+    {
+      "script": "test-field-gps-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14680,
+      "timedOut": false,
+      "logSha256": "2b546b58b98113ee40c5cff17e679dd0d948b2189ab04aac4fe13d7c369dbe77"
+    },
+    {
+      "script": "test-field-legacy-queue-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9998,
+      "timedOut": false,
+      "logSha256": "4833dbc38c9be52367969ed417dcf6d2fb91ccf592dd955f86badbeb94e35b98"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2863,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 122536,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 20418,
+      "logSha256": "a28838a23df73913fba5cbd783c2cb86709ba38d903c5b477f439bf7cd4a993c"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 1886,
+      "logSha256": "72121dd0a1b108c59d9b64dd364938b6f509999dc627c84a1f1bf9682bd9c4ef"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "coverage": [
+    "Real GPS language selector in all five languages at320/390/1440. Original element identities, focus, button guards, KPI values, immutable local point bytes and GPS request counts preserved. Locale changes repaint only owned presentation.",
+    "Offline send-now and cached reload preserve the exact point key, UUID, account, latitude/longitude, accuracy and recordedAt. The cache is ready before the connection is removed.",
+    "Corrupt local GPS record remains untouched. Original owned Error.message stays Portuguese; WeakMap identity translates its presentation. Identical external Error.message or a forged copy property remains literal; markup is displayed as text.",
+    "Invalid zero coordinates, storage refusal with literal error text and the real geolocation watcher permission callback preserve the original saved point. Nested notices and the actual page error consumer update by locale without invoking save/send/flush/status/start/stop.",
+    "Incomplete and wrong-owner acknowledgements retain the point and create no history. A real response is held then lost; locale changes during that response preserve the point and disabled button. Repeating the original UUID/body/token confirms exactly one SQL history point and the matching current location.",
+    "Older unowned GPS archive remains byte-identical after actual confirmation and language changes; only acknowledgement of the exact owned point removes it. Existing GPS recovery regression also covers two processes/tabs, rollback, changed account, lifecycle and outdated watcher callbacks."
+  ],
+  "catalogue": {
+    "entries": 21,
+    "texts": 105,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "durableStorageChanged": false,
+    "originalErrorMessagesChanged": false
+  },
+  "preservation": {
+    "base": "b4eb9a5715a5e5c1bd140511b7e46d368dd8a041",
+    "helperAndConsumersIdenticalAfterReversingPresentation": true,
+    "mixedLineEndingsPreserved": true,
+    "originalGroups": 342,
+    "newGroups": 343,
+    "previousGroupsInExactOrder": true,
+    "unchanged": [
+      "frontend/technician.js",
+      "frontend/cw-field-write-store.js",
+      "frontend/cw-legacy-technician-copy.js",
+      "frontend/gps.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml",
+      "frontend/cw-field-photos.js"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/js/offline/offline-gps.js": "b546977ca85393a7e946fc767ae5aa9e18563a0c134770b843bc994e726f1fa5",
+    "frontend/technician-gps.js": "c27bc17611514c31aa7e69a0c3916906a2e2cd89409abd5dc58f79d0c312feec",
+    "frontend/technician-gps.html": "c166a4d87191f82a3cbe5bd5512340b226c9e1e3066b51ef79e930a41544f1b3",
+    "scripts/test-field-suite.js": "c824cbbeac363482c72cf2afec389cb02d13d36ced482183b967ca8491ff918d",
+    "frontend/sw.js": "09deec2892318193471be66f11c66b64838dbacc3f549563959ce1c64139a574",
+    "scripts/test-field-gps-languages.js": "b023a2df2a30e7ee390a77c583471ffda0ec8180a008db1b096a85635f41820f"
+  },
+  "visual": {
+    "capture": [
+      {
+        "script": "capture-gps.cjs",
+        "code": 0,
+        "signal": null,
+        "ms": 12927,
+        "timedOut": false,
+        "logSha256": "a83193a90665078e707a20b6f117e5cb5a32dbdc37f8bddb4834905ff6835060"
+      }
+    ],
+    "fileSha256": "85633583caa08326af81f5656e43474448f1754dc3b5f9ada29bb4a8f62ac50e",
+    "reviewed": true,
+    "finding": "German320 notice wraps within its width; native error text and the real selector are protected from blanket translation. This is not full-page/device/theme acceptance."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "notifications/email/WhatsApp/fiscal/webhooks/background jobs disabled"
+  },
+  "nativePrevious": [
+    {
+      "task": 448,
+      "run": 36629776697,
+      "job": 109615752303,
+      "counts": {
+        "total": 341,
+        "passed": 341
+      },
+      "failures": [],
+      "restore": {
+        "status": "success",
+        "tables": 128,
+        "uploadedFiles": 50,
+        "databaseRowsAndFileHashesMatch": true,
+        "excerpt": "PASS restored 128 tables and 50 uploaded files; database rows and file hashes match"
+      },
+      "exactGroupOrderVerified": true
+    },
+    {
+      "task": 449,
+      "run": 36632923826,
+      "job": 109626354811,
+      "counts": {
+        "total": 341,
+        "passed": 341
+      },
+      "failures": [],
+      "restore": {
+        "status": "success",
+        "tables": 128,
+        "uploadedFiles": 50,
+        "databaseRowsAndFileHashesMatch": true,
+        "excerpt": "PASS restored 128 tables and 50 uploaded files; database rows and file hashes match"
+      },
+      "exactGroupOrderVerified": true
+    }
+  ],
+  "limits": [
+    "PGlite/Chromium153 does not replace native PostgreSQL16/additive upgrade/full343-group suite/full database and uploaded-file restore with measured counts and matching hashes.",
+    "Native448 and449 accepted341/341 with restore128 tables50 uploaded files in each exact prior run; these are measured counts, not fixed restoration limits. TASK450 native run36636579876 remains pending in the full suite.",
+    "The GPS-page body is explicitly excluded from generic translation to preserve literal/data/error presentation. GPS-page titles, buttons, KPI labels and page-owned success/fallback messages, compatibility gps.js and other C06 panels still need their own batches.",
+    "Only save/send/flush/status/start/stop are counted as producers in the language matrix; pre-existing account-validation polling remains active.",
+    "C06/C06-009/C08/C10 remain open;32=26 not started/one active/five complete. Public repository authorized during development; private before completion/C32. No merge/deploy/external communications; annual maintenance contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  },
+  "diagnosticWording": "After validation, the new script diagnostic was clarified to attribute cached reload to the valid point, and language preservation to the corrupt record. Assertions and product code unchanged."
+}

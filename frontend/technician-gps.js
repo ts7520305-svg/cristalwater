@@ -4,7 +4,7 @@ const statusBox = document.getElementById('gpsStatus'), startBtn = document.getE
 const syncKpi = document.getElementById('syncKpi'), accuracyKpi = document.getElementById('accuracyKpi'), lastKpi = document.getElementById('lastKpi');
 let watching = false, acquiring = false, confirming = false, invalidated = false, lifecycle = 0;
 function currentGpsSession() { return !invalidated && gpsClient.same(gpsPageSession); }
-function setStatus(message, tone = '') { if (statusBox) { statusBox.textContent = message; statusBox.dataset.tone = tone; } }
+function setStatus(message, tone = '') { if (statusBox) { window.CWGpsErrors?.clear(statusBox); statusBox.textContent = message; statusBox.dataset.tone = tone; } }
 function setKpi(sync, accuracy = '—', last = '—') { if (syncKpi) syncKpi.textContent = sync; if (accuracyKpi) accuracyKpi.textContent = accuracy; if (lastKpi) lastKpi.textContent = last; }
 function controls() { if (startBtn) startBtn.disabled = watching || !currentGpsSession(); if (sendNowBtn) sendNowBtn.disabled = acquiring || !currentGpsSession(); const retry = document.getElementById('gpsRetryBtn'); if (retry) retry.disabled = confirming || !currentGpsSession(); }
 function reportGps(result) {
@@ -15,7 +15,7 @@ function reportGps(result) {
   else if (result.ignored) { setKpi('A atualizar'); setStatus('Leituras antigas reconhecidas sem atualizar a posição atual. Obtenha uma leitura atual.'); }
   else { setKpi('Sem pendências'); setStatus('Não há envios GPS pendentes nesta conta.'); }
 }
-function gpsError(error) { if (currentGpsSession()) { setKpi('Por confirmar'); setStatus(error.message || 'GPS por confirmar. Os pontos guardados foram preservados.', 'error'); } }
+function gpsError(error) { if (currentGpsSession()) { setKpi('Por confirmar'); setStatus(error.message || 'GPS por confirmar. Os pontos guardados foram preservados.', 'error'); window.CWGpsErrors?.set(statusBox, error, 'GPS por confirmar. Os pontos guardados foram preservados.'); } }
 async function sendPoint(position, captured = gpsPageSession, expectedLifecycle = lifecycle) {
   if (!currentGpsSession() || !gpsClient.same(captured)) return;
   const result = await gpsClient.send(position.coords.latitude, position.coords.longitude, { accuracy: position.coords.accuracy ?? null, recordedAt: new Date(position.timestamp).toISOString() }, captured);
