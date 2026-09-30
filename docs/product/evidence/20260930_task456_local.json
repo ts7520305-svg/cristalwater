@@ -236,14 +236,32 @@
     }
   ],
   "limits": [
-    "Publication and native PostgreSQL16/upgrade/full348-group suite/full database and uploaded-file restore for TASK456 remain pending. PGlite does not replace these gates.",
+    "Native PostgreSQL16/full348-group suite/full database and uploaded-file restore acceptance for TASK456 remains pending. The exact-commit CI has nine successful initial steps, including the additive-upgrade check; local PGlite does not replace the remaining native gates.",
     "Common alert-board reading states/responsibility/actions/history and shared push/auth/navigation messages require their own batches. Reading acknowledgement is not physical closure. Persisted/external text remains literal; date policy C10 unchanged.",
     "TASK452 native acceptance is recorded here with exact-run logs, all344 groups/order, restored128 tables/51 files and six source hashes verified at its code commit. Its old evidence file remains the historical publication snapshot.",
     "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "8cb313bca74787473d30d372c4457a8ec5a72083",
+    "tree": "172f4500a7969c09a201725734512997857ae85e",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "126b9d639538af823d5428de0e941fb0e46e87a0",
+    "originalHistoryBranch": "work/local-task456-20260930",
+    "ci": {
+      "run": 36677835725,
+      "job": 109766594583,
+      "head": "8cb313bca74787473d30d372c4457a8ec5a72083",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 9,
+      "currentStep": "Run npm test && npm run test:technician && npm run test:field-browser",
+      "fullSuiteGroups": 348,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }
