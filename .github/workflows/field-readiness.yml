@@ -9,9 +9,10 @@ permissions:
 jobs:
   field:
     runs-on: ubuntu-latest
-    # TASK377 was canceled after about 50m with 283/290 groups completed successfully.
-    # Keep every test and restore gate; allow headroom beyond the former 50m budget.
-    timeout-minutes: 70
+    # TASK463 ended canceled after about 70m with 354/357 groups finished.
+    # The suite now has 360 groups; preserve per-script deadlines and leave room
+    # for setup, the complete suite and the isolated database/file restore gate.
+    timeout-minutes: 90
     services:
       postgres:
         image: postgres:16

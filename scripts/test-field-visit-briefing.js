@@ -119,7 +119,7 @@ assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
     ['en', 'Start visit', 'Pool notes', 'Overdue recurring reminder'],
     ['fr', 'Commencer la visite', 'Consignes de la piscine', 'Rappel récurrent en retard'],
     ['es', 'Iniciar visita', 'Notas de la piscina', 'Recordatorio recurrente vencido'],
-    ['de', 'Besuch starten', 'Poolhinweise', 'Überfällige wiederkehrende Erinnerung'],
+    ['de', 'Besuch beginnen', 'Poolhinweise', 'Überfällige wiederkehrende Erinnerung'],
   ]) {
     await page.evaluate(language => CristalI18n.applyLanguage(language), language);
     await page.locator('#startBtn').filter({ hasText: startLabel }).waitFor();
