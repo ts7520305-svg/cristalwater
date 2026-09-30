@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#0f1723">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cristal Water - GPS Tecnico</title>
+  <title data-cw-gps-text="documentTitle">Cristal Water - GPS Técnico</title>
   <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
   <script src="/technician-auth-guard.js"></script>
@@ -134,24 +134,24 @@
 <body class="gps-page" data-required-role="TECHNICIAN">
   <main class="gps-shell" data-cw-no-i18n>
     <section class="gps-card">
-      <p class="gps-muted">Operacao tecnica</p>
-      <h1 class="gps-title">GPS de Campo</h1>
-      <p class="gps-muted">Leitura ao sol e estado de sincronizacao em tempo real.</p>
+      <p class="gps-muted" data-cw-gps-text="operation">Operação técnica</p>
+      <h1 class="gps-title" data-cw-gps-text="heading">GPS de Campo</h1>
+      <p class="gps-muted" data-cw-gps-text="intro">Leitura ao sol e estado de sincronização em tempo real.</p>
       <div class="actions">
-        <button id="startBtn" class="primary" type="button">Iniciar tracking</button>
-        <button id="sendNowBtn" type="button">Enviar ponto agora</button>
-        <button id="gpsRetryBtn" type="button">Confirmar pontos guardados</button>
+        <button data-cw-gps-text="start" id="startBtn" class="primary" type="button">Iniciar tracking</button>
+        <button data-cw-gps-text="send" id="sendNowBtn" type="button">Enviar ponto agora</button>
+        <button data-cw-gps-text="retry" id="gpsRetryBtn" type="button">Confirmar pontos guardados</button>
       </div>
     </section>
 
     <p id="gpsStatus" class="status-box" aria-live="polite">Pronto para iniciar GPS.</p>
 
     <section class="gps-card">
-      <h2 style="margin:0 0 8px;">Estado rapido</h2>
+      <h2 data-cw-gps-text="summary" style="margin:0 0 8px;">Estado rápido</h2>
       <div class="kpis">
-        <div class="kpi"><span>Sincronizacao</span><b id="syncKpi">Em espera</b></div>
-        <div class="kpi"><span>Precisao</span><b id="accuracyKpi">-</b></div>
-        <div class="kpi"><span>Ultimo envio</span><b id="lastKpi">-</b></div>
+        <div class="kpi"><span data-cw-gps-text="synchronization">Sincronização</span><b id="syncKpi">Em espera</b></div>
+        <div class="kpi"><span data-cw-gps-text="accuracy">Precisão</span><b id="accuracyKpi">-</b></div>
+        <div class="kpi"><span data-cw-gps-text="last">Último envio</span><b id="lastKpi">-</b></div>
       </div>
     </section>
   </main>

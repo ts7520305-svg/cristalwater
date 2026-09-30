@@ -12,6 +12,15 @@ const copy = {
   es: { offline: 'GPS guardado en este dispositivo; esperando conexión.', unreadable: 'Registro GPS ilegible. Los datos se han conservado; pida ayuda a la oficina.', invalid: 'Lectura GPS no válida.', unconfirmed: 'GPS pendiente de confirmación. Se ha conservado el punto para repetir el mismo envío.', permission: 'GPS no disponible o permiso denegado.', savedError: 'No se ha podido guardar el GPS: ', history: 'Se han conservado los puntos GPS antiguos sin cuenta confirmada; pida ayuda a la oficina.', confirmed: 'Envíos GPS confirmados.' },
   de: { offline: 'GPS auf diesem Gerät gespeichert; Verbindung ausstehend.', unreadable: 'Unlesbarer GPS-Eintrag. Die Daten bleiben erhalten; bitten Sie das Büro um Hilfe.', invalid: 'Ungültige GPS-Messung.', unconfirmed: 'GPS-Bestätigung ausstehend. Der Punkt bleibt für denselben erneuten Versand erhalten.', permission: 'GPS nicht verfügbar oder Berechtigung verweigert.', savedError: 'GPS konnte nicht gespeichert werden: ', history: 'Ältere GPS-Punkte ohne bestätigtes Konto bleiben erhalten; bitten Sie das Büro um Hilfe.', confirmed: 'GPS-Sendungen bestätigt.' }
 };
+const syncText = {
+  waiting: ['Em espera', 'Waiting', 'En attente', 'En espera', 'Wartend'],
+  pending: ['Por confirmar', 'Awaiting confirmation', 'À confirmer', 'Por confirmar', 'Bestätigung ausstehend'],
+  reviewing: ['A rever', 'Needs review', 'À vérifier', 'Por revisar', 'Prüfung erforderlich'],
+  synchronized: ['Sincronizado', 'Synchronized', 'Synchronisé', 'Sincronizado', 'Synchronisiert'],
+  updating: ['A atualizar', 'Updating', 'À actualiser', 'Por actualizar', 'Aktualisierung erforderlich'],
+  empty: ['Sem pendências', 'Nothing pending', 'Aucun envoi en attente', 'Sin pendientes', 'Keine ausstehenden Punkte'],
+  changed: ['Sessão alterada', 'Session changed', 'Session modifiée', 'Sesión cambiada', 'Sitzung geändert']
+};
 let browser, completed = false; const releases = [];
 const deadline = setTimeout(() => { console.error('GPS language scenario did not finish'); process.exit(1); }, 90000);
 process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
@@ -46,13 +55,15 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     const count = requests.length;
     await page.evaluate(() => { window.qaGpsNodes = Array.from(document.querySelectorAll('#cwLegacyGpsStatus,#gpsStatus,#sendNowBtn,#gpsRetryBtn,#startBtn,#syncKpi,#accuracyKpi,#lastKpi')); document.getElementById('gpsRetryBtn').focus(); });
     const before = await page.evaluate(() => ({ focus: document.activeElement.id, controls: ['startBtn','sendNowBtn','gpsRetryBtn'].map(id => document.getElementById(id).disabled), calls: window.qaGpsCalls && { ...qaGpsCalls }, kpis: ['syncKpi','accuracyKpi','lastKpi'].map(id => document.getElementById(id).textContent) }));
+    const syncKey = Object.keys(syncText).find(key => syncText[key].includes(before.kpis[0])); assert(syncKey, 'known GPS synchronization state');
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       for (const lang of Object.keys(copy)) {
         await language(lang); await page.waitForFunction(({ selector, text }) => document.querySelector(selector)?.textContent === text, { selector, text: prefix + copy[lang][key] });
         assert.deepEqual(await stored(), state); assert(await page.evaluate(() => qaGpsNodes.every(node => node.isConnected)));
         const after = await page.evaluate(() => ({ focus: document.activeElement.id, controls: ['startBtn','sendNowBtn','gpsRetryBtn'].map(id => document.getElementById(id).disabled), calls: window.qaGpsCalls && { ...qaGpsCalls }, kpis: ['syncKpi','accuracyKpi','lastKpi'].map(id => document.getElementById(id).textContent) }));
-        assert.deepEqual(after, before);
+        assert.equal(after.kpis[0], syncText[syncKey][Object.keys(copy).indexOf(lang)]);
+        assert.deepEqual(after.kpis.slice(1), before.kpis.slice(1)); assert.deepEqual({ ...after, kpis: undefined }, { ...before, kpis: undefined });
         assert(await page.locator(selector).evaluate(node => node.scrollWidth <= node.clientWidth + 1), 'GPS text fits the available width');
       }
     }
@@ -65,7 +76,7 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   const original = await stored(); assert.equal(original.length, 1); assert.equal(await tracks(), 0);
   const point = JSON.parse(original[0][1]); assert.equal(point.owner, 'TECH:' + tech.id); assert.equal(original[0][0], 'cwGpsPoint:v2:' + point.owner + ':' + point.id);
   await instrument(); await matrix('#cwLegacyGpsStatus', 'offline', original);
-  console.log('PASS five-language GPS notices at320/390/1440 preserve nodes, focus, controls, KPI values, exact stored point and request count');
+  console.log('PASS five-language GPS notices at320/390/1440 preserve nodes, focus, controls, numeric KPI values and translated synchronization state, exact stored point and request count');
   await page.evaluate(() => navigator.serviceWorker.ready); await page.reload({ waitUntil: 'networkidle' }); await idle(); assert.deepEqual(await stored(), original);
   console.log('PASS cached offline reload preserves the exact GPS point');
   const cache = fs.readFileSync('frontend/sw.js', 'utf8').match(/const CACHE = '([^']+)'/)[1]; assert(await page.evaluate(name => caches.keys().then(names => names.includes(name)), cache));

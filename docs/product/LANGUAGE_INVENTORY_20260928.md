@@ -8,6 +8,12 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK452 / textos próprios da página GPS
+
+`technician-gps.js` e `technician-gps.html`, continuação C06-009:31 entradas/155 textos PT/EN/FR/ES/DE para título, ações, rótulos, estados de sincronização, hora original e erros próprios. Identidade privada separa os erros próprios dos externos; Error.message e pontos/arquivos permanecem intactos. Trocar idioma não relê GPS nem envia pedidos. Nós, foco, controlos, conta/credenciais e precisão preservados. Cache235/runner344;343 grupos anteriores na ordem exata. [Prova452](evidence/20260930_task452_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados; cinco idiomas/320/390/1440, offline/cache, permissões, arquivo antigo, falhas literais, confirmação retida/perdida, repetição sem duplicar e conta trocada. Captura alemã320 revista. Teste da preferência de idioma/foco transitório corrigido sem alterar guardas. Publicação/gates344/restauro452 pendentes; CI451 na suite343 após dez etapas aprovadas. C06/C06-009 continuam abertas: entrada de compatibilidade gps.js a avaliar pelos consumidores efetivos, navegação partilhada/avisos de autenticação e restantes painéis. C08/C10 e contagens estáticas415 não encerradas por associação. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK451 / avisos e erros do helper GPS
 
 `js/offline/offline-gps.js`, C06-009:21 entradas/105 textos PT/EN/FR/ES/DE para avisos próprios/erros/contagem/parâmetros aninhados. Error.message, pontos/arquivo e falhas externas mantêm-se originais; identidade privada decide a apresentação. Consumidor real `technician-gps.js` e seletor `cw-i18n.js` integrado na página. Zona de GPS/avisos protegidos da tradução genérica; repintura não relê produtores nem envia pontos. Transporte/guardas/ordem/coordenadas/UUID/corpo/hora e finais de linha mistos preservados após inverter apresentação. Cache234/runner343;342 grupos anteriores na ordem exata. [Prova451](evidence/20260929_task451_local.json).

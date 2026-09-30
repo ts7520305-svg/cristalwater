@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK452 local validada / página GPS
+
+**TASK452 / C06-009:** 31 entradas/155 textos PT/EN/FR/ES/DE para título, ações, rótulos, estados, hora da leitura e erros próprios da página GPS. Trocar idioma repinta os mesmos nós, conservando pontos, identidade da conta, credenciais, controlos, precisão e pedidos. Erros externos continuam literais; Error.message original preservado. [Prova452](evidence/20260930_task452_local.json).
+
+**Validação:** quatro integrações aprovadas (página GPS, helper GPS, recuperação GPS e sessão), 1 356 unitários/138 ficheiros, quatro técnicos e sintaxe 695/308/44. Cinco idiomas a320/390/1440; offline/cache, permissões, arquivo antigo, conta trocada, envio retido/perdido e reenvio sem duplicar o histórico. Hora formatada a partir da leitura original; apenas uma linha SQL por ponto. Captura alemã320 revista, incluindo a hora; navegação partilhada ainda contém português e não fica encerrada neste lote. Teste passa com e sem captura.
+
+**Correções do ensaio:** a preferência de idioma muda legitimamente no seletor; o teste verifica agora o idioma escolhido e exige os restantes dados de identidade/credenciais intactos. A matriz fixa o foco num controlo habilitado antes da comparação para evitar o foco transitório num botão acabado de desativar. Nenhuma guarda, limite ou operação alterada. Código operacional da página e HTML idênticos ao inverter a apresentação; helper/backend/schema/workflows intactos. Cache235/runner344,343 grupos anteriores na ordem exata. Dez ficheiros.
+
+**Retoma:** publicar TASK452 e confirmar gates completos451/452 e restauro próprio. CI45136667051825 tem dez etapas iniciais aprovadas e suite343 em execução na última consulta; não declarar o restauro aprovado. Depois, avaliar a entrada de compatibilidade gps.js pelos consumidores efetivos e continuar as fontes/painéis C06. C06/C06-009/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado durante desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK451 / CI em execução
 
 TASK451 publicada na branch `work/field-readiness-20260915-simulation`: código `61eb17daf89b3232be25a22e356ba0f15cc5d7a7`, árvore `eb1dc375929c4f4f3f65ece1fb508c5349bd369c`, igual à validada. Checkout alinhado; histórico local original preservado em `work/local-task451-20260930`. [CI36667051825](https://github.com/ts7520305-svg/cristalwater/actions/runs/36667051825), job109733843295, arrancou no commit exato; 6 etapas iniciais aprovadas, `Verify additive upgrade from the previous schema` em execução na consulta. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Helper GPS em cinco idiomas, erros próprios por identidade, pontos/pedidos/guardas preservados e reenvio confirmando um ponto SQL. Exigir PostgreSQL16/upgrade/suite343/restauro completo com contagens medidas e hashes iguais próprios para aceitação. Atualização documental posterior `[skip ci]` conserva o código. [Prova451](evidence/20260929_task451_local.json).

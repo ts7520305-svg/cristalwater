@@ -1,0 +1,192 @@
+{
+  "task": "TASK452",
+  "item": "C06-009",
+  "date": "2026-09-30",
+  "base": "05b0994b361487950fdceb757fdbc5895d4b63b6",
+  "scope": "Localize the GPS page own title, actions, labels, synchronization states, captured measurement time and owned errors in PT/EN/FR/ES/DE. Shared navigation and authentication notices remain outside this batch.",
+  "negative": [
+    {
+      "script": "test-field-gps-page-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1337,
+      "timedOut": false,
+      "logSha256": "49e61c41a7803a9cc89acb3c5a2497b936e80c30870c63224d9a7d6d3687f65f"
+    }
+  ],
+  "negativeDescription": "Before implementation, selecting English leaves the actual start-tracking button in Portuguese.",
+  "integration": [
+    {
+      "script": "test-field-gps-page-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 17803,
+      "timedOut": false,
+      "logSha256": "f1779fcc34d85819084dd2f4662ed35594d112b169bc3b8adc3f1441a3bcd92f"
+    },
+    {
+      "script": "test-field-gps-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5900,
+      "timedOut": false,
+      "logSha256": "4fe674992efea2e97ec12580e3ad16f0c78d6e598b23fd41b8a486a86f232c6d"
+    },
+    {
+      "script": "test-field-gps-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 8838,
+      "timedOut": false,
+      "logSha256": "2b546b58b98113ee40c5cff17e679dd0d948b2189ab04aac4fe13d7c369dbe77"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 1158,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "captureRun": [
+    {
+      "script": "test-field-gps-page-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 17664,
+      "timedOut": false,
+      "logSha256": "f1779fcc34d85819084dd2f4662ed35594d112b169bc3b8adc3f1441a3bcd92f"
+    }
+  ],
+  "withoutCaptureRun": [
+    {
+      "script": "test-field-gps-page-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15770,
+      "timedOut": false,
+      "logSha256": "f1779fcc34d85819084dd2f4662ed35594d112b169bc3b8adc3f1441a3bcd92f"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 40982,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6347,
+      "logSha256": "ff63b3469cee992d3c79309aaf8d9fd552c744b81804a4507d9fd5282f5349e1"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 564,
+      "logSha256": "22a8b3f0a2bb9c2d60d75ed3e0ce3da0686b72af0880c58dc212a79b05d1fdbe"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "harnessCorrections": [
+    "The initial language matrix wrongly required the stored language preference to remain unchanged. It now asserts the selected language in both user records, with all other identity fields and raw credentials unchanged.",
+    "A just-disabled action can retain focus until the browser next paints. The matrix now focuses an enabled control before its baseline, then still requires that exact focus and all disabled states to survive language changes.",
+    "Capture mode waits for the existing transient authentication toast to disappear naturally and uses a taller320px viewport to inspect the complete page. No product UI is removed or hidden."
+  ],
+  "coverage": [
+    "Real language selector,31 entries/155 translations,320/390/1440px layouts. Page-owned labels and dynamic states repaint the same elements, preserving focus, numeric accuracy, disabled states, credentials, account identity, GPS producer counts, local point bytes and SQL records.",
+    "Offline send and cached reopen retain the original UUID/account/latitude/longitude/accuracy/time. Actual position acquisition, tracking, unsupported geolocation, current-position and watcher permission callbacks, old unowned archive and page fallback errors are covered.",
+    "Owned errors use private identity and retain their original Error.message. External errors, identical text, forged copy and markup remain literal. Helper errors still update through the existing GPS error presenter.",
+    "Language changes during a held real response keep the confirmation button disabled and send no additional requests. A lost response is retried with identical point UUID/body/authorization, leaving one history row. The duplicate acknowledgement is shown as old, not as a newly updated position.",
+    "A subsequent current reading adds exactly one history row and displays rounded accuracy plus the original recordedAt in each locale. Account switching disables all actions and preserves the pending point. Restoring credentials does not unlock the stale page; cached reopening recovers the original account without writing to the other account.",
+    "Existing GPS recovery covers concurrent processes/tabs, storage failure, wrong or incomplete acknowledgements, transaction rollback, late account responses and old watcher callbacks. Session-browser regressions remain approved."
+  ],
+  "catalogue": {
+    "entries": 31,
+    "texts": 155,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "storageChanged": false,
+    "originalErrorMessagesChanged": false
+  },
+  "preservation": {
+    "parent": "05b0994b361487950fdceb757fdbc5895d4b63b6",
+    "operationalPageCodeReversedExactly": true,
+    "htmlReversedExactly": true,
+    "helperUnchanged": true,
+    "previousGroupOrderExact": true,
+    "previousGroups": 343,
+    "groups": 344,
+    "pageCopyEntries": 31,
+    "unchanged": [
+      "frontend/js/offline/offline-gps.js",
+      "frontend/gps.js",
+      "frontend/cw-field-write-store.js",
+      "frontend/cw-i18n.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/technician-gps.js": "aaeaa5d848cec8eebf5a5ef0a9fa4576e40754544a82c0b476f4ba7dcd26b2fd",
+    "frontend/technician-gps.html": "f722e95146d4f41e13b0c3eddf243a0f79e9105eab5e088cbbe6f51f08af34ed",
+    "frontend/sw.js": "f0bca6d8a3109770aba3cb307e7551b0cbe7ac46d2667e396d6e3f6872295c19",
+    "scripts/test-field-suite.js": "5d0057a3ea296033a4c097e1dc4a33a796f5fed32c9cbdf2d2ac7991964a46c5",
+    "scripts/test-field-gps-languages.js": "af55c048936239124ae528e390d2d96e85997becadcda57d5f4b59c626989ac9",
+    "scripts/test-field-gps-page-languages.js": "63ba6124b834b9342985fe56468ce9e89bee2767bbf45550a818925adb694d0a"
+  },
+  "visual": {
+    "fileSha256": "dd22da868a1e529aab252796ead380ada9ca09067fa27d9291138b4f218cd437",
+    "reviewed": true,
+    "finding": "At320px, German GPS actions/status/KPI content fits; confirmed measurement time is visible. Shared navigation still contains Portuguese and is outside this page-owned copy change."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "email/WhatsApp/notifications/fiscal/webhooks/background jobs disabled"
+  },
+  "previousNative": {
+    "task": "TASK451",
+    "code": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+    "run": 36667051825,
+    "job": 109733843295,
+    "status": "in_progress",
+    "successfulInitialSteps": 10,
+    "currentStep": "Run node scripts/test-field-suite.js",
+    "expectedGroups": 343,
+    "restore": "pending"
+  },
+  "limits": [
+    "PGlite does not replace PostgreSQL16, additive upgrade, the complete344-group integration suite or full database/uploaded-file restoration with measured counts and equal hashes.",
+    "GPS compatibility entry point, other C06 panels, shared navigation/authentication notices and C08/C10 remain open. This is not full device/theme acceptance.",
+    "32 completion tasks remain26 not started, one active(C06), five complete. Public repository authorized during development; private before completion/C32. No merge, deployment or external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
