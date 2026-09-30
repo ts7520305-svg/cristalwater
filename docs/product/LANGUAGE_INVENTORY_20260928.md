@@ -8,13 +8,17 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Validação complementar — TASK458 / gate documental
+
+Correção só de QA da espera `networkidle` que falhou no CI454, com documentos já Válidos/online. Regressão reproduzida com GET secundário retido; navegações aguardam DOM e prontidão documental original, com o GET ainda pendente. Browser/API aprovados e todas as guardas de titularidade/privacidade/cache/offline/13 modelos/bytes conservadas. Nenhuma fonte de produto/tradução alterada; cache240/runner349 inalterados. Publicação/gates349/restauro458 pendentes; CI454 continua falhado historicamente. Seis ficheiros, incluindo registo da publicação457. [Prova458](evidence/20260930_task458_local.json). Entradas abaixo históricas.
+
 ## Progresso funcional — TASK457 / C06-012 e C06-003, leitura e histórico
 
 `technician-field-mode.js`:38 entradas/190 textos para o painel comum — estados de leitura, prioridades, responsabilidades, ações, tempo decorrido, histórico e feedback. `cw-field-alert-journal.js`:dez entradas/50 textos para erros próprios e legado, por identidade privada; `Error.message` e `legacyWarning()` originais preservados. Nomes/títulos/detalhes persistidos e erros externos continuam literais; formatação PT de datas inalterada. Capturas imutáveis repintam os mesmos nós sem produtores/rede operacional. [Prova457](evidence/20260930_task457_local.json).
 
 Quatro integrações e gates locais aprovados:1 356 unitários/quatro técnicos/sintaxe. Cinco idiomas/320/390/1440; dez guardas/legado/falsas copies, campos de reserva/65min/datas, toast sobrescrito por texto idêntico, responsabilidades com nomes coincidentes, dois separadores, quota/sem readback/corrupção/retry, cache offline, apenas fecho físico remove causas, conta/dia isolados. Capturas alemãs320 revistas; sobreposição nav/auth continua C08. Cache240/runner349,348 grupos anteriores na ordem exata; operação idêntica ao inverter apresentação. Nove ficheiros.
 
-TASK453 aceite345/restauro128 tabelas51 ficheiros/hashes iguais. TASK454 falhou345/346 numa espera `networkidle` do teste de guias; documentos já Válidos/online, restauro não executado. Ensaio intacto passa localmente; corrigir prontidão em lote próprio antes de prosseguir. CI455/456 nas suites; publicação/gates349/restauro457 pendentes. Próximo funcional: títulos/detalhes das fontes ativas do painel e dashboard/hero; não traduzir o histórico antigo por coincidência textual. C06/C08/C10 abertas; contagens estáticas inalteradas. Entradas abaixo históricas.
+TASK453 aceite345/restauro128 tabelas51 ficheiros/hashes iguais. TASK454 falhou345/346 numa espera `networkidle` do teste de guias; documentos já Válidos/online, restauro não executado. Ensaio intacto passa localmente; corrigir prontidão em lote próprio antes de prosseguir. CI455/456 nas suites; código457 `f9fe9a0d` publicado, [CI36679865735](https://github.com/ts7520305-svg/cristalwater/actions/runs/36679865735) em execução; gates349/restauro pendentes. Próximo funcional: títulos/detalhes das fontes ativas do painel e dashboard/hero; não traduzir o histórico antigo por coincidência textual. C06/C08/C10 abertas; contagens estáticas inalteradas. Entradas abaixo históricas.
 
 ## Progresso funcional — TASK456 / C06-012, lista e alarmes de água
 

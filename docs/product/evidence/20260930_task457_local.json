@@ -462,14 +462,32 @@
     }
   ],
   "limits": [
-    "TASK457 publication and native PostgreSQL16/upgrade/full349-group suite/database and uploaded-file restore are pending. Local PGlite does not replace native acceptance.",
+    "TASK457 is published at its validated tree. Native PostgreSQL16/upgrade/full349-group suite/database and uploaded-file restore acceptance is pending; local PGlite does not replace native acceptance.",
     "TASK454 native run failed345/346: guide-read-scope browser reload waited10s for networkidle while logs already showed Válidos/online, with no page errors. Restore skipped. The unchanged guide test passes locally; this does not accept the failed native run. Stabilise readiness in a separate bounded task, preserving every ownership/privacy assertion.",
     "Category-specific active alert titles/details and dashboard/hero, shared push/auth/navigation and date policyC10 remain open. Stored titles/details/names remain literal.",
     "C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626",
+    "tree": "3e8f68a4b7be2ac4e1cbd7a4049058d13bed4cb0",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "8b74a23c2de027021acfbbd7b6b82e34487ca29d",
+    "originalHistoryBranch": "work/local-task457-20260930",
+    "ci": {
+      "run": 36679865735,
+      "job": 109772750476,
+      "head": "f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 7,
+      "currentStep": "Run npx playwright install --with-deps chromium",
+      "fullSuiteGroups": 349,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

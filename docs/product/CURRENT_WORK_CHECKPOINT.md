@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK458 local validada / prontidão do teste de guias
+
+**TASK458:** reparação limitada ao teste `test-field-guide-read-scope-ui.js`, após a falha nativa454. Um GET secundário retido reproduz com a espera antiga o timeout10s apesar de documentos Válidos/online. As três navegações online passam a esperar `domcontentloaded` e o predicado documental original; o ensaio exige documentos prontos com esse GET ainda pendente. Pedido libertado também em erro. Todas as asserções anteriores de titularidade/privacidade/dados conservadas, sem alongar timeouts. Nenhuma fonte de produto alterada. [Prova458](evidence/20260930_task458_local.json).
+
+**Validação:** ensaio browser corrigido e API de âmbito documental aprovados; dois colegas/perfis PIN/User, resposta200 de outra conta recusada, cache antigo/corrompido/privado preservado, offline/recuperação,320/390/1440, alvos44px sem colisão, zero escritas API/erros de página, snapshot13 modelos e ficheiro oficial intactos. Sintaxe do script aprovada. Testes1356/quatro técnicos/sintaxe integral da TASK457 continuam ligados às mesmas fontes de produto; não foram repetidos para esta alteração só de QA. Cache240/runner349 inalterados. Seis ficheiros, incluindo a publicação457 e documentação.
+
+**Publicação457:** código `f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626`, árvore `3e8f68a4b7be2ac4e1cbd7a4049058d13bed4cb0` igual à validada, checkout alinhado e histórico local em `work/local-task457-20260930`. [CI36679865735](https://github.com/ts7520305-svg/cristalwater/actions/runs/36679865735), job109772750476, no commit exato: sete etapas iniciais aprovadas e instalação Chromium em execução na consulta. TASK453 aceite345/restauro128 tabelas51 ficheiros; TASK452 aceite344/restauro128/51. TASK454 continua falhada345/346/restauro não executado; esta correção exige validação nativa própria. CI455/456 nas suites347/348 na última leitura.
+
+**Retoma:** publicar458 e exigir PostgreSQL16/upgrade/suite349/restauro completo no commit da correção; confirmar455–458 e corrigir novas falhas. Depois títulos/detalhes das fontes ativas do painel e dashboard/hero, preservando a identidade dos textos e os registos antigos. Leitura não significa fecho físico. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK457 local validada / leitura e histórico de alertas
 
 **TASK457 / C06-012 e C06-003:** painel comum com 38 entradas/190 textos e helper de histórico com dez entradas/50 textos PT/EN/FR/ES/DE. Estados de leitura, responsabilidades, ações, tempo decorrido, histórico, avisos e feedback por identidade. Registos originais, nomes/títulos persistidos, datas PT e erros externos continuam literais. Confirmar leitura não fecha água/bomba. [Prova457](evidence/20260930_task457_local.json).

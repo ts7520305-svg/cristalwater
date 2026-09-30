@@ -1,0 +1,105 @@
+{
+  "task": 458,
+  "date": "2026-09-30",
+  "base": "f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626",
+  "scope": "Bounded QA readiness repair for the guide ownership/privacy browser test that timed out in native TASK454. No production source changes.",
+  "nativeFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "job": 109756159173,
+    "code": "809aacf2fec42cfaff22490d19710aecdfbc80e2",
+    "groups": 346,
+    "passed": 345,
+    "failedScript": "scripts/test-field-guide-read-scope-ui.js",
+    "message": "page.reload: Timeout 10000ms exceeded waiting for networkidle",
+    "observedDocs": "Válidos",
+    "observedSource": "online",
+    "pageErrors": [],
+    "restore": "skipped",
+    "fullProof": "20260930_task457_local.json"
+  },
+  "negative": [
+    {
+      "script": "test-field-guide-read-scope-ui.js",
+      "code": 1,
+      "signal": null,
+      "ms": 12173,
+      "timedOut": false
+    }
+  ],
+  "negativeDescription": "New deterministic held GET reproduces the same10s networkidle timeout with the original wait unchanged; documents already Válidos/online and no page errors. The particular request active in the earlier native failure is not identified by its log.",
+  "positive": [
+    {
+      "script": "test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14324,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-guide-read-scope.js",
+      "code": 0,
+      "signal": null,
+      "ms": 4049,
+      "timedOut": false
+    }
+  ],
+  "change": [
+    "Three online navigations use domcontentloaded and the existing ready() predicate: fieldDocsValue=Válidos plus visible workGuideBox. Existing cold-offline navigation unchanged.",
+    "During actual offline-to-online recovery, a one-shot intercepted local GET remains pending while document readiness is asserted. The request is released afterward and in finally on failure. No product endpoint added.",
+    "Every original assertion preserved: two account families/colleagues, typed metadata/contacts/cost exclusion, wrong-owner successful reply rejection, old v2 and corrupt/private v3 cache byte preservation, cold offline/read recovery, three viewports/44px separated links, no browser errors/API writes,13-model snapshot and official file bytes unchanged."
+  ],
+  "preservation": {
+    "base": "f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626",
+    "originalSourceRestoredExactly": true,
+    "originalSha256": "95c5a0fc061cd262751ddddbcfc369cac33289f0f521e0e640af85521bd0e784",
+    "changedFilesBeforeDocs": 1,
+    "productionSourcesChanged": 0,
+    "existingAssertionsUnchanged": true,
+    "nativeGroups": 349,
+    "cacheVersion": 240
+  },
+  "sourceSha256": {
+    "scripts/test-field-guide-read-scope-ui.js": "147ff229c52a071bf1a8034d923caa58dd6ef8d6ce7aaec42f4679024fbacd5b"
+  },
+  "unchangedProductEvidence": {
+    "task": 457,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "483b5057453678d3249b73580d2063300f85d0dce960e1f3c68f14b16a997b69",
+      "frontend/cw-field-alert-journal.js": "0cc0e5b5588cd6fbd08e6c087509cc6951e82eb54b1a19337c9a397c026ef8d6",
+      "frontend/sw.js": "3dc01fd2b4f0bc4473c0658b475407bce062dd460e70feabc5df639b391d188c"
+    },
+    "unit": {
+      "tests": 1356,
+      "files": 138
+    },
+    "technician": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "gatesNotRerun": "Production sources unchanged from the locally validated TASK457; targeted guide browser/API and node syntax checked for this QA-only change."
+  },
+  "runner": {
+    "groups": 349,
+    "identicalToTASK457": true,
+    "cacheVersion": 240
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled"
+  },
+  "limits": [
+    "TASK458 publication/native349-group suite/upgrade/PostgreSQL16/database and uploaded-file restore pending. Native TASK454 remains historically failed; local success does not accept it.",
+    "TASK457 native CI in progress. TASK455/456 native suites/restores pending at last read; TASK453 accepted345/restored128 tables51 files and TASK452 accepted344/restored128/51.",
+    "No production UI change or new language completion claim. C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public development/private before completion/C32. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
