@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK465 / C06-QA-01, seletor de teste independente do idioma
+
+**TASK465 / C06-QA-01:** correção prioritária do teste de fotografias após falha nativa462. A fixture procurava o rótulo `Extra /`, traduzido pela TASK462; o percurso já estava em alemão. Seleção agora pelo índice da visita EXTRA com id exato no snapshot próprio do dia, seguida do clique real no botão existente e confirmação do contexto tipado. Mesmo id e piscina REGULAR/EXTRA conservados. Zero fontes de produto alteradas; seis ficheiros. O teste de navegação aguarda o valor esperado no formulário e exige igualdade integral do rascunho persistido, dentro do prazo original. [Prova465](evidence/20260930_task465_local.json)
+
+**Prova:** falha462 verificada no commit `e2e70d8cda65cee46aa78266dfd490d54524b4f5`, CI36698494469/job109832087499:354/355 na ordem exata, único erro no teste `test-field-photo-panel-languages.js`, restauro não executado; PostgreSQL16/upgrade/fontes confirmados. Reprodução local16038ms com o mesmo timeout7000ms. Após correção, três integrações e sintaxe dos dois testes aprovadas, incluindo todo o percurso foto offline/chooser antigo/upload EXTRA suspenso/resposta perdida/retry/foto e recibo únicos. Sem aumentar tempos, desligar assertions ou alterar UI/payloads. Cache246/runner359 inalterados. TASK461 já aceite353/restauro128/51; falhas históricas454 e462 ficam registadas.
+
+**Retoma:** publicar465, exigir gate/restauro do commit com a correção. Gates463/464 ainda em execução e anteriores à correção. Restaurar e publicar como TASK466 as traduções de produtos/rascunhos já validadas em seis integrações/1 356 unitários/quatro técnicos/sintaxe; checkpoint local preservado. Depois equipa/documentos e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK464 / C06-013, feedback de início e conclusão
 
 **TASK464 / C06-013:** feedback de início/conclusão e bloqueios de sessão/visita/documentos/ocorrências antigas com14 entradas/70 textos PT/EN/FR/ES/DE. Reutiliza o motivo documental privado e o apresentador da visita. Dois erros criados no handler recebem apresentação privada, conservando `Error.message`; erros do servidor, mesmo com texto igual, continuam literais. [Prova464](evidence/20260930_task464_local.json)

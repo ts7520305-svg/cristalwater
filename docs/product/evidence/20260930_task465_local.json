@@ -1,0 +1,190 @@
+{
+  "task": 465,
+  "date": "2026-09-30",
+  "base": "891bd02acd94d12aa0a1b5974e53edf783d22ae6",
+  "item": "C06-QA-01",
+  "scope": {
+    "productSources": 0,
+    "batchFiles": 6,
+    "description": "Repair the photographic integration fixture after TASK462 localized the EXTRA label. Also wait for the expected form value after typed round navigation and require the full persisted draft unchanged. No product or runner change."
+  },
+  "nativeFailure": {
+    "task": 462,
+    "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+    "run": 36698494469,
+    "job": 109832087499,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "3b9c17630d4350a7c5d25e40033bba4c28177dacb634d69f2a880c9912fb6984",
+      "frontend/technician-field-mode.html": "d6c42a4c15349c79caed2a1f8e87340846c60745a290a229daeda4c762fd0b5b",
+      "frontend/sw.js": "bc9eb42bb388f13cc5c91edc7de93f3fb3d216c4160699aca376062a6c1ccc05",
+      "scripts/test-field-round-list-languages.js": "315c08800d619563e37793ea25d7812bc4f0f522a8636608f03b653653ee04c5",
+      "scripts/test-field-round-navigation-languages.js": "7c071237c680acc6dc571e4a1648b07ca4652fce0265ab020c0001303e47b9a7",
+      "scripts/test-field-suite.js": "c93e052384a7f854e024f2979c91c0dcf6d75a2a6a6860819cb52dd6dba829bf"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "5bc6ccfee0332d040563fd6384d4bf08d4065b1b",
+      "frontend/technician-field-mode.html": "4ed90a305765e1c7307d79bb2f695d5f1dde0b66",
+      "frontend/sw.js": "8cd97fe4f00ee09c24488c19b7ea180e2ea165c5",
+      "scripts/test-field-round-list-languages.js": "3a8a122d8b6b282409ed9af1ca6f2257c3f1ec93",
+      "scripts/test-field-round-navigation-languages.js": "a6f5d35de70e3871379125eae39242a77cad7afc",
+      "scripts/test-field-suite.js": "c2e63bd57adfde4619b9b33516cf16878b6616c3"
+    },
+    "status": "completed",
+    "conclusion": "failure",
+    "passed": 354,
+    "total": 355,
+    "exactScriptOrderVerified": true,
+    "sourceBlobsVerified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "failure": {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 17496,
+      "message": "locator.click: Timeout7000ms exceeded searching #visitList button[data-visit-index] by hasText:'Extra /' at line97 after the language matrix and offline reload.",
+      "cause": "TASK462 localizes that status label. The photo fixture has REGULAR and EXTRA with the same numeric id and pool; selection must use the typed day-snapshot index and retain the real UI click.",
+      "fixTask": 465
+    },
+    "groupsSha256": "d50a4e217000cae3262a45c45a69ba17daf6d31b0e4eef95435f394d659c2549"
+  },
+  "negative": {
+    "run": "qa-task465/run-1790766596490",
+    "script": "test-field-photo-panel-languages.js",
+    "code": 1,
+    "ms": 16038,
+    "error": "Timeout7000ms at line97: hasText Extra / no longer matches the German status label."
+  },
+  "fix": "Resolve exactly one EXTRA matching the original numeric id in the owned CWFieldDaySnapshot, then click the existing data-visit-index button; assert German locale and wait for the original typed context. Fixture keeps equal REGULAR/EXTRA id and pool. No translated-label lookup, DOM data weakening, direct visit selection or timeout increase.",
+  "integration": [
+    {
+      "script": "test-field-photo-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15745,
+      "timedOut": false,
+      "evidence": "qa-task465/run-1790766954687"
+    },
+    {
+      "script": "test-field-round-navigation-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20548,
+      "timedOut": false,
+      "evidence": "qa-task465/run-1790766954687"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 876,
+      "timedOut": false,
+      "evidence": "qa-task465/run-1790766954687"
+    }
+  ],
+  "syntax": {
+    "scripts": [
+      "scripts/test-field-photo-panel-languages.js",
+      "scripts/test-field-round-list-languages.js"
+    ],
+    "nodeCheck": true
+  },
+  "preservation": {
+    "productTreeUnchanged": true,
+    "runnerUnchanged": true,
+    "groups": 359,
+    "testBudgets": {
+      "locatorMs": 7000,
+      "scenarioMs": 90000,
+      "runnerMs": 120000
+    },
+    "testBaseSha256": "acebc906068d59398ca031e6f329df7aea65d88bb3d3c73e12b17364cfae3bc6"
+  },
+  "coverage": [
+    "Original five-language320/390/1440 photograph panel scenario completes: cancel/invalid file/quota/camera failure, offline file bytes/name/hash/UUID, typed stale chooser, actual held/lost/retried EXTRA upload, one photo/receipt, original pending regular request and unchanged visit rows.",
+    "Existing round navigation matrix and browser component checks pass. Photo fix changes only fixture selection; the genuine button click and original downstream typed/photo assertions remain."
+  ],
+  "sourceSha256": {
+    "scripts/test-field-photo-panel-languages.js": "d2665fd9e0126bff0eca8b4f4d215d8ccb66f4ff20f54a4f9104a8b8bc4af37a",
+    "scripts/test-field-round-list-languages.js": "5854ff6bed839203d851f88633513d36ffb7f5aa44617863a1ce592bdc4d81f6"
+  },
+  "qaCorrections": [
+    {
+      "run": "qa-task465/run-1790766659096",
+      "script": "test-field-round-navigation-languages.js",
+      "code": 1,
+      "ms": 20626,
+      "detail": "Complementary local run read an empty notes field immediately after selecting REGULAR, expected the literal saved note. Native462 had passed this group. This run did not capture persisted draft contents at failure, so no data-loss or product-race root cause is claimed."
+    },
+    {
+      "run": "qa-task465/run-1790766847387",
+      "script": "round-nav-diagnostics.cjs",
+      "code": 0,
+      "ms": 21039,
+      "detail": "Instrumented isolated rerun passed. Snapshots retained the original REGULAR draft note and separate blank EXTRA draft before and after final selection. Test now verifies the original note in storage before selection, waits within the existing9000ms for typed context plus exact field value, then requires the whole stored draft deep-equal. No retry, timeout extension, or product change."
+    }
+  ],
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "previousNativeAcceptance": {
+    "task": 461,
+    "groups": 353,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "proof": "20260930_task464_local.json"
+  },
+  "pendingNative": [
+    {
+      "task": 463,
+      "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+      "run": 36701344336,
+      "job": 109841249507,
+      "status": "in_progress",
+      "groups": 357,
+      "restore": "pending",
+      "predatesFix": true
+    },
+    {
+      "task": 464,
+      "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
+      "run": 36704725001,
+      "job": 109852165087,
+      "status": "in_progress",
+      "groups": 359,
+      "restore": "pending",
+      "predatesFix": true
+    },
+    {
+      "task": 465,
+      "status": "not_yet_published",
+      "groups": 359,
+      "restore": "pending"
+    }
+  ],
+  "next": "Publish the locally validated product/draft translations as TASK466; original prepared source hashes and six passing integrations preserved in qa-task466.",
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "annualContract": "deferred"
+  }
+}
