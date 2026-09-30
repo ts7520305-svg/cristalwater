@@ -1,0 +1,500 @@
+{
+  "task": 459,
+  "date": "2026-09-30",
+  "base": "46d03b3d706f2ad65074a82f01b98056d69ba5ec",
+  "item": "C06-012 / C06-005",
+  "scope": "Active operational-alert source titles/details in PT/EN/FR/ES/DE and immediate unavailable-reminder board refresh. Original source objects and historical strings remain unchanged.",
+  "catalogue": {
+    "newEntries": 26,
+    "newTexts": 130,
+    "coreAlertTotalEntries": 64,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "privateIdentity": "WeakMap source copies plus branded immutable joined/helper presentation; raw strings are not translated by matching their content."
+  },
+  "negative": [
+    {
+      "script": "test-field-alert-source-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1733,
+      "timedOut": false
+    }
+  ],
+  "negativeDescription": "Original source shows P1 - Visita atrasada after selecting English; the new browser requires P1 - Delayed visit.",
+  "unreadableRefresh": {
+    "negative": {
+      "script": "test-field-alert-source-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 2646,
+      "timedOut": false
+    },
+    "observed": "With translated sources but the original water error early return, real corrupt reminder storage plus cw:water-state-updated leaves zero REMINDER_UNAVAILABLE rows. The strict new test expects one.",
+    "fix": "renderWaterReminders refreshes the interruption board before returning on its read error. The unreadable original reminder bytes stay untouched. Normal journal deduplication still applies.",
+    "classification": "A small operational error-refresh correction, not presentation-only."
+  },
+  "integration": [
+    {
+      "script": "test-field-alert-source-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 34667,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-alert-board-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 18825,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-water-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 25167,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-reminder-error-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12197,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-alert-source.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5536,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 877,
+      "timedOut": false
+    }
+  ],
+  "withoutCapture": [
+    {
+      "script": "test-field-alert-source-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 36413,
+      "timedOut": false
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 38830,
+      "log": "/workspace/scratch/b364087eee9d/qa-task459/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7818,
+      "log": "/workspace/scratch/b364087eee9d/qa-task459/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 661,
+      "log": "/workspace/scratch/b364087eee9d/qa-task459/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "tests": 1356,
+    "files": 138
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Actual field page, real language selector,320/390/1440: urgent count, delayed visit, four unavailable mandatory document blockers, typed pump reminders, legacy pump signals and unreadable-reminder source.",
+    "Original actor Sistema, pool Piscina, client Cliente, actor pendente backend and HTML-like pool name remain literal. Actual fallback actor/pool/client and missing/invalid duration translate; valid legacy duration65min and reminder dates keep existing PT formatting.",
+    "Corrupt reminder bytes remain unchanged. Real helper Error identity translates; a new external Error with the same text and a forged copy stays literal. Optional explicit helper language is pure.",
+    "Language changes preserve DOM nodes, focus, form notes/values, tokens, visit context, local bytes and SQL rows, with no producer reads/writes or operational requests. One-second document/session guards remain running and are counted separately from producers.",
+    "Read-only offline route fixtures and reminder fallback fixtures are restored to their exact original bytes before real operations/network sync.",
+    "REGULAR/EXTRA share the same numeric visit ID but use distinct local IDs/pools. Actual UI creates both reminders offline. Read confirmation leaves the cause OPEN. Five-language physical cancellation writes nothing; actual physical closes synchronize to exactly two SQL reminders and one OPEN/one CLOSED history each. No RESOLVED journal entries or injected HTML.",
+    "Regression scripts cover common alert/history behavior, water-list error/alarm flow, helper error guards, legacy alert source and browser component."
+  ],
+  "qaCorrections": [
+    "A false-positive producer count included the existing one-second CWFieldDocuments.same session guard. It remains enabled and is asserted active, with its count separated from producer operations.",
+    "Legacy alert selector now asserts the actual existing visit-REGULAR-ID identity and matches the exact DOM ID to its journal entry. Current reminder fixtures emit the helper's actual water/reminder events.",
+    "Creation uses the actual Agora pump panel. Nonexistent note controls from the draft test were removed; existing visit/water notes are still checked. No product navigation or data identity changed for these test corrections."
+  ],
+  "preservation": {
+    "base": "46d03b3d706f2ad65074a82f01b98056d69ba5ec",
+    "sources": {
+      "frontend/cw-field-reminders.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "b74c764352320890f0f979af8a5d2a90ec630a8fd236ed9a1056d391f8391d0b"
+      },
+      "frontend/sw.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "3dc01fd2b4f0bc4473c0658b475407bce062dd460e70feabc5df639b391d188c"
+      },
+      "frontend/technician-field-mode.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "483b5057453678d3249b73580d2063300f85d0dce960e1f3c68f14b16a997b69"
+      },
+      "scripts/test-field-suite.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "b3d5d23b9afdab6d22e11b8a28a53fce2224ed17370745e88ee71011848adaad"
+      }
+    },
+    "previousGroups": 349,
+    "newGroups": 350,
+    "priorExactOrderPreserved": true,
+    "operationalChange": "Unreadable reminders now refresh the alert board before the water renderer returns; no stored reminder bytes are changed. Do not classify this as presentation-only."
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "a1fdd1b11a5cab27e3bc35f14ea0446836f63c13e1dc888bc215b6c692468323",
+    "frontend/cw-field-reminders.js": "b4bc2a18d08d5850bc26decd1684b7aa1b42c1f550945e3761d588586199aabe",
+    "frontend/sw.js": "839cfac2b9ff280ae9e98578bb8191b6fbef08c2ee9fc5add9c5136d09a6607e",
+    "scripts/test-field-alert-source-languages.js": "61ea888e70c79b47e91c8fad2f4423d57ea88c3ef7bbb5851b6da038a2b7df80",
+    "scripts/test-field-suite.js": "4f0289edc7f512957315078051e7d73cf483bdd793ae4edc46a7df2dbe990d18"
+  },
+  "visual": {
+    "file": "alert-source-de-320.png",
+    "sha256": "0772a8f6f09ab5e58067b2cc0a9faf8d6a708c77c67b39b27eadd5a03b7c63f4",
+    "review": "German320 alert text wraps inside the card; supplied HTML-like name displays literally. Existing shared fixed navigation/auth toast overlays the long capture; C08 remains open. This is not full-page layout acceptance."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled"
+  },
+  "nativeAccepted": [
+    {
+      "task": 455,
+      "code": "8e1c714a0d72ae0643f9d1aab45c02978ef942fe",
+      "run": 36675696482,
+      "job": 109760049353,
+      "counts": {
+        "total": 347,
+        "passed": 347
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "de3b4873fa4d399461eb71d2f2ea4b0177b27c4ec8e7b0fde0806abd69088135",
+      "sourceHashesVerified": {
+        "frontend/crystal-os-v2-shell.js": "2a9c6ada7c70d14305826385d515d9e8a35e373a7c869cafc8d47c53b96761c6",
+        "frontend/sw.js": "2528b5f7896a8f077298a18cd2e291608970065eebec52d0b86cb5e94681b023",
+        "scripts/test-field-water-panel-languages.js": "7182b55670a513c07cf6e99319ac0c41c8b1c42a9938d99cca0a4c52e70866cc",
+        "scripts/test-field-suite.js": "de3b4873fa4d399461eb71d2f2ea4b0177b27c4ec8e7b0fde0806abd69088135"
+      },
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupEvidenceSha256": "426e2c34885fb20a849917af4713eba5df3ff034056a538f3ce9dd9e30ed83ec",
+      "groupsEvidenceCount": 347
+    },
+    {
+      "task": 456,
+      "code": "8cb313bca74787473d30d372c4457a8ec5a72083",
+      "run": 36677835725,
+      "job": 109766594583,
+      "counts": {
+        "total": 348,
+        "passed": 348
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "c047e906bcc114f220ce862d6f8ab9f0373737e4873d86d1e36bd88bbd784b1f",
+      "sourceHashesVerified": {
+        "frontend/technician-field-mode.js": "7e76361b39a7c1a03c8385dd2a0b14f20433c789036707f9ee3be3867f53d461",
+        "frontend/crystal-os-v2-shell.js": "006d4f4d719498cc0a827756bbf9f3b78dc13c6a369dbf76f87bb3429a92b31c",
+        "frontend/sw.js": "3f4af6e78389cb4ece2164d2b0f01ad3cde16df746adab7204234e56179b81d2",
+        "scripts/test-field-water-list-languages.js": "e7b5f36a590a648efcbcc358a4ddde37af4e192042379afb5723542afe99f0d2",
+        "scripts/test-field-water-panel-languages.js": "27030553c3a32792f63039f4ab65542303af2a176ebe93fd715a246d5f08e1de",
+        "scripts/test-field-suite.js": "c047e906bcc114f220ce862d6f8ab9f0373737e4873d86d1e36bd88bbd784b1f"
+      },
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupEvidenceSha256": "cbb8e77e9c3605cea2ab097eb19a1f75d217d55b37598c9aad120ac9cbc966da",
+      "groupsEvidenceCount": 348
+    }
+  ],
+  "nativeFailed": {
+    "task": 454,
+    "code": "809aacf2fec42cfaff22490d19710aecdfbc80e2",
+    "run": 36674413317,
+    "job": 109756159173,
+    "passed": 345,
+    "groups": 346,
+    "restore": "skipped",
+    "reason": "Guide browser networkidle timeout; historical failure preserved. TASK458 is the separate readiness correction and requires its own completed native gate."
+  },
+  "pendingNative": [
+    {
+      "task": 457,
+      "jobs": [
+        {
+          "id": 109772750476,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36679865735,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task": 458,
+      "jobs": [
+        {
+          "id": 109774351817,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36680397599,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "TASK459 local PGlite results do not replace native PostgreSQL16, additive upgrade, exact350-group suite and database/uploaded-file restore at the published code.",
+    "Document source browser assertions cover the four UNAVAILABLE required states. EXPIRED/PENDING/session-confirmation/mismatch translations and unchanged selection predicates were reviewed in source; this task does not claim new browser acceptance of those document lifecycle branches.",
+    "Dashboard/hero source presentation remains next. Shared push/auth/navigation and date-policy C10 remain open. Historical raw source titles/details and Error.message remain original.",
+    "C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. Only work/field-readiness-20260915-simulation. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

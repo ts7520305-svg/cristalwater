@@ -169,10 +169,10 @@
 };
     const specs = new WeakSet(), errors = new WeakMap();
     function value(key) { const entry = Object.freeze({ key }); specs.add(entry); return entry; }
-    function format(entry) {
+    function format(entry, language = typeof document === 'undefined' ? 'pt' : document.documentElement?.lang || 'pt') {
       if (!specs.has(entry)) return String(entry ?? '');
-      const language = (typeof document === 'undefined' ? 'pt' : document.documentElement?.lang || 'pt').toLowerCase().split('-')[0];
-      return copy[entry.key][Math.max(0, languages.indexOf(language))];
+      const selected = String(language).toLowerCase().split('-')[0];
+      return copy[entry.key][Math.max(0, languages.indexOf(selected))];
     }
     function problem(key) { const error = Error(copy[key][0]); errors.set(error, value(key)); return error; }
     return { problem, presentation: Object.freeze({ format, error: error => errors.get(error) || String(error?.message ?? ''), legacyWarning: () => legacyWarning() ? value('legacy') : '' }) };

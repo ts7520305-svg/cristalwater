@@ -691,12 +691,198 @@
     "{read} {write}",
     "{read} {write}",
     "{read} {write}"
+  ],
+  "sourcePumpTitle": [
+    "P0 - Bomba em manual",
+    "P0 - Pump in manual mode",
+    "P0 - Pompe en mode manuel",
+    "P0 - Bomba en modo manual",
+    "P0 - Pumpe im Handbetrieb"
+  ],
+  "sourcePumpSignal": [
+    "Quem ativou: {who} | Piscina: {pool} | Duração: {duration} | Estado: {status}",
+    "Activated by: {who} | Pool: {pool} | Duration: {duration} | Status: {status}",
+    "Activée par : {who} | Piscine : {pool} | Durée : {duration} | État : {status}",
+    "Activó: {who} | Piscina: {pool} | Duración: {duration} | Estado: {status}",
+    "Aktiviert von: {who} | Pool: {pool} | Dauer: {duration} | Status: {status}"
+  ],
+  "sourceActivatorUnknown": [
+    "por confirmar",
+    "to be confirmed",
+    "à confirmer",
+    "por confirmar",
+    "noch zu bestätigen"
+  ],
+  "sourcePoolUnknown": [
+    "Piscina por confirmar",
+    "Pool to be confirmed",
+    "Piscine à confirmer",
+    "Piscina por confirmar",
+    "Pool noch zu bestätigen"
+  ],
+  "sourcePumpReminder": [
+    "{pool} | {client} | Confirmar modo automático até {when}",
+    "{pool} | {client} | Confirm automatic mode by {when}",
+    "{pool} | {client} | Confirmer le mode automatique avant {when}",
+    "{pool} | {client} | Confirmar el modo automático antes de {when}",
+    "{pool} | {client} | Automatikbetrieb bis {when} bestätigen"
+  ],
+  "sourcePool": [
+    "Piscina",
+    "Pool",
+    "Piscine",
+    "Piscina",
+    "Pool"
+  ],
+  "sourceClient": [
+    "Cliente",
+    "Client",
+    "Client",
+    "Cliente",
+    "Kunde"
+  ],
+  "sourceUnavailableTitle": [
+    "P0 - Água e bombas por confirmar",
+    "P0 - Water and pumps need confirmation",
+    "P0 - Eau et pompes à confirmer",
+    "P0 - Agua y bombas por confirmar",
+    "P0 - Wasser und Pumpen noch zu bestätigen"
+  ],
+  "sourceCriticalTitle": [
+    "P0 - Problema critico",
+    "P0 - Critical problem",
+    "P0 - Problème critique",
+    "P0 - Problema crítico",
+    "P0 - Kritisches Problem"
+  ],
+  "sourceCriticalDetail": [
+    "{count} problema(s) critico(s) pendente(s).",
+    "{count} critical problem(s) pending.",
+    "{count} problème(s) critique(s) en attente.",
+    "{count} problema(s) crítico(s) pendiente(s).",
+    "{count} kritische Probleme ausstehend."
+  ],
+  "sourceDelayedTitle": [
+    "P1 - Visita atrasada",
+    "P1 - Delayed visit",
+    "P1 - Visite en retard",
+    "P1 - Visita atrasada",
+    "P1 - Verspäteter Besuch"
+  ],
+  "sourceDelayedDetail": [
+    "{pool} com atraso face ao planeado.",
+    "{pool} is behind schedule.",
+    "{pool} est en retard sur le planning.",
+    "{pool} lleva retraso respecto a lo previsto.",
+    "{pool} liegt hinter dem Zeitplan."
+  ],
+  "sourceDocsTitle": [
+    "P1 - Documento obrigatorio em falta",
+    "P1 - Required document missing",
+    "P1 - Document obligatoire manquant",
+    "P1 - Falta un documento obligatorio",
+    "P1 - Erforderliches Dokument fehlt"
+  ],
+  "sourceDocsFallback": [
+    "Documentacao da viatura incompleta para operacao segura.",
+    "Vehicle documentation is incomplete for safe operation.",
+    "Les documents du véhicule sont incomplets pour une utilisation sûre.",
+    "La documentación del vehículo está incompleta para operar con seguridad.",
+    "Die Fahrzeugunterlagen sind für einen sicheren Betrieb unvollständig."
+  ],
+  "sourceDocsReason": [
+    "Bloqueio documental - {blockers}",
+    "Document restriction - {blockers}",
+    "Blocage documentaire - {blockers}",
+    "Bloqueo documental - {blockers}",
+    "Dokumentensperre - {blockers}"
+  ],
+  "sourceDocBlocker": [
+    "{name}: {state}",
+    "{name}: {state}",
+    "{name} : {state}",
+    "{name}: {state}",
+    "{name}: {state}"
+  ],
+  "sourceDocTransport": [
+    "Guia AT",
+    "AT transport document",
+    "Document de transport AT",
+    "Documento de transporte AT",
+    "AT-Transportdokument"
+  ],
+  "sourceDocWork": [
+    "Guia de obra",
+    "Work document",
+    "Document de travail",
+    "Documento de trabajo",
+    "Arbeitsdokument"
+  ],
+  "sourceDocInsurance": [
+    "Seguro",
+    "Insurance",
+    "Assurance",
+    "Seguro",
+    "Versicherung"
+  ],
+  "sourceDocInspection": [
+    "Inspeção",
+    "Inspection",
+    "Contrôle technique",
+    "Inspección",
+    "Fahrzeugprüfung"
+  ],
+  "sourceDocUnavailable": [
+    "Indisponível",
+    "Unavailable",
+    "Indisponible",
+    "No disponible",
+    "Nicht verfügbar"
+  ],
+  "sourceDocExpired": [
+    "Expirado",
+    "Expired",
+    "Expiré",
+    "Caducado",
+    "Abgelaufen"
+  ],
+  "sourceDocPending": [
+    "Pendente",
+    "Pending",
+    "En attente",
+    "Pendiente",
+    "Ausstehend"
+  ],
+  "sourceDocValid": [
+    "Válido",
+    "Valid",
+    "Valide",
+    "Válido",
+    "Gültig"
+  ],
+  "sourceDocConfirm": [
+    "Documentos por confirmar para a sessão, viatura e dia atuais",
+    "Documents need confirmation for the current session, vehicle and day",
+    "Documents à confirmer pour la session, le véhicule et le jour actuels",
+    "Documentos por confirmar para la sesión, el vehículo y el día actuales",
+    "Dokumente für die aktuelle Sitzung, das Fahrzeug und den Tag noch zu bestätigen"
+  ],
+  "sourceDocMismatch": [
+    "As guias AT e de obra não correspondem. Atualize os documentos.",
+    "The AT transport and work documents do not match. Refresh the documents.",
+    "Les documents de transport AT et de travail ne correspondent pas. Actualisez les documents.",
+    "Los documentos de transporte AT y de trabajo no coinciden. Actualice los documentos.",
+    "AT-Transportdokument und Arbeitsdokument stimmen nicht überein. Aktualisieren Sie die Dokumente."
   ]
 };
-    const specs = new WeakSet(), bindings = new Map();
+    const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap();
     function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
+    function join(parts, separator = ' | ') { const entry = Object.freeze({ parts: Object.freeze([...parts]), separator }); specs.add(entry); return entry; }
+    function reminder(value) { const entry = Object.freeze({}); reminderSpecs.set(entry, value); return entry; }
     function format(entry, language = document.documentElement.lang || 'pt') {
+      if (reminderSpecs.has(entry)) return window.CWFieldReminders.presentation.format(reminderSpecs.get(entry), language);
       if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
+      if (entry.parts) return entry.parts.map(part => format(part, language)).join(entry.separator);
       const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
       return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key], language));
     }
@@ -719,7 +905,7 @@
     window.addEventListener('cw-language-change', paint);
     let lastLanguage = document.documentElement.lang;
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return { value, format, bind, clear, clearTree, notify };
+    return { value, join, reminder, format, bind, clear, clearTree, notify };
   })();
 
   let visits = [];
@@ -792,6 +978,9 @@
   let opJournalReadWarning = '', opJournalWriteWarning = '', opJournalBusy = false, pumpRemindersError = '';
   let opJournalReadCopy = '', opJournalWriteCopy = '';
   const alertHistoryCopy = new Map();
+  const alertSourceCopies = new WeakMap(), pumpSourceCopies = new WeakMap(), documentSourceCopies = new WeakMap();
+  let docsBlockReasonCopy = '', pumpRemindersErrorCopy = '';
+  function withAlertSource(item, title, detail) { alertSourceCopies.set(item, { title: alertUi.value(title), detail }); return item; }
   const opJournalAttempts = new Set();
 
   function safeSessionRead(key, fallback) {
@@ -1130,13 +1319,14 @@
     ].some((value) => value === true || String(value).toLowerCase() === "true");
     const active = manualFlag || stateText.includes("MANUAL");
 
-    const who = firstPresent([
+    const whoValue = firstPresent([
       equipment.pumpManualBy,
       equipment.manualBy,
       visit?.pumpManualBy,
       visit?.manualBy,
       visit?.lastUpdatedBy,
-    ]) || "pendente backend";
+    ]);
+    const who = whoValue || "pendente backend";
     const since = firstPresent([
       equipment.pumpManualAt,
       equipment.manualAt,
@@ -1149,7 +1339,7 @@
     const hasBackendSignal = manualFlag || Boolean(stateRaw);
     const hasFullMetadata = Boolean(since && who && who !== "pendente backend");
 
-    return {
+    const signal = {
       active,
       who,
       poolName,
@@ -1160,6 +1350,8 @@
       hasFullMetadata,
       dependencyPending: !hasBackendSignal || !hasFullMetadata,
     };
+    pumpSourceCopies.set(signal, { who: whoValue || alertUi.value('sourceActivatorUnknown'), pool: visit?.pool?.name || alertUi.value('sourcePoolUnknown'), duration: since ? alertDurationCopy(since) : alertUi.value('unavailableTime'), status });
+    return signal;
   }
 
   function hasP0Interruption(visit = current()) {
@@ -1593,19 +1785,27 @@
       }),
     };
 
+    const blockerCopies = [];
     const blockers = Object.entries(states)
       .filter(([, state]) => state.required && state.code !== "VALID")
-      .map(([key, state]) => `${({transport:"Guia AT",workGuide:"Guia de obra",insurance:"Seguro",inspection:"Inspeção"})[key] || key}: ${state.label}`);
-    if (!documentsLoaded || !window.CWFieldDocuments.same(docsContext) || docsContext.vehicleId !== Number($('#vehicleId')?.value)) blockers.push('Documentos por confirmar para a sessão, viatura e dia atuais');
-    if (activeTransportGuide?.id && activeWorkGuide?.guideId && activeTransportGuide.id !== activeWorkGuide.guideId) blockers.push('As guias AT e de obra não correspondem. Atualize os documentos.');
+      .map(([key, state]) => {
+        const name = ({ transport: 'sourceDocTransport', workGuide: 'sourceDocWork', insurance: 'sourceDocInsurance', inspection: 'sourceDocInspection' })[key];
+        const label = ({ UNAVAILABLE: 'sourceDocUnavailable', EXPIRED: 'sourceDocExpired', PENDING: 'sourceDocPending', VALID: 'sourceDocValid' })[state.code];
+        blockerCopies.push(alertUi.value('sourceDocBlocker', { name: name ? alertUi.value(name) : key, state: label ? alertUi.value(label) : state.label }));
+        return `${({transport:"Guia AT",workGuide:"Guia de obra",insurance:"Seguro",inspection:"Inspeção"})[key] || key}: ${state.label}`;
+      });
+    if (!documentsLoaded || !window.CWFieldDocuments.same(docsContext) || docsContext.vehicleId !== Number($('#vehicleId')?.value)) { blockers.push('Documentos por confirmar para a sessão, viatura e dia atuais'); blockerCopies.push(alertUi.value('sourceDocConfirm')); }
+    if (activeTransportGuide?.id && activeWorkGuide?.guideId && activeTransportGuide.id !== activeWorkGuide.guideId) { blockers.push('As guias AT e de obra não correspondem. Atualize os documentos.'); blockerCopies.push(alertUi.value('sourceDocMismatch')); }
     const readyForOperation = blockers.length === 0;
 
-    return {
+    const result = {
       states,
       blockers,
       readyForOperation,
       reason: readyForOperation ? "" : `Bloqueio documental - ${blockers.join(" | ")}`,
     };
+    documentSourceCopies.set(result, readyForOperation ? '' : alertUi.value('sourceDocsReason', { blockers: alertUi.join(blockerCopies) }));
+    return result;
   }
 
   function setCrewDocStatus(selector, ok, valueId, metaId, value, meta) {
@@ -1875,8 +2075,8 @@
   }
 
   function activePumpReminders() {
-    try { const rows = window.CWFieldReminders?.list('PUMP_MANUAL') || []; pumpRemindersError = ''; return rows.filter(row => row.status !== 'CLOSED'); }
-    catch (error) { pumpRemindersError = error.message; return []; }
+    try { const rows = window.CWFieldReminders?.list('PUMP_MANUAL') || []; pumpRemindersError = ''; pumpRemindersErrorCopy = ''; return rows.filter(row => row.status !== 'CLOSED'); }
+    catch (error) { pumpRemindersError = error.message; pumpRemindersErrorCopy = window.CWFieldReminders?.presentation?.error(error) ?? error.message; return []; }
   }
 
   function exceptionDurationLabel(isoStart) {
@@ -1899,7 +2099,7 @@
     const pumpReminders = activePumpReminders();
 
     if (pump.active && !pumpReminders.some(row => row.poolId === (visit?.poolId || visit?.pool?.id))) {
-      items.push({
+      items.push(withAlertSource({
         id: `pump-manual:${visitKey(visit)}:${String(pump.since || 'unknown')}`,
         category: "PUMP_MANUAL",
         title: "P0 - Bomba em manual",
@@ -1908,15 +2108,15 @@
         createdBy: pump.who || "Sistema",
         createdAt: pump.since || nowIso,
         targetAction: "problem",
-      });
+      }, 'sourcePumpTitle', alertUi.value('sourcePumpSignal', pumpSourceCopies.get(pump))));
     }
 
-    pumpReminders.forEach(reminder => items.push({
+    pumpReminders.forEach(reminder => items.push(withAlertSource({
       id: `pump-manual:${reminder.visitType}:${reminder.localId}`,
       category: 'PUMP_MANUAL', title: 'P0 - Bomba em manual', priority: 'P0',
       detail: `${reminder.poolName || 'Piscina'} | ${reminder.clientName || 'Cliente'} | Confirmar modo automático até ${formatDate(reminder.dueAt)}`,
       createdBy: reminder.technicianName || 'Técnico', createdAt: reminder.createdAt || nowIso, targetAction: 'pump',
-    }));
+    }, 'sourcePumpTitle', alertUi.value('sourcePumpReminder', { pool: reminder.poolName || alertUi.value('sourcePool'), client: reminder.clientName || alertUi.value('sourceClient'), when: formatDate(reminder.dueAt) }))));
 
     activeWaterReminders().forEach((reminder) => {
       items.push({
@@ -1931,11 +2131,11 @@
       });
     });
 
-    if (waterRemindersError || pumpRemindersError) items.push({ id: 'reminders-unavailable:device', category: 'REMINDER_UNAVAILABLE', title: 'P0 - Água e bombas por confirmar', priority: 'P0', detail: waterRemindersError || pumpRemindersError, createdBy: 'Sistema', createdAt: nowIso, targetAction: 'water' });
+    if (waterRemindersError || pumpRemindersError) items.push(withAlertSource({ id: 'reminders-unavailable:device', category: 'REMINDER_UNAVAILABLE', title: 'P0 - Água e bombas por confirmar', priority: 'P0', detail: waterRemindersError || pumpRemindersError, createdBy: 'Sistema', createdAt: nowIso, targetAction: 'water' }, 'sourceUnavailableTitle', alertUi.reminder(waterRemindersError ? waterRemindersErrorCopy : pumpRemindersErrorCopy)));
     const urgentProblems = pendingProblems.filter((problem) => String(problem.severity || "").toUpperCase() === "URGENTE");
     if (urgentProblems.length) {
       const first = urgentProblems[0];
-      items.push({
+      items.push(withAlertSource({
         id: `critical-problem:${visit?.visitType || 'REGULAR'}:${String(first.visitId || visit?.id || "none")}:${visit?.poolId || visit?.pool?.id || 'none'}`,
         category: "CRITICAL_PROBLEM",
         title: "P0 - Problema critico",
@@ -1944,11 +2144,11 @@
         createdBy: actorName(),
         createdAt: first.createdAt || nowIso,
         targetAction: "problem",
-      });
+      }, 'sourceCriticalTitle', alertUi.value('sourceCriticalDetail', { count: urgentProblems.length })));
     }
 
     if (isVisitDelayed(visit)) {
-      items.push({
+      items.push(withAlertSource({
         id: `visit-delayed:${visitKey(visit)}:${visit?.poolId || visit?.pool?.id || 'none'}`,
         category: "VISIT_DELAYED",
         title: "P1 - Visita atrasada",
@@ -1957,11 +2157,11 @@
         createdBy: "Sistema",
         createdAt: visit?.plannedDate || visit?.date || nowIso,
         targetAction: "hoje",
-      });
+      }, 'sourceDelayedTitle', alertUi.value('sourceDelayedDetail', { pool: visit?.pool?.name || alertUi.value('sourcePool') })));
     }
 
     if (documentsLoaded && !opsSnapshot.docsReady) {
-      items.push({
+      items.push(withAlertSource({
         id: `docs-missing:${Number($('#vehicleId')?.value) || 'none'}`,
         category: "DOC_MISSING",
         title: "P1 - Documento obrigatorio em falta",
@@ -1970,7 +2170,7 @@
         createdBy: "Sistema",
         createdAt: nowIso,
         targetAction: "docs",
-      });
+      }, 'sourceDocsTitle', opsSnapshot.docsBlockReason ? docsBlockReasonCopy : alertUi.value('sourceDocsFallback')));
     }
 
     return items;
@@ -2053,6 +2253,7 @@
     const compliance = computeDocsCompliance();
     const docsReady = Boolean(compliance.readyForOperation);
     opsSnapshot = { docsReady, done, total, pending, docsBlockReason: compliance.reason || "" };
+    docsBlockReasonCopy = documentSourceCopies.get(compliance) || opsSnapshot.docsBlockReason;
     const readyDocs = Object.values(compliance.states).filter((state) => state.code === "VALID").length;
     const photoCount = visitPhotos.length;
     const location = visit ? visitLocation(visit) : null;
@@ -2228,6 +2429,7 @@
     card.hidden = false;
     alertUi.bind(summary, alertUi.value(openExceptions.length ? 'summary' : 'noCauses'));
     const rowCopy = new Map();
+    const sourceById = new Map(openExceptions.map(item => [String(item.id), alertSourceCopies.get(item)]));
 
     const exceptionsHtml = openExceptions.map((item) => {
       const state = stateById[item.id] || {};
@@ -2262,6 +2464,8 @@
     list.innerHTML = (warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '') + exceptionsHtml;
     bindWarning(list);
     for (const row of list.querySelectorAll('[data-exception-category]')) {
+      const source = sourceById.get(row.dataset.exceptionId);
+      if (source) { alertUi.bind(row.querySelector(':scope > strong'), source.title); alertUi.bind(row.querySelector(':scope > strong + div'), source.detail); }
       for (const node of row.querySelectorAll('[data-alert-text]')) alertUi.bind(node, rowCopy.get(row.dataset.exceptionId)[node.dataset.alertText]);
       for (const node of row.querySelectorAll('[data-interrupt-action]')) alertUi.bind(node, alertUi.value(node.dataset.interruptAction));
     }
@@ -2995,7 +3199,7 @@
     if (!list) return;
     waterUi.clearTree(list); list.setAttribute('data-cw-no-i18n', '');
     loadWaterRemindersFromStorage();
-    if (waterRemindersError) { waterUi.bind(list, waterRemindersErrorCopy); return; }
+    if (waterRemindersError) { waterUi.bind(list, waterRemindersErrorCopy); renderInterruptBoard(); return; }
     const active = waterReminders.filter(row=>row.status!=="CLOSED" || !row.closeSyncedAt).sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
     if (!active.length) {
       list.innerHTML = '<div class="muted">Sem lembretes de agua aberta.</div>';
