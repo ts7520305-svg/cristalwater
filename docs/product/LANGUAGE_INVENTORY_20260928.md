@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK460 / C06-012, dashboard e cabeçalho
+
+`technician-field-mode.js/html`:55 entradas/275 textos PT/EN/FR/ES/DE para resumo/cabeçalho, progresso, documentos, envios, ações e nome acessível. Reutiliza o apresentador privado; snapshots imutáveis, nomes/dados/contagens/identidades/histórico originais. Função antiga não chamada `updateFieldDashboardLegacy` inalterada; não se declara toda a página traduzida. [Prova460](evidence/20260930_task460_local.json).
+
+Três correções reproduzidas: problema crítico sem bomba já não aparece como bomba manual; o evento de lembrete atualiza imediatamente o cabeçalho; overflow e colunas demasiado estreitas a320px corrigidos apenas neste dashboard móvel. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440, com/sem captura; mesmos nós/foco/notas/bytes/outbox/SQL, sem produtores ao traduzir. Causas reais/erro, nomes literais/fallbacks, live/cache/documentos ausentes/resposta retida, rota livre/em curso/EXTRA concluída, fotografia offline, pending/falha/respostas tardias de outra visita/conta, navegação sem escritas operacionais. Alemão320x1400 revisto; sobreposição global a900 continua C08. Cache242/runner351;350 anteriores na ordem exata. Nove ficheiros.
+
+TASK457/458 aceites349/349 em ambos/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, fontes verificadas. Correção458 revalidada; falha histórica454 preservada. Gates/restauros459–460 pendentes. Próximo: estado/responsável/tempo da visita atual e lista da ronda; equipa/documentos e push/auth/nav pendentes. C06/C08/C10 e contagens estáticas mantidas. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK459 / C06-012 e C06-005, fontes ativas
 
 `technician-field-mode.js`:26 entradas/130 textos PT/EN/FR/ES/DE para títulos/detalhes de bomba, indisponibilidade de lembretes, problema crítico, atraso e bloqueio documental. Reutiliza o apresentador do painel com composições privadas; helper de lembretes aceita idioma explícito opcional. Objetos dos produtores e histórico permanecem originais; nomes/HTML literal, erros externos e datas PT conservados. Não se traduz texto persistido por coincidência. [Prova459](evidence/20260930_task459_local.json).

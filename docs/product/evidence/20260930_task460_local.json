@@ -1,0 +1,412 @@
+{
+  "task": 460,
+  "date": "2026-09-30",
+  "base": "6b4f427c9ac7cf3ba17001a93ecc6a8b1b469278",
+  "item": "C06-012",
+  "scope": "Live technician dashboard/header presentation, correct P0 source label, immediate reminder-state refresh, and measured small-screen layout repair.",
+  "catalogue": {
+    "entries": 55,
+    "texts": 275,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "presentation": "Existing private alert presenter reused. Immutable snapshots of dashboard numbers, status, names, buttons and asynchronous results; static labels include accessible section naming. No producer calls on language repaint."
+  },
+  "reproducedCorrections": [
+    {
+      "case": "Wrong P0 cause in header",
+      "negative": {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1313,
+        "timedOut": false
+      },
+      "observed": "Actual critical problem, zero manual-pump alerts, but header said Bomba em manual.",
+      "fix": "Water, pump and unreadable-reminder labels are selected from their own active categories; other P0 causes use Alerta crítico. Existing source records, priority, action IDs and history remain original."
+    },
+    {
+      "case": "Stale header after reminder change",
+      "negative": {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 10342,
+        "timedOut": false
+      },
+      "observed": "After real offline pump-reminder creation, header still said Bom dia, Técnico instead of Prioridade P0.",
+      "fix": "The existing cw:water-state-updated listener additionally refreshes the dashboard. Previous handlers and guards are retained."
+    },
+    {
+      "case": "Small-screen overflow/readability",
+      "negative": {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1717,
+        "timedOut": false
+      },
+      "observed": "Actual320px matrix overflow; later screenshot showed words split across narrow shared three-column tiles.",
+      "fix": "Local dashboard cards have min-width0 and anywhere wrapping; buttons min-width0. Mobile progress/documents use two columns and submissions the full row, overriding shared styling for this dashboard only."
+    }
+  ],
+  "integration": [
+    {
+      "script": "test-field-dashboard-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 37233,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-alert-source-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 35916,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-alert-board-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 23699,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-document-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5624,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-guide-read-scope-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14191,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 876,
+      "timedOut": false
+    }
+  ],
+  "withoutCapture": {
+    "script": "dashboard-no-capture.cjs",
+    "code": 0,
+    "signal": null,
+    "ms": 37773,
+    "timedOut": false
+  },
+  "withoutCaptureWrapper": "The QA wrapper deletes CW_DASHBOARD_CAPTURE and executes the exact same repository script in a fresh process. No alternative assertions.",
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 42919,
+      "log": "/workspace/scratch/b364087eee9d/qa-task460/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7321,
+      "log": "/workspace/scratch/b364087eee9d/qa-task460/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 685,
+      "log": "/workspace/scratch/b364087eee9d/qa-task460/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "tests": 1356,
+    "files": 138
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Actual field page and selector, PT/EN/FR/ES/DE at320/390/1440. Dashboard text, accessible name, buttons/actions, counters, focus, existing nodes, notes, tokens, visit context, local bytes, own outbox records and SQL snapshots unchanged by locale changes; only language preference PUT requests permitted.",
+    "Critical problem without manual-pump record; real offline manual-pump and water reminders update priority immediately. Corrupt reminder bytes produce the correct unknown-source header and remain untouched. Acknowledging the alert preserves both reminder statuses.",
+    "User-supplied Técnico/Cliente, pool text containing literal HTML and literal zone dash stay original. Actual fallback pool/client/location and missing technician name translate. No injected b element.",
+    "REGULAR/EXTRA use the same numeric visit ID. Empty round, ongoing extra and completed extra/progress2of2 are read-only cache fixtures. Exact original route bytes restored before later actions; synthetic reminder fixtures were never sent to the server.",
+    "Real live documents, actual refresh held after reading its server result, offline cached copy and no-cache unavailable state. Cache bytes restored; existing document/profile/privacy regression tests passed.",
+    "Actual offline photograph draft yields one pending photo. Controlled pending-reader results cover true, rejection, unresolved state and late replies from the previously selected typed visit. Old-account replies are rejected after the actual session guard fires.",
+    "The fresh empty-name account has no old visit, water/pump/critical alerts or outbox records; its one current missing-document alert is represented as active alerts. Actual address-alert/open-visit/contact/refresh/schedule buttons preserve their navigation. No POST/PATCH/DELETE operational API requests and no reminder/history SQL writes.",
+    "One-second session/document guards stay enabled. Presentation matrices do not invoke producers; unrelated15/30/60s refresh timers are isolated as in previous language tests."
+  ],
+  "qaCorrections": [
+    "Initial test setup used a nonexistent guideType; replaced with the established codeAT fixture before product assertions ran.",
+    "The app has three actual visit filters, not an ALL button. The test now searches those visible filters, requires exactly one matching row and verifies its typed current visit. No absent selector is silently accepted.",
+    "Default persisted zone is a literal dash; assertions preserve it and use blank read-only fixtures for translated fallbacks. Dashboard is made visible before dimension checks.",
+    "The empty-name account legitimately has one missing-document alert; assertions verify that cause and exclude all previous account water/pump/critical work. The free/no-alert branch is independently exercised with the empty-route fixture."
+  ],
+  "preservation": {
+    "base": "6b4f427c9ac7cf3ba17001a93ecc6a8b1b469278",
+    "sources": {
+      "frontend/sw.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "839cfac2b9ff280ae9e98578bb8191b6fbef08c2ee9fc5add9c5136d09a6607e"
+      },
+      "frontend/technician-field-mode.html": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "8a47913b45924839f64d007f84b917e8f8e4f76b00b751fbd03b188e814e749c"
+      },
+      "frontend/technician-field-mode.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "a1fdd1b11a5cab27e3bc35f14ea0446836f63c13e1dc888bc215b6c692468323"
+      },
+      "scripts/test-field-suite.js": {
+        "allDocumentedTransformsReversedExactly": true,
+        "baseSha256": "4f0289edc7f512957315078051e7d73cf483bdd793ae4edc46a7df2dbe990d18"
+      }
+    },
+    "previousGroups": 350,
+    "newGroups": 351,
+    "priorExactOrderPreserved": true,
+    "behavioralCorrections": [
+      "P0 header identifies water/pump/unreadable sources separately and uses a critical-alert label for other P0 causes. Source records, original priority, actions and history remain unchanged.",
+      "The reminder-state event now refreshes the dashboard immediately, retaining all existing rendering and guard calls."
+    ],
+    "layoutCorrection": "Measured320px overflow: min-width0/anywhere wrapping. German visual review: mobile progress/documents in two columns, submissions across the row, overriding shared three-column CSS only on the dashboard."
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "58827a5f706d82c542004c6d60ea994f8c992c140977e8a1af51b6766156aa09",
+    "frontend/technician-field-mode.html": "e0396199e6c03c62a143777e1eb96aea57c5f467d2d823ee97f10efcdf6f34cf",
+    "frontend/sw.js": "44a838b641c2c449231a653c608060fa4a81959470bfbb76320cb131f6c7d831",
+    "scripts/test-field-dashboard-languages.js": "784dc27ccba11cd57141f2fee75dec528ac8714569e625bfd0429b87cb188ef8",
+    "scripts/test-field-suite.js": "6fbe5b93153f932c3248f84b53ec289f4d9d817bc9940e374904a4e426cdd12d"
+  },
+  "visual": {
+    "file": "dashboard-de-320-final.png",
+    "sha256": "b3eb849e94c71ab779c6a16ae5f71fdbaf9d5fb8383670d6e2f976b7a67a04c5",
+    "viewport": {
+      "width": 320,
+      "height": 1400
+    },
+    "review": "German dashboard labels/cards/actions fit and read clearly in the final module capture. The taller capture keeps existing fixed global navigation/auth overlays outside the crop; the900px functional matrix still runs. Shared overlay behavior remains C08 and is not accepted as full-page layout by this task."
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "automaticReview": {
+    "blocked": "Polling an earlier QA process was rejected because Prisma CLI could send a checkpoint request to an unestablished external destination.",
+    "unacceptedRun": "run-1790754947513 has no completed result and is not counted.",
+    "resolution": "Inspected installed Prisma: CHECKPOINT_DISABLE returns from the checkpoint routine before schema information collection or child spawn. Set CHECKPOINT_DISABLE=1 in both QA launchers and explicit subsequent commands, then reran successfully. No new external destination was authorized."
+  },
+  "nativeAccepted": [
+    {
+      "task": 457,
+      "code": "f9fe9a0d36ff86992a6ec800d7a7b9de4ab22626",
+      "run": 36679865735,
+      "job": 109772750476,
+      "counts": {
+        "total": 349,
+        "passed": 349
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "b3d5d23b9afdab6d22e11b8a28a53fce2224ed17370745e88ee71011848adaad",
+      "sourceHashesVerified": {
+        "frontend/technician-field-mode.js": "483b5057453678d3249b73580d2063300f85d0dce960e1f3c68f14b16a997b69",
+        "frontend/cw-field-alert-journal.js": "0cc0e5b5588cd6fbd08e6c087509cc6951e82eb54b1a19337c9a397c026ef8d6",
+        "frontend/sw.js": "3dc01fd2b4f0bc4473c0658b475407bce062dd460e70feabc5df639b391d188c",
+        "scripts/test-field-alert-board-languages.js": "39f081fca0b57634290f75d5212233ecc5439a9f29e0124038a9696c3a7d39d0",
+        "scripts/test-field-suite.js": "b3d5d23b9afdab6d22e11b8a28a53fce2224ed17370745e88ee71011848adaad"
+      },
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupsEvidenceCount": 349,
+      "groupEvidenceSha256": "38f2bd4abb2613e84907b9e56f390c9937b19f440d636114fb2a51a9e46a1087"
+    },
+    {
+      "task": 458,
+      "code": "543408946c4b308d2537337a2b65a9b42c1aa6e8",
+      "run": 36680397599,
+      "job": 109774351817,
+      "counts": {
+        "total": 349,
+        "passed": 349
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "b3d5d23b9afdab6d22e11b8a28a53fce2224ed17370745e88ee71011848adaad",
+      "sourceHashesVerified": {
+        "scripts/test-field-guide-read-scope-ui.js": "147ff229c52a071bf1a8034d923caa58dd6ef8d6ce7aaec42f4679024fbacd5b"
+      },
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupsEvidenceCount": 349,
+      "groupEvidenceSha256": "98344dc04ef465347e47e9d2540c8405ce228e3f5e80b4b7a0f807edefc7fccd"
+    }
+  ],
+  "historicalFailure": {
+    "task": 454,
+    "run": 36674413317,
+    "groups": 346,
+    "passed": 345,
+    "restore": "skipped",
+    "reason": "Guide browser networkidle readiness timeout.",
+    "correction": {
+      "task": 458,
+      "code": "543408946c4b308d2537337a2b65a9b42c1aa6e8",
+      "native349GroupsAndRestoreAccepted": true
+    },
+    "historicalEvidenceUnchanged": true
+  },
+  "pendingNative": [
+    {
+      "task": 459,
+      "jobs": [
+        {
+          "id": 109784303104,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36683599775,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "Native PostgreSQL16/additive upgrade/exact351-group suite/database and uploaded-file restore at TASK460 code remain required. Local PGlite success is separate.",
+    "The live dashboard function is covered; unused updateFieldDashboardLegacy remains unchanged. Visit state/responsibility/time, route-list presentation, crew/document details and shared push/auth/navigation remain next. Date/C10 semantics are unchanged.",
+    "No full-app completion claim: C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. Only work/field-readiness-20260915-simulation; no merge/deploy/external messages. Annual maintenance contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

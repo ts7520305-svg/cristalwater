@@ -138,6 +138,8 @@
     }
 
     .field-tile {
+      min-width: 0;
+      overflow-wrap: anywhere;
       background: var(--cw-surface);
       border: 1px solid #b8cac3;
       border-radius: var(--cw-radius-control);
@@ -187,6 +189,7 @@
     }
 
     .field-tile.primary .hero-action {
+      min-width: 0;
       min-height: 50px;
       border-radius: var(--cw-radius-control);
       border: 1px solid #b7ccc4;
@@ -1137,8 +1140,12 @@
         padding: 10px 8px;
       }
 
-      .field-dashboard {
-        grid-template-columns: 1fr;
+      body.cw-tech-field-page #todayBoard {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      body.cw-tech-field-page #fieldPhotosTile {
+        grid-column: 1 / -1;
       }
 
       .field-tile {
@@ -1284,31 +1291,32 @@
     <div class="field-load-feedback" id="fieldDraftHistory" role="status" data-cw-state-managed="manual" hidden>Existem rascunhos antigos sem conta e tipo de visita confirmados. Foram conservados para revisão pelo escritório; não limpe os dados da aplicação.</div>
     <div class="field-load-feedback" id="fieldExtraVisitNotice" role="status" data-cw-state-managed="manual" hidden></div>
 
-    <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-label="Resumo do dia em campo">
+    <section class="field-dashboard field-panel field-panel-hoje" id="todayBoard" aria-labelledby="fieldDashboardLabel" data-cw-no-i18n>
+      <span id="fieldDashboardLabel" data-dashboard-copy="dashSummary" hidden>Resumo do dia em campo</span>
       <div class="field-tile primary" id="fieldHeroTile">
-        <span class="hero-label" id="fieldHeroLabel">Hoje</span>
-        <b id="fieldFocusNow">A preparar ronda</b>
-        <small id="fieldFocusMeta">Serviço atual e cliente aparecem aqui.</small>
+        <span class="hero-label" id="fieldHeroLabel" data-dashboard-copy="dashToday">Hoje</span>
+        <b id="fieldFocusNow" data-dashboard-copy="dashPreparing">A preparar ronda</b>
+        <small id="fieldFocusMeta" data-dashboard-copy="dashInitial">Serviço atual e cliente aparecem aqui.</small>
         <div class="field-cta-row" id="fieldHeroActions">
-          <button type="button" class="hero-action" data-hero-action="refresh">Atualizar</button>
-          <button type="button" class="hero-action" data-hero-action="agenda">Ver agenda</button>
-          <button type="button" class="hero-action" data-hero-action="contact">Comunicar</button>
+          <button type="button" class="hero-action" data-hero-action="refresh" data-dashboard-copy="dashRefresh">Atualizar</button>
+          <button type="button" class="hero-action" data-hero-action="agenda" data-dashboard-copy="dashAgenda">Ver agenda</button>
+          <button type="button" class="hero-action" data-hero-action="contact" data-dashboard-copy="dashContact">Comunicar</button>
         </div>
       </div>
       <div class="field-tile" id="fieldProgressTile">
-        <span>Progresso</span>
+        <span data-dashboard-copy="dashProgress">Progresso</span>
         <b id="fieldProgressValue">0 / 0</b>
-        <small id="fieldProgressMeta">visitas feitas / total</small>
+        <small id="fieldProgressMeta" data-dashboard-copy="dashProgressInitial">visitas feitas / total</small>
       </div>
       <div class="field-tile" id="fieldDocsTile">
-        <span>Documentos</span>
-        <b id="fieldDocsValue">Verificar</b>
-        <small id="fieldDocsMeta">guia, AT e seguro</small>
+        <span data-dashboard-copy="dashDocuments">Documentos</span>
+        <b id="fieldDocsValue" data-dashboard-copy="dashCheck">Verificar</b>
+        <small id="fieldDocsMeta" data-dashboard-copy="dashDocsInitial">guia, AT e seguro</small>
       </div>
       <div class="field-tile" id="fieldPhotosTile">
-        <span>Envios</span>
-        <b id="fieldPhotosValue">0 fotos</b>
-        <small id="fieldPhotosMeta">fotos e notas da visita</small>
+        <span data-dashboard-copy="dashSubmissions">Envios</span>
+        <b id="fieldPhotosValue" data-dashboard-copy="dashPhotosInitial">0 fotos</b>
+        <small id="fieldPhotosMeta" data-dashboard-copy="dashSubmissionInitial">fotos e notas da visita</small>
       </div>
     </section>
 

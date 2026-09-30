@@ -873,6 +873,391 @@
     "Les documents de transport AT et de travail ne correspondent pas. Actualisez les documents.",
     "Los documentos de transporte AT y de trabajo no coinciden. Actualice los documentos.",
     "AT-Transportdokument und Arbeitsdokument stimmen nicht überein. Aktualisieren Sie die Dokumente."
+  ],
+  "dashSummary": [
+    "Resumo do dia em campo",
+    "Field day summary",
+    "Résumé de la journée sur le terrain",
+    "Resumen de la jornada en campo",
+    "Übersicht des Arbeitstags vor Ort"
+  ],
+  "dashToday": [
+    "Hoje",
+    "Today",
+    "Aujourd’hui",
+    "Hoy",
+    "Heute"
+  ],
+  "dashPreparing": [
+    "A preparar ronda",
+    "Preparing the route",
+    "Préparation de la tournée",
+    "Preparando la ruta",
+    "Route wird vorbereitet"
+  ],
+  "dashInitial": [
+    "Serviço atual e cliente aparecem aqui.",
+    "The current service and client appear here.",
+    "Le service et le client actuels s’affichent ici.",
+    "El servicio y el cliente actuales aparecen aquí.",
+    "Der aktuelle Auftrag und Kunde werden hier angezeigt."
+  ],
+  "dashProgress": [
+    "Progresso",
+    "Progress",
+    "Progression",
+    "Progreso",
+    "Fortschritt"
+  ],
+  "dashProgressInitial": [
+    "visitas feitas / total",
+    "visits completed / total",
+    "visites effectuées / total",
+    "visitas realizadas / total",
+    "erledigte Besuche / gesamt"
+  ],
+  "dashDocuments": [
+    "Documentos",
+    "Documents",
+    "Documents",
+    "Documentos",
+    "Dokumente"
+  ],
+  "dashCheck": [
+    "Verificar",
+    "Check",
+    "Vérifier",
+    "Comprobar",
+    "Prüfen"
+  ],
+  "dashDocsInitial": [
+    "guia, AT e seguro",
+    "work document, AT and insurance",
+    "document de travail, AT et assurance",
+    "documento de trabajo, AT y seguro",
+    "Arbeitsdokument, AT und Versicherung"
+  ],
+  "dashSubmissions": [
+    "Envios",
+    "Submissions",
+    "Envois",
+    "Envíos",
+    "Übermittlungen"
+  ],
+  "dashPhotosInitial": [
+    "0 fotos",
+    "0 photos",
+    "0 photos",
+    "0 fotos",
+    "0 Fotos"
+  ],
+  "dashSubmissionInitial": [
+    "fotos e notas da visita",
+    "visit photos and notes",
+    "photos et notes de la visite",
+    "fotos y notas de la visita",
+    "Fotos und Notizen zum Besuch"
+  ],
+  "dashPriority": [
+    "Prioridade P0",
+    "Priority P0",
+    "Priorité P0",
+    "Prioridad P0",
+    "Priorität P0"
+  ],
+  "dashGreeting": [
+    "Bom dia, {name}",
+    "Good morning, {name}",
+    "Bonjour, {name}",
+    "Buenos días, {name}",
+    "Guten Morgen, {name}"
+  ],
+  "dashTechnician": [
+    "Técnico",
+    "Technician",
+    "Technicien",
+    "Técnico",
+    "Techniker"
+  ],
+  "dashWater": [
+    "Água aberta",
+    "Water running",
+    "Eau ouverte",
+    "Agua abierta",
+    "Wasser läuft"
+  ],
+  "dashPump": [
+    "Bomba em manual",
+    "Pump in manual mode",
+    "Pompe en mode manuel",
+    "Bomba en modo manual",
+    "Pumpe im Handbetrieb"
+  ],
+  "dashUnknown": [
+    "Água e bombas por confirmar",
+    "Water and pumps need confirmation",
+    "Eau et pompes à confirmer",
+    "Agua y bombas por confirmar",
+    "Wasser und Pumpen noch zu bestätigen"
+  ],
+  "dashCritical": [
+    "Alerta crítico",
+    "Critical alert",
+    "Alerte critique",
+    "Alerta crítica",
+    "Kritischer Alarm"
+  ],
+  "dashWaterActive": [
+    "Água aberta ativa",
+    "Water is still running",
+    "L’eau est toujours ouverte",
+    "El agua sigue abierta",
+    "Wasser läuft weiterhin"
+  ],
+  "dashAlerts": [
+    "Há alertas ativos",
+    "There are active alerts",
+    "Des alertes sont actives",
+    "Hay alertas activas",
+    "Es gibt aktive Alarme"
+  ],
+  "dashFree": [
+    "Hoje está livre",
+    "No visits today",
+    "Aucune visite aujourd’hui",
+    "Sin visitas hoy",
+    "Heute keine Besuche"
+  ],
+  "dashCriticalMeta": [
+    "Alerta crítico ativo. Trate primeiro e só depois continue a ronda.",
+    "A critical alert is active. Deal with it before continuing the route.",
+    "Une alerte critique est active. Traitez-la avant de poursuivre la tournée.",
+    "Hay una alerta crítica activa. Atiéndala antes de continuar la ruta.",
+    "Ein kritischer Alarm ist aktiv. Beheben Sie ihn, bevor Sie die Route fortsetzen."
+  ],
+  "dashLocation": [
+    "local por confirmar",
+    "location to be confirmed",
+    "lieu à confirmer",
+    "ubicación por confirmar",
+    "Ort noch zu bestätigen"
+  ],
+  "dashVisitMeta": [
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}",
+    "{client} - {location}"
+  ],
+  "dashPoolOne": [
+    "{count} piscina",
+    "{count} pool",
+    "{count} piscine",
+    "{count} piscina",
+    "{count} Pool"
+  ],
+  "dashPoolMany": [
+    "{count} piscinas",
+    "{count} pools",
+    "{count} piscines",
+    "{count} piscinas",
+    "{count} Pools"
+  ],
+  "dashAlertOne": [
+    "{count} alerta",
+    "{count} alert",
+    "{count} alerte",
+    "{count} alerta",
+    "{count} Alarm"
+  ],
+  "dashAlertMany": [
+    "{count} alertas",
+    "{count} alerts",
+    "{count} alertes",
+    "{count} alertas",
+    "{count} Alarme"
+  ],
+  "dashWaterCount": [
+    "{count} água aberta",
+    "{count} running-water alert",
+    "{count} alerte d’eau ouverte",
+    "{count} alerta de agua abierta",
+    "{count} Alarm wegen laufenden Wassers"
+  ],
+  "dashPumpCount": [
+    "{count} bomba manual",
+    "{count} manual-pump alert",
+    "{count} alerte de pompe en manuel",
+    "{count} alerta de bomba en manual",
+    "{count} Alarm wegen einer Pumpe im Handbetrieb"
+  ],
+  "dashFreeMeta": [
+    "Não tens visitas atribuídas neste momento. {stats}.",
+    "You have no assigned visits at the moment. {stats}.",
+    "Aucune visite ne vous est attribuée actuellement. {stats}.",
+    "No tiene visitas asignadas en este momento. {stats}.",
+    "Ihnen sind derzeit keine Besuche zugewiesen. {stats}."
+  ],
+  "dashPendingVisits": [
+    "{count} visita(s) por concluir",
+    "{count} visit(s) to complete",
+    "{count} visite(s) à terminer",
+    "{count} visita(s) por completar",
+    "{count} Besuche noch abzuschließen"
+  ],
+  "dashRoundReady": [
+    "Ronda pronta para fechar",
+    "Route ready to close",
+    "Tournée prête à clôturer",
+    "Ruta lista para cerrar",
+    "Route kann abgeschlossen werden"
+  ],
+  "dashScheduleFree": [
+    "Agenda livre neste momento",
+    "No visits scheduled at the moment",
+    "Aucune visite prévue actuellement",
+    "Sin visitas programadas en este momento",
+    "Derzeit keine Besuche geplant"
+  ],
+  "dashValidating": [
+    "A validar",
+    "Validating",
+    "Validation en cours",
+    "Validando",
+    "Wird geprüft"
+  ],
+  "dashValid": [
+    "Válidos",
+    "Valid",
+    "Valides",
+    "Válidos",
+    "Gültig"
+  ],
+  "dashReview": [
+    "Rever",
+    "Review",
+    "À vérifier",
+    "Revisar",
+    "Prüfen"
+  ],
+  "dashVehicleConfirm": [
+    "A confirmar a viatura",
+    "Confirming the vehicle",
+    "Confirmation du véhicule",
+    "Confirmando el vehículo",
+    "Fahrzeug wird bestätigt"
+  ],
+  "dashDocsConfirmed": [
+    "Obrigatórios confirmados",
+    "Required documents confirmed",
+    "Documents obligatoires confirmés",
+    "Documentos obligatorios confirmados",
+    "Pflichtdokumente bestätigt"
+  ],
+  "dashDocsCached": [
+    "Cópia de hoje por confirmar",
+    "Today’s copy needs confirmation",
+    "Copie du jour à confirmer",
+    "Copia de hoy por confirmar",
+    "Heutige Kopie noch zu bestätigen"
+  ],
+  "dashDocsMissing": [
+    "Abra Viatura para ver o que falta",
+    "Open Vehicle to see what is missing",
+    "Ouvrez Véhicule pour voir ce qui manque",
+    "Abra Vehículo para ver qué falta",
+    "Öffnen Sie Fahrzeug, um fehlende Dokumente zu sehen"
+  ],
+  "dashCheckingSubmissions": [
+    "A verificar envios guardados",
+    "Checking saved submissions",
+    "Vérification des envois enregistrés",
+    "Comprobando envíos guardados",
+    "Gespeicherte Übermittlungen werden geprüft"
+  ],
+  "dashVisitPending": [
+    "visita por confirmar",
+    "visit awaiting confirmation",
+    "visite en attente de confirmation",
+    "visita pendiente de confirmación",
+    "Besuch wartet auf Bestätigung"
+  ],
+  "dashPhotosPending": [
+    "fotos por enviar",
+    "photos awaiting upload",
+    "photos à envoyer",
+    "fotos pendientes de envío",
+    "Fotos warten auf Übermittlung"
+  ],
+  "dashPendingSubmissions": [
+    "envios pendentes nesta visita",
+    "pending submissions for this visit",
+    "envois en attente pour cette visite",
+    "envíos pendientes de esta visita",
+    "ausstehende Übermittlungen für diesen Besuch"
+  ],
+  "dashSubmissionsUnknown": [
+    "Envios por verificar; preserve os dados",
+    "Submissions need checking; preserve the data",
+    "Envois à vérifier ; conservez les données",
+    "Envíos por comprobar; conserve los datos",
+    "Übermittlungen müssen geprüft werden; bewahren Sie die Daten auf"
+  ],
+  "dashTreat": [
+    "Tratar alerta",
+    "Address alert",
+    "Traiter l’alerte",
+    "Atender alerta",
+    "Alarm bearbeiten"
+  ],
+  "dashContinue": [
+    "Continuar",
+    "Continue",
+    "Continuer",
+    "Continuar",
+    "Fortsetzen"
+  ],
+  "dashContact": [
+    "Comunicar",
+    "Contact",
+    "Communiquer",
+    "Contactar",
+    "Kontakt aufnehmen"
+  ],
+  "dashRefresh": [
+    "Atualizar",
+    "Refresh",
+    "Actualiser",
+    "Actualizar",
+    "Aktualisieren"
+  ],
+  "dashAgenda": [
+    "Ver agenda",
+    "View schedule",
+    "Voir le planning",
+    "Ver agenda",
+    "Terminplan anzeigen"
+  ],
+  "dashExtra": [
+    "Consultar visita extra",
+    "View extra visit",
+    "Consulter la visite supplémentaire",
+    "Consultar visita extra",
+    "Zusatzbesuch ansehen"
+  ],
+  "dashNavigate": [
+    "Navegar",
+    "Navigate",
+    "Itinéraire",
+    "Navegar",
+    "Navigieren"
+  ],
+  "dashOpen": [
+    "Abrir visita",
+    "Open visit",
+    "Ouvrir la visite",
+    "Abrir visita",
+    "Besuch öffnen"
   ]
 };
     const specs = new WeakSet(), bindings = new Map(), reminderSpecs = new WeakMap();
@@ -907,6 +1292,8 @@
     new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
     return { value, join, reminder, format, bind, clear, clearTree, notify };
   })();
+
+  for (const node of document.querySelectorAll('[data-dashboard-copy]')) alertUi.bind(node, alertUi.value(node.dataset.dashboardCopy));
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -2289,7 +2676,7 @@
         return;
       }
       button.hidden = false;
-      button.textContent = text;
+      alertUi.bind(button, text);
       button.dataset.heroAction = action;
       button.classList.remove("primary", "secondary");
       button.classList.add(variant);
@@ -2300,73 +2687,73 @@
     if (heroTile) heroTile.classList.toggle("p0", hasP0);
 
     if (heroLabel) {
-      heroLabel.textContent = hasP0 ? "Prioridade P0" : `Bom dia, ${firstName}`;
+      alertUi.bind(heroLabel, hasP0 ? alertUi.value('dashPriority') : alertUi.value('dashGreeting', { name: userName ? firstName : alertUi.value('dashTechnician') }));
     }
 
     if (focusNow) {
       if (hasP0) {
-        focusNow.textContent = hasWaterOpen ? "Água aberta" : "Bomba em manual";
+        alertUi.bind(focusNow, alertUi.value(hasWaterOpen ? 'dashWater' : hasManualPump ? 'dashPump' : openExceptions.some(item => item.category === 'REMINDER_UNAVAILABLE') ? 'dashUnknown' : 'dashCritical'));
       } else if (visit) {
-        focusNow.textContent = visit.pool?.name || (hasManualPump ? "Bomba em manual" : "Piscina");
+        alertUi.bind(focusNow, visit.pool?.name || alertUi.value(hasManualPump ? 'dashPump' : 'sourcePool'));
       } else {
-        focusNow.textContent = openAlerts ? (hasWaterOpen ? "Água aberta ativa" : (hasManualPump ? "Bomba em manual" : "Há alertas ativos")) : "Hoje está livre";
+        alertUi.bind(focusNow, alertUi.value(openAlerts ? (hasWaterOpen ? 'dashWaterActive' : hasManualPump ? 'dashPump' : 'dashAlerts') : 'dashFree'));
       }
     }
     if (focusMeta) {
       if (hasP0) {
-        focusMeta.textContent = "Alerta crítico ativo. Trate primeiro e só depois continue a ronda.";
+        alertUi.bind(focusMeta, alertUi.value('dashCriticalMeta'));
       } else if (visit) {
-        focusMeta.textContent = `${visit.client?.name || "Cliente"} - ${location?.address || visit.pool?.zone || "local por confirmar"}`;
+        alertUi.bind(focusMeta, alertUi.value('dashVisitMeta', { client: visit.client?.name || alertUi.value('sourceClient'), location: location?.address || visit.pool?.zone || alertUi.value('dashLocation') }));
       } else {
         const statParts = [
-          `${total} piscina${total === 1 ? "" : "s"}`,
-          `${openAlerts} alerta${openAlerts === 1 ? "" : "s"}`,
-          `${hasWaterOpen ? 1 : 0} água aberta`,
-          `${hasManualPump ? 1 : 0} bomba manual`,
+          alertUi.value(total === 1 ? 'dashPoolOne' : 'dashPoolMany', { count: total }),
+          alertUi.value(openAlerts === 1 ? 'dashAlertOne' : 'dashAlertMany', { count: openAlerts }),
+          alertUi.value('dashWaterCount', { count: hasWaterOpen ? 1 : 0 }),
+          alertUi.value('dashPumpCount', { count: hasManualPump ? 1 : 0 }),
         ];
-        focusMeta.textContent = `Não tens visitas atribuídas neste momento. ${statParts.join(" · ")}.`;
+        alertUi.bind(focusMeta, alertUi.value('dashFreeMeta', { stats: alertUi.join(statParts, ' · ') }));
       }
     }
 
-    if (progressValue) progressValue.textContent = visit ? `${done} / ${total}` : `${total} / ${total}`;
-    if (progressMeta) progressMeta.textContent = visit ? (pending ? `${pending} visita(s) por concluir` : "Ronda pronta para fechar") : "Agenda livre neste momento";
+    if (progressValue) alertUi.bind(progressValue, visit ? `${done} / ${total}` : `${total} / ${total}`);
+    if (progressMeta) alertUi.bind(progressMeta, alertUi.value(visit ? (pending ? 'dashPendingVisits' : 'dashRoundReady') : 'dashScheduleFree', { count: pending }));
 
-    if (docsValue) docsValue.textContent = !documentsLoaded ? "A validar" : docsReady ? "Válidos" : "Rever";
-    if (docsMeta) docsMeta.textContent = !documentsLoaded ? "A confirmar a viatura" : docsReady ? docsSource === 'live' ? "Obrigatórios confirmados" : "Cópia de hoje por confirmar" : "Abra Viatura para ver o que falta";
+    if (docsValue) alertUi.bind(docsValue, alertUi.value(!documentsLoaded ? 'dashValidating' : docsReady ? 'dashValid' : 'dashReview'));
+    if (docsMeta) alertUi.bind(docsMeta, alertUi.value(!documentsLoaded ? 'dashVehicleConfirm' : docsReady ? docsSource === 'live' ? 'dashDocsConfirmed' : 'dashDocsCached' : 'dashDocsMissing'));
 
     const pendingPhotos = visitPhotos.filter(photo => photo.status !== "uploaded").length;
     const pendingRevision = ++fieldPendingRevision;
-    if (photosValue) photosValue.textContent = '…';
-    if (photosMeta) photosMeta.textContent = 'A verificar envios guardados';
+    if (photosValue) alertUi.bind(photosValue, '…');
+    if (photosMeta) alertUi.bind(photosMeta, alertUi.value('dashCheckingSubmissions'));
     Promise.resolve(visit ? window.CWFieldOffline.pending(visit.id, visit.visitType || 'REGULAR') : false).then(pendingVisit => {
       if (!sameFieldSession() || pendingRevision !== fieldPendingRevision) return;
-      if (photosValue) photosValue.textContent = String(pendingPhotos + (pendingVisit ? 1 : 0));
-      if (photosMeta) photosMeta.textContent = pendingVisit ? 'visita por confirmar' : pendingPhotos ? 'fotos por enviar' : 'envios pendentes nesta visita';
+      if (photosValue) alertUi.bind(photosValue, String(pendingPhotos + (pendingVisit ? 1 : 0)));
+      if (photosMeta) alertUi.bind(photosMeta, alertUi.value(pendingVisit ? 'dashVisitPending' : pendingPhotos ? 'dashPhotosPending' : 'dashPendingSubmissions'));
       setTileTone('#fieldPhotosTile', pendingPhotos || pendingVisit ? 'warn' : 'ok');
-    }).catch(() => { if (sameFieldSession() && pendingRevision === fieldPendingRevision) { if (photosValue) photosValue.textContent = '?'; if (photosMeta) photosMeta.textContent = 'Envios por verificar; preserve os dados'; setTileTone('#fieldPhotosTile','warn'); } });
+    }).catch(() => { if (sameFieldSession() && pendingRevision === fieldPendingRevision) { if (photosValue) alertUi.bind(photosValue, '?'); if (photosMeta) alertUi.bind(photosMeta, alertUi.value('dashSubmissionsUnknown')); setTileTone('#fieldPhotosTile','warn'); } });
 
     if (heroActions) {
       heroActions.hidden = false;
       if (hasP0) {
-        setHeroButton(0, "Tratar alerta", "p0", "primary");
-        setHeroButton(1, "Continuar", "continue", "secondary");
-        setHeroButton(2, "Comunicar", "contact", "secondary");
+        setHeroButton(0, alertUi.value('dashTreat'), "p0", "primary");
+        setHeroButton(1, alertUi.value('dashContinue'), "continue", "secondary");
+        setHeroButton(2, alertUi.value('dashContact'), "contact", "secondary");
       } else if (!hasActiveVisit) {
-        setHeroButton(0, "Atualizar", "refresh", "primary");
-        setHeroButton(1, "Ver agenda", "agenda", "secondary");
-        setHeroButton(2, "Comunicar", "contact", "secondary");
+        setHeroButton(0, alertUi.value('dashRefresh'), "refresh", "primary");
+        setHeroButton(1, alertUi.value('dashAgenda'), "agenda", "secondary");
+        setHeroButton(2, alertUi.value('dashContact'), "contact", "secondary");
       } else if (!isRegularVisit(visit) && isVisitDone(visit)) {
-        setHeroButton(0, "Consultar visita extra", "continue", "primary");
-        setHeroButton(1, "Navegar", "map", "secondary");
-        setHeroButton(2, "Comunicar", "contact", "secondary");
+        setHeroButton(0, alertUi.value('dashExtra'), "continue", "primary");
+        setHeroButton(1, alertUi.value('dashNavigate'), "map", "secondary");
+        setHeroButton(2, alertUi.value('dashContact'), "contact", "secondary");
       } else if (hasIntervention) {
-        setHeroButton(0, "Continuar", "continue", "primary");
-        setHeroButton(1, "Navegar", "map", "secondary");
-        setHeroButton(2, "Comunicar", "contact", "secondary");
+        setHeroButton(0, alertUi.value('dashContinue'), "continue", "primary");
+        setHeroButton(1, alertUi.value('dashNavigate'), "map", "secondary");
+        setHeroButton(2, alertUi.value('dashContact'), "contact", "secondary");
       } else {
-        setHeroButton(0, "Abrir visita", "openVisit", "primary");
-        setHeroButton(1, "Navegar", "map", "secondary");
-        setHeroButton(2, "Comunicar", "contact", "secondary");
+        setHeroButton(0, alertUi.value('dashOpen'), "openVisit", "primary");
+        setHeroButton(1, alertUi.value('dashNavigate'), "map", "secondary");
+        setHeroButton(2, alertUi.value('dashContact'), "contact", "secondary");
       }
     }
 
@@ -4609,7 +4996,7 @@
     render();
   });
   window.addEventListener('cw:extra-correction-confirmed',event=>{if(sameFieldSession()&&event.detail.owner===fieldWriteSession.owner&&event.detail.token===fieldWriteSession.token)void load();});
-  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); });
+  window.addEventListener('cw:water-state-updated', () => { loadWaterRemindersFromStorage(); renderWaterReminders(); scheduleWaterReminders(); renderList(); renderNowBoard(current()); updateFieldDashboard(current()); });
   window.addEventListener('cw:alert-journal-updated', () => { if (sameFieldSession()) renderInterruptBoard(); });
   window.addEventListener('storage', event => { if (sameFieldSession() && event.key?.startsWith('cwFieldAlertJournal:')) renderInterruptBoard(); });
   function renderIncompleteStatus(){void window.CWFieldIncomplete?.refresh();}
