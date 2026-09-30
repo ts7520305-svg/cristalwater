@@ -426,6 +426,15 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "toolbarTitle": ["Documentos", "Documents", "Documents", "Documentos", "Dokumente"],
+  "toolbarHint": ["AT, obra e seguro", "AT, work and insurance", "AT, travaux et assurance", "AT, trabajo y seguro", "AT, Arbeit und Versicherung"],
+  "toolbarLegal": ["Documentos legais", "Legal documents", "Documents légaux", "Documentos legales", "Rechtliche Dokumente"],
+  "toolbarHelp": ["Guias, seguro e stock da viatura quando for preciso apresentar.", "Guides, insurance and vehicle stock when you need to show them.", "Documents, assurance et stock du véhicule à présenter au besoin.", "Guías, seguro y existencias del vehículo para mostrarlos cuando sea necesario.", "Dokumente, Versicherung und Fahrzeugbestand bei Bedarf vorlegen."],
+  "toolbarVehicle": ["ID da viatura", "Vehicle ID", "ID du véhicule", "ID del vehículo", "Fahrzeug-ID"],
+  "toolbarTechnician": ["ID do técnico", "Technician ID", "ID du technicien", "ID del técnico", "Techniker-ID"],
+  "toolbarShow": ["Mostrar documentos", "Show documents", "Afficher les documents", "Mostrar documentos", "Dokumente anzeigen"],
+  "toolbarGuides": ["Consultar guias", "View guides", "Consulter les documents", "Consultar guías", "Dokumente einsehen"],
+  "toolbarMaintenance": ["Manutenção da viatura", "Vehicle maintenance", "Entretien du véhicule", "Mantenimiento del vehículo", "Fahrzeugwartung"],
   "bodyMissing": [
     "Em falta",
     "Missing",
@@ -2609,6 +2618,23 @@
   for (const node of document.querySelectorAll('[data-visit-copy]')) alertUi.bind(node, alertUi.value(node.dataset.visitCopy));
   for (const node of document.querySelectorAll('[data-crew-copy]')) alertUi.bind(node, alertUi.value(node.dataset.crewCopy));
   for (const node of document.querySelectorAll('[data-center-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.centerInitialCopy));
+  for (const node of document.querySelectorAll('[data-document-toolbar-copy]')) alertUi.bind(node, alertUi.value(node.dataset.documentToolbarCopy));
+  // Attribute-only presentation preserves the original inputs, values and selection.
+  const documentToolbarInputs = [...document.querySelectorAll('[data-document-toolbar-placeholder]')].map(node => ({ node, entry: alertUi.value(node.dataset.documentToolbarPlaceholder) }));
+  function paintDocumentToolbarInputs() {
+    for (const { node, entry } of documentToolbarInputs) {
+      if (!node.isConnected) continue;
+      const text = alertUi.format(entry);
+      for (const attribute of ['placeholder', 'aria-label']) if (node.getAttribute(attribute) !== text) node.setAttribute(attribute, text);
+    }
+  }
+  paintDocumentToolbarInputs();
+  window.addEventListener('cw-language-change', paintDocumentToolbarInputs);
+  let documentToolbarLanguage = document.documentElement.lang;
+  new MutationObserver(() => {
+    const language = document.documentElement.lang;
+    if (language !== documentToolbarLanguage) { documentToolbarLanguage = language; paintDocumentToolbarInputs(); }
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
   let visits = [];
   let routeConfirmedAt = null;
@@ -5878,6 +5904,9 @@
     alertUi.bind($('.crew-card .field-tab-title h2'), alertUi.value('dashTechnician'));
     alertUi.bind($('.crew-card .field-tab-title span'), alertUi.value('crewSectionHint'));
     markFieldSection("#transportGuideBox", "field-panel-docs", "Documentos", "AT, obra e seguro");
+    const documentCard = $('#transportGuideBox')?.closest('section');
+    alertUi.bind(documentCard?.querySelector('.field-tab-title h2'), alertUi.value('toolbarTitle'));
+    alertUi.bind(documentCard?.querySelector('.field-tab-title span'), alertUi.value('toolbarHint'));
     markFieldSection("#waterReminderList", "field-panel-more", "Agua aberta", "alarme obrigatorio");
     const waterCard = $('#waterReminderList')?.closest('section');
     for (const [selector, key] of [['.field-tab-title h2', 'title'], ['.field-tab-title span', 'hint'], [':scope > .chip', 'chip'], [':scope > .muted', 'intro'], ['#openWaterBtn', 'open']]) waterUi.bind(waterCard?.querySelector(selector), waterUi.value(key));

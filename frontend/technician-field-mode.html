@@ -1648,16 +1648,16 @@
     </section>
 
     <section class="card field-panel field-panel-docs">
-      <span class="chip">Documentos legais</span>
-      <div class="muted" style="margin-top:10px">Guias, seguro e stock da viatura quando for preciso apresentar.</div>
+      <span class="chip" data-document-toolbar-copy="toolbarLegal" data-cw-no-i18n>Documentos legais</span>
+      <div class="muted" style="margin-top:10px" data-document-toolbar-copy="toolbarHelp" data-cw-no-i18n>Guias, seguro e stock da viatura quando for preciso apresentar.</div>
       <div class="doc-tools">
-        <input id="vehicleId" inputmode="numeric" placeholder="ID da viatura">
-        <input id="technicianId" inputmode="numeric" placeholder="ID do técnico">
+        <input id="vehicleId" inputmode="numeric" placeholder="ID da viatura" aria-label="ID da viatura" data-document-toolbar-placeholder="toolbarVehicle" data-cw-no-i18n>
+        <input id="technicianId" inputmode="numeric" placeholder="ID do técnico" aria-label="ID do técnico" data-document-toolbar-placeholder="toolbarTechnician" data-cw-no-i18n>
       </div>
       <div class="actions">
-        <button class="big" id="loadGuidesBtn" type="button">Mostrar documentos</button>
-        <a class="big ghost doc-btn" href="/technician-guide">Consultar guias</a>
-        <a class="big ghost doc-btn" href="/vehicle-maintenance">Manutenção da viatura</a>
+        <button class="big" id="loadGuidesBtn" type="button" data-document-toolbar-copy="toolbarShow" data-cw-no-i18n>Mostrar documentos</button>
+        <a class="big ghost doc-btn" href="/technician-guide" data-document-toolbar-copy="toolbarGuides" data-cw-no-i18n>Consultar guias</a>
+        <a class="big ghost doc-btn" href="/vehicle-maintenance" data-document-toolbar-copy="toolbarMaintenance" data-cw-no-i18n>Manutenção da viatura</a>
       </div>
       <div class="doc-grid">
         <div class="doc-card" id="transportGuideBox" data-cw-no-i18n>

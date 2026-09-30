@@ -1,0 +1,166 @@
+{
+  "task": 474,
+  "date": "2026-09-30",
+  "base": "e5a9da153fe4bc37ce2e41aa72fc2e8726543c9d",
+  "item": "C06-015 / barra documental do técnico",
+  "scope": {
+    "productSources": 3,
+    "testScripts": 2,
+    "documentation": 4,
+    "totalFiles": 9
+  },
+  "translation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newEntries": 9,
+    "newTexts": 45,
+    "previousEntries": 303,
+    "totalEntries": 312,
+    "previousEntriesUnchanged": true
+  },
+  "negative": {
+    "script": "scripts/test-field-document-toolbar-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 1369,
+    "reason": "Language en selected but legal toolbar label remained Portuguese",
+    "actual": "Documentos legais",
+    "expected": "Legal documents"
+  },
+  "local": {
+    "runtime": "Isolated PGlite / Chromium153; one shared database, no reset",
+    "integrations": [
+      {
+        "script": "scripts/test-field-crew-status-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19456
+      },
+      {
+        "script": "scripts/test-field-document-center-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21294
+      },
+      {
+        "script": "scripts/test-field-document-transition-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14342
+      },
+      {
+        "script": "scripts/test-field-document-body-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13436
+      },
+      {
+        "script": "scripts/test-field-document-toolbar-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9218
+      }
+    ],
+    "newChecks": 30,
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "scenarios": [
+      "live",
+      "real toolbar refresh",
+      "offline reload/cache",
+      "typed EXTRA with same numeric ID as REGULAR",
+      "changed-account refresh blocked"
+    ],
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "operationalWrites": 0,
+    "pageErrors": 0,
+    "screenshots": "German320 title, both ID controls and actions inspected; no horizontal overflow"
+  },
+  "preservation": {
+    "base": "e5a9da153fe4bc37ce2e41aa72fc2e8726543c9d",
+    "mainSourceReversedExactly": true,
+    "previousCatalogEntries": 303,
+    "previousCatalogPreserved": true,
+    "newCatalogEntries": 9,
+    "newTranslatedTexts": 45,
+    "catalogTotal": 312,
+    "runnerBefore": 365,
+    "runnerAfter": 366,
+    "previousOrderPreserved": true,
+    "timeoutsUnchanged": true,
+    "sha256": {
+      "frontend/technician-field-mode.js": "4cf18587c1a71757329db0fa16c63f5ed8da6cc1416fcd0ba0212dd1de57981d",
+      "frontend/technician-field-mode.html": "9a74f0ce9752defb18bfa6c1ee4df01532c9ae5c78e63776fc641997874c431e",
+      "frontend/sw.js": "a1268e1065a27ae37d4b76f1eabced0075361a4a84d5eed3c8c63bce8197692f",
+      "scripts/test-field-suite.js": "c6d46f0aa231ae4288fe1022ac9633dd732462477a1fc746c0a1abe3df94fe70",
+      "scripts/test-field-document-toolbar-languages.js": "b1f42792d34d99290f01951d03d3c727699e30cb5df510dbadc9960c67224273"
+    },
+    "sameInputValuesAndSelection": true,
+    "sameReadonlyAndDisabled": true,
+    "sameElementsAndHandlers": true,
+    "sameLinksAndSources": true,
+    "sameStorageOutboxAndSqlDuringLanguageChange": true,
+    "typedDraftsPreserved": true,
+    "backendSchemaDocumentModulesWorkflowUnchanged": true,
+    "draftProtection469Preserved": true,
+    "cssUnchanged": true
+  },
+  "preparation": {
+    "unitInitial": {
+      "passed": 1355,
+      "failed": 1,
+      "cause": "Required historical commit missing from shallow checkout",
+      "fetched": "61fc1ca25bcc30f0f613101920778ace6cea5642",
+      "testUnchanged": true,
+      "finalPassed": 1356
+    },
+    "isolatedProcesses": "First separately started DB/app processes were not reachable from later tool calls. One supervisor starts DB/app/tests together.",
+    "preliminaryIntegration": {
+      "code": 0,
+      "ms": 9294,
+      "assertions": "all passed",
+      "supervisorExit": 1,
+      "cause": "PGlite socket close callback ran after database disposal"
+    },
+    "supervisorFix": "Finish socket close callbacks before closing database; final five-script supervisor exits0."
+  },
+  "native473": {
+    "code": "e5a9da153fe4bc37ce2e41aa72fc2e8726543c9d",
+    "run": 36741452228,
+    "job": 109976597755,
+    "status": "in_progress",
+    "initialStepsPassed": 10,
+    "suiteGroups": 365,
+    "suite": "in_progress",
+    "restore": "pending"
+  },
+  "native474": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "suiteGroups": 366,
+    "status": "pending",
+    "postgres16UpgradeRestoreRequired": true,
+    "workflowBudgetMinutes": 90
+  },
+  "cache": 253,
+  "runner": 366,
+  "limits": [
+    "Local PGlite/Chromium evidence is separate from native PostgreSQL16/upgrade/full suite/restore.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/1 in progress/5 complete.",
+    "Public during development; private before closure/C32; no merge/deploy/external contacts; annual contract deferred."
+  ]
+}
