@@ -13,7 +13,62 @@
     CANCELLED: 'A abertura foi cancelada. Pode abrir novamente o documento.',
     RETRY: 'Não foi possível abrir o documento. Volte a tentar.'
   };
-  const failure = code => Object.assign(new Error(messages[code]), { code });
+  const languages = ['pt', 'en', 'fr', 'es', 'de'];
+  const copy = {
+    INVALID_DOCUMENT: [messages.INVALID_DOCUMENT, 'The document is outside the application or the link is invalid.', 'Le document est hors de l’application ou le lien est invalide.', 'El documento está fuera de la aplicación o el enlace no es válido.', 'Das Dokument liegt außerhalb der Anwendung oder der Link ist ungültig.'],
+    SESSION: [messages.SESSION, 'The session has changed or expired. Sign in again to open the document.', 'La session a changé ou a expiré. Connectez-vous à nouveau pour ouvrir le document.', 'La sesión ha cambiado o ha caducado. Inicia sesión de nuevo para abrir el documento.', 'Die Sitzung hat sich geändert oder ist abgelaufen. Melden Sie sich erneut an, um das Dokument zu öffnen.'],
+    POPUP: [messages.POPUP, 'Allow a new window to open to view the document.', 'Autorisez l’ouverture d’une nouvelle fenêtre pour consulter le document.', 'Permite abrir una nueva ventana para consultar el documento.', 'Erlauben Sie das Öffnen eines neuen Fensters, um das Dokument anzusehen.'],
+    UNAVAILABLE: [messages.UNAVAILABLE, 'Your session does not permit access to this document, or it is no longer available.', 'Votre session ne permet pas de consulter ce document ou il n’est plus disponible.', 'Tu sesión no permite consultar este documento o ya no está disponible.', 'Ihre Sitzung erlaubt keinen Zugriff auf dieses Dokument oder es ist nicht mehr verfügbar.'],
+    UNCONFIRMED: [messages.UNCONFIRMED, 'The response does not confirm the selected document. Try again.', 'La réponse ne confirme pas le document sélectionné. Réessayez.', 'La respuesta no confirma el documento seleccionado. Vuelve a intentarlo.', 'Die Antwort bestätigt das ausgewählte Dokument nicht. Versuchen Sie es erneut.'],
+    INCOMPLETE: [messages.INCOMPLETE, 'The received document is incomplete. Try again.', 'Le document reçu est incomplet. Réessayez.', 'El documento recibido está incompleto. Vuelve a intentarlo.', 'Das empfangene Dokument ist unvollständig. Versuchen Sie es erneut.'],
+    TIMEOUT: [messages.TIMEOUT, 'The document took too long. Try again.', 'Le document a mis trop de temps à arriver. Réessayez.', 'El documento ha tardado demasiado. Vuelve a intentarlo.', 'Das Dokument hat zu lange gebraucht. Versuchen Sie es erneut.'],
+    CANCELLED: [messages.CANCELLED, 'Opening was cancelled. You can open the document again.', 'L’ouverture a été annulée. Vous pouvez ouvrir à nouveau le document.', 'Se ha cancelado la apertura. Puedes abrir el documento de nuevo.', 'Das Öffnen wurde abgebrochen. Sie können das Dokument erneut öffnen.'],
+    RETRY: [messages.RETRY, 'The document could not be opened. Try again.', 'Impossible d’ouvrir le document. Réessayez.', 'No se ha podido abrir el documento. Vuelve a intentarlo.', 'Das Dokument konnte nicht geöffnet werden. Versuchen Sie es erneut.']
+  };
+  const errorCopies = new WeakMap(), copyCodes = new WeakMap();
+  const presentation = {
+    error: error => errorCopies.get(error) || null,
+    format(entry, language = document.documentElement.lang || 'pt') {
+      if (!copyCodes.has(entry)) return String(entry ?? '');
+      const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
+      return copy[copyCodes.get(entry)][index];
+    }
+  };
+  const failure = code => {
+    const error = Object.assign(new Error(messages[code]), { code }), entry = Object.freeze({});
+    errorCopies.set(error, entry); copyCodes.set(entry, code); return error;
+  };
+  let notice = null;
+  function releaseNotice() {
+    if (!notice) return;
+    notice.node.removeAttribute('data-cw-download-copy');
+    if (!notice.protected) notice.node.removeAttribute('data-cw-no-i18n');
+    notice = null;
+  }
+  function paintNotice() {
+    if (!notice) return;
+    const { node } = notice;
+    if (!node.isConnected || node.style.display === 'none' || node.textContent !== notice.rendered || node.firstChild !== notice.textNode) { releaseNotice(); return; }
+    const rendered = presentation.format(notice.entry);
+    if (node.textContent !== rendered) node.textContent = rendered;
+    notice.rendered = rendered; notice.textNode = node.firstChild;
+  }
+  const noticeObserver = new MutationObserver(paintNotice);
+  noticeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+  window.addEventListener('cw-language-change', paintNotice);
+  function announce(error) {
+    releaseNotice();
+    const entry = presentation.error(error), rendered = entry ? presentation.format(entry) : error.message;
+    if (window.CristalAuth?.toast) {
+      window.CristalAuth.toast(rendered);
+      const node = document.getElementById('cw-v21-toast');
+      if (!entry || !node || node.textContent !== rendered) return;
+      notice = { node, entry, rendered, textNode: node.firstChild, protected: node.hasAttribute('data-cw-no-i18n') };
+      node.setAttribute('data-cw-download-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+      // Release ownership if another producer replaces or hides the same toast.
+      noticeObserver.observe(node, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style'] });
+    } else window.alert(rendered);
+  }
   const positive = value => /^[1-9]\d{0,9}$/.test(String(value)) && Number(value) <= 2147483647;
   const fingerprint = () => JSON.stringify(keys.map(key => localStorage.getItem(key)));
   function principal() {
@@ -123,10 +178,7 @@
     const link = event.target?.closest?.('a[data-auth-download]');
     if (!link) return;
     event.preventDefault();
-    open(link.href).catch(error => {
-      if (window.CristalAuth?.toast) window.CristalAuth.toast(error.message);
-      else window.alert(error.message);
-    });
+    open(link.href).catch(announce);
   });
-  window.CristalDownloads = { open, cancel };
+  window.CristalDownloads = { open, cancel, presentation };
 }());
