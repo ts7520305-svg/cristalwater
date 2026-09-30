@@ -317,18 +317,6 @@
   },
   "pendingNative": [
     {
-      "task": 463,
-      "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
-      "run": 36701344336,
-      "job": 109841249507,
-      "status": "in_progress",
-      "groups": 357,
-      "restore": "pending",
-      "predatesFix": true,
-      "successfulInitialSteps": 10,
-      "currentStep": "Run node scripts/test-field-suite.js"
-    },
-    {
       "task": 464,
       "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
       "run": 36704725001,
@@ -353,9 +341,14 @@
     },
     {
       "task": 466,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 360,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+      "run": 36708610951,
+      "job": 109864746875,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema"
     }
   ],
   "limits": {
@@ -374,6 +367,111 @@
     "deploy": false,
     "externalContacts": false,
     "annualContract": "deferred",
-    "next": "Crew/document status, remaining correction-summary own messages, then shared push/auth/navigation. Require native465/466 full suites and restore; inspect older463/464 failures without rerunning known faulty code."
+    "next": "Investigate and repair native463 water-confirmation, briefing and vehicle-assignment failures as TASK467;465 already repairs photo/round-navigation symptoms locally. Require current native suites/restore; then crew/document status and remaining correction-summary own messages, shared push/auth/navigation."
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+    "tree": "19d75bcfd25c4ac20159d7fbfe242ec1ae49ed72",
+    "run": 36708610951,
+    "job": 109864746875,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36708610951",
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulInitialSteps": 6,
+    "currentStep": "Verify additive upgrade from the previous schema",
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
+  },
+  "nativeIncomplete463": {
+    "task": 463,
+    "code": "e62427d9bea2a1ff6d381d6cb10af2cc8bfdb226",
+    "run": 36701344336,
+    "job": 109841249507,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "6884a48d125d5a095b338b4bc4dee0f8742d19e1b0f73a69615546282cfa9862",
+      "frontend/technician-field-mode.html": "270e680af0b7f12c2cc70cc0f2a2f103862092afcc8d2ac0f93e5cef025bb14d",
+      "frontend/sw.js": "052f6e1afc30f2b162b859ba743d7dfc41fa47601c826bcc31f33b358fb226bf",
+      "scripts/test-field-visit-shell-languages.js": "06269eb0ee546c64c01ffc539999f96a822304a9254dbfed27b050201f7ffd3e",
+      "scripts/test-field-visit-actions-languages.js": "d17515c1b9c296f40770d2cab61d6ae6b3d9cd43e23655da77077ebe3bd9c71e",
+      "scripts/test-field-suite.js": "17f989623c23c842350d4f08dbe8876b73d759974044821874dc0e6fb616a112"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "7cb63e672ce43cad0e5abc040b8ba912423cd7e5",
+      "frontend/technician-field-mode.html": "8403d2f578d198b0ed86dc70f9a7d150d897b887",
+      "frontend/sw.js": "4e43f461eada42ff4807aa323f7c9f178f485d85",
+      "scripts/test-field-visit-shell-languages.js": "3de34dc4fad94e2be1f81d6fceb8bca82bf3775f",
+      "scripts/test-field-visit-actions-languages.js": "d8150844e411783357320e9a928576771f8d6b0d",
+      "scripts/test-field-suite.js": "5bb8790a510fc0b83e48cc025d3e2cd22e9ce09f"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 357,
+    "completedGroups": 354,
+    "passedGroups": 349,
+    "failedGroups": [
+      {
+        "script": "test-field-photo-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 17621
+      },
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 24021
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 20401
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14496
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 15037
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T10:15:54Z",
+    "updatedAt": "2026-09-30T11:26:22Z",
+    "cancellationReason": "No cause established from the run metadata or job log; no acceptance claimed.",
+    "alreadyLocallyRepairedIn": {
+      "test-field-photo-panel-languages.js": 465,
+      "test-field-round-navigation-languages.js": 465
+    },
+    "remainingInvestigation": [
+      "test-field-water-panel-languages.js",
+      "test-field-visit-briefing.js",
+      "test-field-vehicle-assignment-ui.js"
+    ],
+    "groupsSha256": "8f47d760cd2d54de8d3b962c2e284a6558165bf6070017da5c14098599a34b66",
+    "errors": {
+      "test-field-photo-panel-languages.js": "German fixture still searched Extra /; repaired in465.",
+      "test-field-water-panel-languages.js": "Timeout8000ms waiting for physical close confirmation dialog at line258.",
+      "test-field-round-navigation-languages.js": "Read empty notes after REGULAR selection at line97; same symptom covered by465 stored-draft/form wait repair.",
+      "test-field-visit-briefing.js": "Timeout10000ms waiting for German start label Besuch starten at line125.",
+      "test-field-vehicle-assignment-ui.js": "Timeout12000ms: destination option absent in form at line16, called line21."
+    }
   }
 }
