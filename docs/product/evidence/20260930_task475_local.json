@@ -189,9 +189,27 @@
   "native475": {
     "branch": "work/field-readiness-20260915-simulation",
     "suiteGroups": 367,
-    "status": "publication_pending",
+    "status": "in_progress",
+    "code": "82ccbc0173ddc029b917b484f7b7490dadceb2e4",
+    "run": 36751168770,
+    "job": 110009859426,
+    "initialStepsPassed": 4,
+    "currentStep": "Run npm ci",
+    "suite": "pending",
+    "restore": "pending",
     "postgres16UpgradeRestoreRequired": true,
     "workflowBudgetMinutes": 90
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "82ccbc0173ddc029b917b484f7b7490dadceb2e4",
+    "tree": "e4c844a302efb49468db82125d05d0d2cf6f7bb2",
+    "parent": "4054455dea77356847126dd9de719f1266e9e6f5",
+    "validatedLocalTreeMatchesRemote": true,
+    "remoteCommitParentsVerified": true,
+    "force": false,
+    "merge": false,
+    "deploy": false
   },
   "cache": 254,
   "runner": 367,

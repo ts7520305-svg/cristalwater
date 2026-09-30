@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK475 / resumo de correção
+
+TASK475 guardada na branch `work/field-readiness-20260915-simulation`: código `82ccbc0173ddc029b917b484f7b7490dadceb2e4`, árvore `e4c844a302efb49468db82125d05d0d2cf6f7bb2`, igual à validada localmente; parent `4054455dea77356847126dd9de719f1266e9e6f5` confirmado. [CI36751168770](https://github.com/ts7520305-svg/cristalwater/actions/runs/36751168770), job110009859426, em execução no commit de código: quatro etapas iniciais aprovadas, instalação das dependências em curso na consulta; suite367/restauro pendentes. Cinco integrações finais,50 verificações de idioma/largura e1 356 unitários/quatro técnicos/sintaxe aprovados localmente. Cache254/runner367. [Prova475](evidence/20260930_task475_local.json).
+
+TASK473/474 continuam nas suites365/366 após dez etapas iniciais aprovadas; restauros pendentes. Exigir suites/restauros dos commits exatos antes de aceitação nativa. Próximo: acompanhar473–475, corrigir novas falhas e continuar erros dos downloads autenticados, depois push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Esta atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK475 / resumo de correção
 
 **TASK475 / C06-015:** cabeçalho, ajuda, rótulos, checklist guardada, ausência de leituras/produtos/notas, contagem de fotos, estado e data de apresentação nos cinco idiomas PT/EN/FR/ES/DE. 24 entradas novas/120 textos;312 anteriores intactas, catálogo336. Três fontes de produto, runner/teste e quatro documentos: nove ficheiros. [Prova475](evidence/20260930_task475_local.json).
