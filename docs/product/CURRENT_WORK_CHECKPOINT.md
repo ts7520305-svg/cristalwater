@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK481 / prontidão do teste de volume
+
+Código `e94f03d2c17045caac35787d76a9860a8a8fd775`, árvore `d7a286dff412391992c966d4d819fdfd4b8b7a72`, igual à validada localmente; parent `06e39da4f4ddf131966565a75fd5480455264dc5` confirmado. [CI36780272430](https://github.com/ts7520305-svg/cristalwater/actions/runs/36780272430), job110108477689: seis etapas iniciais aprovadas, verificação aditiva em curso; suite372/restauro pendentes na consulta. Só o teste de volume mudou: prontidão da ronda e DOM exatos com leituras contínuas, marcadores de fase, limites preservados. Volume58671ms/cache80 verificações/sessão50 aprovados, sintaxe695/308/44; catálogo340/cache259/runner372 e todas as fontes produto mantidos. [Prova481](evidence/20260930_task481_local.json).
+
+Última aceitação completa atualizada para TASK479: [CI36771220588](https://github.com/ts7520305-svg/cristalwater/actions/runs/36771220588)/job110077814896, código `364c2e52d64dc35cc544008ae766800149ecdaff`, árvore `d53e0887b694840b60e37a86a2a5322c20bb87c6`, head/checkout/árvore remota/fontes conferidos.371 grupos distintos/code0 na ordem exata, PostgreSQL16.15/43 migrações aditivas,1 384 unitários/140 ficheiros/quatro técnicos/sintaxe695/308/44. Restauro128 tabelas/51 ficheiros, linhas/hashes iguais, PASS em2026-09-30T21:28:25Z. Fontes e371 resultados completos na prova481. Esta aceitação refere-se ao código479; não a480/481.
+
+TASK478 terminou com369/370 grupos aprovados e UI do volume SIGKILL75s; restauro saltado. Ensaio controlado reproduziu timeout networkidle com825 visitas já prontas/197 leituras, mas o ponto exato do bloqueio nativo478 não foi registado. TASK480 continua na suite372 após dez etapas iniciais aprovadas/restauro pendente. A confirmação nativa da correção481 permanece pendente.
+
+Próximo: acompanhar480/481 e continuar TASK482/falhas próprias de carregamento e avisos legados da ronda, mantendo erros alheios literais. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/VPS/contactos externos; contrato anual adiado. Atualização documental [skip ci]; entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK481 / prontidão do teste de volume
 
 TASK481 priorizada para corrigir o teste de volume após a falha nativa da TASK478; trabalho de idiomas de carregamento/avisos legados passa para TASK482. A única fonte alterada é `scripts/test-field-agenda-volume.js`: navegação da ronda técnica aguarda domcontentloaded e usa as assertivas exatas da ronda/DOM para comprovar prontidão. Inclui leituras GET reais de health a cada100ms e marcadores de fase para diagnóstico. Catálogo340/cache259/runner372 e ordem exata mantidos; sem novos grupos ou traduções. Produto, service worker, cache, backend/schema/migrações/workflows/dependências conservados.
