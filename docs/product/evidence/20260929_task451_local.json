@@ -216,18 +216,54 @@
         "excerpt": "PASS restored 128 tables and 50 uploaded files; database rows and file hashes match"
       },
       "exactGroupOrderVerified": true
+    },
+    {
+      "task": 450,
+      "run": 36636579876,
+      "job": 109638576785,
+      "counts": {
+        "total": 342,
+        "passed": 342
+      },
+      "failures": [],
+      "restore": {
+        "status": "success",
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsAndFileHashesMatch": true,
+        "excerpt": "PASS restored 128 tables and 51 uploaded files; database rows and file hashes match"
+      },
+      "exactGroupOrderVerified": true
     }
   ],
   "limits": [
     "PGlite/Chromium153 does not replace native PostgreSQL16/additive upgrade/full343-group suite/full database and uploaded-file restore with measured counts and matching hashes.",
-    "Native448 and449 accepted341/341 with restore128 tables50 uploaded files in each exact prior run; these are measured counts, not fixed restoration limits. TASK450 native run36636579876 remains pending in the full suite.",
+    "Native448 and449 accepted341/341 with restore128 tables50 uploaded files in each exact prior run; native450 accepted342/342 with restore128 tables51 uploaded files. Counts are measured, not fixed restoration limits; native451 remains pending.",
     "The GPS-page body is explicitly excluded from generic translation to preserve literal/data/error presentation. GPS-page titles, buttons, KPI labels and page-owned success/fallback messages, compatibility gps.js and other C06 panels still need their own batches.",
     "Only save/send/flush/status/start/stop are counted as producers in the language matrix; pre-existing account-validation polling remains active.",
     "C06/C06-009/C08/C10 remain open;32=26 not started/one active/five complete. Public repository authorized during development; private before completion/C32. No merge/deploy/external communications; annual maintenance contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+    "tree": "eb1dc375929c4f4f3f65ece1fb508c5349bd369c",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "e39d3772c28e09cca8a1ae7cb9ba8633b1a3ac96",
+    "originalHistoryBranch": "work/local-task451-20260930",
+    "ci": {
+      "run": 36667051825,
+      "job": 109733843295,
+      "head": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema",
+      "fullSuiteGroups": 343,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   },

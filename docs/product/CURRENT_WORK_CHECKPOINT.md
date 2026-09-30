@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK451 / CI em execução
+
+TASK451 publicada na branch `work/field-readiness-20260915-simulation`: código `61eb17daf89b3232be25a22e356ba0f15cc5d7a7`, árvore `eb1dc375929c4f4f3f65ece1fb508c5349bd369c`, igual à validada. Checkout alinhado; histórico local original preservado em `work/local-task451-20260930`. [CI36667051825](https://github.com/ts7520305-svg/cristalwater/actions/runs/36667051825), job109733843295, arrancou no commit exato; 6 etapas iniciais aprovadas, `Verify additive upgrade from the previous schema` em execução na consulta. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Helper GPS em cinco idiomas, erros próprios por identidade, pontos/pedidos/guardas preservados e reenvio confirmando um ponto SQL. Exigir PostgreSQL16/upgrade/suite343/restauro completo com contagens medidas e hashes iguais próprios para aceitação. Atualização documental posterior `[skip ci]` conserva o código. [Prova451](evidence/20260929_task451_local.json).
+
+CI45036636579876 aceite342/342 e restauro128 tabelas51 ficheiros medidos/hashes iguais; nomes/ordem dos342 grupos verificados nos logs. CI448/449 aceites341/341/restauro128/50. Contagens são específicas de cada run. Próximo: confirmar gates451 e reparar falhas; depois os textos próprios da página GPS. Compatibilidade gps.js e restantes painéis C06 continuam pendentes. C06/C06-009/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público autorizado no desenvolvimento; privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 29/09/2026, TASK451 local validada / mensagens do helper GPS
 
 **TASK451 / C06-009:**21 entradas/105 textos PT/EN/FR/ES/DE no helper GPS, incluindo os erros próprios, avisos e parâmetros aninhados. Identidade privada do Error mantém Error.message original e falhas externas literais. Consumidor real da página GPS e seletor global integrados; zona de GPS protegida da tradução genérica. Nós repintam sem voltar a ler produtores ou alterar pontos/pedidos. [Prova451](evidence/20260929_task451_local.json).
