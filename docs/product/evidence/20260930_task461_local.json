@@ -250,7 +250,14 @@
     },
     {
       "task": 461,
-      "status": "not_yet_published",
+      "code": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "run": 36694971218,
+      "job": 109820630724,
+      "head": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 4,
+      "currentStep": "Run npm ci",
       "fullSuiteGroups": 353,
       "restore": "pending"
     }
@@ -271,5 +278,29 @@
     "deploy": false,
     "externalContacts": false,
     "annualContract": "deferred"
+  },
+  "publication": {
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
+    "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+    "tree": "fc0c2c6276e7812e4b98de14dfe863b03f9acb4d",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "1508aae5026cb6110e4fd02a4d186c4d3a6fe0a3",
+    "originalHistoryBranch": "work/local-task461-20260930",
+    "ci": {
+      "run": 36694971218,
+      "job": 109820630724,
+      "head": "143060d8a3234c3bc008546f4867a0d6b545fa7a",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 4,
+      "currentStep": "Run npm ci",
+      "fullSuiteGroups": 353,
+      "restore": "pending"
+    },
+    "merged": false,
+    "deployed": false
   }
 }

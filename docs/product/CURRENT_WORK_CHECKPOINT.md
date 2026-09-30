@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK461 / CI em execução
+
+TASK461 publicada na branch `work/field-readiness-20260915-simulation`: código `143060d8a3234c3bc008546f4867a0d6b545fa7a`, árvore `fc0c2c6276e7812e4b98de14dfe863b03f9acb4d`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task461-20260930`. [CI36694971218](https://github.com/ts7520305-svg/cristalwater/actions/runs/36694971218), job109820630724, no commit exato: 4 etapas iniciais aprovadas; `Run npm ci` em execução na consulta. Quadro da visita atual com18 entradas/90 textos: estado, responsável, reparação/manutenção, minutos e vazio, conservando nomes/dados/prioridades/cálculos. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados; dois grupos complementares dentro dos limites existentes. Cache243/runner353. [Prova461](evidence/20260930_task461_local.json).
+
+TASK459 aceite350/350 grupos na ordem exata/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, cinco fontes verificadas. TASK457/458 já aceites; falha histórica454 conservada. CI460 na suite351; exigir gates/restauros460–461. Próximo funcional: lista da ronda; texto envolvente da visita, equipa/documentos e push/auth/nav pendentes. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK461 local validada / estado da visita atual
 
 **TASK461 / C06-012:**18 entradas/90 textos PT/EN/FR/ES/DE para identificação do quadro, oito estados, responsável, reparação/manutenção, minutos e ausência de visita atual. Apresentador privado existente reutilizado; nomes, notas, registos, prioridades e dados originais conservados. Arredondamento, origem do início, datas e regras C10 inalterados. [Prova461](evidence/20260930_task461_local.json).
