@@ -372,6 +372,17 @@
 
     .crew-head { flex-wrap: wrap; }
 
+    #correctionSummary .service-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    #correctionSummary .service-summary-item { min-width: 0; }
+    #correctionSummary .service-summary-item > span { display: block; color: var(--muted); font-size: 12px; }
+    #correctionSummary .service-summary-item > b { display: block; overflow-wrap: anywhere; }
+    #correctionSummary .service-summary-note { margin-top: 14px; overflow-wrap: anywhere; }
+
     .crew-grid,
     .crew-status-grid,
     .checks,
@@ -1454,12 +1465,12 @@
     <section class="card service-summary-card field-panel field-panel-agora" id="correctionSummaryCard" hidden>
       <div class="service-summary-head">
         <div>
-          <span class="chip">Registo guardado</span>
-          <div class="muted" style="margin-top:8px">Esta visita já foi feita. Pode ajustar e guardar correção.</div>
+          <span class="chip" data-correction-initial-copy="correctionSaved" data-cw-no-i18n>Registo guardado</span>
+          <div class="muted" style="margin-top:8px" data-correction-initial-copy="correctionHelp" data-cw-no-i18n>Esta visita já foi feita. Pode ajustar e guardar correção.</div>
         </div>
-        <span class="chip" id="correctionSavedAt">Feita</span>
+        <span class="chip" id="correctionSavedAt" data-correction-initial-copy="correctionDone" data-cw-no-i18n>Feita</span>
       </div>
-      <div id="correctionSummary"></div>
+      <div id="correctionSummary" data-cw-no-i18n></div>
     </section>
 
     <section class="card access-card field-panel field-panel-agora" id="accessCard">

@@ -426,6 +426,30 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "correctionSaved": ["Registo guardado", "Saved record", "Enregistrement sauvegardé", "Registro guardado", "Gespeicherter Eintrag"],
+  "correctionHelp": ["Esta visita já foi feita. Pode ajustar e guardar correção.", "This visit is complete. You can adjust it and save a correction.", "Cette visite est terminée. Vous pouvez la modifier et enregistrer une correction.", "Esta visita ya se ha realizado. Puedes ajustarla y guardar una corrección.", "Dieser Besuch ist abgeschlossen. Sie können ihn anpassen und eine Korrektur speichern."],
+  "correctionDone": ["Feita", "Completed", "Terminée", "Completada", "Abgeschlossen"],
+  "correctionChecklist": ["Checklist", "Checklist", "Checklist", "Lista de comprobación", "Checkliste"],
+  "correctionChlorine": ["Cloro", "Chlorine", "Chlore", "Cloro", "Chlor"],
+  "correctionAlkalinity": ["Alcalinidade", "Alkalinity", "Alcalinité", "Alcalinidad", "Alkalinität"],
+  "correctionTemperature": ["Temperatura", "Temperature", "Température", "Temperatura", "Temperatur"],
+  "correctionProducts": ["Produtos", "Products", "Produits", "Productos", "Produkte"],
+  "correctionPhotos": ["Fotos", "Photos", "Photos", "Fotos", "Fotos"],
+  "correctionState": ["Estado", "Status", "État", "Estado", "Status"],
+  "correctionCleaning": ["Limpeza", "Cleaning", "Nettoyage", "Limpieza", "Reinigung"],
+  "correctionVacuuming": ["Aspiracao", "Vacuuming", "Aspiration", "Aspiración", "Absaugen"],
+  "correctionBasket": ["Cesto", "Basket", "Panier", "Cesta", "Korb"],
+  "correctionBrushing": ["Escovagem", "Brushing", "Brossage", "Cepillado", "Bürsten"],
+  "correctionWaterline": ["Linha de agua", "Waterline", "Ligne d’eau", "Línea de agua", "Wasserlinie"],
+  "correctionFilter": ["Filtro", "Filter", "Filtre", "Filtro", "Filter"],
+  "correctionNoChecks": ["Sem checklist marcada", "No checklist items marked", "Aucun élément de checklist coché", "Sin elementos marcados en la lista", "Keine Punkte der Checkliste markiert"],
+  "correctionNoReading": ["Sem registo", "No reading recorded", "Aucune mesure enregistrée", "Sin lectura registrada", "Kein Messwert erfasst"],
+  "correctionNoProducts": ["Sem produtos", "No products", "Aucun produit", "Sin productos", "Keine Produkte"],
+  "correctionPhotoOne": ["{count} foto", "{count} photo", "{count} photo", "{count} foto", "{count} Foto"],
+  "correctionPhotoMany": ["{count} fotos", "{count} photos", "{count} photos", "{count} fotos", "{count} Fotos"],
+  "correctionOpen": ["Correção aberta", "Correction open", "Correction ouverte", "Corrección abierta", "Korrektur offen"],
+  "correctionSavedNotes": ["Notas guardadas:", "Saved notes:", "Notes enregistrées :", "Notas guardadas:", "Gespeicherte Notizen:"],
+  "correctionNoNotes": ["Sem notas registadas nesta visita.", "No notes recorded for this visit.", "Aucune note enregistrée pour cette visite.", "Sin notas registradas en esta visita.", "Keine Notizen für diesen Besuch erfasst."],
   "toolbarTitle": ["Documentos", "Documents", "Documents", "Documentos", "Dokumente"],
   "toolbarHint": ["AT, obra e seguro", "AT, work and insurance", "AT, travaux et assurance", "AT, trabajo y seguro", "AT, Arbeit und Versicherung"],
   "toolbarLegal": ["Documentos legais", "Legal documents", "Documents légaux", "Documentos legales", "Rechtliche Dokumente"],
@@ -2619,6 +2643,7 @@
   for (const node of document.querySelectorAll('[data-crew-copy]')) alertUi.bind(node, alertUi.value(node.dataset.crewCopy));
   for (const node of document.querySelectorAll('[data-center-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.centerInitialCopy));
   for (const node of document.querySelectorAll('[data-document-toolbar-copy]')) alertUi.bind(node, alertUi.value(node.dataset.documentToolbarCopy));
+  for (const node of document.querySelectorAll('[data-correction-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.correctionInitialCopy));
   // Attribute-only presentation preserves the original inputs, values and selection.
   const documentToolbarInputs = [...document.querySelectorAll('[data-document-toolbar-placeholder]')].map(node => ({ node, entry: alertUi.value(node.dataset.documentToolbarPlaceholder) }));
   function paintDocumentToolbarInputs() {
@@ -5530,15 +5555,15 @@
     return `${value}${suffix ? ` ${suffix}` : ""}`;
   }
 
-  function doneChecksLabel(visit) {
+  function doneChecksCopy(visit) {
     const done = [];
-    if (visit?.cleaned) done.push("Limpeza");
-    if (visit?.vacuumed) done.push("Aspiracao");
-    if (visit?.basketCleaned) done.push("Cesto");
-    if (visit?.brushed) done.push("Escovagem");
-    if (visit?.waterlineClean) done.push("Linha de agua");
-    if (visit?.backwashDone) done.push("Filtro");
-    return done.length ? done.join(" / ") : "Sem checklist marcada";
+    if (visit?.cleaned) done.push(alertUi.value('correctionCleaning'));
+    if (visit?.vacuumed) done.push(alertUi.value('correctionVacuuming'));
+    if (visit?.basketCleaned) done.push(alertUi.value('correctionBasket'));
+    if (visit?.brushed) done.push(alertUi.value('correctionBrushing'));
+    if (visit?.waterlineClean) done.push(alertUi.value('correctionWaterline'));
+    if (visit?.backwashDone) done.push(alertUi.value('correctionFilter'));
+    return done.length ? alertUi.join(done, ' / ') : alertUi.value('correctionNoChecks');
   }
 
   function productsLabel(products) {
@@ -5551,6 +5576,8 @@
     const summary = $("#correctionSummary");
     const savedAt = $("#correctionSavedAt");
     if (!card || !summary) return;
+    alertUi.clearTree(summary);
+    alertUi.clear(savedAt);
 
     if (!isVisitDone(visit)) {
       card.hidden = true;
@@ -5561,25 +5588,35 @@
     const products = productsFromVisit(visit);
     const photos = photosFromVisit(visit);
     card.hidden = false;
-    if (savedAt) savedAt.textContent = visit?.endAt ? formatDate(visit.endAt) : "Feita";
+    alertUi.bind(savedAt, visit?.endAt ? alertUi.documentBodyDate(visit.endAt) : alertUi.value('correctionDone'));
+
+    // Capture the saved snapshot once; a language repaint touches only these leaves.
+    const entries = [];
+    const leaf = (entry, tag = 'b') => {
+      const index = entries.push(entry) - 1;
+      return `<${tag} data-correction-copy="${index}">${esc(alertUi.format(entry))}</${tag}>`;
+    };
+    const label = key => leaf(alertUi.value(key), 'span');
+    const reading = (value, suffix = '') => leaf(value === undefined || value === null || value === '' ? alertUi.value('correctionNoReading') : readingLabel(value, suffix));
 
     summary.innerHTML = `
       <div class="service-summary-grid">
-        <div class="service-summary-item"><span>Checklist</span><b>${esc(doneChecksLabel(visit))}</b></div>
-        <div class="service-summary-item"><span>pH</span><b>${esc(readingLabel(visit?.ph))}</b></div>
-        <div class="service-summary-item"><span>Cloro</span><b>${esc(readingLabel(visit?.chlorine, "ppm"))}</b></div>
-        <div class="service-summary-item"><span>Alcalinidade</span><b>${esc(readingLabel(visit?.alkalinity, "ppm"))}</b></div>
-        <div class="service-summary-item"><span>ORP</span><b>${esc(readingLabel(visit?.orpMv, "mV"))}</b></div>
-        <div class="service-summary-item"><span>Temperatura</span><b>${esc(readingLabel(visit?.temperature, "C"))}</b></div>
-        <div class="service-summary-item"><span>Produtos</span><b>${esc(productsLabel(products))}</b></div>
-        <div class="service-summary-item"><span>Fotos</span><b>${esc(`${photos.length} foto${photos.length === 1 ? "" : "s"}`)}</b></div>
-        <div class="service-summary-item"><span>Estado</span><b>Correção aberta</b></div>
+        <div class="service-summary-item">${label('correctionChecklist')}${leaf(doneChecksCopy(visit))}</div>
+        <div class="service-summary-item"><span>pH</span>${reading(visit?.ph)}</div>
+        <div class="service-summary-item">${label('correctionChlorine')}${reading(visit?.chlorine, 'ppm')}</div>
+        <div class="service-summary-item">${label('correctionAlkalinity')}${reading(visit?.alkalinity, 'ppm')}</div>
+        <div class="service-summary-item"><span>ORP</span>${reading(visit?.orpMv, 'mV')}</div>
+        <div class="service-summary-item">${label('correctionTemperature')}${reading(visit?.temperature, 'C')}</div>
+        <div class="service-summary-item">${label('correctionProducts')}${leaf(products.length ? productsLabel(products) : alertUi.value('correctionNoProducts'))}</div>
+        <div class="service-summary-item">${label('correctionPhotos')}${leaf(alertUi.value(photos.length === 1 ? 'correctionPhotoOne' : 'correctionPhotoMany', { count: photos.length }))}</div>
+        <div class="service-summary-item">${label('correctionState')}${leaf(alertUi.value('correctionOpen'))}</div>
       </div>
       <div class="service-summary-note">
-        <strong>Notas guardadas:</strong><br>
-        ${esc(visit?.notes || "Sem notas registadas nesta visita.")}
+        ${leaf(alertUi.value('correctionSavedNotes'), 'strong')}<br>
+        ${leaf(visit?.notes || alertUi.value('correctionNoNotes'), 'span')}
       </div>
     `;
+    for (const node of summary.querySelectorAll('[data-correction-copy]')) alertUi.bind(node, entries[Number(node.dataset.correctionCopy)]);
   }
 
   function selectVisit(nextIndex) {

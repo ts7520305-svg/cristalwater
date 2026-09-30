@@ -1,0 +1,203 @@
+{
+  "task": 475,
+  "date": "2026-09-30",
+  "base": "4054455dea77356847126dd9de719f1266e9e6f5",
+  "item": "C06-015 / resumo de correção da visita",
+  "scope": {
+    "productSources": 3,
+    "testScripts": 2,
+    "documentation": 4,
+    "totalFiles": 9
+  },
+  "translation": {
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "newEntries": 24,
+    "newTexts": 120,
+    "previousEntries": 312,
+    "totalEntries": 336,
+    "previousEntriesUnchanged": true
+  },
+  "negative": {
+    "script": "scripts/test-field-correction-summary-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 1270,
+    "reason": "Language en selected but saved-record correction heading remained Portuguese",
+    "actual": "Registo guardado",
+    "expected": "Saved record"
+  },
+  "local": {
+    "runtime": "Isolated PGlite / Chromium153; five scripts sequentially in one shared database, no reset",
+    "integrations": [
+      {
+        "script": "scripts/test-field-document-toolbar-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10269
+      },
+      {
+        "script": "scripts/test-field-correction-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12773
+      },
+      {
+        "script": "scripts/test-field-visit-completion-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9482
+      },
+      {
+        "script": "scripts/test-field-extra-correction.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9308
+      },
+      {
+        "script": "scripts/test-field-round-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21325
+      }
+    ],
+    "newChecks": 50,
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "scenarios": [
+      "completed REGULAR with all checks/readings/products/two photos",
+      "completed EXTRA with absent readings/products/notes and one photo",
+      "offline reload EXTRA",
+      "DONE without endAt / zero photos / subset checklist",
+      "invalid endAt presentation",
+      "cached PLANNED hidden summary",
+      "actual PLANNED hidden summary",
+      "return to REGULAR with same numeric ID as EXTRA"
+    ],
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "operationalWritesInNewGroup": 0,
+    "pageErrorsInNewGroup": 0,
+    "screenshots": "German320 summary inspected after scoped grid/label spacing fix; values and literal markup readable with no horizontal overflow"
+  },
+  "preservation": {
+    "base": "4054455dea77356847126dd9de719f1266e9e6f5",
+    "mainSourceReversedExactly": true,
+    "previousCatalogEntries": 312,
+    "previousCatalogPreserved": true,
+    "newCatalogEntries": 24,
+    "newTranslatedTexts": 120,
+    "catalogTotal": 336,
+    "runnerBefore": 366,
+    "runnerAfter": 367,
+    "previousOrderPreserved": true,
+    "timeoutsUnchanged": true,
+    "sha256": {
+      "frontend/technician-field-mode.js": "ccdeb54c1ddff47531665a441f2d3a5fe179eef232f25187644d09276b7b2137",
+      "frontend/technician-field-mode.html": "8ebe4bc0acf67eae6396ada7ab07fd4c94153ece51b629b7b61526dff4baa553",
+      "frontend/sw.js": "e02d0630c53d3c903d7628ebf2a704c5135fcbacbfaa43493b4acfac09caf872",
+      "scripts/test-field-suite.js": "355efed23f33ca0acc821b12995d9bb93e68945f251aeb30ce6c8e95191f0da6",
+      "scripts/test-field-correction-summary-languages.js": "64f79514d0df27f4baaa58e3ae30321555b1392f704372c403540113d2fa0b44"
+    },
+    "scopedSummaryCss": true,
+    "htmlReversedExactly": true,
+    "rawReadingAndProductHelpersPreserved": true,
+    "sameInputValuesReadonlyDisabledAndChecks": true,
+    "sameSummaryElementsAndCorrectionHandler": true,
+    "sameStorageOutboxSqlAndProducerCallsDuringLanguageChange": true,
+    "typedDraftsPreserved": true,
+    "literalNotesProductsQuantitiesUnitsEscaped": true,
+    "backendSchemaDocumentModulesWorkflowUnchanged": true,
+    "draftProtection469Preserved": true,
+    "sameDateInstantPrecisionAndBrowserTimezone": true
+  },
+  "preparation": {
+    "initialTestHarnessFailure": {
+      "script": "scripts/test-field-correction-summary-languages.js",
+      "reason": "Form snapshot used model property orpMv instead of actual input ID orp",
+      "fixed": "Uses the existing orp input; all snapshot assertions retained"
+    },
+    "preLayoutIntegrations": [
+      {
+        "script": "scripts/test-field-document-toolbar-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9712
+      },
+      {
+        "script": "scripts/test-field-correction-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12776
+      },
+      {
+        "script": "scripts/test-field-visit-completion-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8963
+      },
+      {
+        "script": "scripts/test-field-extra-correction.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8858
+      },
+      {
+        "script": "scripts/test-field-round-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20719
+      }
+    ],
+    "layoutFix": "Initial visual QA found labels directly adjacent to values. Added scoped correction-summary grid/gaps/block labels and wrapping. Final five-script sequence and syntax passed after the HTML change.",
+    "supervisorFinalExit": 0
+  },
+  "native473": {
+    "code": "e5a9da153fe4bc37ce2e41aa72fc2e8726543c9d",
+    "run": 36741452228,
+    "job": 109976597755,
+    "status": "in_progress",
+    "initialStepsPassed": 10,
+    "suiteGroups": 365,
+    "suite": "in_progress",
+    "restore": "pending"
+  },
+  "native474": {
+    "code": "b79a7780b9fea0074ec5c465015ee08239ed01cc",
+    "run": 36746025908,
+    "job": 109992318689,
+    "status": "in_progress",
+    "initialStepsPassed": 10,
+    "suiteGroups": 366,
+    "suite": "in_progress",
+    "restore": "pending"
+  },
+  "native475": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "suiteGroups": 367,
+    "status": "publication_pending",
+    "postgres16UpgradeRestoreRequired": true,
+    "workflowBudgetMinutes": 90
+  },
+  "cache": 254,
+  "runner": 367,
+  "limits": [
+    "Local PGlite/Chromium evidence is separate from native PostgreSQL16/upgrade/full suite/restore.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/1 in progress/5 complete.",
+    "Public during development; private before closure/C32; no merge/deploy/external contacts; annual contract deferred."
+  ]
+}
