@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK459 / CI em execução
+
+TASK459 publicada na branch `work/field-readiness-20260915-simulation`: código `993c454943641bc7c18d92a95d22e2b082dd50d5`, árvore `74669bfbfdf0f692b945e6734f3f4a0963c214a7`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task459-20260930`. [CI36683599775](https://github.com/ts7520305-svg/cristalwater/actions/runs/36683599775), job109784303104, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Fontes ativas com26 entradas/130 textos e atualização imediata do aviso de dados ilegíveis; dados e histórico original preservados. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache241/runner350. [Prova459](evidence/20260930_task459_local.json).
+
+TASK455/456 aceites347/348 grupos na ordem exata/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros em ambos, linhas e hashes iguais. TASK454 conserva a falha histórica345/346/restauro não executado; correção458 exige gate próprio. CI457/458 nas suites349. Exigir gates/restauros457–459. Próximo funcional: dashboard/hero do técnico. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK459 local validada / fontes dos alertas
 
 **TASK459 / C06-012 e C06-005:**26 entradas/130 textos PT/EN/FR/ES/DE para títulos/detalhes ativos de bomba, lembretes indisponíveis, problemas críticos, visita atrasada e bloqueio documental. Cópias privadas por identidade; objetos originais, nomes/detalhes históricos, erros externos e datas PT preservados. Helper aceita idioma explícito opcional sem mudar o comportamento por omissão. [Prova459](evidence/20260930_task459_local.json).

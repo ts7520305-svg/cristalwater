@@ -486,14 +486,32 @@
     }
   ],
   "limits": [
-    "TASK459 local PGlite results do not replace native PostgreSQL16, additive upgrade, exact350-group suite and database/uploaded-file restore at the published code.",
+    "TASK459 is published at its validated tree; native PostgreSQL16, additive upgrade, exact350-group suite and database/uploaded-file restore at this code remain pending. Local PGlite results do not replace native acceptance.",
     "Document source browser assertions cover the four UNAVAILABLE required states. EXPIRED/PENDING/session-confirmation/mismatch translations and unchanged selection predicates were reviewed in source; this task does not claim new browser acceptance of those document lifecycle branches.",
     "Dashboard/hero source presentation remains next. Shared push/auth/navigation and date-policy C10 remain open. Historical raw source titles/details and Error.message remain original.",
     "C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. Only work/field-readiness-20260915-simulation. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "993c454943641bc7c18d92a95d22e2b082dd50d5",
+    "tree": "74669bfbfdf0f692b945e6734f3f4a0963c214a7",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "38fe6ae23170a2169990f9f0a33d994fc175f782",
+    "originalHistoryBranch": "work/local-task459-20260930",
+    "ci": {
+      "run": 36683599775,
+      "job": 109784303104,
+      "head": "993c454943641bc7c18d92a95d22e2b082dd50d5",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema",
+      "fullSuiteGroups": 350,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }
