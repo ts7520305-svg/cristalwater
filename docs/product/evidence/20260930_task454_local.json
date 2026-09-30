@@ -191,13 +191,31 @@
     }
   ],
   "limits": [
-    "Publication and native PostgreSQL16/upgrade/full346-group suite/full database and uploaded-file restore for TASK454 remain pending. PGlite does not replace these gates.",
+    "Native PostgreSQL16/upgrade/full346-group suite/full database and uploaded-file restore for published TASK454 remain pending. PGlite does not replace these gates.",
     "Water-open panel and other helper consumers still show their original text until their own presentation integration. Persisted syncError strings remain literal because they lack reliable error provenance; no schema or historical-data rewrite is implied.",
     "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "809aacf2fec42cfaff22490d19710aecdfbc80e2",
+    "tree": "bd3b352d3753c8707129028d409aab0bd820f1f1",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "439406dabcda276a05d3f7ed79bcbbabc5eb4d63",
+    "originalHistoryBranch": "work/local-task454-20260930",
+    "ci": {
+      "run": 36674413317,
+      "job": 109756159173,
+      "head": "809aacf2fec42cfaff22490d19710aecdfbc80e2",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 1,
+      "currentStep": "Initialize containers",
+      "fullSuiteGroups": 346,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK454 / CI em execução
+
+TASK454 publicada na branch `work/field-readiness-20260915-simulation`: código `809aacf2fec42cfaff22490d19710aecdfbc80e2`, árvore `bd3b352d3753c8707129028d409aab0bd820f1f1`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task454-20260930`. [CI36674413317](https://github.com/ts7520305-svg/cristalwater/actions/runs/36674413317), job109756159173, no commit exato: uma etapa inicial aprovada; `Initialize containers` em execução na consulta. Helper de lembretes com23 entradas/115 textos nos cinco idiomas e integração no painel da bomba; mensagens/dados originais e guardas preservados. Cinco integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. [Prova454](evidence/20260930_task454_local.json).
+
+Exigir gates PostgreSQL16/upgrade/suite346/restauro completo próprios; contagens medidas e hashes iguais. CI452/453 continuam nas suites344/345 após dez etapas iniciais aprovadas; restauros pendentes. TASK451 aceite343/restauro128 tabelas51 ficheiros. Próximo: confirmar452/453/454 e corrigir falhas; depois integrar a apresentação no painel de água aberta (`crystal-os-v2-shell.js` e respetivos consumidores). Texto persistido sem origem inequívoca continua literal, sem reescrita histórica implícita. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK454 local validada / mensagens dos lembretes
 
 **TASK454 / C06-005:** helper de lembretes com 23 entradas/115 textos PT/EN/FR/ES/DE, integrado no painel real da bomba (referência histórica C08-045). Identidade privada distingue erros próprios de texto externo; `Error.message`, `legacyWarning()` e `syncError` persistido permanecem originais. Trocar idioma repinta os mesmos nós sem reler produtores nem criar pedidos operacionais. [Prova454](evidence/20260930_task454_local.json).
