@@ -134,6 +134,8 @@ async function apiProbe(f) {
 }
 
 async function browserProbe(f) {
+  const probeStarted = performance.now(), phases = [];
+  const mark = (phase, detail = {}) => { const entry = { phase, elapsedMs: Math.round(performance.now() - probeStarted), ...detail }; phases.push(entry); console.log(JSON.stringify({ agendaVolumeStage: entry })); };
   const browser = await require('playwright').chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   try {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, timezoneId: f.timeZone, serviceWorkers: 'block' });
@@ -141,6 +143,7 @@ async function browserProbe(f) {
     await context.addInitScript(({ token, id, origin }) => { if (location.origin !== origin) return; for (const k of ['token', 'cristalwater_jwt', 'adminToken']) localStorage.setItem(k, token); for (const k of ['user', 'cristalwater_user']) localStorage.setItem(k, JSON.stringify({ id, role: 'ADMIN' })); }, { token: sign({ id: f.admin, role: 'ADMIN', principalType: 'USER' }), id: f.admin, origin: new URL(base).origin });
     const page = await context.newPage(), errors = [], writes = []; page.setDefaultTimeout(30000);
     const observe = p => { p.on('pageerror', e => errors.push(e.message)); p.on('request', r => { if (r.url().startsWith(base + '/api/') && !['GET', 'HEAD', 'OPTIONS'].includes(r.method())) writes.push(r.method() + ' ' + new URL(r.url()).pathname); }); }; observe(page);
+    mark('planner-open');
     const start = performance.now(); await page.goto(base + '/admin-rounds', { waitUntil: 'networkidle' });
     await page.waitForFunction(() => document.getElementById('status')?.textContent.includes('carregadas com sucesso'));
     const today = new Date(f.today), end = add(today, 7), ownPools = new Set(f.pools.map(r => r.id));
@@ -162,6 +165,7 @@ async function browserProbe(f) {
     await page.setViewportSize({ width: 390, height: 1000 }); exact(await rowKeys(), plannerKeys(expected), 'mobile planner IDs');
     await page.locator('#weekVisits').evaluate(n => n.scrollIntoView({ block: 'start' }));
     await page.screenshot({ path: path.join(folder, 'planner-390.png') });
+    mark('planner-verified', { rows: expected.length });
     const dayExpected = dayRows(f, f.lisbonDay), seen = []; let pages = 0;
     const dayStart = performance.now(); await page.goto(base + '/admin-today?' + new URLSearchParams({ date: f.lisbonDay, q: f.prefix }), { waitUntil: 'networkidle' });
     for (;;) {
@@ -176,6 +180,7 @@ async function browserProbe(f) {
     assert(loadMs < 30000); assert(plannerHeapMiB < 256); assert(ownPools.size === 400);
     await page.locator('[data-visit-key]').first().scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(folder, 'day-390.png') });
     const dayTraversalMs = performance.now() - dayStart;
+    mark('day-verified', { rows: seen.length, pages });
     const techContext = await browser.newContext({ viewport: { width: 390, height: 1000 }, timezoneId: f.timeZone, serviceWorkers: 'block' });
     await techContext.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort());
     await techContext.addInitScript(({ token, tech, origin }) => {
@@ -184,23 +189,38 @@ async function browserProbe(f) {
       for (const k of ['user', 'cristalwater_user']) localStorage.setItem(k, JSON.stringify({ id: tech.id, name: tech.name, role: 'TECHNICIAN' }));
       const interval = window.setInterval; window.setInterval = (fn, ms, ...args) => [15000, 30000].includes(ms) ? 0 : interval(fn, ms, ...args);
       Object.defineProperty(navigator, 'geolocation', { value: { watchPosition: () => 1, clearWatch() {} } });
+      // A complete field route must be verifiable while unrelated reads continue.
+      window.qaAgendaTraffic = { started: 0, completed: 0 };
+      window.qaAgendaTrafficTimer = interval(() => {
+        qaAgendaTraffic.started++;
+        fetch('/api/core/health?agendaReadiness=' + qaAgendaTraffic.started).then(response => { if (response.ok) qaAgendaTraffic.completed++; }).catch(() => {});
+      }, 100);
     }, { token: sign({ id: f.techs[0].id, role: 'TECHNICIAN' }), tech: f.techs[0], origin: new URL(base).origin });
     const field = await techContext.newPage(); field.setDefaultTimeout(20000); observe(field);
-    const expectedTech = technicianRows(f), techStart = performance.now(); await field.goto(base + '/technician-field-mode', { waitUntil: 'networkidle' });
+    const expectedTech = technicianRows(f), techStart = performance.now(); mark('technician-open', { expectedRows: expectedTech.length });
+    // The exact route and DOM assertions below define field readiness.
+    try { await field.goto(base + '/technician-field-mode', { waitUntil: 'domcontentloaded' }); }
+    catch (error) { const readiness = await field.evaluate(() => ({ routeRows: window.CWFieldDaySnapshot?.().visits.length, domRows: document.querySelectorAll('#visitList [data-visit-index]').length, traffic: window.qaAgendaTraffic })); mark('technician-wait-failed', readiness); throw error; }
     await field.waitForFunction(n => window.CWFieldDaySnapshot?.().visits.length === n, expectedTech.length);
     exact(await field.evaluate(() => CWFieldDaySnapshot().visits.map(r => r.visitType + ':' + r.id)), expectedTech.map(visitKey), 'technician browser snapshot');
+    mark('technician-snapshot-verified', { rows: expectedTech.length });
     await field.locator('#poolSegments [data-pool-filter=TODO]').evaluate(n => n.click());
     exact(await field.locator('#visitList [data-visit-index]').evaluateAll(rows => rows.map(r => Number(r.dataset.visitIndex))), expectedTech.map((_, i) => i), 'technician browser DOM indexes');
+    mark('technician-dom-verified', { rows: expectedTech.length });
     for (const index of [expectedTech.length - 1, 0, expectedTech.length - 1]) {
       await field.locator('#visitList [data-visit-index="' + index + '"]').evaluate(n => n.click());
       await field.waitForFunction(wanted => { const r = window.CWFieldVisitContext?.(); return r && r.visitType + ':' + r.id === wanted; }, visitKey(expectedTech[index]));
+      mark('technician-selection-verified', { index });
     }
     assert.equal(await field.locator('#visitList img').count(), 0);
     const techCdp = await techContext.newCDPSession(field); await techCdp.send('Performance.enable'); const techMetrics = await techCdp.send('Performance.getMetrics');
     const technicianHeapMiB = mib(techMetrics.metrics.find(m => m.name === 'JSHeapUsedSize').value), technicianMs = performance.now() - techStart;
     assert(technicianHeapMiB < 256); assert(technicianMs < 30000); assert.deepEqual(errors, []); assert.deepEqual(writes, []);
+    const readinessTraffic = await field.evaluate(() => { clearInterval(qaAgendaTrafficTimer); return { ...qaAgendaTraffic }; });
+    assert(readinessTraffic.started > 0 && readinessTraffic.completed > 0, 'Continuous reads exercised during field readiness');
+    mark('technician-verified', { rows: expectedTech.length, readinessTraffic });
     await field.locator('#visitList [data-visit-index]').last().scrollIntoViewIfNeeded(); await field.screenshot({ path: path.join(folder, 'technician-390.png') });
-    return { mode: 'UI', pools: f.pools.length, plannerRows: expected.length, plannerLoadMs: Math.round(loadMs * 10) / 10, plannerJsHeapMiB: plannerHeapMiB, dayRows: seen.length, dayPages: pages, dayTraversalMs: Math.round(dayTraversalMs * 10) / 10, technicianRows: expectedTech.length, technicianLoadAndNavigationMs: Math.round(technicianMs * 10) / 10, technicianJsHeapMiB: technicianHeapMiB, exactIds: true, repeatedFilters: true, pageErrors: errors.length, writes: writes.length };
+    return { mode: 'UI', pools: f.pools.length, plannerRows: expected.length, plannerLoadMs: Math.round(loadMs * 10) / 10, plannerJsHeapMiB: plannerHeapMiB, dayRows: seen.length, dayPages: pages, dayTraversalMs: Math.round(dayTraversalMs * 10) / 10, technicianRows: expectedTech.length, technicianLoadAndNavigationMs: Math.round(technicianMs * 10) / 10, technicianJsHeapMiB: technicianHeapMiB, exactIds: true, repeatedFilters: true, pageErrors: errors.length, writes: writes.length, readinessTraffic, phases };
   } finally { await browser.close(); }
 }
 
