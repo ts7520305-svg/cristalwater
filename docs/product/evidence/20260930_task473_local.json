@@ -1,0 +1,436 @@
+{
+  "task": 473,
+  "date": "2026-09-30",
+  "base": "1823ddd22957b0d34645b574d2c5aee766ac4e4e",
+  "item": "C06-015 / correção de isolamento das fixtures documentais",
+  "scope": {
+    "productSources": 0,
+    "testScripts": 4,
+    "documentation": 4,
+    "totalFiles": 8
+  },
+  "rootCause": "Four adjacent scripts reused the same unique TransportGuide.codeAT literal; isolated local runs hid collisions in the native shared database.",
+  "change": "Append the newly inserted vehicle ID to each fixture guide code. Restore only the body fixture guide code in finally after its original empty-string scenario, before disconnecting.",
+  "nativeFailures": [
+    {
+      "task": 470,
+      "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+      "run": 36720143535,
+      "job": 109902864721,
+      "status": "completed",
+      "conclusion": "failure",
+      "expectedGroups": 363,
+      "completedGroups": 363,
+      "passedGroups": 362,
+      "exactGroupOrder": true,
+      "failures": [
+        {
+          "script": "test-field-document-center-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 472
+        }
+      ],
+      "failedBeforeBrowser": true,
+      "failure": "Prisma P2002: TransportGuide.codeAT unique constraint while creating the document-center fixture",
+      "postgresql16": true,
+      "additiveUpgrade": "success",
+      "restore": "skipped",
+      "sourceBlobAndSha256Verified": 6
+    },
+    {
+      "task": 471,
+      "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
+      "run": 36722902396,
+      "job": 109912294469,
+      "status": "completed",
+      "conclusion": "failure",
+      "expectedGroups": 364,
+      "completedGroups": 364,
+      "passedGroups": 362,
+      "exactGroupOrder": true,
+      "failures": [
+        {
+          "script": "test-field-document-center-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 406
+        },
+        {
+          "script": "test-field-document-transition-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 397
+        }
+      ],
+      "failedBeforeBrowser": true,
+      "failure": "Prisma P2002: TransportGuide.codeAT unique constraint while creating document-center and document-transition fixtures",
+      "postgresql16": true,
+      "additiveUpgrade": "success",
+      "restore": "skipped",
+      "sourceBlobAndSha256Verified": 4
+    },
+    {
+      "task": 472,
+      "code": "643798002ec9362757ce7bbd60f1bd6957b79870",
+      "run": 36728433958,
+      "job": 109931291546,
+      "status": "completed",
+      "conclusion": "failure",
+      "expectedGroups": 365,
+      "completedGroups": 365,
+      "passedGroups": 362,
+      "exactGroupOrder": true,
+      "failures": [
+        {
+          "script": "test-field-document-center-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 523
+        },
+        {
+          "script": "test-field-document-transition-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 532
+        },
+        {
+          "script": "test-field-document-body-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 529
+        }
+      ],
+      "failedBeforeBrowser": true,
+      "failure": "Prisma P2002: TransportGuide.codeAT unique constraint while creating document-center, document-transition and document-body fixtures",
+      "postgresql16": true,
+      "additiveUpgrade": "success",
+      "restore": "skipped",
+      "sourceBlobAndSha256Verified": 5
+    }
+  ],
+  "negative": {
+    "environment": "isolated PGlite shared database",
+    "results": [
+      {
+        "script": "test-field-crew-status-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16973,
+        "timedOut": false,
+        "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790783914127/01-test-field-crew-status-languages.js.log"
+      },
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 410,
+        "timedOut": false,
+        "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790783914127/02-test-field-document-center-languages.js.log"
+      },
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 388,
+        "timedOut": false,
+        "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790783914127/03-test-field-document-transition-languages.js.log"
+      },
+      {
+        "script": "test-field-document-body-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 394,
+        "timedOut": false,
+        "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790783914127/04-test-field-document-body-languages.js.log"
+      }
+    ],
+    "guideRows": [
+      {
+        "id": 1,
+        "codeAT": "AT <b>{code}</b>",
+        "vehicleId": 1
+      }
+    ],
+    "limitation": "PGlite/Prisma emitted unexpected-message and closed-connection errors at the duplicate insert, not P2002. Native470/471/472 independently establish the unique-constraint cause. Earlier local protocol failures remain historical; do not assert every prior failure has this cause."
+  },
+  "integration": [
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 17018,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/01-test-field-crew-status-languages.js.log"
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20016,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/02-test-field-document-center-languages.js.log"
+    },
+    {
+      "script": "test-field-document-transition-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13937,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/03-test-field-document-transition-languages.js.log"
+    },
+    {
+      "script": "test-field-document-body-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13079,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/04-test-field-document-body-languages.js.log"
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 17434,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/05-test-field-crew-status-languages.js.log"
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 20643,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/06-test-field-document-center-languages.js.log"
+    },
+    {
+      "script": "test-field-document-transition-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13965,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/07-test-field-document-transition-languages.js.log"
+    },
+    {
+      "script": "test-field-document-body-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 12673,
+      "timedOut": false,
+      "log": "/workspace/scratch/b364087eee9d/qa-task473/run-1790784012405/08-test-field-document-body-languages.js.log"
+    }
+  ],
+  "sameDatabaseWithoutReset": true,
+  "repeatedSequence": 2,
+  "databaseAudit": {
+    "guides": [
+      {
+        "id": 1,
+        "codeAT": "AT <b>{code}</b> 1",
+        "vehicleId": 1
+      },
+      {
+        "id": 2,
+        "codeAT": "AT <b>{code}</b> 2",
+        "vehicleId": 2
+      },
+      {
+        "id": 3,
+        "codeAT": "AT <b>{code}</b> 3",
+        "vehicleId": 3
+      },
+      {
+        "id": 4,
+        "codeAT": "AT <b>{code}</b> 4",
+        "vehicleId": 4
+      },
+      {
+        "id": 5,
+        "codeAT": "AT <b>{code}</b> 5",
+        "vehicleId": 5
+      },
+      {
+        "id": 6,
+        "codeAT": "AT <b>{code}</b> 6",
+        "vehicleId": 6
+      },
+      {
+        "id": 7,
+        "codeAT": "AT <b>{code}</b> 7",
+        "vehicleId": 7
+      },
+      {
+        "id": 8,
+        "codeAT": "AT <b>{code}</b> 8",
+        "vehicleId": 8
+      }
+    ],
+    "distinctCodeCount": 8,
+    "emptyCodeLeftBehind": false,
+    "restoredBodyFixtureCodes": true
+  },
+  "coverage": [
+    {
+      "script": "test-field-crew-status-languages.js",
+      "matrices": 10,
+      "localeWidthChecks": 60,
+      "passLines": 11
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "matrices": 16,
+      "localeWidthChecks": 90,
+      "passLines": 17
+    },
+    {
+      "script": "test-field-document-transition-languages.js",
+      "matrices": 3,
+      "localeWidthChecks": 45,
+      "passLines": 4
+    },
+    {
+      "script": "test-field-document-body-languages.js",
+      "matrices": 9,
+      "localeWidthChecks": 55,
+      "passLines": 10
+    },
+    {
+      "script": "test-field-crew-status-languages.js",
+      "matrices": 10,
+      "localeWidthChecks": 60,
+      "passLines": 11
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "matrices": 16,
+      "localeWidthChecks": 90,
+      "passLines": 17
+    },
+    {
+      "script": "test-field-document-transition-languages.js",
+      "matrices": 3,
+      "localeWidthChecks": 45,
+      "passLines": 4
+    },
+    {
+      "script": "test-field-document-body-languages.js",
+      "matrices": 9,
+      "localeWidthChecks": 55,
+      "passLines": 10
+    }
+  ],
+  "preservation": {
+    "base": "1823ddd22957b0d34645b574d2c5aee766ac4e4e",
+    "sources": [
+      {
+        "path": "scripts/test-field-crew-status-languages.js",
+        "reversibleExact": true,
+        "assertionLinesUnchanged": 18,
+        "sha256": "4813d97571052fdcf198cb7f7ab292448c53395a8ad1c9f9b3d14c55fe88221b"
+      },
+      {
+        "path": "scripts/test-field-document-center-languages.js",
+        "reversibleExact": true,
+        "assertionLinesUnchanged": 30,
+        "sha256": "cc95c6f23dbc576af2028c76a52362fa6462ac84f5dd0718e2457303eee8920a"
+      },
+      {
+        "path": "scripts/test-field-document-transition-languages.js",
+        "reversibleExact": true,
+        "assertionLinesUnchanged": 12,
+        "sha256": "b780c08713c816eef3f2013a554db4fccecbd98de6911f80055853e559f72698"
+      },
+      {
+        "path": "scripts/test-field-document-body-languages.js",
+        "reversibleExact": true,
+        "assertionLinesUnchanged": 18,
+        "sha256": "c297cf00dc3cf4dd93632bf73d1236d2e97cfbbd2f28d0842b2a1c804bed76e7"
+      }
+    ],
+    "productTreeShas": {
+      "frontend": "8362d8fe9d34a628498a3263e51802517fd52554",
+      "src": "96d062ae45f31b5b3b6ab79bde881dad9dcb423f",
+      "prisma": "f108bd1e38ffbe9ae69427f1af891e5b3872b585",
+      ".github": "14926bf1e89e38a06cc5fa30810d94d3ab324c92"
+    },
+    "productUnchanged": true,
+    "runnerSha256": "34bd5a9f8e7597575a5fab638e0000d23c7028370c78ab126377ebedcabee519",
+    "groupsUnchanged": 365,
+    "limitsUnchanged": "120 seconds per test /90 minutes workflow",
+    "cacheUnchanged": 252,
+    "managedDraftMemoryPreserved": true
+  },
+  "sourceSha256": {
+    "scripts/test-field-crew-status-languages.js": "4813d97571052fdcf198cb7f7ab292448c53395a8ad1c9f9b3d14c55fe88221b",
+    "scripts/test-field-document-center-languages.js": "cc95c6f23dbc576af2028c76a52362fa6462ac84f5dd0718e2457303eee8920a",
+    "scripts/test-field-document-transition-languages.js": "b780c08713c816eef3f2013a554db4fccecbd98de6911f80055853e559f72698",
+    "scripts/test-field-document-body-languages.js": "c297cf00dc3cf4dd93632bf73d1236d2e97cfbbd2f28d0842b2a1c804bed76e7"
+  },
+  "syntax": {
+    "command": "node --check",
+    "scripts": [
+      "scripts/test-field-crew-status-languages.js",
+      "scripts/test-field-document-center-languages.js",
+      "scripts/test-field-document-transition-languages.js",
+      "scripts/test-field-document-body-languages.js"
+    ],
+    "passed": 4
+  },
+  "generalGates": {
+    "unchangedProduct": "643798002ec9362757ce7bbd60f1bd6957b79870",
+    "run": 36728433958,
+    "job": 109931291546,
+    "syntax": "success",
+    "unitTechnicianBrowser": "success",
+    "rerunLocallyIn473": false,
+    "reason": "Only fixture identity and cleanup changed; four script syntax checks and eight real shared-database browser integrations target the regression. Full native gates required again on473."
+  },
+  "cache": 252,
+  "runner": 365,
+  "nativeAcceptance469": {
+    "task": 469,
+    "code": "ac625a05c14b4ffea16dfdf24baab21601529690",
+    "run": 36719222682,
+    "job": 109899721783,
+    "sourceSha256": {
+      "frontend/technician-field-mode.html": "1154410a7291ed65669308cd37edd3b4dde848e46e56798d0e414c6792670755",
+      "frontend/sw.js": "38b8b99f77b2660c8fe039f8e8e29590e719d29dffe765ffc6074131ca22b353",
+      "scripts/test-field-draft-navigation-memory.js": "a7ac8cb47cb0e9724c14c505340dc84433419f92e7ce97295d98bbe051971765",
+      "scripts/test-field-suite.js": "26a9aa1e4c35f1854db97dae18ec604c18ba6242b5ec4618ce3e8970a3045e00"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.html": "b3e78aef87c66df2dca862be37952daca24a2be3",
+      "frontend/sw.js": "fe5cb42427363b9beeb2749d8995d10e60a9cdc0",
+      "scripts/test-field-draft-navigation-memory.js": "eaac98fad027700b7aaa6b6b28a55e7724ab1200",
+      "scripts/test-field-suite.js": "caf1e63e65d4376e44635f224f2e75b0f2f4e04c"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 362,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T13:06:01Z",
+    "updatedAt": "2026-09-30T14:12:19Z",
+    "sourceSha256Verified": true
+  },
+  "pendingNative": [
+    {
+      "task": 473,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 365,
+      "workflowBudgetMinutes": 90,
+      "restore": "pending"
+    }
+  ],
+  "limits": [
+    "No product change or new translation",
+    "Native473 full365 groups and restore still required",
+    "C06/C08/C10 remain open;32 tasks=26 not started/1 in progress/5 complete",
+    "Public during development; private before closure/C32; no merge/deploy/external contacts; annual contract deferred"
+  ]
+}
