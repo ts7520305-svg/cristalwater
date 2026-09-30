@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK464 / CI em execução
+
+TASK464 publicada na branch `work/field-readiness-20260915-simulation`: código `34ce7355832c4784b8aa404aaea11965fe2cfaf4`, árvore `a201d4a6a8a8acdb494d67b901808dce9f55f2e5`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task464-20260930`. [CI36704725001](https://github.com/ts7520305-svg/cristalwater/actions/runs/36704725001), job109852165087, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Feedback de início/conclusão/bloqueios com14 entradas/70 textos; regras/payloads e mensagens originais conservados. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados;30 funções byte a byte. Cache246/runner359. [Prova464](evidence/20260930_task464_local.json)
+
+Gate461 aceite353/353/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, fontes verificadas. Gates462/463 nas suites355/357 após dez etapas aprovadas; exigir gates/restauros462–464. TASK457–460 aceites; falha histórica454 preservada e correção458 revalidada. Próximo funcional: feedback de validação de produtos/rascunhos nos handlers, depois equipa/documentos e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK464 local validada / feedback de início e conclusão
 
 **TASK464 / C06-013:** feedback de início/conclusão e bloqueios de sessão/visita/documentos/ocorrências antigas com14 entradas/70 textos PT/EN/FR/ES/DE. Reutiliza o motivo documental privado e o apresentador da visita. Dois erros criados no handler recebem apresentação privada, conservando `Error.message`; erros do servidor, mesmo com texto igual, continuam literais. [Prova464](evidence/20260930_task464_local.json)

@@ -308,9 +308,14 @@
     },
     {
       "task": 464,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 359,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
+      "run": 36704725001,
+      "job": 109852165087,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema"
     }
   ],
   "limits": {
@@ -330,5 +335,21 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Remaining product/draft validation feedback in the visit handlers; crew/documents and shared push/auth/navigation."
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "34ce7355832c4784b8aa404aaea11965fe2cfaf4",
+    "tree": "a201d4a6a8a8acdb494d67b901808dce9f55f2e5",
+    "run": 36704725001,
+    "job": 109852165087,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36704725001",
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulInitialSteps": 6,
+    "currentStep": "Verify additive upgrade from the previous schema",
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }
