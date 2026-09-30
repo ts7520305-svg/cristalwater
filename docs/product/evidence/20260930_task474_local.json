@@ -152,9 +152,16 @@
   "native474": {
     "branch": "work/field-readiness-20260915-simulation",
     "suiteGroups": 366,
-    "status": "pending",
+    "status": "in_progress",
     "postgres16UpgradeRestoreRequired": true,
-    "workflowBudgetMinutes": 90
+    "workflowBudgetMinutes": 90,
+    "code": "b79a7780b9fea0074ec5c465015ee08239ed01cc",
+    "run": 36746025908,
+    "job": 109992318689,
+    "initialStepsPassed": 7,
+    "currentStep": "Run npx playwright install --with-deps chromium",
+    "suite": "pending",
+    "restore": "pending"
   },
   "cache": 253,
   "runner": 366,
@@ -162,5 +169,16 @@
     "Local PGlite/Chromium evidence is separate from native PostgreSQL16/upgrade/full suite/restore.",
     "C06/C08/C10 remain open;32 tasks=26 not started/1 in progress/5 complete.",
     "Public during development; private before closure/C32; no merge/deploy/external contacts; annual contract deferred."
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "b79a7780b9fea0074ec5c465015ee08239ed01cc",
+    "tree": "774bd1a641a0f002426a1c900941a1d01a453a54",
+    "parent": "e5a9da153fe4bc37ce2e41aa72fc2e8726543c9d",
+    "validatedLocalTreeMatchesRemote": true,
+    "remoteCommitParentsVerified": true,
+    "force": false,
+    "merge": false,
+    "deploy": false
+  }
 }

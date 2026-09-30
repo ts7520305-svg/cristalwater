@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK474 / barra documental
+
+TASK474 guardada na branch `work/field-readiness-20260915-simulation`: código `b79a7780b9fea0074ec5c465015ee08239ed01cc`, árvore `774bd1a641a0f002426a1c900941a1d01a453a54`, igual à validada localmente. [CI36746025908](https://github.com/ts7520305-svg/cristalwater/actions/runs/36746025908), job109992318689, no commit de código: em execução; sete etapas iniciais aprovadas, instalação de Chromium em execução na consulta, suite366/restauro por executar. Traduções/IDs acessíveis com nove entradas/45 textos,30 verificações e cinco integrações partilhadas;1 356 unitários/quatro técnicos/sintaxe aprovados. Cache253/runner366. [Prova474](evidence/20260930_task474_local.json).
+
+TASK473 continua na suite365 após dez etapas iniciais aprovadas; restauro pendente. Exigir suites completas e restauros dos respetivos commits antes de aceitação nativa. Próximo: acompanhar473/474, corrigir novas falhas e continuar o resumo de correção, depois download/push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Esta atualização documental `[skip ci]` conserva todas as fontes de código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK474 / barra documental
 
 **TASK474 / C06-015:** título/indicação da secção, rótulo/ajuda, placeholders e nomes acessíveis dos dois IDs, botão de atualização e ligações de guias/manutenção nos cinco idiomas PT/EN/FR/ES/DE. Nove entradas novas/45 textos;303 entradas anteriores intactas, catálogo312. Três fontes de produto, runner/teste e quatro documentos: nove ficheiros. [Prova474](evidence/20260930_task474_local.json).
