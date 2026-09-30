@@ -496,10 +496,15 @@
     },
     {
       "task": 468,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 361,
       "workflowBudgetMinutes": 90,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+      "run": 36714652539,
+      "job": 109884485856,
+      "successfulInitialSteps": 2,
+      "currentStep": "Run actions/checkout@v4"
     }
   ],
   "limits": {
@@ -519,5 +524,22 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Require exact361 groups/restore468 and inspect467. Historical465/466 predate all467 repairs; do not relaunch faulty versions. Next functional scope: remaining document center/body/provenance/warnings, correction-summary own text, shared push/auth/navigation."
+  },
+  "publication": {
+    "task": 468,
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+    "tree": "b09b3dfcd42dfd02f1e432ddde72d9728bd82594",
+    "run": 36714652539,
+    "job": 109884485856,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36714652539",
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulInitialSteps": 2,
+    "currentStep": "Run actions/checkout@v4",
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }
