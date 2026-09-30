@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK471 / avisos de dia e viatura
+
+**TASK471 / C06-015:** os avisos de mudança de viatura e de dia seguem agora o idioma escolhido. Duas entradas/dez textos PT/EN/FR/ES/DE; catálogo principal263, com as261 anteriores intactas. As mensagens brutas e todas as condições das guardas permanecem iguais. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova471](evidence/20260930_task471_local.json)
+
+**Validação:** falha original reproduzida em2 323ms. Quatro integrações,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Três cenários nos cinco idiomas a320/390/1440:45 verificações. Mudança de viatura online/offline e passagem de23:59:59 para00:00:01 no fuso Europe/Lisbon, detetada pela guarda original de um segundo. Documentos/ronda/rascunhos completos e separados REGULAR/EXTRA, tokens, outbox e linhas SQL conservados. Sem escritas operacionais nem erros de página. Capturas alemãs a320px revistas.
+
+**Preservação:** inversão exata das duas fontes; módulos de documentos, datas e rascunhos, HTML e regressão469 intactos. Mudança de idioma não recarrega documentos nem recria nós do centro. A ronda antiga continua a ser invalidada no novo dia e a falta de ronda offline do dia atual continua explícita. Cache251/runner364;363 grupos anteriores na ordem exata, limites120s/90min intactos. C10 e regras de sessão sem alteração; o relógio e o token de48h pertencem apenas à fixture isolada.
+
+**Gates e retoma:** publicar471 e exigir364 grupos/restauro. TASK468–470 continuam nas suites361/362/363 após dez etapas aprovadas; restauros pendentes. TASK467 aceite360/360/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Cancelamentos465/466 e falhas históricas conservados; perda de rascunhos466 corrigida469. Próximo: acompanhar os gates e corrigir novas falhas; depois corpos de guias/seguro e botões/PDF, resumo de correção e push/auth/nav. Não se declara a página inteira traduzida. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK470 / resumo e avisos documentais
 
 TASK470 publicada na branch `work/field-readiness-20260915-simulation`: código `8caaba37852f958bf86c160df4c943f1ef02d511`, árvore `c2146ad069edfb50ae8e803bd5fe651aa6cb5acc`, igual à validada. Histórico local conservado em `work/local-task470-20260930`. [CI36720143535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36720143535), job109902864721, no commit exato: etapas iniciais aprovadas:1; `Initialize containers` em execução na consulta. Resumo/proveniência/avisos documentais com34 entradas novas/170 textos e dez reutilizadas. Sete integrações,1 356 unitários/quatro técnicos/sintaxe aprovados; falha de preparação PGlite e repetição intacta conservadas. Proteção dos13 campos de rascunho469 mantida e retestada. Cache250/runner363. [Prova470](evidence/20260930_task470_local.json).

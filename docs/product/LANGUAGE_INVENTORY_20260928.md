@@ -8,6 +8,16 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK471 / C06-015, avisos de dia e viatura
+
+**TASK471 / C06-015:** os avisos de mudança de viatura e de dia seguem agora o idioma escolhido. Duas entradas/dez textos PT/EN/FR/ES/DE; catálogo principal263, com as261 anteriores intactas. As mensagens brutas e todas as condições das guardas permanecem iguais. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova471](evidence/20260930_task471_local.json)
+
+**Validação:** falha original reproduzida em2 323ms. Quatro integrações,1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Três cenários nos cinco idiomas a320/390/1440:45 verificações. Mudança de viatura online/offline e passagem de23:59:59 para00:00:01 no fuso Europe/Lisbon, detetada pela guarda original de um segundo. Documentos/ronda/rascunhos completos e separados REGULAR/EXTRA, tokens, outbox e linhas SQL conservados. Sem escritas operacionais nem erros de página. Capturas alemãs a320px revistas.
+
+**Preservação:** inversão exata das duas fontes; módulos de documentos, datas e rascunhos, HTML e regressão469 intactos. Mudança de idioma não recarrega documentos nem recria nós do centro. A ronda antiga continua a ser invalidada no novo dia e a falta de ronda offline do dia atual continua explícita. Cache251/runner364;363 grupos anteriores na ordem exata, limites120s/90min intactos. C10 e regras de sessão sem alteração; o relógio e o token de48h pertencem apenas à fixture isolada.
+
+**Gates e retoma:** publicar471 e exigir364 grupos/restauro. TASK468–470 continuam nas suites361/362/363 após dez etapas aprovadas; restauros pendentes. TASK467 aceite360/360/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Cancelamentos465/466 e falhas históricas conservados; perda de rascunhos466 corrigida469. Próximo: acompanhar os gates e corrigir novas falhas; depois corpos de guias/seguro e botões/PDF, resumo de correção e push/auth/nav. Não se declara a página inteira traduzida. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK470 / C06-015, resumo e avisos documentais
 
 **TASK470 / C06-015:** resumo do centro documental, proveniência, estados, bloqueios, confirmação de atualização e avisos próprios de cache/acesso/gravação nos cinco idiomas. 34 entradas novas/170 textos:20 no apresentador da página e14 no módulo documental; dez entradas reutilizadas. As241 entradas anteriores ficam intactas; catálogo principal261. Quatro fontes de produto, dois scripts e quatro documentos; dez ficheiros. [Prova470](evidence/20260930_task470_local.json)

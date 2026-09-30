@@ -1,0 +1,406 @@
+{
+  "task": 471,
+  "date": "2026-09-30",
+  "base": "cfb729c62df1cb85e0be428f7c0e8eb3086d70ed",
+  "item": "C06-015",
+  "scope": {
+    "productSources": 2,
+    "testScripts": 2,
+    "documentationFiles": 4,
+    "batchFiles": 8,
+    "description": "Translate only existing document invalidation notices for vehicle/day changes; retain their raw messages and original guard conditions."
+  },
+  "catalogue": {
+    "entries": 2,
+    "texts": 10,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "previousMainEntries": 261,
+    "totalMainEntries": 263,
+    "previousEntriesUnchanged": true
+  },
+  "negative": {
+    "evidence": "qa-task471/run-1790775095723",
+    "results": [
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 2323,
+        "timedOut": false
+      }
+    ],
+    "description": "Before product edits, a real vehicle input and English selector left the notice in Portuguese. Scenario failed2323ms. The later day fixture was refined to advance2seconds across local midnight, rather than24hours; negative occurred before the day phase."
+  },
+  "preparation": "First edit script rejected an ambiguous catalogue anchor without changing any product file; scoped alertUi anchor used instead. No application behavior or test assertion was relaxed.",
+  "integration": [
+    {
+      "script": "test-field-document-transition-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 14638,
+      "timedOut": false,
+      "evidence": "qa-task471/run-1790775183186"
+    },
+    {
+      "script": "test-field-document-center-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22077,
+      "timedOut": false,
+      "evidence": "qa-task471/run-1790775234526"
+    },
+    {
+      "script": "test-field-document-recovery.js",
+      "code": 0,
+      "signal": null,
+      "ms": 6865,
+      "timedOut": false,
+      "evidence": "qa-task471/run-1790775234526"
+    },
+    {
+      "script": "test-field-draft-navigation-memory.js",
+      "code": 0,
+      "signal": null,
+      "ms": 2697,
+      "timedOut": false,
+      "evidence": "qa-task471/run-1790775234526"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 47618,
+      "log": "/workspace/scratch/b364087eee9d/qa-task471/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7774,
+      "log": "/workspace/scratch/b364087eee9d/qa-task471/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 632,
+      "log": "/workspace/scratch/b364087eee9d/qa-task471/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "files": 138,
+    "tests": 1356
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Three actual transition matrices: vehicle online, vehicle offline after genuine service-worker reload, and next day offline. PT/EN/FR/ES/DE at320/390/1440:45 locale checks.",
+    "Browser clock fixed at23:59:59 in Europe/Lisbon before loading, then advanced2seconds. Original one-second guard observes midnight and invalidates the document context. No scope/date producer or guard callback replaced. A synthetic48h token remains valid for this midnight fixture; application session rules unchanged.",
+    "REGULAR/EXTRA share the same numeric id but different pools and notes. Complete original document/route/draft bytes, tokens, outbox and SQL rows preserved through both vehicle changes and day invalidation. The old route is no longer offered after the day changes; absent new-day offline route shows the existing load error.",
+    "Each locale change preserves document-center nodes, refresh handler/focus, selected vehicle input, unavailable source markers and raw storage. No document reload triggered by locale changes. Only expected language-preference PUTs occur; no operational API writes or page errors.",
+    "German320px online-vehicle and offline-day screenshots reviewed; text fits without CSS changes. Existing document-center90-check integration, original document recovery and deterministic draft-memory regression also pass.",
+    "Scenario110s, locators9s, runner120s and workflow90min unchanged. One-second guard active; only periodic15/30/60s disabled by fixture."
+  ],
+  "preservation": {
+    "base": "cfb729c62df1cb85e0be428f7c0e8eb3086d70ed",
+    "exactReversal": {
+      "frontend/technician-field-mode.js": "5c6d55b77245f9adfb419b8dab251738f50c6481b466b10ab5f5af0536f66149",
+      "frontend/sw.js": "9c227f2c9e0e22195265653fade1abf3c1720e4947614c26b0275f63104b5818"
+    },
+    "previousCatalogue": 261,
+    "newCatalogue": 263,
+    "previousEntriesUnchanged": true,
+    "unchangedSources": [
+      "frontend/cw-field-documents.js",
+      "frontend/cw-field-route-cache.js",
+      "frontend/cw-field-visit-drafts.js",
+      "frontend/technician-field-mode.html",
+      "scripts/test-field-draft-navigation-memory.js"
+    ],
+    "previousGroups": 363,
+    "groups": 364,
+    "priorExactOrderPreserved": true,
+    "guardConditionsAndDataMutations": "Original conditions, raw messages, context invalidation, source clearing, route refresh and cache handling exactly preserved after reversal of presentation-only arguments."
+  },
+  "visual": [
+    {
+      "path": "qa-task471/transition-de-320-vehicle-online.png",
+      "sha256": "f06debf07a5e53939a197d34b572282c839250ee89fbd1c9d4c0867734c80fd1"
+    },
+    {
+      "path": "qa-task471/transition-de-320-day-offline.png",
+      "sha256": "027a7a64f0f49ecd09f10798b0d90f9d8c932ba557cf2ce5eb0a9c4ababed501"
+    }
+  ],
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "4d718d8424d977a263e0d25edba5cf6bac049cfaa5271efa71c01565376c1e78",
+    "frontend/sw.js": "5310dd34db1db98ae9536b83505a8cce76b6b3aeab695d110dec8659799735cb",
+    "scripts/test-field-document-transition-languages.js": "1e0e66bbf12a49207845059f3a4f29c6f2425dd9c7e28579cc4ca38f3e1d6df0",
+    "scripts/test-field-suite.js": "16f486d4f08218d7dc47ef85aa82d3bcdbc85cf5d0b67e74f88582acbe0009ea"
+  },
+  "cache": 251,
+  "runner": {
+    "before": 363,
+    "after": 364,
+    "previousExactOrderPreserved": true,
+    "perScriptDeadlineMs": 120000,
+    "workflowBudgetMinutes": 90
+  },
+  "environment": {
+    "database": "isolated PGlite",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "prismaCheckpointDisabled": true
+  },
+  "nativeIncomplete465": {
+    "task": 465,
+    "code": "aa548357fcd4cb5643e3e3452bc66981fc1cdc81",
+    "run": 36708004453,
+    "job": 109862765829,
+    "sourceSha256": {
+      "scripts/test-field-round-list-languages.js": "5854ff6bed839203d851f88633513d36ffb7f5aa44617863a1ce592bdc4d81f6",
+      "scripts/test-field-suite.js": "170bcf062d1de1c08073197482148ee6c39e84d33d4870d1818bd1ad89604fdf",
+      "scripts/test-field-photo-panel-languages.js": "d2665fd9e0126bff0eca8b4f4d215d8ccb66f4ff20f54a4f9104a8b8bc4af37a"
+    },
+    "gitBlobs": {
+      "scripts/test-field-round-list-languages.js": "330dc2d9deed0b468f52c19f989c8292659184c3",
+      "scripts/test-field-suite.js": "addbbb3efb02cf97820d3c8a36bf587f2ce0e614",
+      "scripts/test-field-photo-panel-languages.js": "dd9654f8484eeb921a5e2437159d3c3a96eaf06d"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 359,
+    "completedGroups": 347,
+    "passedGroups": 345,
+    "failedGroups": [
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14642
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14775
+      }
+    ],
+    "missingGroups": [
+      "test-field-repair-revenue.js",
+      "test-field-repair-execution.js",
+      "test-field-repair-execution-revenue.js",
+      "test-field-repair-execution-command.js",
+      "test-field-repair-no-materials.js",
+      "test-field-repair-execution-ui.js",
+      "test-field-visit-report-origin.js",
+      "test-field-product-identity.js",
+      "test-field-product-identity-ui.js",
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:21:08Z",
+    "updatedAt": "2026-09-30T12:31:37Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467
+    },
+    "remainingInvestigation": [],
+    "logSha256": "f0b68a13825e7ec64d6e63a95b1f270aa04fea5fc3d8a36c64c79fa68bff269c"
+  },
+  "nativeIncomplete466": {
+    "task": 466,
+    "code": "87e37534eef1dac24673138e32355d6da8e59e8f",
+    "run": 36708610951,
+    "job": 109864746875,
+    "sourceSha256": {
+      "frontend/technician-field-mode.js": "c1287e3f0cadae57bc472fb4e4eb2a932ffae49ffb04e854ed0ebe5956acb920",
+      "scripts/test-field-visit-validation-languages.js": "5eaa67086dbea6146a164256763281dbf8e86bd2c47549174af599373aeab2b7",
+      "frontend/sw.js": "c441c9990246138108d390f9c03976802a2f4f65393eae79819d22646cfa3c61",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "frontend/cw-field-visit-drafts.js": "5d375c49e1486ece9a8aba25cfbaee8c6e5c6810883a5345710de9e641a91744",
+      "frontend/cw-visit-product-identity.js": "d1bb5522aa207cc75675d2adf6375ab3bc88f392e48acbd49c66662bb11071da"
+    },
+    "gitBlobs": {
+      "frontend/technician-field-mode.js": "ed57622024992d24c36ce9df6f4092283e45c42c",
+      "scripts/test-field-visit-validation-languages.js": "2aeacee1943f369eb0d9f2b6c90fcd1c14f74983",
+      "frontend/sw.js": "500c118d4c60b9a01246ee4f89415caca43dbe88",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "frontend/cw-field-visit-drafts.js": "0bdfde3d0a1085c2452e8c0bc2ad9aafefa98f7c",
+      "frontend/cw-visit-product-identity.js": "7260cfdb9355ba8252a3590fa6992b6ed9f8dff9"
+    },
+    "status": "completed",
+    "conclusion": "cancelled",
+    "expectedGroups": 360,
+    "completedGroups": 357,
+    "passedGroups": 353,
+    "failedGroups": [
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 23807
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 18496
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14546
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 1,
+        "signal": null,
+        "ms": 14798
+      }
+    ],
+    "missingGroups": [
+      "test-field-legacy-products.js",
+      "test-field-product-catalogue-ui.js",
+      "test-field-extra-products.js"
+    ],
+    "exactScriptPrefixVerified": true,
+    "sourceBlobsVerified": true,
+    "sourceSha256Verified": true,
+    "postgres16": true,
+    "upgrade": true,
+    "restore": "skipped",
+    "startedAt": "2026-09-30T11:27:03Z",
+    "updatedAt": "2026-09-30T12:37:40Z",
+    "cancellationReason": "unconfirmed",
+    "alreadyLocallyRepairedIn": {
+      "test-field-water-panel-languages.js": 467,
+      "test-field-visit-briefing.js": 467,
+      "test-field-vehicle-assignment-ui.js": 467,
+      "test-field-round-navigation-languages.js": 469
+    },
+    "remainingInvestigation": [],
+    "logSha256": "40f2e4e82a8040139db994bdc063d3c3bdf359c1d6dde7452a184aab21341896",
+    "repair469NativeAcceptance": "pending"
+  },
+  "previousNativeAcceptance": {
+    "task": 467,
+    "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+    "run": 36710186213,
+    "job": 109869850165,
+    "sourceSha256": {
+      ".github/workflows/field-readiness.yml": "c96037b58679aa58ea85759b31124104b9da596722d52f60910550c9822a4d83",
+      "scripts/test-field-water-panel-languages.js": "d29631bbb16044c530f7083e71239d9dc7d0062bcdd255f20118fc3a9be4dc70",
+      "scripts/test-field-vehicle-assignment-ui.js": "fbd027a12eaad159c797ad4b50802e22e842b87cdc4ea38108d36f77cfdce183",
+      "scripts/test-field-suite.js": "82ddaf153c305d6c89ac01663755d9873349c2af8e9de4ebdebd6afc52045b76",
+      "scripts/test-field-visit-briefing.js": "45649e8e32354fe862989c3d00f09ddb8d0d2146e50e6332ac53a694b0372a0d"
+    },
+    "gitBlobs": {
+      ".github/workflows/field-readiness.yml": "95a13c10f3147a71158e0385b6f549d0134792ec",
+      "scripts/test-field-water-panel-languages.js": "a8cc24896c9675fb7d133f2c0c11c10dc814c20d",
+      "scripts/test-field-vehicle-assignment-ui.js": "aa555346e2e1334ab7bb475fffb57b895029930b",
+      "scripts/test-field-suite.js": "7c425497b00d7cfeeef39538bb0d80005d02e4e4",
+      "scripts/test-field-visit-briefing.js": "de07c953a3dcf31891062857c6f4ce706245eb00"
+    },
+    "status": "completed",
+    "conclusion": "success",
+    "groupCount": 360,
+    "postgres16": true,
+    "upgrade": true,
+    "restoredTables": 128,
+    "restoredFiles": 51,
+    "rowsAndHashesMatch": true,
+    "sourceBlobsVerified": true,
+    "exactOrder": true,
+    "runStartedAt": "2026-09-30T11:42:26Z",
+    "updatedAt": "2026-09-30T12:55:23Z",
+    "sourceSha256Verified": true
+  },
+  "pendingNative": [
+    {
+      "task": 468,
+      "job": 109884485856,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "b563f4820a1a6ba04b514cc126a3d3c0c65c40c3",
+      "run": 36714652539,
+      "fullSuiteGroups": 361,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 469,
+      "job": 109899721783,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "ac625a05c14b4ffea16dfdf24baab21601529690",
+      "run": 36719222682,
+      "fullSuiteGroups": 362,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 470,
+      "job": 109902864721,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "restore": "pending",
+      "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+      "run": 36720143535,
+      "fullSuiteGroups": 363,
+      "workflowBudgetMinutes": 90
+    },
+    {
+      "task": 471,
+      "status": "not_yet_published",
+      "fullSuiteGroups": 364,
+      "workflowBudgetMinutes": 90,
+      "restore": "pending"
+    }
+  ],
+  "limits": {
+    "C06": "open",
+    "C08": "open",
+    "C10": "open",
+    "completion": {
+      "total": 32,
+      "notStarted": 26,
+      "inProgress": 1,
+      "done": 5
+    },
+    "publicDuringDevelopment": true,
+    "privateBeforeCloseC32": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false,
+    "annualContract": "deferred",
+    "next": "Require exact364 groups/restore471; inspect468–470. Remaining guide/insurance bodies and PDF buttons, correction summary and shared push/auth/navigation. No whole-page translation claim."
+  }
+}

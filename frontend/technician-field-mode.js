@@ -426,6 +426,20 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "centerVehicleChanged": [
+    "A viatura mudou. Consulte os documentos antes de iniciar ou concluir.",
+    "The vehicle changed. Check the documents before starting or completing work.",
+    "Le véhicule a changé. Consultez les documents avant de commencer ou de terminer l’intervention.",
+    "El vehículo ha cambiado. Consulta los documentos antes de iniciar o finalizar el trabajo.",
+    "Das Fahrzeug hat sich geändert. Prüfen Sie die Dokumente vor Beginn oder Abschluss der Arbeit."
+  ],
+  "centerDayChanged": [
+    "O dia mudou. Consulte os documentos atuais com rede.",
+    "The day changed. View the current documents online.",
+    "Le jour a changé. Consultez les documents actuels en ligne.",
+    "El día ha cambiado. Consulta los documentos actuales con conexión.",
+    "Der Tag hat sich geändert. Rufen Sie die aktuellen Dokumente online ab."
+  ],
   "centerTitle": [
     "Centro documental",
     "Document overview",
@@ -3108,11 +3122,11 @@
     return Boolean(activeTransportGuide?.id || activeWorkGuide?.guideId || activeWorkGuide?.guide?.id);
   }
 
-  function clearFieldDocuments(message = '') {
+  function clearFieldDocuments(message = '', copy = message) {
     ++docsRevision; docsContext = null; documentsLoaded = false;
     activeTransportGuide = null; activeWorkGuide = null; activeWorkStock = []; activeInsurance = null; activeVehicle = null;
     docsSource = 'unavailable'; docsDetail = ''; docsWarning = message;
-    docsDetailCopy = ''; docsWarningCopy = message;
+    docsDetailCopy = ''; docsWarningCopy = copy;
     ['transport', 'work', 'insurance'].forEach(kind => renderDocumentSection(kind, null, 'unavailable', ''));
     renderDoseRows(); renderCrewStatus(); updateFieldDashboard(current());
   }
@@ -5334,7 +5348,7 @@
 
   function protectFieldRouteSession() {
     if (sameFieldSession() && docsContext && !window.CWFieldDocuments.same(docsContext))
-      clearFieldDocuments('O dia mudou. Consulte os documentos atuais com rede.');
+      clearFieldDocuments('O dia mudou. Consulte os documentos atuais com rede.', alertUi.value('centerDayChanged'));
     if (!sameFieldSession()) {
       if (routeSessionBlocked) return;
       for(const url of photoPreviewCache.values())URL.revokeObjectURL(url); photoPreviewCache.clear();
@@ -5851,7 +5865,7 @@
 
   const refreshDoseStockBtn = $("#refreshDoseStockBtn");
   if (refreshDoseStockBtn) refreshDoseStockBtn.onclick = () => loadGuides(true);
-  $('#vehicleId')?.addEventListener('input', () => clearFieldDocuments('A viatura mudou. Consulte os documentos antes de iniciar ou concluir.'));
+  $('#vehicleId')?.addEventListener('input', () => clearFieldDocuments('A viatura mudou. Consulte os documentos antes de iniciar ou concluir.', alertUi.value('centerVehicleChanged')));
   if ($('#technicianId')) $('#technicianId').readOnly = true;
 
   const doseRows = $("#doseRows");
