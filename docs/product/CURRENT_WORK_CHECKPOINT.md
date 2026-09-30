@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK452 / CI em execução
+
+TASK452 publicada na branch `work/field-readiness-20260915-simulation`: código `87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5`, árvore `e243eeda1731c0cce44fde2c886b6d946a55c10b`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task452-20260930`. [CI36671372520](https://github.com/ts7520305-svg/cristalwater/actions/runs/36671372520), job109746883916, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Página GPS com31 entradas/155 textos em cinco idiomas; pontos/conta/credenciais e reenvios preservados. [Prova452](evidence/20260930_task452_local.json).
+
+Exigir gates PostgreSQL16/upgrade/suite344/restauro completo próprio; contagens medidas e hashes iguais. CI45136667051825 ainda na suite343 após dez etapas aprovadas na última consulta; nenhum restauro declarado. Próximo: confirmar451/452 e corrigir falhas; depois avaliar compatibilidade gps.js pelos consumidores efetivos e continuar C06. Navegação partilhada/avisos de autenticação não encerrados. C06/C06-009/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK452 local validada / página GPS
 
 **TASK452 / C06-009:** 31 entradas/155 textos PT/EN/FR/ES/DE para título, ações, rótulos, estados, hora da leitura e erros próprios da página GPS. Trocar idioma repinta os mesmos nós, conservando pontos, identidade da conta, credenciais, controlos, precisão e pedidos. Erros externos continuam literais; Error.message original preservado. [Prova452](evidence/20260930_task452_local.json).

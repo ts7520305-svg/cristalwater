@@ -184,8 +184,26 @@
     "32 completion tasks remain26 not started, one active(C06), five complete. Public repository authorized during development; private before completion/C32. No merge, deployment or external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5",
+    "tree": "e243eeda1731c0cce44fde2c886b6d946a55c10b",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "43d9a18458fbb694d93d615d91e54c7455e194d4",
+    "originalHistoryBranch": "work/local-task452-20260930",
+    "ci": {
+      "run": 36671372520,
+      "job": 109746883916,
+      "head": "87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema",
+      "fullSuiteGroups": 344,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }
