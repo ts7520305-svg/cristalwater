@@ -1,0 +1,201 @@
+{
+  "task": "TASK455",
+  "date": "2026-09-30",
+  "base": "9558e21129d59ebd942964d97f8e1d148ac8c530",
+  "item": "C06 water controls; cross-reference static inventory C08-026 shell source",
+  "scope": "Only installTechnicianWaterUx:flow control, elapsed time, physical-close confirmation, own feedback and owned helper errors. Core list labels/status/alarm messages and shared shell features remain separate.",
+  "negative": [
+    {
+      "script": "test-field-water-panel-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1589,
+      "timedOut": false,
+      "logSha256": "f22223cc20185eab780d481f2d02ee572559110be7f38bb55a2e9d6ad8bce633"
+    }
+  ],
+  "negativeDescription": "The real flow selector keeps its Portuguese accessible label after selecting English.",
+  "integration": [
+    {
+      "script": "test-field-water-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22382,
+      "timedOut": false,
+      "logSha256": "8d7caa2824f056f6cb160fde3034227ec9b446e33573c4bbf96bd4bda0128e33"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15675,
+      "timedOut": false,
+      "logSha256": "48c1350d06832035b364abf337296b56caea5a12c7773ca6d3c98c262156a944"
+    },
+    {
+      "script": "test-field-water-api.js",
+      "code": 0,
+      "signal": null,
+      "ms": 7837,
+      "timedOut": false,
+      "logSha256": "990d32907566b2e68ba8817ac21167825919466a7c4aff710caf708084cccc62"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 887,
+      "timedOut": false,
+      "logSha256": "7f8ca6ca8f301dabec2c046015d0d4f18489ba40130b39a970f88b0a1c61d572"
+    }
+  ],
+  "initialBrowserWithoutCapture": {
+    "script": "test-field-water-panel-languages.js",
+    "code": 0,
+    "signal": null,
+    "ms": 21707,
+    "timedOut": false,
+    "logSha256": "8d7caa2824f056f6cb160fde3034227ec9b446e33573c4bbf96bd4bda0128e33"
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 40163,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6566,
+      "logSha256": "ed8cc9fc6c62689f06506d6d407ac263ead91318b70fe85a8bd7380d6e196d12"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 646,
+      "logSha256": "aa7af0e4add479989deabec2373922da1447431e467ee3f9ce129fc80fc8983e"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "catalogue": {
+    "entries": 21,
+    "texts": 105,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "storedDataChanged": false
+  },
+  "coverage": [
+    "Real page, selector and water controls at320/390/1440. Flow option text/aria label, note placeholder, helper, elapsed time, flow detail, matching exception detail, saved feedback and physical-close dialog translated. Same nodes/focus/selection/flow/note/hidden inputs/context/credentials/local bytes/SQL; only expected language preference requests and no reminder producers during language changes.",
+    "External quota error matching an owned error with forged copy stays literal; real duplicate helper error translates through trusted identity. A shared toast overwritten with exactly the same raw text loses the old presentation identity. Dismissing the physical-close dialog in all languages performs no write.",
+    "Actual offline REGULAR/EXTRA controls with equal numeric visit IDs create distinct requests on their own pools; payload/hash/flow/note survive cache reload. Read-only fixture covers minute/hour/day/unknown time and unknown flow/fallback names/literal markup parameters, then restores original reminder bytes before network. Existing30-second callback explicitly invoked for one elapsed-time fixture.",
+    "Real403 refusal preserved; actual server response held/lost while changing language, identical retries and physical offline closure. Malformed close acknowledgement rejected even after real server closure. Two SQL reminders and one OPEN/one CLOSED history record each. Extra-reminder/water-API/component browser regressions include permissions, handover, escalation, failure rollback and check-in.",
+    "Observer reacts to structural changes in the water panel and exception list, including core row replacements. Text-only repaint cannot reload reminders. Other shell features are byte-identical. Reversing presentation changes restores the whole original shell; business helper/backend/schema/workflow unchanged."
+  ],
+  "preservation": {
+    "frontend/crystal-os-v2-shell.js": {
+      "operationalCodeReversedExactly": true,
+      "baseSha256": "7a42d8bdb7600479b7f27b16da2191c4e0e6c619062b4c70f5d1299448b12b51"
+    },
+    "suite": {
+      "previous": 346,
+      "current": 347,
+      "previousOrderExact": true
+    },
+    "outsideWaterFunctionByteIdentical": true,
+    "unchanged": [
+      "frontend/technician-field-mode.js",
+      "frontend/technician-field-mode.html",
+      "frontend/cw-field-reminders.js",
+      "frontend/cw-pump-reminders.js",
+      "frontend/cw-field-write-store.js",
+      "frontend/cw-i18n.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml",
+      "scripts/test-field-browser.js"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/crystal-os-v2-shell.js": "2a9c6ada7c70d14305826385d515d9e8a35e373a7c869cafc8d47c53b96761c6",
+    "frontend/sw.js": "2528b5f7896a8f077298a18cd2e291608970065eebec52d0b86cb5e94681b023",
+    "scripts/test-field-water-panel-languages.js": "7182b55670a513c07cf6e99319ac0c41c8b1c42a9938d99cca0a4c52e70866cc",
+    "scripts/test-field-suite.js": "de3b4873fa4d399461eb71d2f2ea4b0177b27c4ec8e7b0fde0806abd69088135"
+  },
+  "visual": {
+    "captureSha256": "67f1224cbeb2eb572cffba662c0d11f625fc033fc89e83df5ebe4fedbaf3887b",
+    "reviewed": true,
+    "finding": "German helper/options/flow and elapsed text fit320px; placeholder retains full accessible attribute while input shows its available width. Shared fixed navigation/auth toast overlap the middle of this tall capture and remain C08 work. Core Portuguese status/action labels are explicitly outside this source batch. Not full-page/theme/device approval."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "email/WhatsApp/notifications/fiscal/webhooks/background jobs disabled"
+  },
+  "pendingNative": [
+    {
+      "task": 452,
+      "run": 36671372520,
+      "job": 109746883916,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 344,
+      "restore": "pending"
+    },
+    {
+      "task": 453,
+      "run": 36673052696,
+      "job": 109752028731,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 345,
+      "restore": "pending"
+    },
+    {
+      "task": 454,
+      "run": 36674413317,
+      "job": 109756159173,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 346,
+      "restore": "pending"
+    }
+  ],
+  "limits": [
+    "Publication and native PostgreSQL16/upgrade/full347-group suite/full database and uploaded-file restore for TASK455 remain pending. PGlite does not replace these gates.",
+    "Core water panel title/action/status/empty/fallback/alarm messages in technician-field-mode.js/html require the next bounded batch. Persisted syncError and external errors remain literal; no provenance inferred from matching words. Unused userNote versus note data contract is unchanged.",
+    "Only the water function in shared shell C08-026 was changed; check-in, navigation, drawer and search are not localized or approved by this work. Static inventory counts unchanged.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

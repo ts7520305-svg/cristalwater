@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK455 / controlos de água do shell, referência C08-026
+
+`crystal-os-v2-shell.js`, só `installTechnicianWaterUx`:21 entradas/105 textos para caudal/opções/acessibilidade, nota/ajuda, tempo minutos/horas/dias/desconhecido, detalhes/exceções, fecho físico e feedback. Erros próprios/helper por identidade; texto externo e `syncError` persistido literal. Nós/valores/foco/seleção e dados preservados. Observador limitado a substituição de elementos de água/exceções; só repintar texto não relê produtores. Temporizador30s conservado e exercitado. Outros módulos do shell byte a byte; C08-026 não fica fechado. [Prova455](evidence/20260930_task455_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440; quota externa/falsa copy, duplicado real, toast substituído por texto literal coincidente, cancelamento físico, cache offline e REGULAR/EXTRA de igual ID, fixtures de tempo/caudal/nomes repostas antes da rede,403,resposta retida/perdida/reenvio e fecho incompleto. Dois lembretes SQL/uma abertura e fecho por lembrete. Código operacional restaurado ao inverter apresentação; cache238/runner347,346 grupos anteriores na ordem exata. Captura alemã320 revista: texto próprio cabe; nav/aviso de autenticação sobrepõem-se na captura longa, ainda C08. Publicação/gates347/restauro455 pendentes; CI452–454 nas suites344–346.
+
+Próximo: rótulos/estados/vazio/ações/alarmes do painel de água em `technician-field-mode.js/html`, ainda sem aprovação neste lote. Contrato `userNote`/`note` e mensagens persistidas sem origem inequívoca conservados. C06/C08/C10 continuam abertas; contagens estáticas inalteradas. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK454 / C06-005, mensagens do helper de lembretes
 
 `cw-field-reminders.js`:23 entradas/115 textos para22 erros próprios e aviso de lembretes antigos. Identidade privada protege a apresentação de erros externos coincidentes ou falsas propriedades copy. `Error.message`, `legacyWarning()` original e strings `syncError` persistidas permanecem literais/originais; não se traduz texto histórico por comparação de palavras. `cw-pump-reminders.js` integra esta apresentação e repinta os mesmos nós com o seletor real; referência histórica C08-045 conservada. Água aberta e outros consumidores ainda usam a API original e requerem integração própria. [Prova454](evidence/20260930_task454_local.json).

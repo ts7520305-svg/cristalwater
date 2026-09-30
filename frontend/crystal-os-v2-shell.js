@@ -28,23 +28,203 @@
     if (window.__CW_FIELD_WATER_UX__) return;
     window.__CW_FIELD_WATER_UX__ = true;
 
-    const FLOW = { DRIP: 'A pingar', HALF: 'Meia aberta', FULL: 'Totalmente aberta' };
+    const waterCopy = (() => {
+      const languages = ['pt', 'en', 'fr', 'es', 'de'];
+      const copy = {
+  "drip": [
+    "A pingar",
+    "Dripping",
+    "Goutte à goutte",
+    "Goteando",
+    "Tropfend"
+  ],
+  "half": [
+    "Meia aberta",
+    "Half open",
+    "À moitié ouverte",
+    "Medio abierta",
+    "Halb geöffnet"
+  ],
+  "full": [
+    "Totalmente aberta",
+    "Fully open",
+    "Complètement ouverte",
+    "Totalmente abierta",
+    "Vollständig geöffnet"
+  ],
+  "unknownTime": [
+    "tempo por confirmar",
+    "time unconfirmed",
+    "durée à confirmer",
+    "tiempo por confirmar",
+    "Zeit unbestätigt"
+  ],
+  "minutes": [
+    "{minutes} min",
+    "{minutes} min",
+    "{minutes} min",
+    "{minutes} min",
+    "{minutes} Min."
+  ],
+  "hours": [
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours} Std. {minutes} Min."
+  ],
+  "days": [
+    "{days}d {hours}h",
+    "{days}d {hours}h",
+    "{days}j {hours}h",
+    "{days}d {hours}h",
+    "{days} T. {hours} Std."
+  ],
+  "flowLabel": [
+    "Estado da torneira ou caudal",
+    "Tap or flow state",
+    "État du robinet ou débit",
+    "Estado del grifo o caudal",
+    "Zustand des Wasserhahns oder Durchfluss"
+  ],
+  "notePlaceholder": [
+    "Nota opcional. Ex: encher até meio do skimmer",
+    "Optional note. E.g. fill to the middle of the skimmer",
+    "Note facultative. Ex. : remplir jusqu’au milieu du skimmer",
+    "Nota opcional. Ej.: llenar hasta la mitad del skimmer",
+    "Optionale Notiz. Z. B. bis zur Mitte des Skimmers auffüllen"
+  ],
+  "helper": [
+    "Indica como ficou a água. O aviso mantém-se ativo até confirmares que a torneira está fechada; o tempo é contado automaticamente.",
+    "Indicate how you left the water. The warning stays active until you confirm the tap is closed; elapsed time is counted automatically.",
+    "Indiquez comment vous avez laissé l’eau. L’avertissement reste actif jusqu’à la confirmation de la fermeture du robinet ; la durée est calculée automatiquement.",
+    "Indique cómo ha dejado el agua. El aviso permanece activo hasta que confirme que el grifo está cerrado; el tiempo se cuenta automáticamente.",
+    "Geben Sie an, wie Sie das Wasser hinterlassen haben. Die Warnung bleibt aktiv, bis Sie bestätigen, dass der Wasserhahn geschlossen ist; die Zeit wird automatisch erfasst."
+  ],
+  "closedPending": [
+    "Fecho físico confirmado; envio pendente",
+    "Physical closure confirmed; upload pending",
+    "Fermeture physique confirmée ; envoi en attente",
+    "Cierre físico confirmado; envío pendiente",
+    "Schließen vor Ort bestätigt; Übermittlung ausstehend"
+  ],
+  "openSince": [
+    "Água aberta há {elapsed}",
+    "Water has been running for {elapsed}",
+    "L’eau coule depuis {elapsed}",
+    "Agua abierta desde hace {elapsed}",
+    "Wasser läuft seit {elapsed}"
+  ],
+  "flowDetail": [
+    "Caudal: {flow}{note}",
+    "Flow: {flow}{note}",
+    "Débit : {flow}{note}",
+    "Caudal: {flow}{note}",
+    "Durchfluss: {flow}{note}"
+  ],
+  "unknownFlow": [
+    "Por confirmar",
+    "Unconfirmed",
+    "À confirmer",
+    "Por confirmar",
+    "Unbestätigt"
+  ],
+  "pool": [
+    "Piscina",
+    "Pool",
+    "Piscine",
+    "Piscina",
+    "Pool"
+  ],
+  "client": [
+    "Cliente",
+    "Client",
+    "Client",
+    "Cliente",
+    "Kunde"
+  ],
+  "interrupt": [
+    "{pool} | {client} | {open} | {flow}",
+    "{pool} | {client} | {open} | {flow}",
+    "{pool} | {client} | {open} | {flow}",
+    "{pool} | {client} | {open} | {flow}",
+    "{pool} | {client} | {open} | {flow}"
+  ],
+  "missing": [
+    "Reabra a página para recuperar os lembretes.",
+    "Reopen the page to recover reminders.",
+    "Rouvrez la page pour récupérer les rappels.",
+    "Vuelva a abrir la página para recuperar los recordatorios.",
+    "Öffnen Sie die Seite erneut, um die Erinnerungen wiederherzustellen."
+  ],
+  "savedOpen": [
+    "Água aberta guardada neste telemóvel. A confirmar no servidor.",
+    "Running water recorded on this phone. Awaiting server confirmation.",
+    "Ouverture de l’eau enregistrée sur ce téléphone. En attente de confirmation du serveur.",
+    "Agua abierta registrada en este teléfono. Pendiente de confirmación del servidor.",
+    "Laufendes Wasser auf diesem Telefon erfasst. Serverbestätigung ausstehend."
+  ],
+  "confirm": [
+    "Confirma que a torneira está totalmente fechada?",
+    "Do you confirm that the tap is fully closed?",
+    "Confirmez-vous que le robinet est complètement fermé ?",
+    "¿Confirma que el grifo está totalmente cerrado?",
+    "Bestätigen Sie, dass der Wasserhahn vollständig geschlossen ist?"
+  ],
+  "savedClosed": [
+    "Fecho guardado neste telemóvel. A confirmar no servidor.",
+    "Closure saved on this phone. Awaiting server confirmation.",
+    "Fermeture enregistrée sur ce téléphone. En attente de confirmation du serveur.",
+    "Cierre guardado en este teléfono. Pendiente de confirmación del servidor.",
+    "Schließen auf diesem Telefon gespeichert. Serverbestätigung ausstehend."
+  ]
+};
+      const specs = new WeakSet(), errors = new WeakMap(), bindings = new Map();
+      function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
+      function format(entry) {
+        if (!specs.has(entry)) return reminders?.presentation?.format(entry) ?? String(entry ?? '');
+        const language = (document.documentElement?.lang || 'pt').toLowerCase().split('-')[0];
+        return copy[entry.key][Math.max(0, languages.indexOf(language))].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key]));
+      }
+      function clear(node) { const old = bindings.get(node); if (!old) return; bindings.delete(node); node.removeAttribute('data-cw-water-copy'); if (!old.protected) node.removeAttribute('data-cw-no-i18n'); }
+      function bind(node, entry, attribute = '') {
+        if (!node) return;
+        const previous = bindings.get(node), rendered = format(entry), protectedNode = previous ? previous.protected : node.hasAttribute('data-cw-no-i18n');
+        node.setAttribute('data-cw-water-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+        if (attribute) { if (node.getAttribute(attribute) !== rendered) node.setAttribute(attribute, rendered); }
+        else if (node.textContent !== rendered) node.textContent = rendered;
+        bindings.set(node, { entry, attribute, rendered, protected: protectedNode, textNode: node.firstChild });
+      }
+      function prune() { for (const node of bindings.keys()) if (!node.isConnected) clear(node); }
+      function paint() {
+        for (const [node, item] of bindings) {
+          const current = item.attribute ? node.getAttribute(item.attribute) : node.textContent;
+          if (!node.isConnected || current !== item.rendered || (!item.attribute && node.firstChild !== item.textNode)) { clear(node); continue; }
+          bind(node, item.entry, item.attribute);
+        }
+      }
+      window.addEventListener('cw-language-change', paint);
+      let lastLanguage = document.documentElement?.lang || 'pt';
+      if (document.documentElement) new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      return { value, format, bind, prune, problem: key => { const error = Error(copy[key][0]); errors.set(error, value(key)); return error; }, error: error => errors.get(error) || reminders?.presentation?.error(error) || String(error?.message ?? '') };
+    })();
+    const FLOW = { DRIP: waterCopy.value('drip'), HALF: waterCopy.value('half'), FULL: waterCopy.value('full') };
     const $ = (selector, root = document) => root.querySelector(selector);
     const reminders = window.CWFieldReminders;
     const rows = () => reminders ? reminders.list('WATER_OPEN') : [];
     const byId = id => rows().find(item => item.localId === id);
     const elapsed = (value) => {
       const date = new Date(value || 0);
-      if (Number.isNaN(date.getTime())) return 'tempo por confirmar';
+      if (Number.isNaN(date.getTime())) return waterCopy.value('unknownTime');
       const mins = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
-      if (mins < 60) return `${mins} min`;
+      if (mins < 60) return waterCopy.value('minutes', { minutes: mins });
       const hours = Math.floor(mins / 60);
-      return hours < 24 ? `${hours}h ${String(mins % 60).padStart(2, '0')}m` : `${Math.floor(hours / 24)}d ${hours % 24}h`;
+      return hours < 24 ? waterCopy.value('hours', { hours, minutes: String(mins % 60).padStart(2, '0') }) : waterCopy.value('days', { days: Math.floor(hours / 24), hours: hours % 24 });
     };
     const toast = (message) => {
       const node = $('#toast');
       if (!node) return;
-      node.textContent = message;
+      waterCopy.bind(node, message);
       node.classList.add('show');
       setTimeout(() => node.classList.remove('show'), 2400);
     };
@@ -68,7 +248,9 @@
         select.innerHTML = '<option value="DRIP">A pingar</option><option value="HALF">Meia aberta</option><option value="FULL" selected>Totalmente aberta</option>';
         grid.insertBefore(select, note);
       }
-      note.placeholder = 'Nota opcional. Ex: encher até meio do skimmer';
+      waterCopy.bind($('#waterFlowState'), waterCopy.value('flowLabel'), 'aria-label');
+      for (const option of $('#waterFlowState')?.options || []) if (FLOW[option.value]) waterCopy.bind(option, FLOW[option.value]);
+      waterCopy.bind(note, waterCopy.value('notePlaceholder'), 'placeholder');
       let helper = card.querySelector('[data-water-state-helper]');
       if (!helper) {
         helper = document.createElement('div');
@@ -78,16 +260,17 @@
         const legacy = card.querySelector(':scope > .muted');
         if (legacy) legacy.replaceWith(helper); else card.insertBefore(helper, grid);
       }
-      helper.textContent = 'Indica como ficou a água. O aviso mantém-se ativo até confirmares que a torneira está fechada; o tempo é contado automaticamente.';
+      waterCopy.bind(helper, waterCopy.value('helper'));
     }
 
     function decorate() {
+      waterCopy.prune();
       enhance();
       document.querySelectorAll('#waterReminderList [data-water-id]').forEach((node) => {
         const reminder = byId(node.dataset.waterId);
         if (!reminder) return;
         const main = node.querySelector('.doc-number');
-        if (main) main.textContent = reminder.status === 'CLOSED' ? 'Fecho físico confirmado; envio pendente' : `Água aberta há ${elapsed(reminder.createdAt)}`;
+        if (main) waterCopy.bind(main, reminder.status === 'CLOSED' ? waterCopy.value('closedPending') : waterCopy.value('openSince', { elapsed: elapsed(reminder.createdAt) }));
         let detail = node.querySelector('[data-water-flow-detail]');
         if (!detail) {
           detail = document.createElement('div');
@@ -95,50 +278,57 @@
           detail.className = 'muted';
           node.querySelector('.water-line')?.insertAdjacentElement('afterend', detail);
         }
-        if (detail) detail.textContent = `Caudal: ${FLOW[reminder.flowState] || 'Por confirmar'}${reminder.userNote ? ` · ${reminder.userNote}` : ''}`;
+        if (detail) waterCopy.bind(detail, waterCopy.value('flowDetail', { flow: FLOW[reminder.flowState] || waterCopy.value('unknownFlow'), note: reminder.userNote ? ` · ${reminder.userNote}` : '' }));
       });
       document.querySelectorAll('#interruptList [data-exception-category="WATER_OPEN"]').forEach((node) => {
         const localId = String(node.dataset.exceptionId || '').replace(/^water-open:/, '');
         const reminder = byId(localId);
         const detail = node.querySelector('strong')?.nextElementSibling;
-        if (reminder && detail) detail.textContent = `${reminder.poolName || 'Piscina'} | ${reminder.clientName || 'Cliente'} | Água aberta há ${elapsed(reminder.createdAt)} | Caudal: ${FLOW[reminder.flowState] || 'Por confirmar'}`;
+        if (reminder && detail) waterCopy.bind(detail, waterCopy.value('interrupt', { pool: reminder.poolName || waterCopy.value('pool'), client: reminder.clientName || waterCopy.value('client'), open: waterCopy.value('openSince', { elapsed: elapsed(reminder.createdAt) }), flow: waterCopy.value('flowDetail', { flow: FLOW[reminder.flowState] || waterCopy.value('unknownFlow'), note: '' }) }));
       });
     }
 
     async function openWater() {
-      if (!reminders) throw Error('Reabra a página para recuperar os lembretes.');
+      if (!reminders) throw waterCopy.problem('missing');
       const flowState = String($('#waterFlowState')?.value || 'FULL');
       const note = String($('#waterNote')?.value || '').trim();
       const safetyMinutes = Math.max(15, Math.min(1440, Number(localStorage.getItem('cwWaterSafetyMinutes')) || 120));
       await reminders.create('WATER_OPEN', {flowState,note,dueAt:new Date(Date.now()+safetyMinutes*60000).toISOString()});
-      toast('Água aberta guardada neste telemóvel. A confirmar no servidor.');
+      toast(waterCopy.value('savedOpen'));
       if ($('#waterNote')) $('#waterNote').value = '';
       await reminders.sync();
     }
 
     async function closeWater(localId) {
-      if (!byId(localId) || !window.confirm('Confirma que a torneira está totalmente fechada?')) return;
+      if (!byId(localId) || !window.confirm(waterCopy.format(waterCopy.value('confirm')))) return;
       await reminders.mark('WATER_OPEN',localId,'close');
-      toast('Fecho guardado neste telemóvel. A confirmar no servidor.');
+      toast(waterCopy.value('savedClosed'));
       await reminders.sync();
     }
     window.CWWaterReminders = {open:openWater,close:closeWater};
 
     document.addEventListener('click', (event) => {
       const openButton = event.target.closest('#openWaterBtn');
-      if (openButton) { event.preventDefault(); event.stopImmediatePropagation(); openWater().catch((error) => toast(error.message)); return; }
+      if (openButton) { event.preventDefault(); event.stopImmediatePropagation(); openWater().catch((error) => toast(waterCopy.error(error))); return; }
       const closeButton = event.target.closest('[data-water-close]');
-      if (closeButton) { event.preventDefault(); event.stopImmediatePropagation(); closeWater(closeButton.dataset.waterClose).catch((error) => toast(error.message)); }
+      if (closeButton) { event.preventDefault(); event.stopImmediatePropagation(); closeWater(closeButton.dataset.waterClose).catch((error) => toast(waterCopy.error(error))); }
     }, true);
 
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((records) => {
+      // Text-only repaints (including language changes) must not reload reminders.
+      // Core list/exception renders replace elements and still trigger decoration.
+      const relevant = records.some(record => {
+        const elements = [...record.addedNodes, ...record.removedNodes].filter(node => node.nodeType === 1);
+        return elements.length && (record.target.closest?.('.water-card, #interruptList') || elements.some(node => node.matches('.water-card, #interruptList') || node.querySelector('.water-card, #interruptList')));
+      });
+      if (!relevant) return;
       // Decoration changes child nodes. Do not observe our own writes.
       observer.disconnect();
-      try { decorate(); } catch (error) { toast(error.message); }
+      try { decorate(); } catch (error) { toast(waterCopy.error(error)); }
       finally { observer.observe(document.body, { childList: true, subtree: true }); }
     });
     observer.observe(document.body, { childList: true, subtree: true });
-    setInterval(() => { try { decorate(); } catch (error) { toast(error.message); } }, 30000);
+    setInterval(() => { try { decorate(); } catch (error) { toast(waterCopy.error(error)); } }, 30000);
     window.addEventListener('online', () => syncPendingWaterState().catch(() => {}));
     decorate();
     syncPendingWaterState().catch(() => {});
