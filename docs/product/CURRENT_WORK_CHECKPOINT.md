@@ -1,5 +1,15 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 30/09/2026, TASK453 local validada / bomba em manual
+
+**TASK453 / C06:** painel real de bomba em manual com18 entradas/90 textos PT/EN/FR/ES/DE: ações, minutos, validação, contagem/tempo decorrido, estado pendente e confirmação física. Nós/valores/rascunhos/pontos de foco e pedidos preservados; erros externos e avisos do helper continuam literais. Referência funcional à fonte que o inventário heurístico classificou C08-045; o consumidor confirmado é `/technician-field-mode`. [Prova453](evidence/20260930_task453_local.json).
+
+**Validação:** quatro integrações (painel, lembretes EXTRA, API água/bomba e sessão),1 356 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Cinco idiomas/320/390/1440; cancelamento sem escrita, quota literal, cache offline, visitas REGULAR/EXTRA com igual número, fecho físico offline,403, resposta real retida/perdida, reenvio idêntico e confirmação incompleta recusada. Duas linhas SQL e uma abertura/um fecho por lembrete. Captura alemã320 revista; cenário passa com e sem captura. Espera do teste ajustada ao fecho assíncrono real; nenhuma guarda/limite removida. Apresentações de nós retirados libertadas sem mudar o temporizador. Código operacional idêntico ao inverter só apresentação; helper/backend/schema/workflow preservados. Cache236/runner345,344 grupos anteriores na ordem exata.
+
+**Gates anteriores:** TASK451 aceite no commit `61eb17da`: [CI36667051825](https://github.com/ts7520305-svg/cristalwater/actions/runs/36667051825),343/343 grupos na ordem exata, PostgreSQL16/upgrade e restauro128 tabelas51 ficheiros, linhas/hashes iguais. Evidência451 atualizada após validar os hashes da sua versão. TASK45236671372520 continua na suite344 após dez etapas aprovadas; restauro pendente.
+
+**Retoma:** publicar453 e confirmar gates/restauros452/453. Depois continuar mensagens próprias do helper de lembretes e painel de água aberta. `gps.js` confirmado sem consumidor literal nas páginas/fontes atuais, compatibilidade preservada e sem alegar tradução ou ausência de consumidores externos. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Nove ficheiros. Entradas abaixo históricas.
+
 ## Publicação confirmada — 30/09/2026, TASK452 / CI em execução
 
 TASK452 publicada na branch `work/field-readiness-20260915-simulation`: código `87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5`, árvore `e243eeda1731c0cce44fde2c886b6d946a55c10b`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task452-20260930`. [CI36671372520](https://github.com/ts7520305-svg/cristalwater/actions/runs/36671372520), job109746883916, no commit exato: 6 etapas iniciais aprovadas; `Verify additive upgrade from the previous schema` em execução na consulta. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. Página GPS com31 entradas/155 textos em cinco idiomas; pontos/conta/credenciais e reenvios preservados. [Prova452](evidence/20260930_task452_local.json).

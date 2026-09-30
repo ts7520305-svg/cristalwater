@@ -237,14 +237,14 @@
     }
   ],
   "limits": [
-    "PGlite/Chromium153 does not replace native PostgreSQL16/additive upgrade/full343-group suite/full database and uploaded-file restore with measured counts and matching hashes.",
-    "Native448 and449 accepted341/341 with restore128 tables50 uploaded files in each exact prior run; native450 accepted342/342 with restore128 tables51 uploaded files. Counts are measured, not fixed restoration limits; native451 remains pending.",
+    "Native PostgreSQL16/additive upgrade/full343-group suite and restore of128 tables/51 uploaded files with matching rows and hashes accepted for61eb17daf89b3232be25a22e356ba0f15cc5d7a7. This does not imply deployment or approval of later code.",
+    "Native448 and449 accepted341/341 with restore128 tables50 uploaded files in each exact prior run; native450 accepted342/342 with restore128 tables51 uploaded files. Counts are measured, not fixed restoration limits; native451 accepted343/343 with restore128 tables51 uploaded files.",
     "The GPS-page body is explicitly excluded from generic translation to preserve literal/data/error presentation. GPS-page titles, buttons, KPI labels and page-owned success/fallback messages, compatibility gps.js and other C06 panels still need their own batches.",
     "Only save/send/flush/status/start/stop are counted as producers in the language matrix; pre-existing account-validation polling remains active.",
     "C06/C06-009/C08/C10 remain open;32=26 not started/one active/five complete. Public repository authorized during development; private before completion/C32. No merge/deploy/external communications; annual maintenance contract deferred."
   ],
   "publication": {
-    "status": "published_ci_in_progress",
+    "status": "published_native_validated",
     "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
     "codeCommit": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
@@ -257,15 +257,55 @@
       "run": 36667051825,
       "job": 109733843295,
       "head": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
-      "status": "in_progress",
-      "conclusion": null,
-      "successfulInitialSteps": 6,
-      "currentStep": "Verify additive upgrade from the previous schema",
+      "status": "completed",
+      "conclusion": "success",
+      "successfulInitialSteps": 18,
+      "currentStep": null,
       "fullSuiteGroups": 343,
-      "restore": "pending"
+      "restore": "passed",
+      "nativeAcceptance": {
+        "task": 451,
+        "code": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+        "run": 36667051825,
+        "job": 109733843295,
+        "counts": {
+          "total": 343,
+          "passed": 343
+        },
+        "failures": [],
+        "exactGroupOrderVerified": true,
+        "restore": {
+          "status": "success",
+          "tables": 128,
+          "uploadedFiles": 51,
+          "databaseRowsAndFileHashesMatch": true,
+          "excerpt": "PASS restored 128 tables and 51 uploaded files; database rows and file hashes match"
+        },
+        "groupsEvidenceSha256": "1a9f8132af3d5012ca2008a36742a219cce609301fdb632b5a9cb4d56bc4138d"
+      }
     },
     "merged": false,
     "deployed": false
   },
-  "diagnosticWording": "After validation, the new script diagnostic was clarified to attribute cached reload to the valid point, and language preservation to the corrupt record. Assertions and product code unchanged."
+  "diagnosticWording": "After validation, the new script diagnostic was clarified to attribute cached reload to the valid point, and language preservation to the corrupt record. Assertions and product code unchanged.",
+  "nativeVerification": {
+    "task": 451,
+    "code": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+    "run": 36667051825,
+    "job": 109733843295,
+    "counts": {
+      "total": 343,
+      "passed": 343
+    },
+    "failures": [],
+    "exactGroupOrderVerified": true,
+    "restore": {
+      "status": "success",
+      "tables": 128,
+      "uploadedFiles": 51,
+      "databaseRowsAndFileHashesMatch": true,
+      "excerpt": "PASS restored 128 tables and 51 uploaded files; database rows and file hashes match"
+    },
+    "groupsEvidenceSha256": "1a9f8132af3d5012ca2008a36742a219cce609301fdb632b5a9cb4d56bc4138d"
+  }
 }

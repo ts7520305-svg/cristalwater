@@ -1,0 +1,232 @@
+{
+  "task": "TASK453",
+  "date": "2026-09-30",
+  "base": "38f987c4325f2eeacb2c4b8dfd8ee4ea63b9c54a",
+  "item": "C06 technician pump panel; cross-reference historical source batch C08-045",
+  "scope": "Localize the actual manual-pump panel, reminder rows, validation and physical confirmation dialog. The same reminder helper, queues, payloads and guards remain in use.",
+  "negative": [
+    {
+      "script": "test-field-pump-panel-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1518,
+      "timedOut": false,
+      "logSha256": "a9a14aaa6abd2ccfd293ebd0a5dc733f90a9b8c4f505210e65f3314caa80e219"
+    }
+  ],
+  "negativeDescription": "English selection leaves the real pump-create action in Portuguese.",
+  "integration": [
+    {
+      "script": "test-field-pump-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22821,
+      "timedOut": false,
+      "logSha256": "f28c28231ee8c0a9f0516d899844b034d1c6ed470d6a1dc109e15ac7472f989c"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16737,
+      "timedOut": false,
+      "logSha256": "48c1350d06832035b364abf337296b56caea5a12c7773ca6d3c98c262156a944"
+    },
+    {
+      "script": "test-field-water-api.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9912,
+      "timedOut": false,
+      "logSha256": "990d32907566b2e68ba8817ac21167825919466a7c4aff710caf708084cccc62"
+    },
+    {
+      "script": "test-field-session-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 979,
+      "timedOut": false,
+      "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3"
+    }
+  ],
+  "withoutCaptureRun": [
+    {
+      "script": "test-field-pump-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21207,
+      "timedOut": false,
+      "logSha256": "f28c28231ee8c0a9f0516d899844b034d1c6ed470d6a1dc109e15ac7472f989c"
+    }
+  ],
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 40301,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 7394,
+      "logSha256": "4d77c7b5c368bf4f87de830c6b0d343433d37011e622d36bd97936e5cb87d40f"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 619,
+      "logSha256": "24bd16b1e47bc8259aef16ad16f16cf511c2407008cc5842f0bd814b387b79c6"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "intermediate": {
+    "failedRuns": [
+      "run-1790745116506",
+      "run-1790745183395"
+    ],
+    "cause": "The browser click resolves before the asynchronous local close finishes. The fixture now waits for the actual CLOSED state before checking the translated row, as already done for the regular visit. No business limit, guard or assertion removed."
+  },
+  "catalogue": {
+    "entries": 18,
+    "texts": 90,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "storedDataChanged": false,
+    "ownedErrorMessagePreserved": true
+  },
+  "coverage": [
+    "Real panel and real language selector at320/390/1440. Static labels, saved feedback, minute validation, countdown/elapsed/overdue/server states, fallback names and automatic-pending state. Same DOM, focus, minutes, notes, visit context, token, local drafts/reminders and SQL preserved; no reminder producers or operational HTTP calls during language changes.",
+    "Native physical-confirmation dialog is translated when opened. Dismissing it in all five languages performs no writes. Accepting it marks the local reminder closed and retains a pending server acknowledgement; it never claims physical action automatically.",
+    "Actual offline REGULAR and EXTRA controls create distinct UUIDs for the same numeric visit id and different pools. Exact local request bodies/hashes survive cached reload. Injected quota text equal to the owned validation text stays literal and creates no reminder; helper/legacy warnings remain literal until their own batch.",
+    "Read-only presentation fixture covers overdue/elapsed/fallback/server values then restores exact original bytes before real network tests. Literal pool/technician names containing markup and parameter syntax remain text. Periodic presentation registration is retained; background refresh intervals alone are isolated in the test while account guards stay active.",
+    "Real403 rejection preserves local requests. A real create response is held during all-language changes then lost; repeat POST uses the identical UUID/type/pool/body/token and creates one server reminder. A false isCompleted=false close acknowledgement is rejected even after the server performed the close; retry confirms the original closure.",
+    "Two typed reminders result in exactly two SQL reminder rows and one OPEN/one CLOSED history entry each. Existing extra-reminder/water-API/session regression groups cover ownership, two processes/tabs, rollback, handover, escalation and late replies."
+  ],
+  "preservation": {
+    "base": "38f987c4325f2eeacb2c4b8dfd8ee4ea63b9c54a",
+    "pumpOperationalCodeReversedExactly": true,
+    "previousGroupOrderExact": true,
+    "previousGroups": 344,
+    "groups": 345,
+    "copyEntries": 18,
+    "unchanged": [
+      "frontend/cw-field-reminders.js",
+      "frontend/technician-field-mode.js",
+      "frontend/technician-field-mode.html",
+      "frontend/cw-field-write-store.js",
+      "frontend/gps.js",
+      "frontend/cw-i18n.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/cw-pump-reminders.js": "168635d4e38349dd90013f1f45af6276a5d69eb59654a866f5c5187b0349c143",
+    "frontend/sw.js": "7a5422e0247072e18c1e5c492b35d7b24da6d8c054e3931e2ee6410f78bd01e8",
+    "scripts/test-field-suite.js": "62aa519542121ba1801d0ca799188622a749cc0611f7a820d17fcd2e641f04cf",
+    "scripts/test-field-pump-panel-languages.js": "5136535cd916fdc79aee59746772125042f9e04837105cb72a580efe8f4f73d7"
+  },
+  "scopeReview": {
+    "inventoryRows": [
+      {
+        "file": "frontend/cw-pump-reminders.js",
+        "sha256": "678a136877ebfe119051a766b8484eb18f225d500332b7bdbb220aebda0d8f83",
+        "scope": "browser-source",
+        "owner": "C08",
+        "batch": "C08-045",
+        "routes": [
+          "/technician-field-mode"
+        ],
+        "reachability": "literal-page-reference"
+      },
+      {
+        "file": "frontend/gps.js",
+        "sha256": "72297d65641189895ef05a671a06d5a3f327bb92ba446a42752a9ea1945fbc32",
+        "scope": "browser-source",
+        "owner": "C06",
+        "batch": "C06-009",
+        "routes": [],
+        "reachability": "no-page-reference"
+      }
+    ],
+    "currentLiteralCompatibilityConsumers": [],
+    "compatibilityPreserved": true,
+    "runtimeConsumer": "frontend/technician-field-mode.html loads /cw-pump-reminders.js",
+    "functionalOwner": "C06, technician pump panel; historical C08-045 classification was by filename and is cross-referenced without rewriting the static snapshot"
+  },
+  "presentationLifecycle": "Removed banner nodes are released from the presentation map on render/error, preserving the existing30-second schedule without retaining old nodes indefinitely.",
+  "visual": {
+    "captureSha256": "bccdf909fdb7e777639cb42b3a579416e9ed1f77fd982830a046bdbe10a7c7be",
+    "reviewed": true,
+    "finding": "German panel at320px fits; long action label wraps and the minute input and focus ring remain readable. This is not full-page/theme/device approval."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "email/WhatsApp/notifications/fiscal/webhooks/background jobs disabled"
+  },
+  "nativePrevious": {
+    "task": 451,
+    "code": "61eb17daf89b3232be25a22e356ba0f15cc5d7a7",
+    "run": 36667051825,
+    "job": 109733843295,
+    "counts": {
+      "total": 343,
+      "passed": 343
+    },
+    "failures": [],
+    "exactGroupOrderVerified": true,
+    "restore": {
+      "status": "success",
+      "tables": 128,
+      "uploadedFiles": 51,
+      "databaseRowsAndFileHashesMatch": true,
+      "excerpt": "PASS restored 128 tables and 51 uploaded files; database rows and file hashes match"
+    },
+    "groupsEvidenceSha256": "1a9f8132af3d5012ca2008a36742a219cce609301fdb632b5a9cb4d56bc4138d"
+  },
+  "pendingNative": {
+    "task": 452,
+    "code": "87bfeed41eb5c2f04ce70f1c317ce1919df6b2b5",
+    "run": 36671372520,
+    "job": 109746883916,
+    "status": "in_progress",
+    "successfulInitialSteps": 10,
+    "currentStep": "Run node scripts/test-field-suite.js",
+    "expectedGroups": 344,
+    "restore": "pending"
+  },
+  "limits": [
+    "Publication and native PostgreSQL16/additive upgrade/full345-group suite/full database and uploaded-file restore for TASK453 remain pending. PGlite does not replace these gates.",
+    "Helper-owned reminder errors, durable syncError strings, old reminder warnings and the water panel still require their own review. GPS compatibility source has no current literal page consumer and remains untouched; this is not a claim about unknown external or old cached consumers.",
+    "The static inventory assigned cw-pump-reminders.js to C08-045 by filename. The verified runtime consumer is the technician field page, so this is functional C06 work with that cross-reference; static inventory counts are unchanged.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}

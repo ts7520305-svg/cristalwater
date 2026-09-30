@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK453 / painel técnico de bomba em manual
+
+`cw-pump-reminders.js`:18 entradas/90 textos para título/introdução, minutos, ações, registo, validação, nomes de reserva, estados/tempo decorrido e confirmação física. O inventário estático agrupou esta fonte por nome em C08-045, mas o consumidor confirmado é `/technician-field-mode`; esta execução conta funcionalmente para C06, com referência cruzada e sem reescrever a fotografia estática. Os textos do helper `cw-field-reminders.js`, mensagens persistidas e avisos antigos continuam literais e pendentes. [Prova453](evidence/20260930_task453_local.json).
+
+Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cinco idiomas/320/390/1440; nós/foco/dados/contas/pedidos conservados sem reler os produtores na mudança de idioma. Offline/cache,REGULAR/EXTRA,cancelamento físico,quota,403,resposta retida/perdida,reenvio e fecho incompleto; duas linhas SQL e abertura/fecho únicos. Código operacional conservado após inverter apresentação; cache236/runner345,344 grupos anteriores na ordem exata. Captura alemã320 revista. Publicação/gates345/restauro453 pendentes. CI451 aceite343/343/restauro128 tabelas51 ficheiros com linhas/hashes iguais;452 na suite344.
+
+`frontend/gps.js` continua sem referências literais nas páginas/fontes frontend e servidor atuais, coerente com `no-page-reference` do inventário. Fica conservado como compatibilidade; não se declara traduzido nem se excluem consumidores antigos/externos. Próximo: helper de lembretes e painel água aberta; C06/C08/C10 mantêm pendências. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK452 / textos próprios da página GPS
 
 `technician-gps.js` e `technician-gps.html`, continuação C06-009:31 entradas/155 textos PT/EN/FR/ES/DE para título, ações, rótulos, estados de sincronização, hora original e erros próprios. Identidade privada separa os erros próprios dos externos; Error.message e pontos/arquivos permanecem intactos. Trocar idioma não relê GPS nem envia pedidos. Nós, foco, controlos, conta/credenciais e precisão preservados. Cache235/runner344;343 grupos anteriores na ordem exata. [Prova452](evidence/20260930_task452_local.json).
