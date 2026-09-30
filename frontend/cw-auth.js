@@ -50,6 +50,31 @@
     for(const socket of activeSockets){try{socket.disconnect();}catch(_){}}
     activeSockets.clear();
   }
+
+  // Only owned auth leaves are repainted; toast producers and timers stay independent.
+  const authCopy={"expiredMessage":["Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.","Session expired. Local records remain on this phone. Sign in again with the same account to send pending data.","Session expirée. Les enregistrements locaux restent sur ce téléphone. Reconnectez-vous avec le même compte pour envoyer les données en attente.","Sesión caducada. Los registros locales permanecen en este móvil. Inicia sesión de nuevo con la misma cuenta para enviar los datos pendientes.","Sitzung abgelaufen. Lokale Einträge bleiben auf diesem Handy. Melden Sie sich erneut mit demselben Konto an, um ausstehende Daten zu senden."],"expiredLink":["Voltar a entrar","Sign in again","Se reconnecter","Volver a entrar","Erneut anmelden"],"connection":["Ligação instável. A sessão foi mantida e os dados serão preservados.","Unstable connection. Your session was retained and your data will be preserved.","Connexion instable. La session a été conservée et les données seront préservées.","Conexión inestable. Se ha mantenido la sesión y se conservarán los datos.","Instabile Verbindung. Die Sitzung wurde beibehalten und Ihre Daten bleiben erhalten."],"logout":["Não foi possível terminar a sessão. Tente novamente.","Could not sign out. Try again.","Impossible de se déconnecter. Réessayez.","No se ha podido cerrar la sesión. Vuelve a intentarlo.","Abmelden war nicht möglich. Versuchen Sie es erneut."]};
+  const authLanguages=['pt','en','fr','es','de'], authLeaves=new Map();
+  const authLanguage=()=>Math.max(0,authLanguages.indexOf(String(document.documentElement.lang||'pt').toLowerCase().split('-')[0]));
+  function bindAuthCopy(node,key,notice=false){
+    const rendered=authCopy[key][authLanguage()];
+    if(node.textContent!==rendered)node.textContent=rendered;
+    authLeaves.set(notice?'notice':key,{node,key,notice,rendered,textNode:node.firstChild});
+  }
+  function paintAuthCopy(){
+    for(const [slot,leaf] of authLeaves){
+      const {node}=leaf;
+      if(!node.isConnected||leaf.notice&&node.style.display==='none'||node.textContent!==leaf.rendered||node.firstChild!==leaf.textNode){authLeaves.delete(slot);continue;}
+      bindAuthCopy(node,leaf.key,leaf.notice);
+    }
+  }
+  window.addEventListener('cw-language-change',paintAuthCopy);
+  new MutationObserver(paintAuthCopy).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  function authToast(key){
+    toast(authCopy[key][0]);
+    const node=document.getElementById('cw-v21-toast');
+    if(node&&node.style.display!=='none')bindAuthCopy(node,key,true);
+  }
+
   let expiredSessionToken = '';
   function isSessionExpired(){ return Boolean(expiredSessionToken && expiredSessionToken === getToken()); }
   function showSessionExpired(){
@@ -58,8 +83,8 @@
     if(!banner){
       banner = document.createElement('div'); banner.id = 'cwSessionExpired'; banner.setAttribute('role', 'alert');
       banner.style.cssText = 'position:sticky;top:0;z-index:100;padding:14px;background:#fff4ce;color:#624400;font:600 14px system-ui';
-      const message = document.createElement('p'); message.textContent = 'Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.';
-      const link = document.createElement('a'); link.href = '/technician-login'; link.textContent = 'Voltar a entrar';
+      const message = document.createElement('p'); message.setAttribute('data-cw-no-i18n',''); bindAuthCopy(message,'expiredMessage');
+      const link = document.createElement('a'); link.href = '/technician-login'; link.setAttribute('data-cw-no-i18n',''); bindAuthCopy(link,'expiredLink');
       link.style.cssText = 'display:inline-flex;align-items:center;min-height:44px;color:#075c4c;text-decoration:underline';
       banner.append(message,link); document.body.prepend(banner);
     }
@@ -183,7 +208,7 @@
         return res;
       }catch(err){
         // A cancelled stale read is not a connection failure; its caller owns the state.
-        if(err?.name !== 'AbortError') toast('Ligação instável. A sessão foi mantida e os dados serão preservados.');
+        if(err?.name !== 'AbortError') authToast('connection');
         throw err;
       }
     };
@@ -195,7 +220,7 @@
     if(!button || button.disabled) return;
     event.preventDefault(); button.disabled=true; button.setAttribute('aria-busy','true');
     try{await logout();}
-    catch(_){toast('Não foi possível terminar a sessão. Tente novamente.');}
+    catch(_){authToast('logout');}
     finally{button.disabled=false;button.removeAttribute('aria-busy');}
   });
 

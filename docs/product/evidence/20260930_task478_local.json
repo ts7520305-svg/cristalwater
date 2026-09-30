@@ -1,0 +1,169 @@
+{
+  "task": 478,
+  "parent": "872bdd1b5d662c64b1ee751477b7c3928533b9a3",
+  "status": "local_pass_native_pending",
+  "catalog": {
+    "entries": 4,
+    "variants": 20,
+    "main": 336,
+    "cache": 257,
+    "runnerGroups": 370
+  },
+  "negative": {
+    "ms": 1126,
+    "expected": "Session expired. Local records remain on this phone. Sign in again with the same account to send pending data.",
+    "actual": "Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.",
+    "exitCode": 1
+  },
+  "qa": {
+    "checks": 50,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "extraWidth": 320,
+    "unitTests": 1384,
+    "unitFiles": 140,
+    "newUnitCases": 10,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "integrations": [
+      {
+        "script": "test-field-auth-languages.js",
+        "code": 0,
+        "ms": 11561
+      },
+      {
+        "script": "test-field-session-browser.js",
+        "code": 0,
+        "ms": 1108
+      },
+      {
+        "script": "test-field-push-session-browser.js",
+        "code": 0,
+        "ms": 1047
+      },
+      {
+        "script": "test-field-download-error-languages.js",
+        "code": 0,
+        "ms": 14447
+      },
+      {
+        "script": "test-field-push-languages.js",
+        "code": 0,
+        "ms": 15578
+      }
+    ],
+    "sharedDatabaseNoReset": true,
+    "companion": {
+      "script": "test-auth-entry-browser.js",
+      "code": 0,
+      "ms": 3656,
+      "separateHarness": true,
+      "clientGuardCases": 24,
+      "loginScripts": 4,
+      "realAdminAndTechnicianLogout": true
+    },
+    "noOperationalWrites": true,
+    "noPageErrors": true,
+    "originalErrors": true,
+    "originalTimer4200": true,
+    "noRedirectOnFieldExpiry": true,
+    "sameIdTypedDrafts": true,
+    "screenshotsReviewed": [
+      "expired-REGULAR-de-320.png",
+      "connection-REGULAR-de-320.png"
+    ]
+  },
+  "inverseExact": true,
+  "preserved": [
+    "auth and session checks",
+    "credentials origins headers fetch",
+    "role guards",
+    "logout redirects sockets",
+    "privacy push subscription retirement",
+    "raw error identity/name/message",
+    "generic toast caller contract",
+    "same-ID REGULAR/EXTRA drafts",
+    "outbox and SQL",
+    "document producers",
+    "backend schema migrations workflows dependencies",
+    "369 previous runner groups/order and deadlines"
+  ],
+  "fixtureAdjustment": "Snapshot the field drafts before token renewal; afterwards require identical stored draft bytes. The former session is correctly rejected by CWFieldDraftSnapshot.",
+  "sourceHashes": [
+    {
+      "path": "frontend/cw-auth.js",
+      "sha256": "08395ae7b161f6236712cd88927021b029e4b6c9ffda45078c1505dd69fccd82",
+      "blob": "b66ed3baa15b7f7aafc7292cbdd36adc388799d6"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "33ed5f3c9550df64c6ca6c16c64bd9be669d7fcb3293a1433313935cb23de4a1",
+      "blob": "7ac1121437fae7abfcf2763f6593f49ddaaf8623"
+    },
+    {
+      "path": "scripts/test-field-suite.js",
+      "sha256": "b992c4a31538e75ac3499e4e08f8577ff4e2567e9039a6d88e62bc8d6d8e07a1",
+      "blob": "40a02a9a327439fcf4824b3051b9690aaf608c2f"
+    },
+    {
+      "path": "scripts/test-field-auth-languages.js",
+      "sha256": "0795031f1ebca844ec5ee1563e7c660d8caa9284ce4167c1d37b46eec7bf0aac",
+      "blob": "44f6644f3cbe934f1678de809da57a886a963e8b"
+    },
+    {
+      "path": "tests/auth-presentation.test.js",
+      "sha256": "a80dd5376535a336d1f8967d82bdaf4135038950e73307611cc5311b7198ce1e",
+      "blob": "5abef56e465d389af318340a3beef101754f692c"
+    }
+  ],
+  "native": {
+    "lastDetailedAcceptance": 475,
+    "lastEvidence": "20260930_task477_local.json",
+    "task476": "suite368 in progress",
+    "task477": "suite369 in progress"
+  },
+  "texts": {
+    "expiredMessage": [
+      "Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.",
+      "Session expired. Local records remain on this phone. Sign in again with the same account to send pending data.",
+      "Session expirée. Les enregistrements locaux restent sur ce téléphone. Reconnectez-vous avec le même compte pour envoyer les données en attente.",
+      "Sesión caducada. Los registros locales permanecen en este móvil. Inicia sesión de nuevo con la misma cuenta para enviar los datos pendientes.",
+      "Sitzung abgelaufen. Lokale Einträge bleiben auf diesem Handy. Melden Sie sich erneut mit demselben Konto an, um ausstehende Daten zu senden."
+    ],
+    "expiredLink": [
+      "Voltar a entrar",
+      "Sign in again",
+      "Se reconnecter",
+      "Volver a entrar",
+      "Erneut anmelden"
+    ],
+    "connection": [
+      "Ligação instável. A sessão foi mantida e os dados serão preservados.",
+      "Unstable connection. Your session was retained and your data will be preserved.",
+      "Connexion instable. La session a été conservée et les données seront préservées.",
+      "Conexión inestable. Se ha mantenido la sesión y se conservarán los datos.",
+      "Instabile Verbindung. Die Sitzung wurde beibehalten und Ihre Daten bleiben erhalten."
+    ],
+    "logout": [
+      "Não foi possível terminar a sessão. Tente novamente.",
+      "Could not sign out. Try again.",
+      "Impossible de se déconnecter. Réessayez.",
+      "No se ha podido cerrar la sesión. Vuelve a intentarlo.",
+      "Abmelden war nicht möglich. Versuchen Sie es erneut."
+    ]
+  }
+}
