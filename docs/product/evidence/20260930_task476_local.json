@@ -2421,14 +2421,62 @@
     "remoteTreeVerified": true
   },
   "native474": {
+    "task": 474,
     "code": "b79a7780b9fea0074ec5c465015ee08239ed01cc",
+    "tree": "774bd1a641a0f002426a1c900941a1d01a453a54",
     "run": 36746025908,
     "job": 109992318689,
-    "status": "in_progress",
-    "initialStepsPassed": 10,
-    "suiteGroups": 366,
-    "suite": "in_progress",
-    "restore": "pending"
+    "conclusion": "success",
+    "runHeadVerified": true,
+    "runBranch": "work/field-readiness-20260915-simulation",
+    "runUrl": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36746025908",
+    "groups": 366,
+    "expectedOrderExact": true,
+    "uniqueGroups": 366,
+    "failures": [],
+    "missing": [],
+    "unexpected": [],
+    "resultsSha256": "c0805e6c4311a690918f67fbb76e6b230b4676d6a5b74f1cbb26508e0b5361b3",
+    "resultsSource": "Completed GitHub job logs;366 parsed JSON results matched the exact commit runner",
+    "postgres": "16",
+    "additiveMigrations": 43,
+    "unitTests": 1356,
+    "unitFiles": 138,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "restore": {
+      "tables": 128,
+      "files": 51,
+      "rowsMatch": true,
+      "hashesMatch": true
+    },
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "blob": "093f4689a4e2e754fc6b00d75b6ab41048095c3d",
+        "sha256": "4cf18587c1a71757329db0fa16c63f5ed8da6cc1416fcd0ba0212dd1de57981d"
+      },
+      "frontend/technician-field-mode.html": {
+        "blob": "bf5704c74fe3cf014a455da5017a35bcbd38ea4f",
+        "sha256": "9a74f0ce9752defb18bfa6c1ee4df01532c9ae5c78e63776fc641997874c431e"
+      },
+      "frontend/sw.js": {
+        "blob": "5cf8d04aad32dc51c8d623d9f1ce196807baa09a",
+        "sha256": "a1268e1065a27ae37d4b76f1eabced0075361a4a84d5eed3c8c63bce8197692f"
+      },
+      "scripts/test-field-suite.js": {
+        "blob": "df261a0b1f810494a529acf2b8def437449604f6",
+        "sha256": "c6d46f0aa231ae4288fe1022ac9633dd732462477a1fc746c0a1abe3df94fe70"
+      },
+      "scripts/test-field-document-toolbar-languages.js": {
+        "blob": "ee83348eebdd007d189ec4746a20dfc1f3a2aa8f",
+        "sha256": "b1f42792d34d99290f01951d03d3c727699e30cb5df510dbadc9960c67224273"
+      }
+    },
+    "remoteTreeVerified": true
   },
   "native475": {
     "code": "82ccbc0173ddc029b917b484f7b7490dadceb2e4",
@@ -2443,9 +2491,16 @@
   "native476": {
     "branch": "work/field-readiness-20260915-simulation",
     "suiteGroups": 368,
-    "status": "publication_pending",
+    "status": "in_progress",
     "postgres16UpgradeRestoreRequired": true,
-    "workflowBudgetMinutes": 90
+    "workflowBudgetMinutes": 90,
+    "code": "a8f41dcf4b53551c9a2fb1efd8520f3e1226acbd",
+    "run": 36755990582,
+    "job": 110026247375,
+    "initialStepsPassed": 6,
+    "currentStep": "Verify additive upgrade from the previous schema",
+    "suite": "pending",
+    "restore": "pending"
   },
   "cache": 255,
   "runner": 368,
@@ -2454,5 +2509,16 @@
     "Direct programmatic consumers retain raw Error.message; their presentation still belongs to later C08/C09 lots.",
     "C06/C08/C10 remain open;32 tasks=26 not started/1 in progress/5 complete.",
     "Public during development; private before closure/C32; no merge/deploy/external contacts; annual contract deferred."
-  ]
+  ],
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "a8f41dcf4b53551c9a2fb1efd8520f3e1226acbd",
+    "tree": "b70a4a5eeed49e46db3ee4af9acb18c6273e22a8",
+    "parent": "df8aca36582137c7717e91cceeadbdd95a64718b",
+    "validatedLocalTreeMatchesRemote": true,
+    "remoteCommitParentsVerified": true,
+    "force": false,
+    "merge": false,
+    "deploy": false
+  }
 }
