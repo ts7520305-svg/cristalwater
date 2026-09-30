@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK462 / CI em execução
+
+TASK462 publicada na branch `work/field-readiness-20260915-simulation`: código `e2e70d8cda65cee46aa78266dfd490d54524b4f5`, árvore `a48fe146ef5c2b764d0ca5765fff3b9d4f0af444`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task462-20260930`. [CI36698494469](https://github.com/ts7520305-svg/cristalwater/actions/runs/36698494469), job109832087499, no commit exato: 2 etapas iniciais aprovadas; `Run actions/checkout@v4` em execução na consulta. Lista da ronda/filtros com20 entradas/100 textos, oito estados, localização/GPS e vazios; dados e regras conservados. Overflow dos filtros móveis corrigido. Seis integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache244/runner355. [Prova462](evidence/20260930_task462_local.json)
+
+TASK460 aceite351/351 grupos na ordem exata/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais, fontes verificadas. TASK457–459 já aceites; falha histórica454 conservada e correção458 revalidada. CI461 na suite353; exigir gates/restauros461–462. Próximo funcional: textos e ações em redor da visita atual; equipa/documentos e push/auth/nav pendentes. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK462 local validada / lista da ronda
 
 **TASK462 / C06-012:** lista da ronda e filtros com20 entradas/100 textos PT/EN/FR/ES/DE. Oito estados, grupos, técnico/tarefa/tempo, estados conhecidos da agenda, localização/GPS e vazios. Dados/nomes/estados desconhecidos permanecem literais; só a apresentação muda. [Prova462](evidence/20260930_task462_local.json)

@@ -290,9 +290,14 @@
     },
     {
       "task": 462,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 355,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+      "run": 36698494469,
+      "job": 109832087499,
+      "successfulInitialSteps": 2,
+      "currentStep": "Run actions/checkout@v4"
     }
   ],
   "limits": {
@@ -319,5 +324,24 @@
     "ms": 23146,
     "timedOut": false,
     "evidence": "qa-task462/run-1790761392578"
+  },
+  "publication": {
+    "task": 462,
+    "code": "e2e70d8cda65cee46aa78266dfd490d54524b4f5",
+    "tree": "a48fe146ef5c2b764d0ca5765fff3b9d4f0af444",
+    "branch": "work/field-readiness-20260915-simulation",
+    "run": 36698494469,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36698494469",
+    "job": 109832087499,
+    "status": "in_progress",
+    "successfulInitialSteps": 2,
+    "currentStep": "Run actions/checkout@v4",
+    "defaultBranch": "feature/technicians-v25",
+    "defaultSha": "cc73bba77368a605fd7710b31c98cb0c680915ac",
+    "publicDuringDevelopment": true,
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }
