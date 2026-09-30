@@ -426,6 +426,8 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "routeCacheSaveFailed": ["A ronda não ficou guardada para uso offline. {detail}","The round was not saved for offline use. {detail}","La tournée n’a pas été enregistrée pour une utilisation hors ligne. {detail}","La ronda no se ha guardado para usarla sin conexión. {detail}","Die Tour wurde nicht für die Offline-Nutzung gespeichert. {detail}"],
+  "routeCacheUnconfirmed": ["Ronda de {day}, consultada no servidor em {date}. Sem confirmação atual; alterações do escritório por verificar.","Round for {day}, checked on the server at {date}. No current confirmation; office changes still need checking.","Tournée du {day}, consultée sur le serveur le {date}. Pas de confirmation actuelle ; les modifications du bureau restent à vérifier.","Ronda del {day}, consultada en el servidor el {date}. Sin confirmación actual; los cambios de la oficina están por comprobar.","Tour vom {day}, auf dem Server abgerufen am {date}. Keine aktuelle Bestätigung; Änderungen des Büros müssen noch geprüft werden."],
   "routeSessionChanged": ["A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.","The session changed. Saved data has been preserved. Reopen field mode with the current account.","La session a changé. Les données enregistrées ont été conservées. Rouvrez le mode terrain avec le compte actuel.","La sesión ha cambiado. Se han conservado los datos guardados. Vuelve a abrir el modo de campo con la cuenta actual.","Die Sitzung hat sich geändert. Gespeicherte Daten bleiben erhalten. Öffnen Sie den Außendienstmodus erneut mit dem aktuellen Konto."],
   "routeSessionReopen": ["Reabrir modo de campo","Reopen field mode","Rouvrir le mode terrain","Volver a abrir el modo de campo","Außendienstmodus erneut öffnen"],
   "correctionSaved": ["Registo guardado", "Saved record", "Enregistrement sauvegardé", "Registro guardado", "Gespeicherter Eintrag"],
@@ -5711,13 +5713,13 @@
   }
 
   function showRouteCacheWarning(message) {
-    const node = $("#fieldRouteAge"); node.hidden = false; node.textContent = message;
+    const node = $("#fieldRouteAge"); node.hidden = false; alertUi.bind(node, message);
   }
 
   function persistModernRoute() {
     if (!sameFieldSession() || !window.CWFieldRouteCache.same(routeContext) || !routeSnapshot) return false;
     try { routeSnapshot = window.CWFieldRouteCache.update(routeSnapshot, visits, routeContext); return true; }
-    catch (error) { showRouteCacheWarning('A ronda não ficou guardada para uso offline. ' + error.message); return false; }
+    catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: '' + error.message })); return false; }
   }
 
   function protectFieldRouteSession() {
@@ -5771,13 +5773,13 @@
       if (snapshot) {
         routeConfirmedAt = snapshot.serverConfirmedAt;
         try { window.CWFieldRouteCache.save(snapshot, context); }
-        catch (error) { showRouteCacheWarning('A ronda não ficou guardada para uso offline. ' + error.message); }
+        catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: '' + error.message })); }
       } else {
         routeConfirmedAt = null;
         if (failure?.denied) { visits = []; routeSnapshot = null; routeContext = null; throw failure; }
         snapshot = window.CWFieldRouteCache.read(context);
         if (!snapshot) throw new Error('Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.');
-        showRouteCacheWarning(`Ronda de ${context.day}, consultada no servidor em ${new Date(snapshot.serverConfirmedAt).toLocaleString('pt-PT')}. Sem confirmação atual; alterações do escritório por verificar.`);
+        showRouteCacheWarning(alertUi.value('routeCacheUnconfirmed', { day: context.day, date: new Date(snapshot.serverConfirmedAt).toLocaleString('pt-PT') }));
       }
       routeContext = context; routeSnapshot = snapshot; visits = snapshot.visits;
       $("#fieldLoadError").hidden = true;

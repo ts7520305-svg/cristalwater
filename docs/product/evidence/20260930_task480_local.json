@@ -1,0 +1,232 @@
+{
+  "task": 480,
+  "parent": "fe4699da157e734c5e69dac8acebf699144f07c9",
+  "status": "local_pass_publication_pending",
+  "catalog": {
+    "entries": 2,
+    "variants": 10,
+    "main": 340,
+    "previous338Preserved": true,
+    "cache": 259,
+    "runnerGroups": 372,
+    "previous371OrderPreserved": true,
+    "words": {
+      "routeCacheSaveFailed": [
+        "A ronda não ficou guardada para uso offline. {detail}",
+        "The round was not saved for offline use. {detail}",
+        "La tournée n’a pas été enregistrée pour une utilisation hors ligne. {detail}",
+        "La ronda no se ha guardado para usarla sin conexión. {detail}",
+        "Die Tour wurde nicht für die Offline-Nutzung gespeichert. {detail}"
+      ],
+      "routeCacheUnconfirmed": [
+        "Ronda de {day}, consultada no servidor em {date}. Sem confirmação atual; alterações do escritório por verificar.",
+        "Round for {day}, checked on the server at {date}. No current confirmation; office changes still need checking.",
+        "Tournée du {day}, consultée sur le serveur le {date}. Pas de confirmation actuelle ; les modifications du bureau restent à vérifier.",
+        "Ronda del {day}, consultada en el servidor el {date}. Sin confirmación actual; los cambios de la oficina están por comprobar.",
+        "Tour vom {day}, auf dem Server abgerufen am {date}. Keine aktuelle Bestätigung; Änderungen des Büros müssen noch geprüft werden."
+      ]
+    }
+  },
+  "negative": {
+    "script": "scripts/test-field-route-cache-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 3349,
+    "expected": "The round was not saved for offline use. Raw <b>{day}</b> — A ronda não ficou guardada para uso offline.",
+    "actual": "A ronda não ficou guardada para uso offline. Raw <b>{day}</b> — A ronda não ficou guardada para uso offline.",
+    "testedAgainstExactPreviousModule": true,
+    "forwardModuleRestoredExact": true
+  },
+  "qa": {
+    "checks": 80,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "extraWidth": 320,
+    "scenarios": [
+      "save-quota-online",
+      "foreign-identical",
+      "save-corrupt-online",
+      "cached-offline",
+      "update-quota-offline",
+      "extra-cached-offline"
+    ],
+    "protectedFields": 13,
+    "sameIdRegularExtraDrafts": true,
+    "immutablePendingRequests": 2,
+    "noPageErrors": true,
+    "noOperationalWritesInNewGroup": true,
+    "companionDraftTestKeepsItsNormalCompletionStockDebit": true,
+    "originalQuotaErrorIdentityNameMessage": true,
+    "rawErrorDetailsLiteral": true,
+    "rawDayAndPtDateFormatPreserved": true,
+    "liveSnapshotConfirmedDespiteSaveFailure": true,
+    "offlineConfirmedAtNull": true,
+    "offlineQuotaStartMemoryOnly": true,
+    "unitTests": 1384,
+    "unitFiles": 140,
+    "newUnitCases": 0,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "integrations": [
+      {
+        "script": "scripts/test-field-route-cache-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25141
+      },
+      {
+        "script": "scripts/test-field-modern-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5101
+      },
+      {
+        "script": "scripts/test-field-modern-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19483
+      },
+      {
+        "script": "scripts/test-field-route-session-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16061
+      },
+      {
+        "script": "scripts/test-field-round-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20974
+      }
+    ],
+    "sharedDatabaseNoReset": true,
+    "isolatedLocalDatabase": "PGlite, not native PostgreSQL16",
+    "screenshotsReviewed": [
+      "save-quota-online-de-320.png",
+      "save-corrupt-online-de-320.png",
+      "cached-offline-de-320.png",
+      "update-quota-offline-de-320.png",
+      "extra-cached-offline-de-320.png"
+    ],
+    "rawStoragePendingAndSQLStrictDuringLanguageMatrix": true
+  },
+  "inverseExact": true,
+  "catalogExact": true,
+  "preserved": [
+    "CWFieldRouteCache untouched and account/day/visit-type validity",
+    "route revision, confirmedAt and stale response guards",
+    "existing load, save, update, offline start and replay flows",
+    "role=status, warning hidden after successful live refresh and CSS",
+    "warning/fields/controls node identity, handlers and selector focus",
+    "13 protected draft fields and same-ID REGULAR/EXTRA drafts",
+    "all raw route/draft/journal storage during locale matrix",
+    "two raw pending IndexedDB UUID/payload records and SQL",
+    "original Error identity/name/message, details and date literals",
+    "foreign identical-string replacement releases translation ownership",
+    "no document/photo/draft/route calls on locale change",
+    "backend schema migrations workflows dependencies",
+    "371 previous runner groups/order and 120s/90min deadlines"
+  ],
+  "fixtureAdjustments": [
+    "The retry control is normally hidden and dashboard refresh action changes with visit state; invoke its existing original click listener without changing product visibility/handlers.",
+    "Keep the existing page offline while opening EXTRA from the real cached shell. An earlier fixture restored connectivity just to change view, correctly triggering normal auto-replay; product synchronization is unchanged and all strict pending/request/SQL assertions remain."
+  ],
+  "sourceHashes": [
+    {
+      "path": "frontend/technician-field-mode.js",
+      "sha256": "742232d7546aa7ba37f2715002463aa6508e1b42dd68dd3b895b49d8002eb39c",
+      "blob": "104b1b202ac5b7a19a4955a2633e2c85b90e46f5"
+    },
+    {
+      "path": "frontend/sw.js",
+      "sha256": "0f214cc54ee6d1d348173be14391efbc7536914a80117a1867c3a9b4d497d5d6",
+      "blob": "be37dc580cccfd2fa4ee76a86c464734e8e7d112"
+    },
+    {
+      "path": "scripts/test-field-suite.js",
+      "sha256": "6292d37dbc0e74e556481cb58b47107ab54320cc7014be5aac9b372236a1237e",
+      "blob": "54a6201a208d010d4e0f3a8457442aa4ee94eb26"
+    },
+    {
+      "path": "scripts/test-field-route-cache-languages.js",
+      "sha256": "118e742630c7015cf18f206dad92080f5a5ec5698f7148181c8d25b6b8b6521f",
+      "blob": "c4e8d9685952abcdd1c3df07f3fbe1b655c423c8"
+    }
+  ],
+  "native": {
+    "lastDetailedAcceptance": 477,
+    "task477": {
+      "code": "dc7f14107efc39201440c8140788ad9395d9a476",
+      "tree": "ebb0a28b0dffd273e14e8ae5683dda9998e76301",
+      "run": 36760759887,
+      "job": 110042399644,
+      "groups": 369,
+      "allPassExactOrder": true,
+      "postgres": 16,
+      "additiveMigrations": 43,
+      "restoredTables": 128,
+      "restoredFiles": 51,
+      "rowsAndHashesMatch": true,
+      "fullEvidence": "docs/product/evidence/20260930_task479_local.json#native.task477"
+    },
+    "task478": {
+      "code": "9b253a6be8d18a5f934f3868ec6c64e447e3d965",
+      "run": 36764977784,
+      "job": 110056749153,
+      "status": "in_progress",
+      "initialStepsPassed": 10,
+      "suiteGroups": 370,
+      "suite": "in_progress",
+      "restore": "pending"
+    },
+    "task479": {
+      "code": "364c2e52d64dc35cc544008ae766800149ecdaff",
+      "run": 36771220588,
+      "job": 110077814896,
+      "status": "in_progress",
+      "initialStepsPassed": 10,
+      "suiteGroups": 371,
+      "suite": "in_progress",
+      "restore": "pending"
+    },
+    "task480": "publication/native CI pending"
+  },
+  "constraints": {
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "completionTasks": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "completed": 5,
+    "completedIds": [
+      "C01",
+      "C02",
+      "C03",
+      "C04",
+      "C05"
+    ],
+    "publicDuringDevelopmentPrivateBeforeClose": true,
+    "merge": false,
+    "deploy": false,
+    "vps": false,
+    "externalContacts": false,
+    "annualContract": "deferred"
+  }
+}
