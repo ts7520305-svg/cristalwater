@@ -28,7 +28,7 @@
   const specs = new WeakSet(), errors = new WeakMap(), presentations = new Map();
   function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
   function format(entry) {
-   if (!specs.has(entry)) return String(entry ?? '');
+   if (!specs.has(entry)) return reminders.presentation?.format(entry) ?? String(entry ?? '');
    const language = (document.documentElement?.lang || 'pt').toLowerCase().split('-')[0], index = Math.max(0, languages.indexOf(language));
    return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key]));
   }
@@ -44,7 +44,7 @@
   window.addEventListener('cw-language-change', paint);
   let lastLanguage = document.documentElement?.lang || 'pt';
   if (document.documentElement && typeof MutationObserver === 'function') new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-  return { value, format, bind, clear, literal, problem: key => { const error = Error(copy[key][0]); errors.set(error, value(key)); return error; }, error: (node, error) => { const entry = errors.get(error); if (entry) bind(node, entry); else literal(node, error.message); } };
+  return { value, format, bind, clear, literal, problem: key => { const error = Error(copy[key][0]); errors.set(error, value(key)); return error; }, error: (node, error) => { const entry = errors.get(error); if (entry) bind(node, entry); else if (reminders.presentation) bind(node, reminders.presentation.error(error)); else literal(node, error.message); } };
  })();
  const reminders=window.CWFieldReminders;
  const read=()=>reminders.list('PUMP_MANUAL').filter(row=>row.status!=='CLOSED'||!row.closeSyncedAt);
@@ -57,7 +57,7 @@
  const feedbackCopy=key=>pumpCopy.bind(document.getElementById('pumpReminderFeedback'),pumpCopy.value(key));
  function render(){
   try{
-   const rows=read(),warning=reminders.legacyWarning();banner.hidden=!rows.length&&!warning;pumpCopy.clear(banner);banner.replaceChildren();if(warning){const p=document.createElement('p');p.textContent=warning;banner.append(p);}
+   const rows=read(),warning=reminders.presentation?.legacyWarning() ?? reminders.legacyWarning();banner.hidden=!rows.length&&!warning;pumpCopy.clear(banner);banner.replaceChildren();if(warning){const p=document.createElement('p');pumpCopy.bind(p,warning);banner.append(p);}
    for(const item of rows){
     const row=document.createElement('div');row.dataset.pumpReminder=item.localId;row.style.cssText='padding:8px 0';
     const text=document.createElement('p');const remaining=Math.ceil((Date.parse(item.dueAt)-Date.now())/60000);
@@ -69,7 +69,7 @@
     };row.append(button);}
     banner.append(row);
    }
-  }catch(e){banner.hidden=false;pumpCopy.literal(banner,e.message);}
+  }catch(e){banner.hidden=false;pumpCopy.clear(banner);pumpCopy.error(banner,e);}
  }
  async function sync(){
   try{await reminders.sync();}catch(e){feedbackError(e);}finally{render();}

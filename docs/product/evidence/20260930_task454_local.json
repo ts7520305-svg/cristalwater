@@ -1,0 +1,204 @@
+{
+  "task": "TASK454",
+  "date": "2026-09-30",
+  "base": "1965ea7db752bbf95f5ce5a5acf17cd49aeaf5b8",
+  "item": "C06-005 reminder helper; real pump consumer cross-reference C08-045",
+  "scope": "23 owned helper messages in five languages, consumed by the actual pump panel. Original Error.message, legacyWarning string API, stored syncError and other consumers stay intact.",
+  "negative": [
+    {
+      "script": "test-field-reminder-error-languages.js",
+      "code": 1,
+      "signal": null,
+      "ms": 1559,
+      "timedOut": false,
+      "logSha256": "af3f5f812bb90e343a266a5e5eed066851eeaa534f86a9821c21c4f3dec0213e"
+    }
+  ],
+  "negativeDescription": "The actual pump banner still displays an unreadable-reminder error in Portuguese after selecting English.",
+  "integration": [
+    {
+      "script": "test-field-reminder-error-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 13433,
+      "timedOut": false,
+      "logSha256": "3562f59dde30fb2608dc53cd1e0a2ab54f1ddb568729cbff69c94249afcfff09"
+    },
+    {
+      "script": "test-field-pump-panel-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 21175,
+      "timedOut": false,
+      "logSha256": "f28c28231ee8c0a9f0516d899844b034d1c6ed470d6a1dc109e15ac7472f989c"
+    },
+    {
+      "script": "test-field-extra-reminders.js",
+      "code": 0,
+      "signal": null,
+      "ms": 15713,
+      "timedOut": false,
+      "logSha256": "48c1350d06832035b364abf337296b56caea5a12c7773ca6d3c98c262156a944"
+    },
+    {
+      "script": "test-field-water-api.js",
+      "code": 0,
+      "signal": null,
+      "ms": 7492,
+      "timedOut": false,
+      "logSha256": "990d32907566b2e68ba8817ac21167825919466a7c4aff710caf708084cccc62"
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 838,
+      "timedOut": false,
+      "logSha256": "7f8ca6ca8f301dabec2c046015d0d4f18489ba40130b39a970f88b0a1c61d572"
+    }
+  ],
+  "initialBrowserWithoutCapture": {
+    "script": "test-field-reminder-error-languages.js",
+    "code": 0,
+    "signal": null,
+    "ms": 11788,
+    "timedOut": false,
+    "logSha256": "85b822927963787eaf13f559b1701c7f0e63b2cdbf5a0904f2504cb6b245cf17"
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 39658,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6331,
+      "logSha256": "671e35f487296fe49acae3647efca154f1ac71f1b4dd35da845197170820d950"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 591,
+      "logSha256": "869f6cc510a3c8c06c18a8fe3c09de447b7e308bdf687f8855387b47dc446b20"
+    }
+  ],
+  "unitTotals": {
+    "passed": 1356,
+    "files": 138
+  },
+  "technicianTotals": {
+    "passed": 4
+  },
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "catalogue": {
+    "entries": 23,
+    "texts": 115,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "guardsExercised": 22,
+    "legacyWarningCases": 1,
+    "originalErrorMessagePreserved": true,
+    "storedDataChanged": false
+  },
+  "coverage": [
+    "All22 helper guards exercised through real helper functions in isolated VM fixtures; exact five-language messages, unknown language/minimal DOM fallback and preserved original Error.message. Matching external Error/copy fields and unbranded objects cannot acquire trusted identity. Formatting performs no storage writes or network requests.",
+    "Real technician page and language selector at320/390/1440: malformed/invalid stored rows, missing visit context, missing storage locks, external quota error with matching own text and forged copy, duplicate reminder and changed-account rejection. Same nodes/focus/notes/minutes/context/credentials/local data/SQL; only expected language preference requests during switching.",
+    "Actual legacy warning retains the raw legacy archive and original legacyWarning() API, including after offline cached reload. Durable syncError remains its original raw text; language changes never infer provenance or rewrite it.",
+    "Real offline pump creation,403 server error identical to an owned error, held/lost actual create response, identical replay and physical offline closure. One SQL reminder and exactly one OPEN/one CLOSED history record. Existing unchanged pump language test covers REGULAR/EXTRA collision, confirmation cancellation and malformed close acknowledgement; extra-reminder/water-API/component-browser regressions pass.",
+    "Only presentation code changed: reversing the captured transformations restores both helper and pump source byte-for-byte. Backend/schema/workflow and other consumers unchanged. Pump presentation map retains existing node lifecycle and timer; helper specs/errors use private weak identity."
+  ],
+  "preservation": {
+    "frontend/cw-field-reminders.js": {
+      "operationalCodeReversedExactly": true,
+      "baseSha256": "fea949664779efde8a38c07763d070493f133c930c74a17ca81882e8f13e9fb1"
+    },
+    "frontend/cw-pump-reminders.js": {
+      "operationalCodeReversedExactly": true,
+      "baseSha256": "168635d4e38349dd90013f1f45af6276a5d69eb59654a866f5c5187b0349c143"
+    },
+    "suite": {
+      "previous": 345,
+      "current": 346,
+      "previousOrderExact": true
+    },
+    "unchanged": [
+      "frontend/technician-field-mode.js",
+      "frontend/technician-field-mode.html",
+      "frontend/crystal-os-v2-shell.js",
+      "frontend/cw-field-write-store.js",
+      "frontend/cw-field-day-review.js",
+      "frontend/cw-i18n.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml",
+      "scripts/test-field-pump-panel-languages.js"
+    ]
+  },
+  "sourceSha256": {
+    "frontend/cw-field-reminders.js": "b74c764352320890f0f979af8a5d2a90ec630a8fd236ed9a1056d391f8391d0b",
+    "frontend/cw-pump-reminders.js": "1060c636913db2992572ae781b1bf366e07d89b138d79ab6f581dae4813d30cb",
+    "frontend/sw.js": "277cb67ca96ac04a6b1065880a2b71b89b24757b16367a5778d15beb776a19bd",
+    "scripts/test-field-reminder-error-languages.js": "9e5489f0d5d33008916247acc7da17f31b5adf08542b6c6be61ff201f3dd3737",
+    "scripts/test-field-suite.js": "a4d936b4e052862d0e1d4e3d91a31161e9dba0ea364e2a699fef3d0d5bc85ebd"
+  },
+  "visual": {
+    "captureSha256": "4c7c4d8d2149b9eef183ccf9d1ec070e8576c8a26f41e425c3ff8d0ff90910d4",
+    "reviewed": true,
+    "finding": "German legacy warning and pump reminder fit320px; long confirmation action wraps. Markup/parameter-looking pool and technician names remain literal. Not full-page/theme/device approval."
+  },
+  "environment": {
+    "database": "isolated PGlite via TCP",
+    "browser": "Chromium153",
+    "timezone": "Europe/Lisbon",
+    "externalEffects": "email/WhatsApp/notifications/fiscal/webhooks/background jobs disabled"
+  },
+  "pendingNative": [
+    {
+      "task": 452,
+      "run": 36671372520,
+      "job": 109746883916,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 344,
+      "restore": "pending"
+    },
+    {
+      "task": 453,
+      "run": 36673052696,
+      "job": 109752028731,
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 10,
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "expectedGroups": 345,
+      "restore": "pending"
+    }
+  ],
+  "limits": [
+    "Publication and native PostgreSQL16/upgrade/full346-group suite/full database and uploaded-file restore for TASK454 remain pending. PGlite does not replace these gates.",
+    "Water-open panel and other helper consumers still show their original text until their own presentation integration. Persisted syncError strings remain literal because they lack reliable error provenance; no schema or historical-data rewrite is implied.",
+    "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
