@@ -1,5 +1,13 @@
 # Inventário de idiomas — C05 / TASK415
 
+## Publicação confirmada — 30/09/2026, TASK479 / mudança de sessão
+
+Código `364c2e52d64dc35cc544008ae766800149ecdaff`, árvore `d53e0887b694840b60e37a86a2a5322c20bb87c6`, igual à validada localmente; parent `314da354e35e56e0b4613c2714c5e50f972a6938` confirmado. [CI36771220588](https://github.com/ts7520305-svg/cristalwater/actions/runs/36771220588), job110077814896: duas etapas iniciais aprovadas, checkout em curso na consulta; suite371/restauro pendentes. Duas entradas/10 variantes para aviso/link, catálogo338 com336 entradas preservadas,50 verificações e cinco integrações finais aprovadas;1 384 unitários/140 ficheiros/quatro técnicos/sintaxe695/308/44. Bloqueio,13 campos, trabalho local e reabertura real com a conta atual preservados. Inversão exata do módulo original e falha do teste final contra o código anterior confirmadas. Cache258/runner371. [Prova479](evidence/20260930_task479_local.json).
+
+Última aceitação completa: TASK477/CI36760759887/job110042399644, código `dc7f14107efc39201440c8140788ad9395d9a476`, árvore `ebb0a28b0dffd273e14e8ae5683dda9998e76301`, head/checkout/árvore confirmados.369 grupos distintos/code0 na ordem exata, PostgreSQL16/43 migrações,1 374 unitários/139 ficheiros/quatro técnicos/sintaxe e restauro128 tabelas/51 ficheiros com linhas/hashes iguais; PASS em2026-09-30T19:57:25Z. Resultados completos na prova479. Não atribuir esta aprovação aos códigos478/479. TASK478 continua na suite370 após dez etapas aprovadas, restauro pendente na última consulta.
+
+Próximo: acompanhar478/479 e continuar avisos próprios de cache/ronda atual e navegação, deixando erros alheios literais. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante o desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/VPS/contactos externos; contrato anual adiado. Atualização documental [skip ci]; entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK479 / mudança de sessão da ronda
 
 TASK479 / C06-015 implementada e validada localmente: duas entradas/10 variantes PT/EN/FR/ES/DE para o aviso de mudança de sessão e a ligação «Reabrir modo de campo». Catálogo principal338, com as336 entradas anteriores exatamente preservadas. Só duas folhas próprias passam pelo apresentador existente; texto português, nós, role/href, CSS, bloqueio inert/display:none!important, revisão da ronda, cancelamento de resultados tardios, contexto e listeners/prazos originais conservados. A recuperação continua a exigir a ligação real, usando a conta atual; restaurar a credencial anterior não desbloqueia a página. Sem alteração a autenticação, permissões ou navegação.
