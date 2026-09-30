@@ -1,5 +1,13 @@
 # Inventário de idiomas — C05 / TASK415
 
+## Publicação confirmada — 30/09/2026, TASK478 / autenticação
+
+Código `9b253a6be8d18a5f934f3868ec6c64e447e3d965`, árvore `cdfd293c16bbb6c4e7baa1a12c5345201f6064fd`, igual à validada localmente; parent `872bdd1b5d662c64b1ee751477b7c3928533b9a3` confirmado. [CI36764977784](https://github.com/ts7520305-svg/cristalwater/actions/runs/36764977784), job110056749153: seis etapas iniciais aprovadas, upgrade aditivo em curso na consulta; suite370/restauro pendentes. Quatro entradas/20 variantes,50 verificações, cinco integrações finais e ensaio adicional de entrada partilhada,1 384 unitários/140 ficheiros/quatro técnicos/sintaxe aprovados localmente. Cache257/runner370. [Prova478](evidence/20260930_task478_local.json).
+
+TASK476 aceite nativamente: código `a8f41dcf4b53551c9a2fb1efd8520f3e1226acbd`, árvore `b70a4a5eeed49e46db3ee4af9acb18c6273e22a8`, head/checkout/árvore remota confirmados. [CI36755990582](https://github.com/ts7520305-svg/cristalwater/actions/runs/36755990582), job110026247375, sucesso. Logs lidos:368 grupos distintos, code0 na ordem exata do runner desse commit; PostgreSQL16/43 migrações aditivas,1 367 unitários/138 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Restauro128 tabelas/51 ficheiros, linhas/hashes iguais, PASS em2026-09-30T19:19:02Z. Fontes/blob/SHA256 e resultados completos na prova478. Última aceitação completa476; não atribuída ao código478. TASK477 permanece na suite369 após dez etapas aprovadas/restauro pendente na última consulta. Exigir CI/restauros477/478 exatos.
+
+Próximo: acompanhar477/478, depois aviso de mudança de sessão da ronda/reabertura e navegação. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental [skip ci]; entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK478 / apresentação da autenticação
 
 TASK478 / C06-015 implementada e validada localmente: quatro entradas/20 variantes PT/EN/FR/ES/DE para mensagem de sessão expirada, ligação «Voltar a entrar», ligação instável e falha ao terminar sessão. Catálogo principal336 intacto. Aviso de expiração conserva os registos locais e a instrução de voltar com a mesma conta. Folhas próprias repintadas; nós, href/role, toast/CSS/timer4200ms originais preservados. Um aviso oculto, removido ou substituído por outro produtor deixa de pertencer ao apresentador, mesmo com texto português idêntico. Texto genérico entregue a CristalAuth.toast continua literal; Error/identidade/name/message permanecem originais. Referências do apresentador limitadas às duas folhas do banner e ao aviso atual.
