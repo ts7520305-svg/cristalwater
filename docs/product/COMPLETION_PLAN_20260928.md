@@ -1,5 +1,13 @@
 # Plano de conclusão — Cristal Water
 
+## Retoma atual — 30/09/2026, TASK477 / apresentação da inscrição push
+
+TASK477 / C06-015 implementada e validada localmente: 12 entradas/60 variantes PT/EN/FR/ES/DE para botão e estados da inscrição push. Catálogo principal336 intacto. Mudança de idioma repinta apenas folhas próprias; erros do servidor/navegador permanecem literais, mesmo quando iguais a uma mensagem própria. Identidade opaca por WeakMap; ownership libertada se outro produtor substituir o nó/texto. Permissões, sessão, pedidos, payload, opções de inscrição, conflito409, unsubscribe e retirada da inscrição tardia preservados. Não altera cw-push-session nem entrega/privacidade. A inscrição continua a exigir confirmação administrativa de um aviso de teste; não prova entrega real.
+
+Falha original reproduzida: inglês escolhido mas botão ainda «Ativar avisos no telemóvel». Novo navegador:75 verificações nos cinco idiomas,320/390/1440, estados pronto/indisponível/configuração/rede/permissão/inscrição/fallback, erros alheios literais,409 e EXTRA. Rascunhos REGULAR/EXTRA com mesmo ID, nós/handler/foco, campos, tokens/conta, outbox/SQL preservados; zero escritas operacionais/erros de página. Sete unitários novos para normalização/fallback, sessão e ownership. Sequência final na mesma base isolada sem reset: push18392ms, sessão1003ms, downloads15102ms, resumo11802ms, todos aprovados. 1 374 unitários/139 ficheiros, quatro técnicos e sintaxe695/308/44 aprovados. Captura alemã320 revista sem overflow. Cache256/runner369;368 grupos anteriores e prazos120s/90min preservados. Duas fontes produto, três testes e quatro documentos: nove ficheiros. [Prova477](evidence/20260930_task477_local.json).
+
+Publicação e CI369/restauro ainda por confirmar nesta entrada. TASK475: job110009859426/CI36751168770 terminado com sucesso, incluindo suite e restauro; logs detalhados ainda por conferir antes de nova aceitação exata. TASK476: CI36755990582 após dez etapas aprovadas, suite368 em curso/restauro pendente. Última aceitação detalhada permanece TASK474/366/restauro128 tabelas51 ficheiros. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Próximo: conferir CI475–477 e continuar auth/nav e consumidores programáticos. Entradas abaixo históricas.
+
 Data: 28/09/2026. Preparado na TASK402 a partir da revisão global, do checkpoint TASK401 e dos caminhos de código abaixo. Âmbito: as sete frentes confirmadas pelo utilizador nesta conversa.
 
 ## Contagem e regra de fecho

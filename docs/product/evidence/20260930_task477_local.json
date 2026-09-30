@@ -1,0 +1,153 @@
+{
+  "task": 477,
+  "parent": "a220b778bdafbdba6b73ea41828940d46dcbf40b",
+  "status": "local_pass_native_pending",
+  "catalog": {
+    "ownedEntries": 12,
+    "variants": 60,
+    "mainCatalog": 336,
+    "cache": 256,
+    "runnerGroups": 369
+  },
+  "negative": {
+    "expected": "Enable phone alerts",
+    "actual": "Ativar avisos no telemóvel"
+  },
+  "qa": {
+    "checks": 75,
+    "unitTests": 1374,
+    "unitFiles": 139,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "integrations": [
+      {
+        "script": "test-field-push-languages.js",
+        "code": 0,
+        "ms": 18392
+      },
+      {
+        "script": "test-field-push-session-browser.js",
+        "code": 0,
+        "ms": 1003
+      },
+      {
+        "script": "test-field-download-error-languages.js",
+        "code": 0,
+        "ms": 15102
+      },
+      {
+        "script": "test-field-correction-summary-languages.js",
+        "code": 0,
+        "ms": 11802
+      }
+    ],
+    "sharedDatabaseNoReset": true,
+    "noOperationalWrites": true,
+    "noRealDeliveryAttempt": true
+  },
+  "preserved": [
+    "session checks and credential",
+    "permission and registration options",
+    "subscription payload and decoded VAPID bytes",
+    "409 unsubscribe/retry",
+    "late-session retirement",
+    "privacy module",
+    "same-ID REGULAR/EXTRA drafts",
+    "SQL/outbox/account except language preference"
+  ],
+  "native": {
+    "lastDetailedAcceptance": 474,
+    "task475": "job success; detailed logs not yet verified",
+    "task476": "suite running"
+  },
+  "texts": {
+    "enable": [
+      "Ativar avisos no telemóvel",
+      "Enable phone alerts",
+      "Activer les alertes sur le téléphone",
+      "Activar avisos en el móvil",
+      "Handy-Hinweise aktivieren"
+    ],
+    "enabled": [
+      "Avisos ativados",
+      "Alerts enabled",
+      "Alertes activées",
+      "Avisos activados",
+      "Hinweise aktiviert"
+    ],
+    "unsupported": [
+      "Este navegador não disponibiliza avisos com a aplicação fechada.",
+      "This browser does not support alerts while the application is closed.",
+      "Ce navigateur ne permet pas les alertes lorsque l’application est fermée.",
+      "Este navegador no permite avisos con la aplicación cerrada.",
+      "Dieser Browser unterstützt keine Hinweise bei geschlossener Anwendung."
+    ],
+    "permissionHint": [
+      "Permita notificações para receber avisos com o ecrã bloqueado.",
+      "Allow notifications to receive alerts while the screen is locked.",
+      "Autorisez les notifications pour recevoir des alertes lorsque l’écran est verrouillé.",
+      "Permite las notificaciones para recibir avisos con la pantalla bloqueada.",
+      "Erlauben Sie Benachrichtigungen, um Hinweise bei gesperrtem Bildschirm zu erhalten."
+    ],
+    "unconfigured": [
+      "Avisos com ecrã bloqueado ainda indisponíveis. Contacte a administração.",
+      "Alerts with the screen locked are not available yet. Contact the administrator.",
+      "Les alertes avec l’écran verrouillé ne sont pas encore disponibles. Contactez l’administration.",
+      "Los avisos con la pantalla bloqueada aún no están disponibles. Contacta con la administración.",
+      "Hinweise bei gesperrtem Bildschirm sind noch nicht verfügbar. Wenden Sie sich an die Verwaltung."
+    ],
+    "network": [
+      "Ligue-se à rede para ativar os avisos.",
+      "Connect to the network to enable alerts.",
+      "Connectez-vous au réseau pour activer les alertes.",
+      "Conéctate a la red para activar los avisos.",
+      "Verbinden Sie sich mit dem Netzwerk, um Hinweise zu aktivieren."
+    ],
+    "permissionDenied": [
+      "Permissão de notificações não concedida.",
+      "Notification permission was not granted.",
+      "L’autorisation des notifications n’a pas été accordée.",
+      "No se ha concedido permiso para las notificaciones.",
+      "Die Berechtigung für Benachrichtigungen wurde nicht erteilt."
+    ],
+    "failure": [
+      "Falha ao ativar avisos",
+      "Failed to enable alerts",
+      "Échec de l’activation des alertes",
+      "Error al activar los avisos",
+      "Hinweise konnten nicht aktiviert werden"
+    ],
+    "registered": [
+      "Dispositivo inscrito. Confirme com a administração a receção de um aviso de teste.",
+      "Device registered. Confirm receipt of a test alert with the administrator.",
+      "Appareil inscrit. Confirmez avec l’administration la réception d’une alerte de test.",
+      "Dispositivo registrado. Confirma con la administración la recepción de un aviso de prueba.",
+      "Gerät registriert. Bestätigen Sie mit der Verwaltung den Empfang eines Testhinweises."
+    ],
+    "initialSession": [
+      "A sessão mudou. Atualize a página para ativar os avisos.",
+      "The session changed. Refresh the page to enable alerts.",
+      "La session a changé. Actualisez la page pour activer les alertes.",
+      "La sesión ha cambiado. Actualiza la página para activar los avisos.",
+      "Die Sitzung hat sich geändert. Laden Sie die Seite neu, um Hinweise zu aktivieren."
+    ],
+    "currentSession": [
+      "A sessão mudou. Ative os avisos na conta atual.",
+      "The session changed. Enable alerts in the current account.",
+      "La session a changé. Activez les alertes dans le compte actuel.",
+      "La sesión ha cambiado. Activa los avisos en la cuenta actual.",
+      "Die Sitzung hat sich geändert. Aktivieren Sie Hinweise im aktuellen Konto."
+    ],
+    "changedSession": [
+      "A sessão mudou. Atualize a página para ativar os avisos na conta atual.",
+      "The session changed. Refresh the page to enable alerts in the current account.",
+      "La session a changé. Actualisez la page pour activer les alertes dans le compte actuel.",
+      "La sesión ha cambiado. Actualiza la página para activar los avisos en la cuenta actual.",
+      "Die Sitzung hat sich geändert. Laden Sie die Seite neu, um Hinweise im aktuellen Konto zu aktivieren."
+    ]
+  }
+}
