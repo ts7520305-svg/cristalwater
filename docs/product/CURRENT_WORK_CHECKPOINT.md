@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK465 / correção em CI
+
+TASK465 publicada na branch `work/field-readiness-20260915-simulation`: código `aa548357fcd4cb5643e3e3452bc66981fc1cdc81`, árvore `52e7f5141080681ab3ba0397d8e0273504bd5c44`, igual à validada. Histórico local conservado em `work/local-task465-20260930`. [CI36708004453](https://github.com/ts7520305-svg/cristalwater/actions/runs/36708004453), job109862765829, no commit exato: 1 etapa inicial aprovada; `Initialize containers` em execução na consulta. Corrigido seletor de fotografias dependente do idioma e reforçada verificação do rascunho na navegação. Três integrações e sintaxe dos dois testes aprovadas. Zero fontes de produto; cache246/runner359 conservados. [Prova465](evidence/20260930_task465_local.json)
+
+Falha nativa462354/355 preservada; restauro não executado. A correção465 aguarda gate completo/restauro. Gates463/464 anteriores à correção ainda nas suites357/359. TASK461 aceite353/353/PostgreSQL16/upgrade/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Próximo: restaurar e publicar as traduções de produtos/rascunhos já validadas como TASK466. Depois equipa/documentos e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK465 local validada / correção da falha nativa462
 
 **TASK465 / C06-QA-01:** correção prioritária do teste de fotografias após falha nativa462. A fixture procurava o rótulo `Extra /`, traduzido pela TASK462; o percurso já estava em alemão. Seleção agora pelo índice da visita EXTRA com id exato no snapshot próprio do dia, seguida do clique real no botão existente e confirmação do contexto tipado. Mesmo id e piscina REGULAR/EXTRA conservados. Zero fontes de produto alteradas; seis ficheiros. O teste de navegação aguarda o valor esperado no formulário e exige igualdade integral do rascunho persistido, dentro do prazo original. [Prova465](evidence/20260930_task465_local.json)
