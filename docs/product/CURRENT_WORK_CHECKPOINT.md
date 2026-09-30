@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK458 / CI em execução
+
+TASK458 publicada na branch `work/field-readiness-20260915-simulation`: código `543408946c4b308d2537337a2b65a9b42c1aa6e8`, árvore `d6eb86139b65c9ee8caad991dc1fb90fe458a7f5`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task458-20260930`. [CI36680397599](https://github.com/ts7520305-svg/cristalwater/actions/runs/36680397599), job109774351817, no commit exato: 7 etapas iniciais aprovadas; `Run npx playwright install --with-deps chromium` em execução na consulta. Prontidão do teste de guias corrigida com regressão de rede ocupada; browser/API e sintaxe aprovados, todas as asserções anteriores conservadas. Produto/cache240/runner349 inalterados. [Prova458](evidence/20260930_task458_local.json).
+
+TASK457 publicada (`f9fe9a0d`, CI36679865735) e já na suite349 após dez etapas aprovadas. CI455/456 nas suites347/348; restauros pendentes. TASK453 aceite345/restauro128 tabelas51 ficheiros; TASK452 aceite344/restauro128/51. TASK454 falhou345/346 na espera de rede e não executou restauro: conservar a falha histórica, exigir a suite349 e restauro completos no código da correção458. Próximo: confirmar455–458 e corrigir falhas; depois títulos/detalhes das fontes ativas do painel e dashboard/hero, preservando dados históricos e separando leitura de fecho físico. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK458 local validada / prontidão do teste de guias
 
 **TASK458:** reparação limitada ao teste `test-field-guide-read-scope-ui.js`, após a falha nativa454. Um GET secundário retido reproduz com a espera antiga o timeout10s apesar de documentos Válidos/online. As três navegações online passam a esperar `domcontentloaded` e o predicado documental original; o ensaio exige documentos prontos com esse GET ainda pendente. Pedido libertado também em erro. Todas as asserções anteriores de titularidade/privacidade/dados conservadas, sem alongar timeouts. Nenhuma fonte de produto alterada. [Prova458](evidence/20260930_task458_local.json).

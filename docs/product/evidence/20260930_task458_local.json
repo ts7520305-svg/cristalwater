@@ -92,14 +92,385 @@
     "externalEffects": "disabled"
   },
   "limits": [
-    "TASK458 publication/native349-group suite/upgrade/PostgreSQL16/database and uploaded-file restore pending. Native TASK454 remains historically failed; local success does not accept it.",
+    "TASK458 is published at the validated tree; its native349-group suite/upgrade/PostgreSQL16/database and uploaded-file restore remain pending. Native TASK454 remains historically failed; local success does not accept it.",
     "TASK457 native CI in progress. TASK455/456 native suites/restores pending at last read; TASK453 accepted345/restored128 tables51 files and TASK452 accepted344/restored128/51.",
     "No production UI change or new language completion claim. C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public development/private before completion/C32. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "543408946c4b308d2537337a2b65a9b42c1aa6e8",
+    "tree": "d6eb86139b65c9ee8caad991dc1fb90fe458a7f5",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "d157bcae781b0e024c00b7393b47a2797b2bcd1b",
+    "originalHistoryBranch": "work/local-task458-20260930",
+    "ci": {
+      "run": 36680397599,
+      "job": 109774351817,
+      "head": "543408946c4b308d2537337a2b65a9b42c1aa6e8",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 7,
+      "currentStep": "Run npx playwright install --with-deps chromium",
+      "fullSuiteGroups": 349,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
-  }
+  },
+  "pendingNative": [
+    {
+      "task": 455,
+      "jobs": [
+        {
+          "id": 109760049353,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36675696482,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task": 456,
+      "jobs": [
+        {
+          "id": 109766594583,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36677835725,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task": 457,
+      "jobs": [
+        {
+          "id": 109772750476,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36679865735,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }

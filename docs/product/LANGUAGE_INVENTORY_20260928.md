@@ -10,7 +10,7 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 ## Validação complementar — TASK458 / gate documental
 
-Correção só de QA da espera `networkidle` que falhou no CI454, com documentos já Válidos/online. Regressão reproduzida com GET secundário retido; navegações aguardam DOM e prontidão documental original, com o GET ainda pendente. Browser/API aprovados e todas as guardas de titularidade/privacidade/cache/offline/13 modelos/bytes conservadas. Nenhuma fonte de produto/tradução alterada; cache240/runner349 inalterados. Publicação/gates349/restauro458 pendentes; CI454 continua falhado historicamente. Seis ficheiros, incluindo registo da publicação457. [Prova458](evidence/20260930_task458_local.json). Entradas abaixo históricas.
+Correção só de QA da espera `networkidle` que falhou no CI454, com documentos já Válidos/online. Regressão reproduzida com GET secundário retido; navegações aguardam DOM e prontidão documental original, com o GET ainda pendente. Browser/API aprovados e todas as guardas de titularidade/privacidade/cache/offline/13 modelos/bytes conservadas. Nenhuma fonte de produto/tradução alterada; cache240/runner349 inalterados. Código458 `54340894` publicado, [CI36680397599](https://github.com/ts7520305-svg/cristalwater/actions/runs/36680397599) em execução; gates349/restauro pendentes; CI454 continua falhado historicamente. Seis ficheiros, incluindo registo da publicação457. [Prova458](evidence/20260930_task458_local.json). Entradas abaixo históricas.
 
 ## Progresso funcional — TASK457 / C06-012 e C06-003, leitura e histórico
 
