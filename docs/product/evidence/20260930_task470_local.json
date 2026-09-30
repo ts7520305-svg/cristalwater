@@ -863,10 +863,15 @@
     },
     {
       "task": 470,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 363,
       "workflowBudgetMinutes": 90,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+      "run": 36720143535,
+      "job": 109902864721,
+      "successfulInitialSteps": 1,
+      "currentStep": "Initialize containers"
     }
   ],
   "limits": {
@@ -886,5 +891,21 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Require exact363 groups/restore470 and362/restore469; inspect468. Remaining document guide/insurance bodies, PDF buttons, day/vehicle-change notices, correction summary and shared push/auth/navigation remain open."
+  },
+  "publication": {
+    "task": 470,
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+    "tree": "c2146ad069edfb50ae8e803bd5fe651aa6cb5acc",
+    "run": 36720143535,
+    "job": 109902864721,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36720143535",
+    "status": "in_progress",
+    "currentStep": "Initialize containers",
+    "successfulInitialSteps": 1,
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }

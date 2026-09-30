@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK470 / resumo e avisos documentais
+
+TASK470 publicada na branch `work/field-readiness-20260915-simulation`: código `8caaba37852f958bf86c160df4c943f1ef02d511`, árvore `c2146ad069edfb50ae8e803bd5fe651aa6cb5acc`, igual à validada. Histórico local conservado em `work/local-task470-20260930`. [CI36720143535](https://github.com/ts7520305-svg/cristalwater/actions/runs/36720143535), job109902864721, no commit exato: etapas iniciais aprovadas:1; `Initialize containers` em execução na consulta. Resumo/proveniência/avisos documentais com34 entradas novas/170 textos e dez reutilizadas. Sete integrações,1 356 unitários/quatro técnicos/sintaxe aprovados; falha de preparação PGlite e repetição intacta conservadas. Proteção dos13 campos de rascunho469 mantida e retestada. Cache250/runner363. [Prova470](evidence/20260930_task470_local.json).
+
+Exigir363 grupos/restauro470 e362/restauro469. TASK468/469 nas suites361/362 após dez etapas aprovadas na última consulta; TASK467 aceite360/360/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Gates465/466 cancelados e falhas históricas conservados; perda de rascunhos466 corrigida469. Próximo: acompanhar468–470 e corrigir novas falhas; depois corpos/botões documentais e avisos de mudança de dia/viatura, resumo de correção e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental [skip ci] conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK470 / resumo e avisos documentais
 
 **TASK470 / C06-015:** resumo do centro documental, proveniência, estados, bloqueios, confirmação de atualização e avisos próprios de cache/acesso/gravação nos cinco idiomas. 34 entradas novas/170 textos:20 no apresentador da página e14 no módulo documental; dez entradas reutilizadas. As241 entradas anteriores ficam intactas; catálogo principal261. Quatro fontes de produto, dois scripts e quatro documentos; dez ficheiros. [Prova470](evidence/20260930_task470_local.json)
