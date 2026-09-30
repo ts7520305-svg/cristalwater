@@ -1,7 +1,7 @@
 {
   "task": "TASK482",
   "date": "2026-09-30",
-  "checkedAt": "2026-09-30T22:16:46.574Z",
+  "checkedAt": "2026-09-30T22:22:43.037Z",
   "branch": "work/field-readiness-20260915-simulation",
   "parent": "ec9bff564f90bbef6d5a9f7785a415de698629dc",
   "scope": "Translate privately owned route-load/cache/legacy errors while preserving original errors and guards; correct existing reminder-language test readiness after native TASK480 failure.",
@@ -3558,8 +3558,34 @@
     }
   },
   "publication": {
-    "status": "pending",
-    "ciAndRestore": "pending"
+    "status": "published",
+    "code": "78dd4355e3c1f97a489f75090b323897a8d1b547",
+    "tree": "2c404a775e99241f9574c2e33a12dad955683374",
+    "parent": "ec9bff564f90bbef6d5a9f7785a415de698629dc",
+    "treeMatchesLocal": true,
+    "sourceHashesMatch": true,
+    "ci": {
+      "run": 36784893749,
+      "job": 110123834926,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36784893749",
+      "head": "78dd4355e3c1f97a489f75090b323897a8d1b547",
+      "status": "in_progress",
+      "conclusion": null,
+      "initialPassedSteps": 6,
+      "suite": {
+        "name": "Run node scripts/test-field-suite.js",
+        "status": "pending",
+        "conclusion": null,
+        "number": 11
+      },
+      "restore": {
+        "name": "Restore database and uploaded files in isolated QA",
+        "status": "pending",
+        "conclusion": null,
+        "number": 12
+      }
+    },
+    "documentationFollowup": "This [skip ci] update records immutable code/run metadata. Product and test sources stay identical to the validated TASK482 commit."
   },
   "completion": {
     "total": 32,
