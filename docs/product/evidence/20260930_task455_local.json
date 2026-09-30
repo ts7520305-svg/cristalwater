@@ -143,7 +143,7 @@
   "visual": {
     "captureSha256": "67f1224cbeb2eb572cffba662c0d11f625fc033fc89e83df5ebe4fedbaf3887b",
     "reviewed": true,
-    "finding": "German helper/options/flow and elapsed text fit320px; placeholder retains full accessible attribute while input shows its available width. Shared fixed navigation/auth toast overlap the middle of this tall capture and remain C08 work. Core Portuguese status/action labels are explicitly outside this source batch. Not full-page/theme/device approval."
+    "finding": "German helper/options/flow and elapsed text fit320px; placeholder retains full placeholder attribute while input shows its available width. Shared fixed navigation/auth toast overlap the middle of this tall capture and remain C08 work. Core Portuguese status/action labels are explicitly outside this source batch. Not full-page/theme/device approval."
   },
   "environment": {
     "database": "isolated PGlite via TCP",
@@ -187,14 +187,32 @@
     }
   ],
   "limits": [
-    "Publication and native PostgreSQL16/upgrade/full347-group suite/full database and uploaded-file restore for TASK455 remain pending. PGlite does not replace these gates.",
+    "Native PostgreSQL16/upgrade/full347-group suite/full database and uploaded-file restore for published TASK455 remain pending. PGlite does not replace these gates.",
     "Core water panel title/action/status/empty/fallback/alarm messages in technician-field-mode.js/html require the next bounded batch. Persisted syncError and external errors remain literal; no provenance inferred from matching words. Unused userNote versus note data contract is unchanged.",
     "Only the water function in shared shell C08-026 was changed; check-in, navigation, drawer and search are not localized or approved by this work. Static inventory counts unchanged.",
     "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "8e1c714a0d72ae0643f9d1aab45c02978ef942fe",
+    "tree": "376ec902f3ada7d9e997faf4fbfdb0d5c69e8fa9",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "c883a49f946f56ddfe0c69b896a5abe3e070d26c",
+    "originalHistoryBranch": "work/local-task455-20260930",
+    "ci": {
+      "run": 36675696482,
+      "job": 109760049353,
+      "head": "8e1c714a0d72ae0643f9d1aab45c02978ef942fe",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 1,
+      "currentStep": "Initialize containers",
+      "fullSuiteGroups": 347,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

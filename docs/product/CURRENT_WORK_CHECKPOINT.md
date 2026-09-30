@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK455 / CI em execução
+
+TASK455 publicada na branch `work/field-readiness-20260915-simulation`: código `8e1c714a0d72ae0643f9d1aab45c02978ef942fe`, árvore `376ec902f3ada7d9e997faf4fbfdb0d5c69e8fa9`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task455-20260930`. [CI36675696482](https://github.com/ts7520305-svg/cristalwater/actions/runs/36675696482), job109760049353, no commit exato: uma etapa inicial aprovada; `Initialize containers` em execução na consulta. Controlos de água do shell com21 entradas/105 textos; caudal/tempo/feedback/confirmação física em cinco idiomas. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe locais aprovados. [Prova455](evidence/20260930_task455_local.json).
+
+Exigir gates PostgreSQL16/upgrade/suite347/restauro completo próprios; contagens medidas e hashes iguais. CI452/453/454 nas suites344/345/346 após dez etapas iniciais aprovadas; restauros pendentes. TASK451 aceite343/restauro128 tabelas51 ficheiros. Próximo: confirmar452–455 e corrigir falhas; depois rótulos/estados/vazio/ações/alarmes de água no core `technician-field-mode.js/html`. Texto persistido sem origem inequívoca continua literal. Shell fora da função de água intacto; C08-026/nav/check-in não encerrados. Sobreposição nav/aviso de autenticação na captura longa segue C08. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK455 local validada / controlos de água
 
 **TASK455 / C06, referência C08-026:** apenas `installTechnicianWaterUx` em `crystal-os-v2-shell.js`:21 entradas/105 textos PT/EN/FR/ES/DE para caudal, nota/ajuda, tempo decorrido, detalhe de exceção, confirmação física e feedback. Erros próprios/do helper por identidade; texto externo/persistido conservado. Repintura dos mesmos nós sem produtores/rede operacional. Observador reage à estrutura de água/exceções, não a mudanças apenas de texto; temporizador30s mantido e exercitado. Restante shell/check-in byte a byte. [Prova455](evidence/20260930_task455_local.json).
