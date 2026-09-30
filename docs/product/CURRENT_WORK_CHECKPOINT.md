@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK469 / rascunhos preservados
+
+TASK469 publicada na branch `work/field-readiness-20260915-simulation`: código `ac625a05c14b4ffea16dfdf24baab21601529690`, árvore `82dcaf25634f17383bda1713f9f963692a7f3fd8`, igual à validada. Histórico local conservado em `work/local-task469-20260930`. [CI36719222682](https://github.com/ts7520305-svg/cristalwater/actions/runs/36719222682), job109899721783, no commit exato: 1 etapa inicial aprovada; `Initialize containers` em execução na consulta. Corrida de perda dos rascunhos corrigida;13 campos protegidos. Cinco integrações,1 356 unitários/quatro técnicos/sintaxe aprovados. Cache249/runner362. [Prova469](evidence/20260930_task469_local.json).
+
+Exigir362 grupos/restauro469; TASK468 continua pendente. TASK467 aceite360/360/restauro128 tabelas51 ficheiros/linhas e hashes iguais. TASK465/466 canceladas, falhas e cancelamentos históricos conservados; a nova corrida466 foi reproduzida e corrigida469. Retomar tradução documental preparada como470 sobre esta correção. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental [skip ci] conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK469 / preservação dos rascunhos
 
 **TASK469:** corrigida uma corrida real de perda de dados exposta pelo CI466. Depois de o rascunho da visita estar carregado, a memória genérica da página podia repor valores antigos no formulário; a seleção seguinte gravava esses valores sobre o rascunho. O cartão de registo recebe o atributo de formulário gerido já respeitado pela navegação. Sete valores e seis caixas ficam exclusivamente sob o gestor de rascunhos existente. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova469](evidence/20260930_task469_local.json)
