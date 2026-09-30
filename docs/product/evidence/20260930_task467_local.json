@@ -285,10 +285,15 @@
     },
     {
       "task": 467,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 360,
       "restore": "pending",
-      "workflowBudgetMinutes": 90
+      "workflowBudgetMinutes": 90,
+      "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+      "run": 36710186213,
+      "job": 109869850165,
+      "successfulInitialSteps": 6,
+      "currentStep": "Verify additive upgrade from the previous schema"
     }
   ],
   "limits": {
@@ -308,5 +313,21 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Require native467 exact360 groups and restore with all known repairs. Inspect older464–466 results as historical versions; do not relaunch code predating the repairs. Then crew/document status and remaining correction-summary own messages, shared push/auth/navigation."
+  },
+  "publication": {
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "9daef1fa7c0e709894d24b0edd96cdba7acc5319",
+    "tree": "ccfe7eadcd7cb9fbf0c83639425c5ca57f8a4a20",
+    "run": 36710186213,
+    "job": 109869850165,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36710186213",
+    "status": "in_progress",
+    "conclusion": null,
+    "successfulInitialSteps": 6,
+    "currentStep": "Verify additive upgrade from the previous schema",
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }
