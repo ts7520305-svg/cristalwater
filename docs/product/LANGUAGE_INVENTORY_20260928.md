@@ -8,6 +8,14 @@ O dicionário global tem 198 chaves com EN/FR/ES/DE disponíveis. Isso só demon
 
 **Lacuna confirmada no contrato atual dos relatórios:** os módulos de visita e mensal aceitam PT/EN/FR/ES e recusam DE. C09 deve adicionar o idioma e testar HTML/PDF, normalização, formatação e rejeição de idiomas inválidos; conservar nomes, notas e evidência original. Isto não significa que os restantes PDFs estejam traduzidos.
 
+## Progresso funcional — TASK457 / C06-012 e C06-003, leitura e histórico
+
+`technician-field-mode.js`:38 entradas/190 textos para o painel comum — estados de leitura, prioridades, responsabilidades, ações, tempo decorrido, histórico e feedback. `cw-field-alert-journal.js`:dez entradas/50 textos para erros próprios e legado, por identidade privada; `Error.message` e `legacyWarning()` originais preservados. Nomes/títulos/detalhes persistidos e erros externos continuam literais; formatação PT de datas inalterada. Capturas imutáveis repintam os mesmos nós sem produtores/rede operacional. [Prova457](evidence/20260930_task457_local.json).
+
+Quatro integrações e gates locais aprovados:1 356 unitários/quatro técnicos/sintaxe. Cinco idiomas/320/390/1440; dez guardas/legado/falsas copies, campos de reserva/65min/datas, toast sobrescrito por texto idêntico, responsabilidades com nomes coincidentes, dois separadores, quota/sem readback/corrupção/retry, cache offline, apenas fecho físico remove causas, conta/dia isolados. Capturas alemãs320 revistas; sobreposição nav/auth continua C08. Cache240/runner349,348 grupos anteriores na ordem exata; operação idêntica ao inverter apresentação. Nove ficheiros.
+
+TASK453 aceite345/restauro128 tabelas51 ficheiros/hashes iguais. TASK454 falhou345/346 numa espera `networkidle` do teste de guias; documentos já Válidos/online, restauro não executado. Ensaio intacto passa localmente; corrigir prontidão em lote próprio antes de prosseguir. CI455/456 nas suites; publicação/gates349/restauro457 pendentes. Próximo funcional: títulos/detalhes das fontes ativas do painel e dashboard/hero; não traduzir o histórico antigo por coincidência textual. C06/C08/C10 abertas; contagens estáticas inalteradas. Entradas abaixo históricas.
+
 ## Progresso funcional — TASK456 / C06-012, lista e alarmes de água
 
 `technician-field-mode.js`:36 entradas/180 textos para títulos/ações/estados/vazio, nomes/local/nota de reserva, rótulos de prazo, erro por identidade e popup/feedback de alarme. `waterReminderLabel()` mantém a saída PT original para consumidores existentes e datas capturadas no formatador existente; C10 intacto. Texto externo, `syncError` e notas que coincidem com rótulos ficam literais. `crystal-os-v2-shell.js`/C08-026 resolve o detalhe da exceção REGULAR/EXTRA; conserva ID antigo e cooperação das apresentações no mesmo nó. O teste455 agora exige o detalhe real tipado. [Prova456](evidence/20260930_task456_local.json).

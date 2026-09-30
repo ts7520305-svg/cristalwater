@@ -422,6 +422,306 @@
     return { value, format, bind, clear, clearTree, prune, notify, error, showAlarm };
   })();
 
+  // Capture journal UI values; changing language neither rereads nor writes the journal.
+  const alertUi = (() => {
+    const languages = ['pt', 'en', 'fr', 'es', 'de'];
+    const copy = {
+  "chip": [
+    "Interrupção operacional",
+    "Operational interruption",
+    "Interruption opérationnelle",
+    "Interrupción operativa",
+    "Betriebsunterbrechung"
+  ],
+  "historyTitle": [
+    "Histórico de alertas",
+    "Alert history",
+    "Historique des alertes",
+    "Historial de alertas",
+    "Alarmverlauf"
+  ],
+  "historyIntro": [
+    "Leituras registadas nesta conta, neste dispositivo e neste dia. O fecho da causa é confirmado no respetivo registo.",
+    "Read acknowledgements for this account, device and day. The cause is closed in its own record.",
+    "Lectures enregistrées pour ce compte, cet appareil et ce jour. La clôture de la cause est confirmée dans le dossier concerné.",
+    "Lecturas registradas en esta cuenta, este dispositivo y este día. El cierre de la causa se confirma en su registro.",
+    "Lesebestätigungen für dieses Konto, dieses Gerät und diesen Tag. Die Behebung der Ursache wird im zugehörigen Eintrag bestätigt."
+  ],
+  "historyEmpty": [
+    "Sem historico local de excecoes.",
+    "No local exception history.",
+    "Aucun historique local des exceptions.",
+    "No hay historial local de excepciones.",
+    "Kein lokaler Verlauf von Ausnahmen."
+  ],
+  "observed": [
+    "Alerta observado",
+    "Alert observed",
+    "Alerte observée",
+    "Alerta observada",
+    "Alarm wahrgenommen"
+  ],
+  "handlingHistory": [
+    "Em tratamento local",
+    "Being handled locally",
+    "En cours de traitement local",
+    "En tratamiento local",
+    "Lokal in Bearbeitung"
+  ],
+  "readHistory": [
+    "Leitura confirmada",
+    "Read acknowledgement saved",
+    "Lecture confirmée",
+    "Lectura confirmada",
+    "Lesebestätigung gespeichert"
+  ],
+  "record": [
+    "Registo local",
+    "Local record",
+    "Enregistrement local",
+    "Registro local",
+    "Lokaler Eintrag"
+  ],
+  "exception": [
+    "Excecao operacional",
+    "Operational exception",
+    "Exception opérationnelle",
+    "Excepción operativa",
+    "Betriebliche Ausnahme"
+  ],
+  "system": [
+    "Sistema",
+    "System",
+    "Système",
+    "Sistema",
+    "System"
+  ],
+  "technician": [
+    "Tecnico",
+    "Technician",
+    "Technicien",
+    "Técnico",
+    "Techniker"
+  ],
+  "notice": [
+    "{count} alerta(s) por resolver · Ver",
+    "{count} unresolved alert(s) · View",
+    "{count} alerte(s) à traiter · Voir",
+    "{count} alerta(s) por resolver · Ver",
+    "{count} ungelöste Alarme · Anzeigen"
+  ],
+  "empty": [
+    "Sem alertas críticos neste momento.",
+    "No critical alerts at the moment.",
+    "Aucune alerte critique pour le moment.",
+    "No hay alertas críticas en este momento.",
+    "Derzeit keine kritischen Alarme."
+  ],
+  "summary": [
+    "Trate a causa de cada alerta no respetivo registo. Assumir ou confirmar a leitura neste dispositivo mantém o aviso visível.",
+    "Address each alert’s cause in its own record. Taking responsibility or acknowledging it on this device keeps the alert visible.",
+    "Traitez la cause de chaque alerte dans le dossier concerné. La prise en charge ou la confirmation de lecture sur cet appareil laisse l’alerte visible.",
+    "Trate la causa de cada alerta en su registro. Asumirla o confirmar su lectura en este dispositivo mantiene el aviso visible.",
+    "Bearbeiten Sie die Ursache jedes Alarms im zugehörigen Eintrag. Die Übernahme oder Lesebestätigung auf diesem Gerät lässt den Alarm sichtbar."
+  ],
+  "noCauses": [
+    "Sem causas ativas. Histórico de leitura local disponível.",
+    "No active causes. Local read history is available.",
+    "Aucune cause active. L’historique local des lectures est disponible.",
+    "No hay causas activas. Historial local de lectura disponible.",
+    "Keine aktiven Ursachen. Der lokale Leseverlauf ist verfügbar."
+  ],
+  "priority": [
+    "Prioridade: {priority} | Leitura local: {status}",
+    "Priority: {priority} | Local read status: {status}",
+    "Priorité : {priority} | Lecture locale : {status}",
+    "Prioridad: {priority} | Lectura local: {status}",
+    "Priorität: {priority} | Lokaler Lesestatus: {status}"
+  ],
+  "unread": [
+    "Por ler",
+    "Unread",
+    "Non lue",
+    "Sin leer",
+    "Ungelesen"
+  ],
+  "handling": [
+    "Em tratamento",
+    "Being handled",
+    "En cours de traitement",
+    "En tratamiento",
+    "In Bearbeitung"
+  ],
+  "read": [
+    "Confirmada",
+    "Acknowledged",
+    "Confirmée",
+    "Confirmada",
+    "Bestätigt"
+  ],
+  "unconfirmed": [
+    "Por confirmar",
+    "Unconfirmed",
+    "À confirmer",
+    "Por confirmar",
+    "Unbestätigt"
+  ],
+  "responsibility": [
+    "Responsabilidade: criou {created} | recebeu {received}",
+    "Responsibility: created by {created} | received by {received}",
+    "Responsabilité : créée par {created} | reçue par {received}",
+    "Responsabilidad: creó {created} | recibió {received}",
+    "Verantwortung: erstellt von {created} | empfangen von {received}"
+  ],
+  "acknowledgement": [
+    "Assumiu neste dispositivo: {assumed} | Confirmou leitura: {confirmed}",
+    "Taken on this device by: {assumed} | Read acknowledged by: {confirmed}",
+    "Prise en charge sur cet appareil : {assumed} | Lecture confirmée par : {confirmed}",
+    "Asumió en este dispositivo: {assumed} | Confirmó la lectura: {confirmed}",
+    "Auf diesem Gerät übernommen von: {assumed} | Lesen bestätigt von: {confirmed}"
+  ],
+  "pending": [
+    "pendente",
+    "pending",
+    "en attente",
+    "pendiente",
+    "ausstehend"
+  ],
+  "elapsed": [
+    "Tempo em curso: {duration}",
+    "Elapsed time: {duration}",
+    "Temps écoulé : {duration}",
+    "Tiempo transcurrido: {duration}",
+    "Verstrichene Zeit: {duration}"
+  ],
+  "noTime": [
+    "Sem tempo em curso",
+    "No elapsed time",
+    "Aucun temps écoulé",
+    "Sin tiempo transcurrido",
+    "Keine verstrichene Zeit"
+  ],
+  "unavailableTime": [
+    "duracao indisponivel",
+    "duration unavailable",
+    "durée indisponible",
+    "duración no disponible",
+    "Dauer nicht verfügbar"
+  ],
+  "minutes": [
+    "{minutes} minuto(s)",
+    "{minutes} minute(s)",
+    "{minutes} minute(s)",
+    "{minutes} minuto(s)",
+    "{minutes} Minute(n)"
+  ],
+  "hours": [
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m",
+    "{hours}h {minutes}m"
+  ],
+  "resolve": [
+    "Tratar causa",
+    "Address cause",
+    "Traiter la cause",
+    "Tratar la causa",
+    "Ursache bearbeiten"
+  ],
+  "assume": [
+    "Assumir",
+    "Take responsibility",
+    "Prendre en charge",
+    "Asumir",
+    "Übernehmen"
+  ],
+  "confirm": [
+    "Confirmar leitura",
+    "Acknowledge reading",
+    "Confirmer la lecture",
+    "Confirmar lectura",
+    "Lesen bestätigen"
+  ],
+  "retry": [
+    "Rever histórico guardado",
+    "Review saved history",
+    "Revoir l’historique enregistré",
+    "Revisar el historial guardado",
+    "Gespeicherten Verlauf prüfen"
+  ],
+  "saved": [
+    "Leitura guardada neste dispositivo. O alerta mantém-se até tratar a causa.",
+    "Read acknowledgement saved on this device. The alert remains until its cause is addressed.",
+    "Lecture enregistrée sur cet appareil. L’alerte reste visible jusqu’au traitement de sa cause.",
+    "Lectura guardada en este dispositivo. La alerta se mantiene hasta tratar la causa.",
+    "Lesebestätigung auf diesem Gerät gespeichert. Der Alarm bleibt bestehen, bis seine Ursache behoben ist."
+  ],
+  "writeFailed": [
+    "O histórico não ficou guardado. {detail}",
+    "The history was not saved. {detail}",
+    "L’historique n’a pas été enregistré. {detail}",
+    "El historial no se ha guardado. {detail}",
+    "Der Verlauf wurde nicht gespeichert. {detail}"
+  ],
+  "changeFailed": [
+    "A alteração não ficou guardada. {detail}",
+    "The change was not saved. {detail}",
+    "La modification n’a pas été enregistrée. {detail}",
+    "El cambio no se ha guardado. {detail}",
+    "Die Änderung wurde nicht gespeichert. {detail}"
+  ],
+  "pumpInstruction": [
+    "Confirme o modo automático no registo da bomba. A leitura do alerta não fecha o lembrete.",
+    "Confirm automatic mode in the pump record. Acknowledging the alert does not close the reminder.",
+    "Confirmez le mode automatique dans le dossier de la pompe. La lecture de l’alerte ne clôture pas le rappel.",
+    "Confirme el modo automático en el registro de la bomba. Leer la alerta no cierra el recordatorio.",
+    "Bestätigen Sie den Automatikbetrieb im Pumpeneintrag. Die Lesebestätigung des Alarms schließt die Erinnerung nicht."
+  ],
+  "historyMeta": [
+    "{date} | {actor}",
+    "{date} | {actor}",
+    "{date} | {actor}",
+    "{date} | {actor}",
+    "{date} | {actor}"
+  ],
+  "warnings": [
+    "{read} {write}",
+    "{read} {write}",
+    "{read} {write}",
+    "{read} {write}",
+    "{read} {write}"
+  ]
+};
+    const specs = new WeakSet(), bindings = new Map();
+    function value(key, params = {}) { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); specs.add(entry); return entry; }
+    function format(entry, language = document.documentElement.lang || 'pt') {
+      if (!specs.has(entry)) return window.CWFieldAlertJournal?.presentation?.format(entry, language) ?? String(entry ?? '');
+      const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
+      return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => format(entry.params[key], language));
+    }
+    function clear(node) { const old = bindings.get(node); if (!old) return; bindings.delete(node); node.removeAttribute('data-cw-alert-copy'); if (!old.protected) node.removeAttribute('data-cw-no-i18n'); }
+    function clearTree(root) { for (const node of bindings.keys()) if (!node.isConnected || node === root || root.contains(node)) clear(node); }
+    function bind(node, entry) {
+      if (!node) return;
+      const previous = bindings.get(node), rendered = format(entry), protectedNode = previous ? previous.protected : node.hasAttribute('data-cw-no-i18n');
+      node.setAttribute('data-cw-alert-copy', ''); node.setAttribute('data-cw-no-i18n', '');
+      if (node.textContent !== rendered) node.textContent = rendered;
+      bindings.set(node, { entry, rendered, protected: protectedNode, textNode: node.firstChild });
+    }
+    function paint() {
+      for (const [node, item] of bindings) {
+        if (!node.isConnected || node.textContent !== item.rendered || node.firstChild !== item.textNode) { clear(node); continue; }
+        bind(node, item.entry);
+      }
+    }
+    function notify(entry) { toast(format(entry)); bind($('#toast'), entry); }
+    window.addEventListener('cw-language-change', paint);
+    let lastLanguage = document.documentElement.lang;
+    new MutationObserver(() => { const language = document.documentElement.lang; if (language !== lastLanguage) { lastLanguage = language; paint(); } }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    return { value, format, bind, clear, clearTree, notify };
+  })();
+
   let visits = [];
   let routeConfirmedAt = null;
   window.CWFieldDaySnapshot = () => ({
@@ -490,6 +790,8 @@
   const FIELD_UI_STATE_KEY = "cw:tech-field:ui-state:v1";
   const FIELD_LAST_EXPLICIT_FILTER_KEY = "cw:tech-field:last-explicit-filter:v1";
   let opJournalReadWarning = '', opJournalWriteWarning = '', opJournalBusy = false, pumpRemindersError = '';
+  let opJournalReadCopy = '', opJournalWriteCopy = '';
+  const alertHistoryCopy = new Map();
   const opJournalAttempts = new Set();
 
   function safeSessionRead(key, fallback) {
@@ -955,6 +1257,7 @@
       ui.info(message);
       return;
     }
+    alertUi.clear(node);
     waterUi.clear(node);
     clearPhotoError(node);
     clearPhotoUi(node);
@@ -1561,10 +1864,12 @@
   function readOpJournal() {
     try {
       const context = window.CWFieldAlertJournal.scope(fieldWriteSession), value = window.CWFieldAlertJournal.read(context);
-      opJournalReadWarning = window.CWFieldAlertJournal.legacyWarning(context);
+      opJournalReadCopy = window.CWFieldAlertJournal.presentation.legacyWarning(context);
+      opJournalReadWarning = window.CWFieldAlertJournal.presentation.format(opJournalReadCopy, 'pt');
       return { context, value, states: window.CWFieldAlertJournal.states(value) };
     } catch (error) {
       opJournalReadWarning = error.message;
+      opJournalReadCopy = window.CWFieldAlertJournal?.presentation?.error(error) ?? error.message;
       return { context: null, value: { entries: [] }, states: {} };
     }
   }
@@ -1679,8 +1984,8 @@
       if (missing.length) {
         missing.forEach(item => opJournalAttempts.add(prefix + item.id)); opJournalBusy = true;
         window.CWFieldAlertJournal.record(context, missing, 'OPEN', actorName())
-          .then(() => { if (sameFieldSession()) opJournalWriteWarning = ''; })
-          .catch(error => { if (sameFieldSession()) opJournalWriteWarning = 'O histórico não ficou guardado. ' + error.message; })
+          .then(() => { if (sameFieldSession()) { opJournalWriteWarning = ''; opJournalWriteCopy = ''; } })
+          .catch(error => { if (sameFieldSession()) { opJournalWriteWarning = 'O histórico não ficou guardado. ' + error.message; opJournalWriteCopy = alertUi.value('writeFailed', { detail: window.CWFieldAlertJournal.presentation.error(error) }); } })
           .finally(() => { opJournalBusy = false; if (sameFieldSession()) renderInterruptBoard(); });
       }
     }
@@ -1693,11 +1998,13 @@
       const context = window.CWFieldAlertJournal.scope(fieldWriteSession);
       await window.CWFieldAlertJournal.record(context, [exception], action, actorName(), () => sameFieldSession() && collectOperationalExceptions().some(item => item.id === exception.id));
       if (!sameFieldSession()) return;
-      opJournalWriteWarning = ''; renderInterruptBoard();
-      toast('Leitura guardada neste dispositivo. O alerta mantém-se até tratar a causa.');
+      opJournalWriteWarning = ''; opJournalWriteCopy = ''; renderInterruptBoard();
+      alertUi.notify(alertUi.value('saved'));
     } catch (error) {
       if (!sameFieldSession()) return;
-      opJournalWriteWarning = 'A alteração não ficou guardada. ' + error.message; renderInterruptBoard(); toast(opJournalWriteWarning);
+      opJournalWriteWarning = 'A alteração não ficou guardada. ' + error.message;
+      opJournalWriteCopy = alertUi.value('changeFailed', { detail: window.CWFieldAlertJournal.presentation.error(error) });
+      renderInterruptBoard(); alertUi.notify(opJournalWriteCopy);
     }
   }
 
@@ -1710,16 +2017,33 @@
   }
 
   function renderExceptionHistory(history) {
+    alertHistoryCopy.clear();
     if (!history.length) {
       return '<div class="interrupt-item" data-history-empty="1">Sem historico local de excecoes.</div>';
     }
-    return history.slice(-6).reverse().map((entry) => `
+    return history.slice(-6).reverse().map((entry) => {
+      const text = {
+        action: alertUi.value(({ OPEN: 'observed', ASSUMED: 'handlingHistory', CONFIRMED: 'readHistory' })[entry.action] || 'record'),
+        historyTitle: entry.title || alertUi.value('exception'),
+        historyMeta: alertUi.value('historyMeta', { date: formatDate(entry.createdAt), actor: entry.by || alertUi.value('system') }),
+      };
+      alertHistoryCopy.set(String(entry.id || ''), text);
+      return `
       <div class="interrupt-item" data-history-entry="${esc(entry.id || "")}" style="border-style:dashed">
-        <strong>${esc(({OPEN:'Alerta observado',ASSUMED:'Em tratamento local',CONFIRMED:'Leitura confirmada'})[entry.action] || 'Registo local')}</strong>
-        <div>${esc(entry.title || "Excecao operacional")}</div>
-        <div class="muted">${esc(formatDate(entry.createdAt))} | ${esc(entry.by || "Sistema")}</div>
+        <strong data-alert-text="action">${esc(alertUi.format(text.action))}</strong>
+        <div data-alert-text="historyTitle">${esc(alertUi.format(text.historyTitle))}</div>
+        <div class="muted" data-alert-text="historyMeta">${esc(alertUi.format(text.historyMeta))}</div>
       </div>
-    `).join("");
+    `;
+    }).join("");
+  }
+
+  function alertDurationCopy(isoStart) {
+    if (!isoStart) return alertUi.value('noTime');
+    const started = new Date(isoStart);
+    if (Number.isNaN(started.getTime())) return alertUi.value('unavailableTime');
+    const minutes = Math.max(0, Math.round((Date.now() - started.getTime()) / 60000));
+    return minutes < 60 ? alertUi.value('minutes', { minutes }) : alertUi.value('hours', { hours: Math.floor(minutes / 60), minutes: String(minutes % 60).padStart(2, '0') });
   }
 
   function updateFieldDashboard(visit) {
@@ -1874,23 +2198,36 @@
     const openExceptions = exceptions;
     const history = readOpJournal().value.entries;
     const warning = [opJournalReadWarning, opJournalWriteWarning].filter(Boolean).join(' ');
+    const warningCopy = opJournalReadWarning && opJournalWriteWarning ? alertUi.value('warnings', { read: opJournalReadCopy, write: opJournalWriteCopy }) : opJournalReadWarning ? opJournalReadCopy : opJournalWriteCopy;
+    const bindWarning = root => {
+      for (const node of root.querySelectorAll('[role="status"]')) { node.dataset.alertText = 'warning'; alertUi.bind(node, warningCopy); }
+      for (const node of root.querySelectorAll('[data-interrupt-action="retry"]')) alertUi.bind(node, alertUi.value('retry'));
+    };
+    alertUi.clearTree(list); list.setAttribute('data-cw-no-i18n', '');
 
     const historyList = $("#fieldAlertHistoryList");
-    if (historyList) historyList.innerHTML = `<p>Leituras registadas nesta conta, neste dispositivo e neste dia. O fecho da causa é confirmado no respetivo registo.</p>${warning ? `<p role="status">${esc(warning)}</p>` : ''}` + renderExceptionHistory(history);
+    if (historyList) {
+      alertUi.clearTree(historyList); historyList.setAttribute('data-cw-no-i18n', '');
+      historyList.innerHTML = `<p data-alert-text="intro">Leituras registadas nesta conta, neste dispositivo e neste dia. O fecho da causa é confirmado no respetivo registo.</p>${warning ? `<p role="status">${esc(warning)}</p>` : ''}` + renderExceptionHistory(history);
+      alertUi.bind(historyList.querySelector('[data-alert-text="intro"]'), alertUi.value('historyIntro'));
+      alertUi.bind(historyList.querySelector('[data-history-empty]'), alertUi.value('historyEmpty'));
+      for (const row of historyList.querySelectorAll('[data-history-entry]')) for (const node of row.querySelectorAll('[data-alert-text]')) alertUi.bind(node, alertHistoryCopy.get(row.dataset.historyEntry)[node.dataset.alertText]);
+      bindWarning(historyList);
+    }
     const priorityNotice = $("#fieldPriorityNotice");
-    if (priorityNotice) { priorityNotice.hidden = !openExceptions.length; priorityNotice.textContent = `${openExceptions.length} alerta(s) por resolver · Ver`; }
+    if (priorityNotice) { priorityNotice.hidden = !openExceptions.length; alertUi.bind(priorityNotice, alertUi.value('notice', { count: openExceptions.length })); }
 
     if (!openExceptions.length) {
       card.hidden = !warning;
-      summary.textContent = "Sem alertas críticos neste momento.";
+      alertUi.bind(summary, alertUi.value('empty'));
       list.innerHTML = warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '';
+      bindWarning(list);
       return;
     }
 
     card.hidden = false;
-    summary.textContent = openExceptions.length
-      ? "Trate a causa de cada alerta no respetivo registo. Assumir ou confirmar a leitura neste dispositivo mantém o aviso visível."
-      : "Sem causas ativas. Histórico de leitura local disponível.";
+    alertUi.bind(summary, alertUi.value(openExceptions.length ? 'summary' : 'noCauses'));
+    const rowCopy = new Map();
 
     const exceptionsHtml = openExceptions.map((item) => {
       const state = stateById[item.id] || {};
@@ -1898,14 +2235,21 @@
       const canAssume = status === "OPEN";
       const canConfirm = ["ASSUMED", "OPEN"].includes(status);
       const createdAt = state.createdAt || item.createdAt || new Date().toISOString();
+      const text = {
+        priority: alertUi.value('priority', { priority: item.priority, status: alertUi.value(({ OPEN: 'unread', ASSUMED: 'handling', CONFIRMED: 'read' })[status] || 'unconfirmed') }),
+        responsibility: alertUi.value('responsibility', { created: state.createdBy || item.createdBy || alertUi.value('system'), received: state.receivedBy || alertUi.value('technician') }),
+        acknowledgement: alertUi.value('acknowledgement', { assumed: state.assumedBy || alertUi.value('pending'), confirmed: state.confirmedBy || alertUi.value('pending') }),
+        elapsed: alertUi.value('elapsed', { duration: alertDurationCopy(createdAt) }),
+      };
+      rowCopy.set(String(item.id), text);
       return `
       <div class="interrupt-item" data-exception-id="${esc(item.id)}" data-exception-category="${esc(item.category)}">
         <strong>${esc(item.title)}</strong>
         <div>${esc(item.detail)}</div>
-        <div class="muted">Prioridade: ${esc(item.priority)} | Leitura local: ${esc(({OPEN:'Por ler',ASSUMED:'Em tratamento',CONFIRMED:'Confirmada'})[status] || 'Por confirmar')}</div>
-        <div class="muted">Responsabilidade: criou ${esc(state.createdBy || item.createdBy || "Sistema")} | recebeu ${esc(state.receivedBy || "Tecnico")}</div>
-        <div class="muted">Assumiu neste dispositivo: ${esc(state.assumedBy || "pendente")} | Confirmou leitura: ${esc(state.confirmedBy || "pendente")}</div>
-        <div class="muted">Tempo em curso: ${esc(exceptionDurationLabel(createdAt))}</div>
+        <div class="muted" data-alert-text="priority">${esc(alertUi.format(text.priority))}</div>
+        <div class="muted" data-alert-text="responsibility">${esc(alertUi.format(text.responsibility))}</div>
+        <div class="muted" data-alert-text="acknowledgement">${esc(alertUi.format(text.acknowledgement))}</div>
+        <div class="muted" data-alert-text="elapsed">${esc(alertUi.format(text.elapsed))}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
           ${item.targetAction ? `<button type="button" data-interrupt-action="resolve" data-interrupt-target="${esc(item.targetAction)}" data-exception-id="${esc(item.id)}">Tratar causa</button>` : ""}
           ${canAssume ? `<button type="button" data-interrupt-action="assume" data-exception-id="${esc(item.id)}">Assumir</button>` : ""}
@@ -1916,6 +2260,11 @@
     }).join("");
 
     list.innerHTML = (warning ? `<p role="status">${esc(warning)}</p><button type="button" data-interrupt-action="retry">Rever histórico guardado</button>` : '') + exceptionsHtml;
+    bindWarning(list);
+    for (const row of list.querySelectorAll('[data-exception-category]')) {
+      for (const node of row.querySelectorAll('[data-alert-text]')) alertUi.bind(node, rowCopy.get(row.dataset.exceptionId)[node.dataset.alertText]);
+      for (const node of row.querySelectorAll('[data-interrupt-action]')) alertUi.bind(node, alertUi.value(node.dataset.interruptAction));
+    }
     waterUi.prune();
     for (const node of list.querySelectorAll('[data-exception-category="WATER_OPEN"] > strong')) waterUi.bind(node, waterUi.value('exceptionTitle'));
   }
@@ -3530,6 +3879,8 @@
   window.addEventListener("offline", updateFieldConnection);
 
   function setupFieldLayout() {
+    alertUi.bind($('#interruptCard > .chip'), alertUi.value('chip'));
+    alertUi.bind($('#fieldAlertHistoryList')?.parentElement.querySelector('summary'), alertUi.value('historyTitle'));
     $("#fieldPriorityNotice")?.addEventListener("click", () => {switchFieldTab("hoje"); $("#interruptCard")?.scrollIntoView({block:"start"});});
     $("#fieldReloadBtn")?.addEventListener("click", () => load());
     document.querySelectorAll("[data-field-jump]").forEach(button => button.addEventListener("click", () => {
@@ -3624,7 +3975,7 @@
         const actionButton = event.target.closest("[data-interrupt-action]");
         if (!actionButton || !sameFieldSession()) return;
         const action = actionButton.dataset.interruptAction;
-        if (action === 'retry') { opJournalAttempts.clear(); opJournalWriteWarning = ''; renderInterruptBoard(); return; }
+        if (action === 'retry') { opJournalAttempts.clear(); opJournalWriteWarning = ''; opJournalWriteCopy = ''; renderInterruptBoard(); return; }
         const exceptionId = actionButton.dataset.exceptionId;
         const exception = collectOperationalExceptions().find((item) => item.id === exceptionId);
         if (action === "assume" && exception) {
@@ -3641,7 +3992,7 @@
           if (target === 'pump') {
             switchFieldTab('more', true);
             document.querySelector('#pumpReminderBanner')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            toast('Confirme o modo automático no registo da bomba. A leitura do alerta não fecha o lembrete.');
+            alertUi.notify(alertUi.value('pumpInstruction'));
             return;
           }
           if (target === "problem") {

@@ -1,0 +1,476 @@
+{
+  "task": 457,
+  "date": "2026-09-30",
+  "base": "f6151a2b7143945733def969010f5847abe46080",
+  "item": "C06-012 / C06-003",
+  "scope": "Common operational alert board and account/device/day journal presentation; category-specific source titles/details remain a later batch.",
+  "catalogue": {
+    "boardEntries": 38,
+    "journalEntries": 10,
+    "languages": [
+      "pt",
+      "en",
+      "fr",
+      "es",
+      "de"
+    ],
+    "texts": 240
+  },
+  "negative": {
+    "script": "test-field-alert-board-languages.js",
+    "code": 1,
+    "signal": null,
+    "ms": 1639,
+    "timedOut": false
+  },
+  "negativeDescription": "Real English selector still displayed Interrupção operacional before the patch.",
+  "integration": [
+    {
+      "script": "test-field-alert-board-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 16116,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-alert-source.js",
+      "code": 0,
+      "signal": null,
+      "ms": 5368,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-water-list-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 24777,
+      "timedOut": false
+    },
+    {
+      "script": "test-field-browser.js",
+      "code": 0,
+      "signal": null,
+      "ms": 877,
+      "timedOut": false
+    }
+  ],
+  "withCapture": [
+    {
+      "script": "test-field-alert-board-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19986,
+      "timedOut": false
+    }
+  ],
+  "withCaptureEvidence": "/workspace/scratch/b364087eee9d/qa-task457/run-1790750505407",
+  "withoutCapture": {
+    "script": "test-field-alert-board-languages.js",
+    "code": 0,
+    "signal": null,
+    "ms": 18586,
+    "timedOut": false
+  },
+  "guideDiagnostic": {
+    "script": "test-field-guide-read-scope-ui.js",
+    "code": 0,
+    "signal": null,
+    "ms": 17712,
+    "timedOut": false
+  },
+  "gates": [
+    {
+      "name": "syntax",
+      "code": 0,
+      "signal": null,
+      "ms": 41473,
+      "log": "/workspace/scratch/b364087eee9d/qa-task457/gate-syntax.log"
+    },
+    {
+      "name": "unit",
+      "code": 0,
+      "signal": null,
+      "ms": 6812,
+      "log": "/workspace/scratch/b364087eee9d/qa-task457/gate-unit.log"
+    },
+    {
+      "name": "technician",
+      "code": 0,
+      "signal": null,
+      "ms": 609,
+      "log": "/workspace/scratch/b364087eee9d/qa-task457/gate-technician.log"
+    }
+  ],
+  "unitTotals": {
+    "tests": 1356,
+    "files": 138
+  },
+  "technicianTotals": 4,
+  "syntaxTotals": {
+    "backend": 695,
+    "frontend": 308,
+    "inline": 44
+  },
+  "coverage": [
+    "Five languages at320/390/1440 through the real selector; same nodes/focus/form values/token/typed visit context/storage/SQL; no producer reads or operational requests caused by language changes.",
+    "Ten real journal guard cases and legacy warning; original Error.message and legacy API preserved; raw/forged external errors, unknown language and minimal-DOM fallback.",
+    "Read acknowledgement, taking responsibility, local history/actions and causal-navigation feedback; literal historical title/actor values including pendente; fallback fields and65-minute display fixtures restore exact bytes before actions. Original pt-PT date output preserved in every language.",
+    "Success toast replaced with identical literal text loses owned presentation; language switches cannot reclaim it.",
+    "Water and pump remain active after local reading; two tabs keep one monotonic OPEN/ASSUMED/CONFIRMED history; duplicate confirmation and attempted reversal add no events.",
+    "Quota, missing readback and corrupt history preserve original bytes; warnings/history emptiness and retry; cached cold-offline reload; only physical controls remove water/pump alerts and confirm server closure.",
+    "Queued write rejected after account change; accounts/days isolated, legacy bytes unchanged, no RESOLVED event, no browser errors."
+  ],
+  "preservation": {
+    "sources": {
+      "frontend/technician-field-mode.js": {
+        "operationalSourceRestoredExactly": true,
+        "baseSha256": "7e76361b39a7c1a03c8385dd2a0b14f20433c789036707f9ee3be3867f53d461"
+      },
+      "frontend/cw-field-alert-journal.js": {
+        "operationalSourceRestoredExactly": true,
+        "baseSha256": "0fb9860784b87cbff1420ecbb3d904662c0382fed8230d2be01fa48b77431ad1"
+      },
+      "frontend/sw.js": {
+        "operationalSourceRestoredExactly": true,
+        "baseSha256": "3f4af6e78389cb4ece2164d2b0f01ad3cde16df746adab7204234e56179b81d2"
+      },
+      "scripts/test-field-suite.js": {
+        "operationalSourceRestoredExactly": true,
+        "baseSha256": "c047e906bcc114f220ce862d6f8ab9f0373737e4873d86d1e36bd88bbd784b1f"
+      }
+    },
+    "previousGroups": 348,
+    "newGroups": 349,
+    "priorExactOrderPreserved": true
+  },
+  "sourceSha256": {
+    "frontend/technician-field-mode.js": "483b5057453678d3249b73580d2063300f85d0dce960e1f3c68f14b16a997b69",
+    "frontend/cw-field-alert-journal.js": "0cc0e5b5588cd6fbd08e6c087509cc6951e82eb54b1a19337c9a397c026ef8d6",
+    "frontend/sw.js": "3dc01fd2b4f0bc4473c0658b475407bce062dd460e70feabc5df639b391d188c",
+    "scripts/test-field-alert-board-languages.js": "39f081fca0b57634290f75d5212233ecc5439a9f29e0124038a9696c3a7d39d0",
+    "scripts/test-field-suite.js": "b3d5d23b9afdab6d22e11b8a28a53fce2224ed17370745e88ee71011848adaad"
+  },
+  "visual": {
+    "reviewed": [
+      "alert-history-de-320.png",
+      "alert-history-de-320-board.png"
+    ],
+    "width": 320,
+    "result": "Own German labels/actions/history wrap within the card. Persisted titles/names and category-specific pump/document titles/details remain literal. Shared navigation/auth overlay in tall capture remains C08.",
+    "limitation": "Not full-page/theme/device approval; category-specific presentation and dashboard/hero still open."
+  },
+  "environment": {
+    "database": "isolated PGlite through PostgreSQL wire protocol",
+    "browser": "Chromium153",
+    "externalEffects": "disabled",
+    "nativePostgreSQLSubstitute": false
+  },
+  "nativeAccepted": [
+    {
+      "task": 453,
+      "code": "715bcc599f810997551b9b02a617aa57f763c4d6",
+      "run": 36673052696,
+      "job": 109752028731,
+      "counts": {
+        "total": 345,
+        "passed": 345
+      },
+      "failures": [],
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "62aa519542121ba1801d0ca799188622a749cc0611f7a820d17fcd2e641f04cf",
+      "sourceHashesVerified": {
+        "frontend/cw-pump-reminders.js": "168635d4e38349dd90013f1f45af6276a5d69eb59654a866f5c5187b0349c143",
+        "frontend/sw.js": "7a5422e0247072e18c1e5c492b35d7b24da6d8c054e3931e2ee6410f78bd01e8",
+        "scripts/test-field-suite.js": "62aa519542121ba1801d0ca799188622a749cc0611f7a820d17fcd2e641f04cf",
+        "scripts/test-field-pump-panel-languages.js": "5136535cd916fdc79aee59746772125042f9e04837105cb72a580efe8f4f73d7"
+      },
+      "restore": {
+        "tables": 128,
+        "uploadedFiles": 51,
+        "databaseRowsMatch": true,
+        "fileHashesMatch": true
+      },
+      "groupsEvidenceSha256": "5150b5b0dfdf9d7cf47f7c131c3fdf736a57ae9d31034b54df6d2f5bf0ad118e"
+    }
+  ],
+  "nativeFailed": [
+    {
+      "task": 454,
+      "code": "809aacf2fec42cfaff22490d19710aecdfbc80e2",
+      "run": 36674413317,
+      "job": 109756159173,
+      "counts": {
+        "total": 346,
+        "passed": 345
+      },
+      "failures": [
+        {
+          "script": "test-field-guide-read-scope-ui.js",
+          "code": 1,
+          "signal": null,
+          "ms": 12026
+        }
+      ],
+      "failure": {
+        "message": "page.reload: Timeout 10000ms exceeded.",
+        "waitUntil": "networkidle",
+        "source": "scripts/test-field-guide-read-scope-ui.js:20:45",
+        "observedDocs": "Válidos",
+        "observedSource": "online",
+        "pageErrors": []
+      },
+      "restore": "skipped",
+      "exactGroupOrderVerified": true,
+      "suiteSha256": "a4d936b4e052862d0e1d4e3d91a31161e9dba0ea364e2a699fef3d0d5bc85ebd",
+      "groupsEvidenceSha256": "2a99dba5548809ff0cae122e0f7e763b704212e0c9e2c58ff0b7868df88daf67"
+    }
+  ],
+  "pendingNative": [
+    {
+      "task": 455,
+      "jobs": [
+        {
+          "id": 109760049353,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36675696482,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "task": 456,
+      "jobs": [
+        {
+          "id": 109766594583,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36677835725,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "limits": [
+    "TASK457 publication and native PostgreSQL16/upgrade/full349-group suite/database and uploaded-file restore are pending. Local PGlite does not replace native acceptance.",
+    "TASK454 native run failed345/346: guide-read-scope browser reload waited10s for networkidle while logs already showed Válidos/online, with no page errors. Restore skipped. The unchanged guide test passes locally; this does not accept the failed native run. Stabilise readiness in a separate bounded task, preserving every ownership/privacy assertion.",
+    "Category-specific active alert titles/details and dashboard/hero, shared push/auth/navigation and date policyC10 remain open. Stored titles/details/names remain literal.",
+    "C06/C08/C10 open;32 tasks=26 not started/one active/five complete. Public during development, private before completion/C32. No merge/deploy/external communications; annual contract deferred."
+  ],
+  "publication": {
+    "status": "local_validated_publication_pending",
+    "branch": "work/field-readiness-20260915-simulation",
+    "merged": false,
+    "deployed": false
+  }
+}
