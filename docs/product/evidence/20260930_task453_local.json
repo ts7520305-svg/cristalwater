@@ -218,14 +218,32 @@
     "restore": "pending"
   },
   "limits": [
-    "Publication and native PostgreSQL16/additive upgrade/full345-group suite/full database and uploaded-file restore for TASK453 remain pending. PGlite does not replace these gates.",
+    "Native PostgreSQL16/additive upgrade/full345-group suite/full database and uploaded-file restore for published TASK453 remain pending. PGlite does not replace these gates.",
     "Helper-owned reminder errors, durable syncError strings, old reminder warnings and the water panel still require their own review. GPS compatibility source has no current literal page consumer and remains untouched; this is not a claim about unknown external or old cached consumers.",
     "The static inventory assigned cw-pump-reminders.js to C08-045 by filename. The verified runtime consumer is the technician field page, so this is functional C06 work with that cross-reference; static inventory counts are unchanged.",
     "C06/C08/C10 remain open;32 tasks=26 not started/one active/five complete. Public during development, private before C32/completion. No merge/deploy/external communications; annual contract deferred."
   ],
   "publication": {
-    "status": "local_validated_publication_pending",
+    "status": "published_ci_in_progress",
+    "date": "2026-09-30",
     "branch": "work/field-readiness-20260915-simulation",
+    "codeCommit": "715bcc599f810997551b9b02a617aa57f763c4d6",
+    "tree": "fdf2f82c0b7ad1019205b4daa8930f3f5c240684",
+    "remoteTreeEqualsValidatedTree": true,
+    "checkoutAligned": true,
+    "originalLocalCommit": "acd5eeed93566c44ecb3eef15563ae8270953c7c",
+    "originalHistoryBranch": "work/local-task453-20260930",
+    "ci": {
+      "run": 36673052696,
+      "job": 109752028731,
+      "head": "715bcc599f810997551b9b02a617aa57f763c4d6",
+      "status": "in_progress",
+      "conclusion": null,
+      "successfulInitialSteps": 4,
+      "currentStep": "Run npm ci",
+      "fullSuiteGroups": 345,
+      "restore": "pending"
+    },
     "merged": false,
     "deployed": false
   }

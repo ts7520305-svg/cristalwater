@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK453 / CI em execução
+
+TASK453 publicada na branch `work/field-readiness-20260915-simulation`: código `715bcc599f810997551b9b02a617aa57f763c4d6`, árvore `fdf2f82c0b7ad1019205b4daa8930f3f5c240684`, igual à validada. Checkout alinhado e histórico local conservado em `work/local-task453-20260930`. [CI36673052696](https://github.com/ts7520305-svg/cristalwater/actions/runs/36673052696), job109752028731, no commit exato: quatro etapas iniciais aprovadas; `Run npm ci` em execução na consulta. Painel de bomba em manual com 18 entradas/90 textos em cinco idiomas; registo offline, pedidos e confirmação física preservados. Quatro integrações, 1 356 unitários/quatro técnicos/sintaxe locais aprovados. [Prova453](evidence/20260930_task453_local.json).
+
+TASK451 aceite: 343/343 grupos na ordem exata e restauro de 128 tabelas/51 ficheiros com linhas/hashes iguais; evidência451 atualizada e hashes da versão451 conferidos. TASK452 continua na suite344 após dez etapas aprovadas. Exigir gates PostgreSQL16/upgrade/suite345/restauro completo próprios para TASK453; contagens medidas e hashes iguais. Próximo: confirmar452/453 e corrigir falhas; depois mensagens próprias do helper de lembretes e painel de água aberta. Compatibilidade gps.js sem consumidor literal atual preservada; consumidores antigos/externos não excluídos. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental `[skip ci]` conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK453 local validada / bomba em manual
 
 **TASK453 / C06:** painel real de bomba em manual com18 entradas/90 textos PT/EN/FR/ES/DE: ações, minutos, validação, contagem/tempo decorrido, estado pendente e confirmação física. Nós/valores/rascunhos/pontos de foco e pedidos preservados; erros externos e avisos do helper continuam literais. Referência funcional à fonte que o inventário heurístico classificou C08-045; o consumidor confirmado é `/technician-field-mode`. [Prova453](evidence/20260930_task453_local.json).
