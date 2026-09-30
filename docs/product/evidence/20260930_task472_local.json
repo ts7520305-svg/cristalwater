@@ -563,34 +563,15 @@
   },
   "pendingNative": [
     {
-      "task": 470,
-      "job": 109902864721,
-      "status": "in_progress",
-      "conclusion": null,
-      "successfulInitialSteps": 10,
-      "currentStep": "Run node scripts/test-field-suite.js",
-      "restore": "pending",
-      "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
-      "run": 36720143535,
-      "fullSuiteGroups": 363,
-      "workflowBudgetMinutes": 90
-    },
-    {
-      "task": 471,
-      "job": 109912294469,
-      "status": "in_progress",
-      "conclusion": null,
-      "successfulInitialSteps": 10,
-      "currentStep": "Run node scripts/test-field-suite.js",
-      "restore": "pending",
-      "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
-      "run": 36722902396,
-      "fullSuiteGroups": 364,
-      "workflowBudgetMinutes": 90
-    },
-    {
       "task": 472,
-      "status": "not_yet_published",
+      "code": "643798002ec9362757ce7bbd60f1bd6957b79870",
+      "run": 36728433958,
+      "job": 109931291546,
+      "status": "in_progress",
+      "currentStep": "Run node scripts/test-field-suite.js",
+      "currentStepStatus": "pending",
+      "successfulInitialSteps": 10,
+      "stepsAvailable": true,
       "fullSuiteGroups": 365,
       "workflowBudgetMinutes": 90,
       "restore": "pending"
@@ -613,5 +594,90 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Require exact365 groups/restore472; inspect470/471. Next:outer document toolbar, correction summary and shared download/push/auth/navigation text. No whole-page translation claim."
+  },
+  "publication": {
+    "task": 472,
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "643798002ec9362757ce7bbd60f1bd6957b79870",
+    "tree": "5a19bb6b078a846a4b454154bc014a5199f9fd79",
+    "run": 36728433958,
+    "job": 109931291546,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36728433958",
+    "status": "in_progress",
+    "currentStep": "Run node scripts/test-field-suite.js",
+    "successfulInitialSteps": 10,
+    "stepsAvailable": true,
+    "currentStepStatus": "pending",
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
+  },
+  "nativeFailure470": {
+    "task": 470,
+    "code": "8caaba37852f958bf86c160df4c943f1ef02d511",
+    "run": 36720143535,
+    "job": 109902864721,
+    "status": "completed",
+    "conclusion": "failure",
+    "expectedGroups": 363,
+    "completedGroups": 363,
+    "passedGroups": 362,
+    "exactGroupOrder": true,
+    "failures": [
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 472
+      }
+    ],
+    "failedBeforeBrowser": true,
+    "failure": "Prisma P2002: TransportGuide.codeAT unique constraint while creating the document-center fixture",
+    "postgresql16": true,
+    "additiveUpgrade": "success",
+    "restore": "skipped",
+    "sourceBlobAndSha256Verified": 6
+  },
+  "nativeFailure471": {
+    "task": 471,
+    "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
+    "run": 36722902396,
+    "job": 109912294469,
+    "status": "completed",
+    "conclusion": "failure",
+    "expectedGroups": 364,
+    "completedGroups": 364,
+    "passedGroups": 362,
+    "exactGroupOrder": true,
+    "failures": [
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 406
+      },
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 397
+      }
+    ],
+    "failedBeforeBrowser": true,
+    "failure": "Prisma P2002: TransportGuide.codeAT unique constraint while creating document-center and document-transition fixtures",
+    "postgresql16": true,
+    "additiveUpgrade": "success",
+    "restore": "skipped",
+    "sourceBlobAndSha256Verified": 4
+  },
+  "nextRepair": {
+    "task": 473,
+    "cause": "Four test fixtures reuse the unique TransportGuide.codeAT value AT <b>{code}</b>",
+    "scope": "Fixture identities only; run all four scripts together against one database, preserving assertions and product",
+    "confirmedNativeFailures": [
+      470,
+      471
+    ]
   }
 }
