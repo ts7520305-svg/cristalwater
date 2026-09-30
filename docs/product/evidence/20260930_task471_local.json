@@ -379,10 +379,15 @@
     },
     {
       "task": 471,
-      "status": "not_yet_published",
+      "status": "in_progress",
       "fullSuiteGroups": 364,
       "workflowBudgetMinutes": 90,
-      "restore": "pending"
+      "restore": "pending",
+      "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
+      "run": 36722902396,
+      "job": 109912294469,
+      "currentStep": "not_yet_reported",
+      "stepsAvailable": false
     }
   ],
   "limits": {
@@ -402,5 +407,22 @@
     "externalContacts": false,
     "annualContract": "deferred",
     "next": "Require exact364 groups/restore471; inspect468–470. Remaining guide/insurance bodies and PDF buttons, correction summary and shared push/auth/navigation. No whole-page translation claim."
+  },
+  "publication": {
+    "task": 471,
+    "branch": "work/field-readiness-20260915-simulation",
+    "code": "e1c190e260c60b4a6de26f4fbb6d7259022b2aea",
+    "tree": "c41d64887945a9d5966dcf2959cb5fad1bee7c9f",
+    "run": 36722902396,
+    "job": 109912294469,
+    "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36722902396",
+    "status": "in_progress",
+    "currentStep": "not_yet_reported",
+    "successfulInitialSteps": 0,
+    "stepsAvailable": false,
+    "treeMatchesValidatedLocalTree": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
   }
 }

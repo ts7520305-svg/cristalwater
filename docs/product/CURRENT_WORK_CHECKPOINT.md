@@ -1,5 +1,11 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Publicação confirmada — 30/09/2026, TASK471 / avisos de dia e viatura
+
+TASK471 publicada na branch `work/field-readiness-20260915-simulation`: código `e1c190e260c60b4a6de26f4fbb6d7259022b2aea`, árvore `c41d64887945a9d5966dcf2959cb5fad1bee7c9f`, igual à validada. Histórico local conservado em `work/local-task471-20260930`. [CI36722902396](https://github.com/ts7520305-svg/cristalwater/actions/runs/36722902396), job109912294469, no commit exato, estado `in_progress`; detalhe das etapas ainda não disponibilizado na consulta. Avisos de mudança de dia/viatura nos cinco idiomas, duas entradas/dez textos. Quatro integrações,1 356 unitários/quatro técnicos/sintaxe aprovados.45 verificações de idioma/largura com guardas e dados preservados. Cache251/runner364. [Prova471](evidence/20260930_task471_local.json).
+
+Exigir364 grupos/restauro471. TASK468–470 nas suites361/362/363 após dez etapas aprovadas na última consulta; TASK467 aceite360/restauro128 tabelas51 ficheiros/linhas e hashes iguais. Histórico de cancelamentos465/466 e falhas conservado; proteção de rascunhos469 mantida. Próximo:acompanhar468–471 e corrigir novas falhas; depois corpos de guias/seguro, botões/PDFs, resumo de correção e push/auth/nav. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes do fecho/C32. Sem merge/deploy/contactos externos; contrato anual adiado. Atualização documental [skip ci] conserva o código. Entradas abaixo históricas.
+
 ## Retoma atual — 30/09/2026, TASK471 / avisos de dia e viatura
 
 **TASK471 / C06-015:** os avisos de mudança de viatura e de dia seguem agora o idioma escolhido. Duas entradas/dez textos PT/EN/FR/ES/DE; catálogo principal263, com as261 anteriores intactas. As mensagens brutas e todas as condições das guardas permanecem iguais. Duas fontes de produto, dois scripts e quatro documentos; oito ficheiros. [Prova471](evidence/20260930_task471_local.json)
