@@ -5,7 +5,8 @@ const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/uti
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost','127.0.0.1'].includes(new URL(base).hostname));
 const languages=['pt','en','fr','es','de'],words={"routeCacheSaveFailed":["A ronda não ficou guardada para uso offline. {detail}","The round was not saved for offline use. {detail}","La tournée n’a pas été enregistrée pour une utilisation hors ligne. {detail}","La ronda no se ha guardado para usarla sin conexión. {detail}","Die Tour wurde nicht für die Offline-Nutzung gespeichert. {detail}"],"routeCacheUnconfirmed":["Ronda de {day}, consultada no servidor em {date}. Sem confirmação atual; alterações do escritório por verificar.","Round for {day}, checked on the server at {date}. No current confirmation; office changes still need checking.","Tournée du {day}, consultée sur le serveur le {date}. Pas de confirmation actuelle ; les modifications du bureau restent à vérifier.","Ronda del {day}, consultada en el servidor el {date}. Sin confirmación actual; los cambios de la oficina están por comprobar.","Tour vom {day}, auf dem Server abgerufen am {date}. Keine aktuelle Bestätigung; Änderungen des Büros müssen noch geprüft werden."]};
-const text=(key,index,params)=>words[key][index].replace(/\{(\w+)\}/g,(_,key)=>params[key]);
+const unreadable=["A ronda guardada está ilegível. Os dados foram preservados; peça apoio ao escritório.","The saved round is unreadable. The data has been preserved; ask the office for help.","La tournée enregistrée est illisible. Les données ont été conservées ; demandez de l’aide au bureau.","No se puede leer la ronda guardada. Se han conservado los datos; pide ayuda a la oficina.","Die gespeicherte Tour ist unlesbar. Die Daten bleiben erhalten; bitten Sie das Büro um Hilfe."];
+const text=(key,index,params)=>words[key][index].replace(/\{(\w+)\}/g,(_,key)=>(typeof params==='function'?params(index):params)[key]);
 let browser,completed=false,checks=0;
 const deadline=setTimeout(()=>{console.error('Route cache language scenario incomplete');process.exit(1);},110000);
 process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
@@ -61,7 +62,7 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
       checks++;if(process.env.CW_ROUTE_CACHE_CAPTURE&&language==='de'&&width===320&&literal===undefined){await fs.mkdir(process.env.CW_ROUTE_CACHE_CAPTURE,{recursive:true});await page.locator('#fieldRouteAge').screenshot({path:process.env.CW_ROUTE_CACHE_CAPTURE+'/'+name+'-de-320.png'});}
     }}
     for(const request of requests.slice(first)){assert.equal(request.path,'/api/settings/language/me');assert.equal(request.method,'PUT');assert.deepEqual(Object.keys(JSON.parse(request.body)),['language']);assert.equal(request.auth,'Bearer '+token);}
-    console.log('PASS route cache languages '+JSON.stringify({name,widths,typedDrafts:true,immutablePending:2,literalDateAndDetails:true}));
+    console.log('PASS route cache languages '+JSON.stringify({name,widths,typedDrafts:true,immutablePending:2,literalDateAndForeignDetails:true,ownedCacheDetailsLocalized:true}));
   }
   const reload=async()=>{const previous=await page.evaluate(()=>CWFieldDaySnapshot().confirmedAt);await page.locator('#fieldReloadBtn').evaluate(button=>button.click());await page.waitForFunction(previous=>CWFieldDaySnapshot().confirmedAt&&CWFieldDaySnapshot().confirmedAt!==previous,previous);await ready('REGULAR');};
   const expect=async(key,params)=>{const language=await page.locator('html').getAttribute('lang'),expected=text(key,languages.indexOf(language),params);await page.waitForFunction(expected=>document.getElementById('fieldRouteAge').textContent===expected,expected);};
@@ -83,8 +84,8 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   const valid=await routeRaw(),corrupt='{corrupt cache <b>{day}</b>';
   await page.evaluate(({key,corrupt})=>localStorage.setItem(key,corrupt),{key:cacheKey,corrupt});await reload();
   const corruptDetail='A ronda guardada está ilegível. Os dados foram preservados; peça apoio ao escritório.';
-  await expect('routeCacheSaveFailed',{detail:corruptDetail});assert.equal(await routeRaw(),corrupt);assert(await page.evaluate(()=>Number.isFinite(Date.parse(CWFieldDaySnapshot().confirmedAt))));
-  await matrix({name:'save-corrupt-online',key:'routeCacheSaveFailed',params:{detail:corruptDetail}});
+  await expect('routeCacheSaveFailed',{detail:unreadable[languages.indexOf(await page.locator('html').getAttribute('lang'))]});assert.equal(await routeRaw(),corrupt);assert(await page.evaluate(()=>Number.isFinite(Date.parse(CWFieldDaySnapshot().confirmedAt))));
+  await matrix({name:'save-corrupt-online',key:'routeCacheSaveFailed',params:index=>({detail:unreadable[index]})});
   await page.evaluate(({key,valid})=>localStorage.setItem(key,valid),{key:cacheKey,valid});await reload();assert(await page.locator('#fieldRouteAge').evaluate(node=>node.hidden));
   const beforeOffline=await routeRaw();await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await ready('REGULAR');
   const fallback=JSON.parse(beforeOffline),date=await page.evaluate(raw=>new Date(raw).toLocaleString('pt-PT'),fallback.serverConfirmedAt),params={day:fallback.day,date};
@@ -101,5 +102,5 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   await matrix({name:'extra-cached-offline',key:'routeCacheUnconfirmed',params:{day:extra.day,date:extraDate},widths:[320]});
   assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),originalDb);assert.deepEqual(errors,[]);
   assert(requests.filter(request=>!['GET','HEAD'].includes(request.method)).every(request=>request.path==='/api/settings/language/me'&&request.method==='PUT'));
-  console.log('PASS route cache language result '+JSON.stringify({checks,typedDrafts:true,immutablePendingRequests:2,noOperationalWrites:true,originalQuotaError:true,offlineStartMemoryOnly:true,rawDatesAndDetails:true}));completed=true;
+  console.log('PASS route cache language result '+JSON.stringify({checks,typedDrafts:true,immutablePendingRequests:2,noOperationalWrites:true,originalQuotaError:true,offlineStartMemoryOnly:true,rawDatesAndForeignDetails:true,ownedCacheDetailsLocalized:true}));completed=true;
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{clearTimeout(deadline);await browser?.close();await prisma.$disconnect();});

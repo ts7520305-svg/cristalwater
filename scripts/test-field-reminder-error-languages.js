@@ -292,7 +292,12 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   const original = await raw();
   await page.evaluate(key => { localStorage.setItem(key, '{broken'); CWPumpReminders.render(); }, key);
   assert.equal(await banner.textContent(), words.unreadable[1]);
-  await page.locator('#notes').fill('Keep <b>{key}</b> exactly'); await matrix('#pumpReminderBanner', 'unreadable');
+  // Keep one real draft lock pending long enough to exercise snapshot readiness.
+  await page.evaluate(() => { window.qaDraftLockRequest = navigator.locks.request; let delayed = false; navigator.locks.request = function (name, ...args) { const callback = args.pop(); return qaDraftLockRequest.call(this, name, ...args, async lock => { if (!delayed && name.startsWith('cwFieldVisitDrafts:v2:')) { delayed = true; await new Promise(resolve => setTimeout(resolve, 500)); } return callback(lock); }); }; });
+  await page.locator('#notes').fill('Keep <b>{key}</b> exactly');
+  await page.waitForFunction(({ id, owner }) => { const raw = localStorage.getItem('cwFieldVisitDrafts:v2:' + owner); return document.getElementById('fieldSaveStatus').dataset.state === 'saved' && raw && JSON.parse(raw).drafts['visit-REGULAR-' + id]?.values.notes === 'Keep <b>{key}</b> exactly'; }, { id, owner: 'TECH:' + tech.id });
+  await page.evaluate(() => { navigator.locks.request = qaDraftLockRequest; });
+  await matrix('#pumpReminderBanner', 'unreadable');
   await page.evaluate(key => { localStorage.setItem(key, '[]'); CWPumpReminders.render(); }, key); await matrix('#pumpReminderBanner', 'invalid');
   await page.evaluate(({ key, original }) => { if (original === null) localStorage.removeItem(key); else localStorage.setItem(key, original); CWPumpReminders.render(); }, { key, original });
   const feedback = '#pumpReminderFeedback';

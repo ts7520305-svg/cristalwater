@@ -426,6 +426,9 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "routeConfirmFailed": ["Não foi possível confirmar a ronda no servidor.","Could not confirm the round on the server.","Impossible de confirmer la tournée sur le serveur.","No se pudo confirmar la ronda en el servidor.","Die Tour konnte auf dem Server nicht bestätigt werden."],
+  "routeNoSavedRound": ["Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.","No saved round for this account and day. Open field mode online before leaving.","Aucune tournée enregistrée pour ce compte et ce jour. Ouvrez le mode terrain en ligne avant de partir.","No hay una ronda guardada para esta cuenta y este día. Abre el modo de campo con conexión antes de salir.","Für dieses Konto und diesen Tag ist keine Tour gespeichert. Öffnen Sie den Außendienstmodus online, bevor Sie losfahren."],
+  "routeSessionPending": ["Sessão por validar","Session needs validation","Session à valider","Sesión pendiente de validar","Sitzung muss bestätigt werden"],
   "routeCacheSaveFailed": ["A ronda não ficou guardada para uso offline. {detail}","The round was not saved for offline use. {detail}","La tournée n’a pas été enregistrée pour une utilisation hors ligne. {detail}","La ronda no se ha guardado para usarla sin conexión. {detail}","Die Tour wurde nicht für die Offline-Nutzung gespeichert. {detail}"],
   "routeCacheUnconfirmed": ["Ronda de {day}, consultada no servidor em {date}. Sem confirmação atual; alterações do escritório por verificar.","Round for {day}, checked on the server at {date}. No current confirmation; office changes still need checking.","Tournée du {day}, consultée sur le serveur le {date}. Pas de confirmation actuelle ; les modifications du bureau restent à vérifier.","Ronda del {day}, consultada en el servidor el {date}. Sin confirmación actual; los cambios de la oficina están por comprobar.","Tour vom {day}, auf dem Server abgerufen am {date}. Keine aktuelle Bestätigung; Änderungen des Büros müssen noch geprüft werden."],
   "routeSessionChanged": ["A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.","The session changed. Saved data has been preserved. Reopen field mode with the current account.","La session a changé. Les données enregistrées ont été conservées. Rouvrez le mode terrain avec le compte actuel.","La sesión ha cambiado. Se han conservado los datos guardados. Vuelve a abrir el modo de campo con la cuenta actual.","Die Sitzung hat sich geändert. Gespeicherte Daten bleiben erhalten. Öffnen Sie den Außendienstmodus erneut mit dem aktuellen Konto."],
@@ -2598,7 +2601,7 @@
     function draftStatus(node) { const source = window.CWFieldVisitDrafts.presentation; return delegated(source, source.copy(node)); }
     function failure(error, fallback = '') {
       if (errorCopies.has(error)) return errorCopies.get(error);
-      for (const source of [window.CWFieldVisitDrafts?.presentation, window.CWVisitProductIdentity?.presentation, window.CWFieldDocuments?.presentation]) {
+      for (const source of [window.CWFieldVisitDrafts?.presentation, window.CWVisitProductIdentity?.presentation, window.CWFieldDocuments?.presentation, window.CWFieldRouteCache?.presentation]) {
         const entry = source?.error(error); if (entry) return delegated(source, entry);
       }
       return error?.message || fallback;
@@ -5719,7 +5722,7 @@
   function persistModernRoute() {
     if (!sameFieldSession() || !window.CWFieldRouteCache.same(routeContext) || !routeSnapshot) return false;
     try { routeSnapshot = window.CWFieldRouteCache.update(routeSnapshot, visits, routeContext); return true; }
-    catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: '' + error.message })); return false; }
+    catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: alertUi.failure(error, '' + error.message) })); return false; }
   }
 
   function protectFieldRouteSession() {
@@ -5765,7 +5768,7 @@
         const response = await fetch('/api/technician/today?' + query, { headers: { Authorization: 'Bearer ' + context.session.token }, cache: 'no-store', signal: AbortSignal.timeout(15000) });
         if (!relevant()) return;
         const data = await response.json(); if (!relevant()) return;
-        if (response.status !== 200) throw Object.assign(Error(data.error || 'Não foi possível confirmar a ronda no servidor.'), { denied: [401,403].includes(response.status) });
+        if (response.status !== 200) throw Object.assign(data.error ? Error(data.error) : alertUi.error('Não foi possível confirmar a ronda no servidor.', alertUi.value('routeConfirmFailed')), { denied: [401,403].includes(response.status) });
         snapshot = window.CWFieldRouteCache.fromResponse(data, context);
       } catch (error) { if (!relevant()) return; failure = error; }
       if (!relevant()) return;
@@ -5773,12 +5776,12 @@
       if (snapshot) {
         routeConfirmedAt = snapshot.serverConfirmedAt;
         try { window.CWFieldRouteCache.save(snapshot, context); }
-        catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: '' + error.message })); }
+        catch (error) { showRouteCacheWarning(alertUi.value('routeCacheSaveFailed', { detail: alertUi.failure(error, '' + error.message) })); }
       } else {
         routeConfirmedAt = null;
         if (failure?.denied) { visits = []; routeSnapshot = null; routeContext = null; throw failure; }
         snapshot = window.CWFieldRouteCache.read(context);
-        if (!snapshot) throw new Error('Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.');
+        if (!snapshot) throw alertUi.error('Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.', alertUi.value('routeNoSavedRound'));
         showRouteCacheWarning(alertUi.value('routeCacheUnconfirmed', { day: context.day, date: new Date(snapshot.serverConfirmedAt).toLocaleString('pt-PT') }));
       }
       routeContext = context; routeSnapshot = snapshot; visits = snapshot.visits;
@@ -5821,11 +5824,11 @@
       loadCurrentDraft();
       render();
       renderPhotoList();
-      $("#fieldLoadError").hidden = false; $("#fieldLoadErrorText").textContent = error.message;
+      $("#fieldLoadError").hidden = false; alertUi.bind($("#fieldLoadErrorText"), alertUi.failure(error, '' + error.message));
       alertUi.bind($('#nextTitle'), alertUi.value('visitLoadFailed'));
-      alertUi.bind($('#nextMeta'), error.message);
+      alertUi.bind($('#nextMeta'), alertUi.failure(error));
       alertUi.bind($('#progressText'), alertUi.value('visitCheckConnection'));
-      $("#connectionState").textContent = error.denied ? "Sessão por validar" : "Offline";
+      alertUi.bind($("#connectionState"), error.denied ? alertUi.value('routeSessionPending') : "Offline");
       renderCrewStatus();
     }
   }
