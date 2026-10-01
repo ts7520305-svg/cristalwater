@@ -67,6 +67,7 @@ const COPY = {
     portalIntro: "Acompanhe visitas, piscinas, mensagens e pagamentos num painel simples e transparente.",
     loadingState: "A carregar estado...",
     loadError: "Nao foi possivel carregar dados",
+    retryExtras: "Tentar novamente",
     noDataStatus: "Sem dados do cliente.",
     poolsJacuzzis: "Piscinas / jacuzzis",
     financialState: "Estado financeiro",
@@ -207,6 +208,7 @@ const COPY = {
     portalIntro: "Consulte visitas, piscinas, mensajes y pagos en un panel sencillo y transparente.",
     loadingState: "Cargando estado…",
     loadError: "No se pudieron cargar los datos",
+    retryExtras: "Reintentar",
     noDataStatus: "No hay datos del cliente.",
     poolsJacuzzis: "Piscinas / jacuzzis",
     financialState: "Estado financiero",
@@ -347,6 +349,7 @@ const COPY = {
     portalIntro: "Follow visits, pools, messages and payments in one clear client area.",
     loadingState: "Loading status...",
     loadError: "Unable to load data",
+    retryExtras: "Try again",
     noDataStatus: "No client data.",
     poolsJacuzzis: "Pools / jacuzzis",
     financialState: "Financial status",
@@ -487,6 +490,7 @@ const COPY = {
     portalIntro: "Suivez les visites, piscines, messages et paiements dans un espace clair.",
     loadingState: "Chargement de l'etat...",
     loadError: "Impossible de charger les donnees",
+    retryExtras: "Réessayer",
     noDataStatus: "Aucune donnee client.",
     poolsJacuzzis: "Piscines / jacuzzis",
     financialState: "Etat financier",
@@ -627,6 +631,7 @@ const COPY = {
     portalIntro: "Verfolgen Sie Besuche, Pools, Nachrichten und Zahlungen in einem klaren Kundenbereich.",
     loadingState: "Status wird geladen...",
     loadError: "Daten konnten nicht geladen werden",
+    retryExtras: "Erneut versuchen",
     noDataStatus: "Keine Kundendaten.",
     poolsJacuzzis: "Pools / Whirlpools",
     financialState: "Finanzstatus",
@@ -831,6 +836,27 @@ function copy(key) {
   return COPY[portalLanguage]?.[key] || COPY.pt[key] || key;
 }
 
+// Repaint only the original labels authored by the extra-section error view.
+const portalExtrasLabels = (function () {
+  const leaves = new Map();
+  function paint() {
+    for (const [node, leaf] of leaves) {
+      if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered) { leaves.delete(node); continue; }
+      const rendered = copy(leaf.key);
+      if (rendered !== leaf.rendered) leaf.textNode.nodeValue = rendered;
+      leaf.rendered = rendered;
+    }
+  }
+  function bind(node, key) {
+    paint();
+    const rendered = copy(key);
+    if (node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE) node.firstChild.nodeValue = rendered;
+    else node.textContent = rendered;
+    leaves.set(node, { key, rendered, textNode: node.firstChild });
+  }
+  return Object.freeze({ bind, paint });
+})();
+
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
     "&": "&amp;",
@@ -990,6 +1016,7 @@ function applyLanguage(language) {
   if (currentServiceHistory.length) renderFilteredServiceHistory();
   updatePresence();
   refreshPaymentWhatsappLink();
+  portalExtrasLabels.paint();
 }
 
 window.addEventListener("cw-language-change", (event) => {
@@ -1593,9 +1620,10 @@ async function loadCustomerExtras() {
     }catch(error){
       if(!selectionIsCurrent(requestedClient, selectionRevision) || revision !== extrasLoadRevision)return;
       const node=el(id);if(!node)return;
-      node.replaceChildren();const message=document.createElement('p');message.textContent=copy('loadError');message.setAttribute('role','alert');
-      const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';retry.textContent=portalLanguage==='en'?'Try again':portalLanguage==='fr'?'Réessayer':'Tentar novamente';
+      node.replaceChildren();const message=document.createElement('p');message.setAttribute('role','alert');
+      const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';
       retry.onclick=()=>loadCustomerExtras();node.append(message,retry);
+      portalExtrasLabels.bind(message, "loadError");portalExtrasLabels.bind(retry, "retryExtras");
     }
   }));
 }

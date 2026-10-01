@@ -136,6 +136,7 @@ scripts.push('test-field-client-chat-consolidation.js');
 scripts.push('test-field-client-chat-history-ui.js');
 scripts.push('test-field-client-portal-requests.js');
 scripts.push('test-field-client-portal-requests-ui.js');
+scripts.push('test-field-client-portal-extras-languages.js');
 scripts.push('test-field-client-edit-preservation.js');
 scripts.push('test-field-pool-edit-atomicity.js');
 scripts.push('test-field-client-edit-recovery.js');
