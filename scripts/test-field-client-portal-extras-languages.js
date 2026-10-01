@@ -130,8 +130,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v278')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v278')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v279')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v279')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.locator('#messageInput').fill('Offline message draft exact');
   const offlineWork = await work(offlinePage); await offline.setOffline(true); await offlinePage.evaluate(() => loadCustomerExtras());

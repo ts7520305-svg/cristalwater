@@ -13,6 +13,19 @@
   let commandBackdrop = null;
   let command = null;
   let currentTooltipTopic = null;
+  let presentationIdentity = null;
+  const authStorageKeys = new Set(['token', 'cristalwater_jwt', 'user', 'cristalwater_user']);
+
+  function currentPresentationIdentity(){
+    const owner = window.CristalHelp?.session();
+    return JSON.stringify([owner?.id || 0, owner?.role || '', owner?.token || '', words().title || '']);
+  }
+  function syncPresentationIdentity(){
+    const nextIdentity = currentPresentationIdentity();
+    if (nextIdentity === presentationIdentity) return;
+    presentationIdentity = nextIdentity;
+    closeDrawer(); closeCommand(); hideTooltip(); currentTooltipTopic = null; renderFabs();
+  }
 
   const lower = (value) => String(value || "").toLowerCase();
   const path = lower(window.location.pathname || "/");
@@ -117,6 +130,7 @@
 
   function showTooltip(el, topicKey, event){
     if(!helpMode()) return;
+    syncPresentationIdentity();
     currentTooltipTopic = topicKey;
     const topic = getTopic(topicKey);
     if(!tooltip){ tooltip = document.createElement("div"); tooltip.className = "cw-tooltip"; tooltip.addEventListener("mouseenter", ()=>{ if(tooltip) tooltip.dataset.keep = "1"; }); tooltip.addEventListener("mouseleave", hideTooltipSoon); document.body.appendChild(tooltip); }
@@ -146,6 +160,7 @@
 
   function openDrawer(topicKey="help"){
     if(!isAuthenticatedArea()) return;
+    syncPresentationIdentity();
     setHelpEnabled(true);
     closeDrawer();
     drawerBackdrop = document.createElement("div"); drawerBackdrop.className = "cw-drawer-backdrop"; drawerBackdrop.addEventListener("click", closeDrawer);
@@ -170,6 +185,7 @@
 
   function openCommand(){
     if(!isAuthenticatedArea()) return;
+    syncPresentationIdentity();
     closeCommand();
     commandBackdrop = document.createElement("div"); commandBackdrop.className = "cw-command-backdrop"; commandBackdrop.addEventListener("click", closeCommand);
     command = document.createElement("section"); command.className = "cw-command"; command.setAttribute("role", "dialog"); command.setAttribute("aria-label", words().command); command.setAttribute('data-cw-no-i18n', '');
@@ -203,7 +219,11 @@
     renderFabs();
     annotateHelpables();
     setTimeout(annotateHelpables, 1000);
-    for (const event of ['storage', 'pageshow', 'cw-language-change']) window.addEventListener(event, () => {
+    presentationIdentity = currentPresentationIdentity();
+    for (const event of ['storage', 'pageshow', 'cw-language-change']) window.addEventListener(event, (change) => {
+      const nextIdentity = currentPresentationIdentity();
+      if (change.type === 'storage' && authStorageKeys.has(change.key) && nextIdentity === presentationIdentity) return;
+      presentationIdentity = nextIdentity;
       closeDrawer(); closeCommand(); hideTooltip(); currentTooltipTopic = null; renderFabs();
     });
     document.addEventListener("keydown", (event)=>{

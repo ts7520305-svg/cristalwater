@@ -39,12 +39,12 @@ const fixture = role => {
       assert.equal(new URL(page.url()).pathname, '/help-center', role + ' must enter its own help without redirect');
       const field = ['TECHNICIAN', 'TEAM_LEADER'].includes(role);
       assert.equal(await page.locator('body').getAttribute('data-cw-role'), field ? 'TECHNICIAN' : role);
-      const allowed = new Set(role === 'CLIENT' ? ['/help-center', '/client-portal', '/client-history', '/client-payments', '/client_chat', '/client-notifications'] : ['/help-center', '/technician-field-mode', '/technician-guide', '/technician-chat', '/technician-chat#noticesTitle', '/technician-profile']);
-      async function checkLinks(selector) {
+      async function checkLinks(selector, currentRole = role) {
+        const allowed = new Set(currentRole === 'CLIENT' ? ['/help-center', '/client-portal', '/client-history', '/client-payments', '/client_chat', '/client-notifications'] : ['/help-center', '/technician-field-mode', '/technician-guide', '/technician-chat', '/technician-chat#noticesTitle', '/technician-profile']);
         const links = await page.locator(selector).evaluateAll(nodes => nodes.map(node => node.getAttribute('href')));
         assert(links.length > 0, role + ' must have useful links');
         for (const href of links) {
-          if (role !== 'ADMIN') assert(allowed.has(href), role + ' cannot advertise ' + href);
+          if (currentRole !== 'ADMIN') assert(allowed.has(href), currentRole + ' cannot advertise ' + href);
           assert(fs.existsSync(path.join(root, 'frontend', href.split(/[?#]/)[0].slice(1) + '.html')), 'Destination must exist: ' + href);
         }
         return links;
@@ -139,6 +139,33 @@ const fixture = role => {
       await page.waitForFunction(role => window.CristalHelp.session()?.role === role && document.querySelectorAll('#helpActions a').length > 0, next.user.role);
       await page.keyboard.press('Alt+h');
       assert.equal(await page.locator('.cw-topic-list [data-topic="aiAdmin"]').count(), next.user.role === 'ADMIN' ? 1 : 0);
+      // A real second-tab profile write can deliver late auth-key events after
+      // the new role's help is already open. The effective principal is stable.
+      await page.evaluate(() => { window.qaHelpAuthEvents = 0; window.addEventListener('storage', event => { if (['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].includes(event.key)) qaHelpAuthEvents++; }); window.qaOpenedHelp = document.querySelector('.cw-drawer'); });
+      await other.evaluate(user => { const profile = { role: user.role, id: user.id, principalType: user.principalType, name: 'Profile literal <b>{help}</b>' }; for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify(profile)); }, next.user);
+      await page.waitForFunction(() => qaHelpAuthEvents >= 2);
+      assert(await page.evaluate(() => qaOpenedHelp.isConnected && qaOpenedHelp === document.querySelector('.cw-drawer')), 'Same-principal auth events must retain the already opened help');
+      assert.equal(await page.locator('.cw-topic-list [data-topic="aiAdmin"]').count(), next.user.role === 'ADMIN' ? 1 : 0);
+      await page.keyboard.press('Escape'); await page.keyboard.press('Control+k');
+      await page.evaluate(() => { window.qaOpenedCommand = document.querySelector('.cw-command'); });
+      await other.evaluate(user => { for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify(user)); }, next.user);
+      await page.waitForFunction(() => qaHelpAuthEvents >= 4);
+      assert(await page.evaluate(() => qaOpenedCommand.isConnected && qaOpenedCommand === document.querySelector('.cw-command')), 'Same-principal auth events must retain the already opened command');
+      await checkLinks('.cw-command-results a', next.user.role);
+      // Token renewal still invalidates the old presentation, even for the
+      // same id and role; invalid-session and role changes above remain intact.
+      await other.evaluate(token => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token + '.renewal-control'); }, next.token);
+      await page.waitForFunction(() => qaHelpAuthEvents >= 6);
+      assert.equal(await page.locator('.cw-command,.cw-drawer,.cw-tooltip').count(), 0);
+      // Same-tab writes do not emit a storage event in this document. Opening
+      // the next view must still discard the previous principal's command.
+      await page.keyboard.press('Control+k'); await page.locator('.cw-command').waitFor();
+      await page.evaluate(({ user, token }) => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify(user)); }, fixture(role));
+      await page.keyboard.press('Alt+h');
+      assert.equal(await page.locator('.cw-command').count(), 0);
+      assert.equal(await page.locator('.cw-topic-list [data-topic="aiAdmin"]').count(), role === 'ADMIN' ? 1 : 0);
+      assert.deepEqual(await page.evaluate(() => [localStorage.getItem('cwFieldOutbox:qa'), localStorage.getItem('sound_CHAT')]), ['pending-work', 'false']);
+      console.log('PASS help ' + role + ': two actual same-principal profile events retain each original help/command view; token renewal and same-tab account change close the old views');
       assert.deepEqual(errors, []); await context.close();
       console.log('PASS help ' + role + ': entry, destinations, forbidden/unknown topics, search, keyboard, five languages/three widths and changed session');
     }
