@@ -7,6 +7,16 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['localh
 const languages = ['pt', 'en', 'fr', 'es', 'de'];
 const retryLabels = ['Tentar novamente', 'Try again', 'Réessayer', 'Reintentar', 'Erneut versuchen'];
 const errorLabels = ['Nao foi possivel carregar dados', 'Unable to load data', 'Impossible de charger les donnees', 'No se pudieron cargar los datos', 'Daten konnten nicht geladen werden'];
+const quoteTitles = ['Orçamentos', 'Quotes', 'Devis', 'Presupuestos', 'Angebote'], quoteRefresh = ['Atualizar', 'Refresh', 'Actualiser', 'Actualizar', 'Aktualisieren'];
+const quoteLoadErrors = ['Não foi possível carregar.', 'Could not load.', 'Chargement impossible.', 'No se pudo cargar.', 'Laden fehlgeschlagen.'];
+let quoteLanguageCases = 0;
+async function quotePresentation(page, index) {
+  await page.waitForFunction(expected => document.getElementById('clientQuotesTitle').textContent === expected, quoteTitles[index]);
+  assert.equal(await page.locator('#clientQuotesRefresh').textContent(), quoteRefresh[index]);
+  const geometry = await page.evaluate(() => ['clientQuotesTitle', 'clientQuotesRefresh'].map(id => { const item = document.getElementById(id), range = document.createRange(); range.selectNodeContents(item); return { id, lines: range.getClientRects().length, height: item.getBoundingClientRect().height, text: [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right })) }; }));
+  for (const item of geometry) { assert.equal(item.lines, 1, 'Quote heading/refresh words must remain whole: ' + item.id); assert(item.text.every(rect => rect.left >= 0 && rect.right <= page.viewportSize().width)); }
+  assert(geometry[1].height >= 44); quoteLanguageCases++;
+}
 const deadline = setTimeout(() => { console.error('Client portal extras language QA deadline'); process.exit(1); }, 150000);
 let browser, client, notice, originalLanguage, complete = false, checks = 0;
 process.on('exit', code => { if (!code && !complete) process.exitCode = 1; });
@@ -74,12 +84,14 @@ async function database() {
     await page.locator('#messageInput').focus(); await page.evaluate(() => { document.getElementById('messageInput').setSelectionRange(2, 8); window.qaExtraNodes = [...document.querySelectorAll('#notificationList > p[role=alert], #notificationList > button, #permissionsList > p[role=alert], #permissionsList > button')]; window.qaExtraTextNodes = qaExtraNodes.map(node => node.firstChild); });
     await page.locator('#cwLanguageSelect').selectOption('pt'); await page.waitForFunction(() => loadedClientId === 0 && document.getElementById('messageInput').disabled); await settle(page);
     const before = await fields(page);
+    const quoteReads = requests.filter(request => request.path.endsWith('/quotes')).length;
     try {
       for (const width of [320, 390, 1440]) {
         await page.setViewportSize({ width, height: 900 });
         for (const [index, language] of languages.entries()) {
           await page.locator('#cwLanguageSelect').selectOption(language); await settle(page);
           assert.equal(await page.evaluate(() => portalLanguage), language);
+          await quotePresentation(page, index); assert.equal(requests.filter(request => request.path.endsWith('/quotes')).length, quoteReads);
           for (const id of ids) { assert.equal(await page.locator('#' + id + ' > button').textContent(), retryLabels[index]); assert.equal(await page.locator('#' + id + ' > p[role=alert]').textContent(), errorLabels[index]); }
           assert(await page.evaluate(() => qaExtraNodes.every((node, index) => node.isConnected && node.firstChild === qaExtraTextNodes[index])));
           assert.deepEqual(await fields(page), before); await preserve();
@@ -96,8 +108,10 @@ async function database() {
   // retain the original busy guard, which disables it while its read is held.
   await page.locator('#messageInput').focus(); await page.evaluate(() => document.getElementById('messageInput').setSelectionRange(2, 8));
   const idleFields = await fields(page), coreReads = () => requests.filter(request => request.path === '/api/client-portal/' + client.id).length, idleReads = coreReads();
+  const idleQuoteReads = requests.filter(request => request.path.endsWith('/quotes')).length;
   for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
     await page.evaluate(language => { queryLanguage = language; applyLanguage(language); }, language); await settle(page);
+    await quotePresentation(page, index); assert.equal(requests.filter(request => request.path.endsWith('/quotes')).length, idleQuoteReads);
     for (const id of Object.keys(endpoints)) { assert.equal(await page.locator('#' + id + ' > button').textContent(), retryLabels[index]); assert.equal(await page.locator('#' + id + ' > p[role=alert]').textContent(), errorLabels[index]); }
     assert.deepEqual(await fields(page), idleFields); assert.equal(coreReads(), idleReads); await preserve(); checks++;
   } }
@@ -129,9 +143,9 @@ async function database() {
   const offline = await context('allow'), offlinePage = await offline.newPage(); offlinePage.setDefaultTimeout(12000);
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
-  for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v280')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v280')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+  for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v281')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v281')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
@@ -143,7 +157,7 @@ async function database() {
   const coldSession = await offlinePage.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].map(key => [key, localStorage.getItem(key)])));
   const coldRequests = []; offlinePage.on('request', request => { const url = new URL(request.url()); if (url.pathname.startsWith('/api/')) coldRequests.push({ path: url.pathname, method: request.method() }); });
   const offlineWork = await work(offlinePage); await offline.setOffline(true); await offlinePage.evaluate(() => loadCustomerExtras());
-  for (const [index, language] of languages.entries()) { await offlinePage.locator('#cwLanguageSelect').selectOption(language); await settle(offlinePage); for (const id of Object.keys(endpoints)) assert.equal(await offlinePage.locator('#' + id + ' > button').textContent(), retryLabels[index]); assert.equal(await offlinePage.locator('#messageInput').inputValue(), 'Offline message draft exact'); assert.deepEqual(await work(offlinePage), offlineWork); checks++; }
+  for (const [index, language] of languages.entries()) { await offlinePage.locator('#cwLanguageSelect').selectOption(language); await settle(offlinePage); await quotePresentation(offlinePage, index); for (const id of Object.keys(endpoints)) assert.equal(await offlinePage.locator('#' + id + ' > button').textContent(), retryLabels[index]); assert.equal(await offlinePage.locator('#messageInput').inputValue(), 'Offline message draft exact'); assert.deepEqual(await work(offlinePage), offlineWork); checks++; }
   await offlinePage.setViewportSize({ width: 320, height: 900 }); await capture(offlinePage, 'offline-de-320');
   // A real cached-document reload must replace the original HTML loaders even
   // though the primary read fails before the extra-section requests are made.
@@ -158,6 +172,7 @@ async function database() {
   }
   async function coldLabels() {
     const index = languages.indexOf(await offlinePage.evaluate(() => portalLanguage)), width = await offlinePage.evaluate(() => innerWidth);
+    await quotePresentation(offlinePage, index); assert((await offlinePage.locator('#clientQuotesStatus').textContent()).startsWith(quoteLoadErrors[index]));
     for (const id of Object.keys(endpoints)) {
       assert.equal(await offlinePage.locator('#' + id + ' > p[role=alert]').textContent(), errorLabels[index]); assert.equal(await offlinePage.locator('#' + id + ' > button').textContent(), retryLabels[index]);
       const rect = await offlinePage.locator('#' + id + ' > button').boundingBox(); assert(rect.x >= 0 && rect.x + rect.width <= width && rect.height >= 44);
@@ -209,7 +224,8 @@ async function database() {
   await coldPreserve(); assert.equal(await offlinePage.locator('#messageInput').isDisabled(), false); assert.deepEqual(await database(), savedDatabase); checks++;
   console.log('PASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work'); await offline.close();
   assert.deepEqual(await database(), savedDatabase);
-  console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true })); complete = true;
+  console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true }));
+  console.log('PASS actual portal quote presentation ' + JSON.stringify({ quoteLanguageCases, cachedQuotesJsBytesEqualSource: true, coldOfflineQuoteErrors: true, realLanguageSelector: true, pureQuotePaintDoesNotReloadQuotes: true })); complete = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   clearTimeout(deadline); await browser?.close(); await prisma.$disconnect();
   if (client) { if (notice) await prisma.notification.delete({ where: { id: notice.id } }); await prisma.clientMessage.deleteMany({ where: { clientId: client.id } }); const key = 'LANGUAGE:CLIENT:' + client.id; await prisma.systemSetting.deleteMany({ where: { key } }); if (originalLanguage) await prisma.systemSetting.create({ data: originalLanguage }); await prisma.client.delete({ where: { id: client.id } }); assert.equal(await prisma.client.count({ where: { id: client.id } }), 0); assert.deepEqual(await prisma.systemSetting.findUnique({ where: { key } }), originalLanguage); console.log('PASS portal extras fixtures removed and previous language setting restored'); }
