@@ -1,0 +1,191 @@
+{
+  "task": 497,
+  "checkedAt": "2026-10-01T14:11:16.806450+00:00",
+  "parent": "00ac8928dc50f4ececfc741a1c448ea863b7c238",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Own technician login labels/statuses, five languages; preserve original native authentication, Enter, pending serialization, session and stored work. Precache original public login JS for offline shell.",
+  "sources": {
+    "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+    "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081",
+    "frontend/sw.js": "f783521ab977d911013f480d4b2130e5de7af4d8282c475b833c7af7c0b6501f",
+    "scripts/test-field-login-languages.js": "89ecb8f4ca7edc38bfcf41ced9234fdd97be308b99e943e9449761dcd53c2bd3",
+    "scripts/test-field-suite.js": "f3beff7b99117f4b2c0532a94e9bacd9dbe4dd5e3ac16fe9aa77f01150d94757"
+  },
+  "productAudit": {
+    "parent": "00ac8928dc50f4ececfc741a1c448ea863b7c238",
+    "originalAuthenticationRestoredExactly": true,
+    "pendingAndEnterAndPayloadAndSessionAndRedirectUnchanged": true,
+    "literalServerAndUserDataProtected": true,
+    "original381ScriptsAndOrderUnchanged": true,
+    "runner": 382,
+    "worker": 272,
+    "ownCopyEntries": 12,
+    "variants": 60,
+    "unchanged": {
+      "frontend/cw-auth.js": "08395ae7b161f6236712cd88927021b029e4b6c9ffda45078c1505dd69fccd82",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/technician-auth-guard.js": "8c58abca001040443985b9a8ebac0c9775bef0f389020bfa59211bce7e55b594",
+      "src/business/technician/TechnicianAuthBusiness.js": "4e51b6e1dd32bac615f0eb72a161293f445a7a0cc379f91da1e75430e044f4a1"
+    }
+  },
+  "local": {
+    "runtime": "Isolated PGlite; external email, WhatsApp, fiscal, webhooks and AI disabled; not native PostgreSQL acceptance",
+    "positive": {
+      "result": {
+        "script": "scripts/test-field-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22539,
+        "logBytes": 1526
+      },
+      "logSha256": "f4d5199f2377e8292ea14a76c2961a9ac7303124459ce202a5e69b74b666a783",
+      "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+    },
+    "regressions": [
+      {
+        "result": {
+          "script": "scripts/test-auth-entry-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 10250,
+          "logBytes": 884
+        },
+        "logSha256": "169c5992e72032b5c5c178dd16a6ed3d8a32510777ac936f9a4d40b1e6c5e5a9",
+        "log": "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script\nPASS login.js repeated login, retry, exact password and no token logging\nPASS admin-login.js repeated login, retry, exact password and no token logging\nPASS client-login.js repeated login, retry, exact password and no token logging\nPASS technician-login.js repeated login, retry, exact password and no token logging\nPASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox\nPASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved\nPASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-session-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 1731,
+          "logBytes": 581
+        },
+        "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3",
+        "log": "PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced\nPASS delayed 401 cannot invalidate a newer login\nPASS account switch preserves both photo queues and prevents cross-account completion\nPASS permanent rejection blocks automatic resends and replacement; manual review reuses the same UUID/content\nPASS Retry-After prevents early automatic and manual sends; original request resumes after the pause\nPASS malformed and unattributed historical queues remain untouched and block accidental replacement\nSESSION RESULT=PASS\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-auth-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 17174,
+          "logBytes": 734
+        },
+        "logSha256": "55a7d2e54bcee2aa2a2c56cc194b2a4cfa489d0c7d270540d40350fca52f300e",
+        "log": "PASS auth languages {\"name\":\"expired\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"connection\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"logout\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"expired\",\"type\":\"EXTRA\",\"widths\":[320],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth language result {\"checks\":50,\"typedDrafts\":true,\"noOperationalWrites\":true,\"originalErrors\":true,\"noRedirectOnFieldExpiry\":true}\n"
+      }
+    ],
+    "negativeImmutableParentLoginProducer": {
+      "result": {
+        "script": "../qa-runtime/negative-login497.cjs",
+        "code": 1,
+        "signal": null,
+        "ms": 2450,
+        "logBytes": 538
+      },
+      "logSha256": "e37e7be5511fd16dfad1803a027f30e4cfb02966ba2875e8531ddec913da60da",
+      "log": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Técnico - Cristal Water'\n- 'Technician - Cristal Water'\n\n    at labels (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-login-languages.js:88:16)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-login-languages.js:107:3 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Técnico - Cristal Water',\n  expected: 'Technician - Cristal Water',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+    },
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44,
+      "passed": true
+    },
+    "workScope": "Two manually seeded REGULAR/EXTRA draft byte fixtures, document/route/legacy/corrupt fixtures, and two genuinely prepared typed IndexedDB requests sharing resource 701 with distinct UUID/SHA256. Does not assert real visit completion or field cache availability.",
+    "qaIterations": "Initial probe deadlocked by returning the held async login promise; a second navigation probe evaluated its own paused page. Harness corrected with route-arrival gates, beforeunload capture and explicit network context. Earlier producer-selection probe reached cache-byte rejection because a broad context route overrode its source; final page-level immutable producer probe fails at the English title. These discarded probes do not establish product failures."
+  },
+  "visual": {
+    "reviewed": [
+      "initial-de-320.png",
+      "literal-de-320.png",
+      "cached-offline-de-320.png"
+    ],
+    "sha256": {
+      "connection-es-320.png": "4db794acdcada35709354760f980e35e1f0f167d820508f994dbfa31333a7099",
+      "connection-en-320.png": "ef2da8744bc9f389c4263ed16e6cdd12c8981a6c58dc58ccdc96839a1d761d63",
+      "initial-fr-320.png": "d4581ca2fb1c4b1b42261bc4617566ab41194ac968dbaddcf76eb4c8fe79a0f8",
+      "initial-pt-320.png": "8adb342c81f0300e39240fadf5bfe4220d2c8ce8a25bfb700f7208fe0b57df2f",
+      "literal-fr-320.png": "2d59dc9d54acdfa175a36b69fee9133057548e9ea64ecf92e5da57b1330f4e95",
+      "literal-es-320.png": "b6e0cf4e50a4b84300cfa55d8e896017f68925c98e651cb68eddeb1f44cba90d",
+      "initial-de-320.png": "46361e106405bc833258cecc5563bc074867193ae796ff8c125be59064c0f2ff",
+      "literal-en-320.png": "663934e65fa5010324c9add2be157ad19af1b597b62e7640a8bed4d2808a8696",
+      "connection-pt-320.png": "c7f1b590d23fbc60f56e13586b50322b5f6043b705182b45bdcb0062b54f411d",
+      "cached-offline-de-320.png": "1fe78eb59012ddf1edeb3f75388e3193ae3595b5e8eb31b1fea274164824c6a9",
+      "literal-pt-320.png": "595dfbe31ed1deff60e815b987e69a8d7207eb80fb13d0d26c8b006cea677362",
+      "connection-fr-320.png": "f5493fd6cbff818976ed0159941e74956ade86f54f706c2fa5a9df8a49ea7aba",
+      "initial-en-320.png": "241a7962a75b9781848dedf5a35422de121b435496628572eb25d3bfa49fb7ee",
+      "connection-de-320.png": "021b0b0ef78e5c7ecbdfa1caafba9a0249b6dc4a843fdc0f6d9454b1bf50c8d3",
+      "literal-de-320.png": "61e28b325b692077cf0ec34f12e0960cd49e5eb7b10203116fa0a9d1a21f7c86",
+      "initial-es-320.png": "ab887d9597a022d174fb24532c676f94ca425f44c81e4788f1eb073eb7a6b6b7"
+    },
+    "result": "German own login labels, preserved PIN selection, escaped long server text and offline connection error fit 320px. Shared footer labels are outside this own-copy scope."
+  },
+  "lastCompleteAcceptance": {
+    "task": 494,
+    "code": "6372b2b4c32ee9a9ce269e9ccc72b3ca1bdbd9dc",
+    "tree": "6a0366048ecd4335f13dc94e9d589cbd2be090a4",
+    "run": 36861734271,
+    "job": 110367328949,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "groups": 381,
+    "distinctGroups": 381,
+    "allCodeZero": true,
+    "actualOrderExactlyMatched": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceSha256": {
+      "frontend/ui/components/empty-state.css": "cf30dce4376a54ae482a3cd955a4814d6e42b3b2b4cea69274bc3dadc26841aa",
+      "frontend/sw.js": "513b3acd11b54d6d0bdc43118f2f3a70d051496792f06ecdaa606c9e6d7daf13",
+      "scripts/test-field-history-languages.js": "5c32f15343268d3a1face47ecb7b55523096459931003d82b5b21f02338d3a30",
+      "scripts/test-field-route-session-languages.js": "6c9280c83642c3f69914137981a1bb4d8a8187e2f407aa17db09fad0f1bd7f56"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T13:45:13.3754616Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "7fea32e4741054627fcbc778de2a6da5fd74146c6341bd544afd628a4075c040"
+  },
+  "publication496": {
+    "code": "00ac8928dc50f4ececfc741a1c448ea863b7c238",
+    "tree": "72a91e24ca085e36317ac30d582d355480938041",
+    "run": 36868131317,
+    "job": 110388711849,
+    "status": "in_progress"
+  },
+  "nativePending": [
+    495,
+    496,
+    497
+  ],
+  "nextTasks": {
+    "TASK498": "Correct anonymous connection toast: cached public login has no token but shared toast currently claims a retained session. Keep authenticated/stale cancellation behavior and all work/session producers intact.",
+    "sharedNavigation": "Inspect fallback footer labels separately; observed Portuguese labels in German screenshot do not by themselves prove stable final-state behavior."
+  },
+  "completion": {
+    "total": 32,
+    "complete": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "annualContract": "deferred",
+    "repoVisibility": "public during development; private before C32 closes"
+  }
+}
