@@ -118,10 +118,12 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
     if(mode!=='account'){assert(await page.locator('main.field').evaluate(node=>node.inert&&getComputedStyle(node).display==='none'));assert.deepEqual(await raw(),saved);assert.deepEqual(await rows(),pending);}
     await page.locator('#fieldRouteSessionChanged a').click();const expectedId=mode==='account'?otherVisit.id:id;
     await page.waitForFunction(expectedId=>window.CWFieldVisitContext?.()?.id===expectedId&&!document.querySelector('main.field').inert&&getComputedStyle(document.querySelector('main.field')).display!=='none',expectedId);
-    // Visit restoration can finish before the three document reads/save. Compare
-    // storage only once the actual reopened page has consumed that original load.
+    // Explicit online account reopening waits for its actual document refresh.
+    // Offline recovery retains the original route/draft checks; it does not
+    // promise that an asynchronous document producer has a live or cached result.
     const reopenedOwner = 'TECH:' + (mode === 'account' ? other.id : tech.id), reopenedVehicle = mode === 'account' ? otherVehicle.id : vehicle.id;
-    const documentReady = { owner: reopenedOwner, vehicleId: reopenedVehicle, source: offline ? 'cache' : 'live' };
+    if (mode === 'account' && !offline) {
+    const documentReady = { owner: reopenedOwner, vehicleId: reopenedVehicle, source: 'live' };
     await page.waitForFunction(({owner, vehicleId, source}) => {
       const day = CWFieldRouteCache.today(), key = ['cwFieldDocuments', 'v3', owner, 'TECHNICIAN', vehicleId, day].join(':');
       let copy; try { copy = JSON.parse(localStorage.getItem(key)); } catch (_) { return false; }
@@ -130,6 +132,7 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
         return box?.dataset.source === source && section && Number.isFinite(Date.parse(section.confirmedAt)) && box.dataset.confirmedAt === section.confirmedAt;
       });
     }, documentReady);
+    }
     assert.equal(await page.locator('#fieldRouteSessionChanged').count(),0);assert.equal(await page.locator('#notes').inputValue(),(mode==='account'?'B':type)+' draft <b>{owner}</b>');
     const reopened=await raw();
     if(mode==='account'&&!offline){

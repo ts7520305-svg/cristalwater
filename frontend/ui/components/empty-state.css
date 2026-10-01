@@ -1,3 +1,12 @@
+:root {
+  --cw-empty-state-label: "Sem dados";
+}
+
+:root:lang(en) { --cw-empty-state-label: "No data"; }
+:root:lang(fr) { --cw-empty-state-label: "Aucune donnée"; }
+:root:lang(es) { --cw-empty-state-label: "Sin datos"; }
+:root:lang(de) { --cw-empty-state-label: "Keine Daten"; }
+
 .cw-v2-state-empty,
 .empty,
 .empty-box,
@@ -17,7 +26,7 @@
 .empty::before,
 .empty-box::before,
 [data-cw-state="empty"]::before {
-  content: "Sem dados";
+  content: var(--cw-empty-state-label, "Sem dados");
   font-size: var(--cw-font-size-xs);
   letter-spacing: 0.03em;
   text-transform: uppercase;

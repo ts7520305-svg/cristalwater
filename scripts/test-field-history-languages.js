@@ -8,7 +8,26 @@ const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
 assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
 const languages = ['pt','en','fr','es','de'], words = {"title": ["Cristal Water - Historico Tecnico", "Cristal Water - Technician History", "Cristal Water - Historique du technicien", "Cristal Water - Historial del técnico", "Cristal Water - Technikerverlauf"], "technician": ["Tecnico", "Technician", "Technicien", "Técnico", "Techniker"], "heading": ["Historico de Visitas", "Visit History", "Historique des visites", "Historial de visitas", "Besuchsverlauf"], "intro": ["Consulta rapida das ultimas visitas concluidas, sem escrita.", "Quick view of recent completed visits, read only.", "Consultation rapide des dernières visites terminées, en lecture seule.", "Consulta rápida de las últimas visitas completadas, solo lectura.", "Schnellansicht der letzten abgeschlossenen Besuche im Lesemodus."], "loading": ["A carregar historico.", "Loading history.", "Chargement de l’historique.", "Cargando el historial.", "Verlauf wird geladen."], "empty": ["Sem historico disponivel.", "No history available.", "Aucun historique disponible.", "No hay historial disponible.", "Kein Verlauf verfügbar."], "noDate": ["Sem data", "No date", "Sans date", "Sin fecha", "Kein Datum"], "pool": ["Piscina", "Pool", "Piscine", "Piscina", "Pool"], "client": ["Cliente", "Client", "Client", "Cliente", "Kunde"], "line": ["{date} · Estado {status}", "{date} · Status {status}", "{date} · Statut {status}", "{date} · Estado {status}", "{date} · Status {status}"], "missingTechnician": ["Sessao sem tecnico associado.", "No technician is associated with this session.", "Aucun technicien n’est associé à cette session.", "No hay ningún técnico asociado a esta sesión.", "Dieser Sitzung ist kein Techniker zugeordnet."], "incomplete": ["A resposta não confirma a lista completa. Atualize antes de consultar o histórico.", "The response does not confirm the complete list. Refresh before viewing history.", "La réponse ne confirme pas la liste complète. Actualisez avant de consulter l’historique.", "La respuesta no confirma la lista completa. Actualiza antes de consultar el historial.", "Die Antwort bestätigt keine vollständige Liste. Aktualisieren Sie, bevor Sie den Verlauf ansehen."], "loaded": ["Historico carregado com {count} visita(s).", "History loaded with {count} visit(s).", "Historique chargé avec {count} visite(s).", "Historial cargado con {count} visita(s).", "Verlauf mit {count} Besuch(en) geladen."], "noCompleted": ["Sem visitas concluidas para mostrar.", "No completed visits to show.", "Aucune visite terminée à afficher.", "No hay visitas completadas para mostrar.", "Keine abgeschlossenen Besuche verfügbar."], "loadFailed": ["Falha ao carregar historico.", "Failed to load history.", "Échec du chargement de l’historique.", "Error al cargar el historial.", "Verlauf konnte nicht geladen werden."], "http": ["Falha HTTP {status}", "HTTP failure {status}", "Échec HTTP {status}", "Error HTTP {status}", "HTTP-Fehler {status}"]};
 const fieldIds = ['notes','ph','chlorine','alkalinity','salt','orp','temperature','cleaned','vacuumed','basketCleaned','brushed','waterlineClean','backwashDone'];
-let browser, release, completed = false, checks = 0, scenarios = 0;
+let browser, release, completed = false, checks = 0, scenarios = 0, emptyProviderChecks = 0, actualEmptyBadgeChecks = 0;
+const sharedEmptyLabels = ['Sem dados','No data','Aucune donnée','Sin datos','Keine Daten'];
+async function sharedEmptyProvider(page, index) {
+  const actual = await page.evaluate(() => {
+    // Detached QA probes verify all four shared selectors while their body is
+    // source text, identical to the Portuguese badge, and must stay literal.
+    const probe = document.createElement('div'); probe.dataset.cwNoI18n = '';
+    probe.style.cssText = 'position:fixed;left:-10000px;top:0;width:200px;pointer-events:none;';
+    const nodes = ['cw-v2-state-empty','empty','empty-box',null].map(className => {
+      const node = document.createElement('div'); if (className) node.className = className; else node.dataset.cwState = 'empty';
+      node.textContent = 'Sem dados'; probe.appendChild(node); return node;
+    });
+    document.body.appendChild(probe);
+    try { return nodes.map(node => ({ content: getComputedStyle(node,'::before').content, body: node.textContent })); }
+    finally { probe.remove(); }
+  });
+  assert.deepEqual(actual,Array.from({ length: 4 },() => ({ content: JSON.stringify(sharedEmptyLabels[index]),body: 'Sem dados' })));
+  emptyProviderChecks += 4;
+}
+
 const deadline = setTimeout(() => { console.error('History language scenario incomplete'); process.exit(1); }, 110000);
 process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
 (async () => {
@@ -168,12 +187,14 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     const dates = await page.evaluate(rows => rows.map(visit => { const when = visit.endAt || visit.startAt || visit.plannedDate || visit.date;return when ? new Date(when).toLocaleString('pt-PT',{ dateStyle: 'short',timeStyle: 'short' }) : null; }),rows);
     for (const width of widths) { await page.setViewportSize({ width,height: 1400 });for (const [index,language] of languages.entries()) {
       await locale(language);const copyIndex = foreign ? 0 : index;
+      await sharedEmptyProvider(page,index);
       assert.equal(await page.title(),words.title[copyIndex]);
       for (const key of ['technician','heading','intro']) assert.equal(await page.locator('[data-cw-history-copy=' + key + ']').textContent(),words[key][copyIndex]);
       assert.equal(await page.locator('#statusBox').textContent(),rawStatus || text(status,copyIndex,{ count: rows.length,status: 503 }));
       const actual = await page.locator('#historyList .item').evaluateAll(nodes => nodes.map(node => [node.querySelector('b').textContent,...[...node.querySelectorAll('small')].map(node => node.textContent)]));
       assert.deepEqual(actual,rows.map((v,pos) => [v.pool?.name || words.pool[copyIndex],v.client?.name || words.client[copyIndex],text('line',copyIndex,{ date: dates[pos] || words.noDate[copyIndex],status: v.status || '-' })]));
       assert.equal(await page.locator('#historyList .empty').count(),empty ? 1 : 0);if (empty) assert.equal(await page.locator('#historyList .empty').textContent(),words.empty[copyIndex]);if (noList) assert.equal(await page.locator('#historyList').textContent(),'');
+      if (empty) { assert.equal(await page.locator('#historyList .empty').evaluate(node => getComputedStyle(node,'::before').content),JSON.stringify(sharedEmptyLabels[index]));actualEmptyBadgeChecks++; }
       assert.deepEqual(await state(),before);assert.deepEqual(await raw(),stored);assert.deepEqual(await pending(),records);assert.deepEqual(await database(),db);
       assert(await page.evaluate(() => qaHistoryNodes.every(node => node.isConnected) && qaHistoryTextNodes.every(node => node.isConnected) && document.activeElement === qaHistoryFocus && qaHistoryLinks.every((node,index) => node.onclick === qaHistoryHandlers[index])));
       assert.equal(await page.locator('#historyList b b,#historyList script,#historyList img').count(),0);assert(!(await page.locator('#historyList').textContent()).includes('PRIVATE HISTORY'));
@@ -202,7 +223,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.goto(base + '/technician-history',{ waitUntil: 'networkidle' });await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').textContent !== 'A carregar historico.');await matrix({ name: 'original-valid-role-missing-technician-id',status: 'missingTechnician',tone: 'error',rows: [],empty: true,widths: [320] });
   await page.evaluate(source => { for (const key of ['user','cristalwater_user']) localStorage.setItem(key,JSON.stringify(source)); },source);await openHistory('native');
   await page.evaluate(() => navigator.serviceWorker.ready);await page.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await page.waitForFunction(async () => { const cache = await caches.open([...await caches.keys()].find(key => key.startsWith('cristalwater-field-')));return !!await cache.match('/technician-history') && !!await cache.match('/technician-history.js'); });
+  const sharedEmptyCss = await fs.readFile('frontend/ui/components/empty-state.css','utf8');
+  await page.waitForFunction(async expected => { const cache = await caches.open([...await caches.keys()].find(key => key.startsWith('cristalwater-field-'))),css = await cache.match('/ui/components/empty-state.css');return !!await cache.match('/technician-history') && !!await cache.match('/technician-history.js') && !!css && await css.text() === expected; },sharedEmptyCss);
   const beforeOffline = await raw(),dbOffline = await database();await context.setOffline(true);
   await matrix({ name: 'real-in-memory-history-offline' });
   await page.reload({ waitUntil: 'domcontentloaded' });await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
@@ -219,11 +241,12 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   for (const width of [320,390,1440]) { await leaderPage.setViewportSize({ width,height: 1400 });for (const [index,language] of languages.entries()) {
     await leaderPage.locator('#cwLanguageSelect').selectOption(language);await leaderPage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     assert.equal(await leaderPage.locator('#statusBox').textContent(),words.noCompleted[index]);assert.equal(await leaderPage.locator('#historyList .empty').textContent(),words.empty[index]);assert.equal(await leaderPage.title(),words.title[index]);
+    await sharedEmptyProvider(leaderPage,index);assert.equal(await leaderPage.locator('#historyList .empty').evaluate(node => getComputedStyle(node,'::before').content),JSON.stringify(sharedEmptyLabels[index]));actualEmptyBadgeChecks++;
     assert.equal(await leaderPage.evaluate(() => getComputedStyle(document.documentElement).visibility),'visible');assert(await leaderPage.evaluate(() => qaLeaderCalls === 0 && qaLeaderNodes.every(node => node.isConnected) && document.documentElement.scrollWidth <= innerWidth + 1));
     assert.deepEqual(await leaderPage.evaluate(() => ['token','cristalwater_jwt','adminToken'].map(key => localStorage.getItem(key))),leaderTokens);assert.deepEqual(await database(),leaderDb);checks++;
     if (process.env.CW_HISTORY_CAPTURE && width === 320 && language === 'de') await leaderPage.locator('main').screenshot({ path: process.env.CW_HISTORY_CAPTURE + '/actual-team-leader-empty-de-320.png' });
   }}
   for (const request of leaderRequests.slice(first)) { assert.equal(request.path,'/api/settings/language/me');assert.equal(request.method,'PUT');assert.equal(request.auth,'Bearer ' + leaderToken); }
   assert.deepEqual(leaderErrors,[]);scenarios++;await leaderContext.close();
-  console.log('PASS history language result ' + JSON.stringify({ checks,scenarios,ownedEntries: 16,languages: 5,realScopedFourVisitsThreeCompleted: true,originalDatePrecedenceFormatAndInvalidDateLiteral: true,techAndTeamLeader: true,readOnly: true,typedDraftFields: 13,immutablePending: 2,realOfflineNoHistoryCacheInvented: true,rawErrorsAndSourceNamesLiteral: true,noOperationalWrites: true }));completed = true;
+  console.log('PASS history language result ' + JSON.stringify({ checks,scenarios,emptyProviderChecks,actualEmptyBadgeChecks,sharedSelectors: 4,sharedBadgeLanguages: 5,sourceBodyLiteral: true,exactSharedCssCachedAndRealOffline: true,ownedEntries: 16,languages: 5,realScopedFourVisitsThreeCompleted: true,originalDatePrecedenceFormatAndInvalidDateLiteral: true,techAndTeamLeader: true,readOnly: true,typedDraftFields: 13,immutablePending: 2,realOfflineNoHistoryCacheInvented: true,rawErrorsAndSourceNamesLiteral: true,noOperationalWrites: true }));completed = true;
 })().catch(error => { console.error(error);process.exitCode = 1; }).finally(async () => { if (typeof release === 'function') release();clearTimeout(deadline);await browser?.close();await prisma.$disconnect(); });
