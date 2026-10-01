@@ -327,7 +327,17 @@
   }
   window.CWFieldReminders={create,mark,list,sync,legacyWarning,context,presentation:reminderCopy.presentation};
   window.addEventListener('online',()=>sync().catch(()=>{}));
-  window.addEventListener('storage',event=>{if(event.key===key||event.key===null||['token','cristalwater_jwt','user','cristalwater_user'].includes(event.key)){window.dispatchEvent(new Event('cw:water-state-updated'));window.dispatchEvent(new Event('cw:reminders-updated'));}});
+  function languageOnlyUserUpdate(event) {
+    if (!['user', 'cristalwater_user'].includes(event.key)) return false;
+    try {
+      if (!captured || !store.same(captured)) return false;
+      const previous = JSON.parse(event.oldValue), current = JSON.parse(event.newValue);
+      if (![previous, current].every(value => value && typeof value === 'object' && !Array.isArray(value) && Number(value.technicianId || value.id) === captured.technicianId && ['TECH', 'TECHNICIAN', 'TEAM_LEADER'].includes(String(value.role || '').toUpperCase()))) return false;
+      const identity = value => JSON.stringify(Object.keys(value).filter(key => key !== 'language').sort().map(key => [key, value[key]]));
+      return identity(previous) === identity(current);
+    } catch (_) { return false; }
+  }
+  window.addEventListener('storage',event=>{if(languageOnlyUserUpdate(event))return;if(event.key===key||event.key===null||['token','cristalwater_jwt','user','cristalwater_user'].includes(event.key)){window.dispatchEvent(new Event('cw:water-state-updated'));window.dispatchEvent(new Event('cw:reminders-updated'));}});
   let invalidated=false;
   setInterval(()=>{if(captured&&!store.same(captured)&&!invalidated){invalidated=true;window.dispatchEvent(new Event('cw:water-state-updated'));window.dispatchEvent(new Event('cw:reminders-updated'));}},1000);
   setInterval(()=>sync().catch(()=>{}),30000);

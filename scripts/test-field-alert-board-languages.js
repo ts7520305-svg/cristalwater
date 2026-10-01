@@ -4,7 +4,7 @@ const assert = require('node:assert/strict'), { randomUUID } = require('node:cry
 const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002'; assert(['127.0.0.1', 'localhost'].includes(new URL(base).hostname));
-let browser;
+let browser, matrixChecks = 0, crossTabLanguageChecks = 0, userNotificationChecks = 0;
 const languages=["pt", "en", "fr", "es", "de"];
 const words={
   "chip": [
@@ -450,7 +450,7 @@ async function helperGuardCases() {
       if(!history.length)assert.equal(await page.locator('[data-history-empty]').textContent(),words.historyEmpty[i]);
       if(warning)for(const message of await page.locator('[data-alert-text=warning]').allTextContents())assert.equal(message,warning[i]);
       if(toast)assert.equal(await page.locator('#toast').textContent(),Array.isArray(toast)?toast[i]:words[toast][i]);
-      assert.deepEqual(await state(),before);assert.deepEqual(await database(),db);assert(await page.evaluate(()=>qaAlertNodes.every(n=>n.isConnected)));assert(await page.locator('#interruptCard').evaluate(n=>n.hidden||n.scrollWidth<=n.clientWidth+1));
+      matrixChecks++;assert.deepEqual(await state(),before);assert.deepEqual(await database(),db);assert(await page.evaluate(()=>qaAlertNodes.every(n=>n.isConnected)));assert(await page.locator('#interruptCard').evaluate(n=>n.hidden||n.scrollWidth<=n.clientWidth+1));
     }}
     for(const r of requests.slice(start)){assert.equal(r.path,'/api/settings/language/me');assert.equal(r.method,'PUT');assert.deepEqual(Object.keys(JSON.parse(r.body)),['language']);}
     await locale('pt');await settle();
@@ -479,6 +479,67 @@ async function helperGuardCases() {
   await Promise.all([confirmation(page, 'CONFIRMED'), confirmation(secondPage, 'CONFIRMED')]);
   await status(waterId, 'CONFIRMED'); await confirmation(secondPage, 'ASSUMED');
   assert.deepEqual((await journal()).entries.filter(entry => entry.exceptionId === waterId).map(entry => entry.action), ['OPEN', 'ASSUMED', 'CONFIRMED']);
+  // Actual language selection in the second live tab updates the two user
+  // records. It must not re-read or replace the first tab's operational board.
+  await locale('pt'); await settle();
+  secondPage.on('request',request => { const path = new URL(request.url()).pathname; if(path.startsWith('/api/')) requests.push({path,method:request.method(),body:request.postData()}); });
+  await page.evaluate(() => {
+    window.qaLanguageStorageEvents = [];
+    window.qaCrossTabNodes = [...document.querySelectorAll('#interruptCard,#interruptCard *,#fieldAlertHistoryList,#fieldAlertHistoryList *,#fieldPriorityNotice')];
+    window.addEventListener('storage',event => {
+      if (!['user','cristalwater_user'].includes(event.key)) return;
+      let before,after; try { before=JSON.parse(event.oldValue);after=JSON.parse(event.newValue); } catch (_) { return; }
+      if (!before || !after) return;
+      qaLanguageStorageEvents.push({key:event.key,changed:Object.keys({...before,...after}).filter(key=>JSON.stringify(before[key])!==JSON.stringify(after[key])).sort()});
+    });
+  });
+  const crossTabBefore=await state(),crossTabDb=await database(),crossTabPending=await page.evaluate(()=>CWFieldWriteStore.records(null,CWFieldWriteStore.session(),true)),crossTabJournal=await raw(),crossTabStart=requests.length;
+  for(const language of ['en','fr','es','de','pt']){
+    const count=await page.evaluate(()=>qaLanguageStorageEvents.length);
+    await secondPage.locator('#cwLanguageSelect').selectOption(language);
+    await page.waitForFunction(count=>qaLanguageStorageEvents.length>=count+2,count);
+    await settle();
+    const after=await state();
+    assert.deepEqual(after.calls,crossTabBefore.calls,'Language-only user updates from another real tab must not re-read reminders or alert history');
+    assert.deepEqual(after,crossTabBefore);assert.deepEqual(await database(),crossTabDb);assert.equal(await raw(),crossTabJournal);
+    assert.deepEqual(await page.evaluate(()=>CWFieldWriteStore.records(null,CWFieldWriteStore.session(),true)),crossTabPending);
+    assert(await page.evaluate(()=>qaCrossTabNodes.every(node=>node.isConnected)));
+    const changes=await page.evaluate(count=>qaLanguageStorageEvents.slice(count),count);
+    assert(changes.length>=2);for(const change of changes)assert.deepEqual(change.changed,['language']);
+    crossTabLanguageChecks++;
+  }
+  for(const request of requests.slice(crossTabStart)){assert.equal(request.path,'/api/settings/language/me');assert.equal(request.method,'PUT');assert.deepEqual(Object.keys(JSON.parse(request.body)),['language']);}
+  // These malformed or changed identity/context event inputs retain the original
+  // notifications. Event fixtures do not alter the actual credentials/storage.
+  const notificationResult=await page.evaluate(()=>{
+    const user=JSON.parse(localStorage.getItem('cristalwater_user')),raw=JSON.stringify(user),events=[];
+    const water=()=>events.push('water'),reminders=()=>events.push('reminders');
+    window.addEventListener('cw:water-state-updated',water);window.addEventListener('cw:reminders-updated',reminders);
+    const cases=[];
+    for(const key of ['user','cristalwater_user'])for(const [name,oldValue,newValue]of [
+      ['added',null,raw],['removed',raw,null],['malformed',raw,'{broken'],['array',raw,'[]'],
+      ['name',raw,JSON.stringify({...user,name:user.name+' changed'})],
+      ['role',raw,JSON.stringify({...user,role:'ADMIN'})],
+      ['id',raw,JSON.stringify({...user,id:Number(user.id)+100000})],
+      ['vehicle',raw,JSON.stringify({...user,vehicleId:100000})]
+    ])cases.push({name:key+':'+name,key,oldValue,newValue});
+    for(const key of ['token','cristalwater_jwt'])cases.push({name:key,key,oldValue:'old token event',newValue:'new token event'});
+    cases.push({name:'clear',key:null,oldValue:null,newValue:null});
+    const reminderKey=Object.keys(localStorage).find(key=>key.startsWith('cwFieldReminders:v1:'));
+    if(!reminderKey)throw Error('Missing actual current-owner reminder cache');
+    cases.push({name:'reminder-data',key:reminderKey,oldValue:localStorage.getItem(reminderKey),newValue:localStorage.getItem(reminderKey)});
+    const result=[];
+    try{for(const item of cases){const first=events.length;window.dispatchEvent(new StorageEvent('storage',item));result.push({name:item.name,notifications:events.slice(first)});}}
+    finally{window.removeEventListener('cw:water-state-updated',water);window.removeEventListener('cw:reminders-updated',reminders);}
+    return result;
+  });
+  assert.equal(notificationResult.length,20);
+  for(const result of notificationResult)assert.deepEqual(result.notifications,['water','reminders'],result.name);
+  userNotificationChecks=notificationResult.length;
+  assert.equal(await raw(),crossTabJournal);assert.deepEqual(await database(),crossTabDb);
+  assert.deepEqual(await page.evaluate(()=>CWFieldWriteStore.records(null,CWFieldWriteStore.session(),true)),crossTabPending);
+  console.log('PASS actual cross-tab language-only storage '+JSON.stringify({languages:crossTabLanguageChecks,userKeys:2,primaryProducerCallsUnchanged:true,nodesAndFocusAndJournalAndPendingAndSqlExact:true,notificationGuards:userNotificationChecks,operationalWrites:0}));
+  await locale('pt');await settle();
   if(process.env.CW_ALERT_BOARD_CAPTURE){await page.locator('[data-field-tab-button=hoje]').click();await locale('de');await page.setViewportSize({width:320,height:900});await page.locator('#interruptCard').screenshot({path:process.env.CW_ALERT_BOARD_CAPTURE.replace('.png','-board.png')});await locale('pt');}
   await click(pumpId, 'resolve'); await matrix({warning:helperWords.legacy,toast:'pumpInstruction'});
   for (const { row } of remote) assert.equal((await prisma.operationalReminder.findUnique({ where: { id: row.id } })).isCompleted, false);
@@ -532,6 +593,7 @@ async function helperGuardCases() {
   assert.deepEqual(separation, { changed: true, same: false, entries: 0 }); assert.equal(await raw(), beforeSwitch);
   for (const [key, value] of Object.entries(legacy)) assert.equal(await page.evaluate(key => localStorage.getItem(key), key), value);
   assert.equal(errors.length, 0, errors.join('\n'));
+  console.log('PASS cross-tab language result '+JSON.stringify({matrixChecks,crossTabLanguageChecks,userNotificationChecks,activeSecondTabRetained:true,allOriginalConcurrentMonotonicHistoryAndPhysicalClosureAndAccountDayIsolationChecksRetained:true}));
   console.log('PASS journal/board languages at320/390/1440; same nodes/focus/data/SQL and no language-triggered producers or operational requests; original history stays literal');
   console.log('PASS locked writes cannot cross session changes; other accounts/days do not inherit the journal; legacy bytes stay untouched');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { await browser?.close(); await prisma.$disconnect(); });

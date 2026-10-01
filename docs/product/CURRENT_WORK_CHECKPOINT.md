@@ -1,5 +1,21 @@
 # CURRENT_WORK_CHECKPOINT
 
+## Retoma atual — 01/10/2026, TASK495 / idioma entre janelas sem releitura operacional
+
+TASK495 implementada e validada localmente: CWFieldReminders deixa de emitir atualizações operacionais quando um evento storage de user/cristalwater_user muda apenas o idioma. Exige a mesma sessão real capturada, técnico correspondente e perfil reconhecido; compara todos os outros campos. Dados, identidade, perfil, nome, viatura, token, remoção/corrupção e chave de lembretes mantêm as notificações originais. Inversão exata do produto comprovada. API/auth/session/sync/gravações/copys originais intactos; catálogo442/runner381 mantidos, cache269→270.
+
+Mecanismo reproduzido com seleção real de idioma na segunda janela, que permanece aberta: dois eventos user com apenas language alterada. Com o módulo parent494 imutável no cenário final, as leituras journal/reminders aumentam e a nova asserção estrita falha15775 ms. Com a correção, cinco idiomas entre janelas conservam produtores, nós/foco/notas/contexto, tokens, storage/journal, outbox real e SQL. Zero escritas operacionais; apenas PUT de idioma existente. Este controlo reproduz a interação real, sem afirmar que o timing nativo original se repetiu naturalmente. A janela não é fechada para ocultar os produtores.
+
+150 verificações de apresentação e20 controlos de notificação aprovados; também todos os casos originais de journal, concorrência monotónica, quota/readback/corrupção, arranque offline, fecho físico, sessão bloqueada e isolamento de conta/dia. Os20 controlos usam entradas de eventos separadas e não alteram credenciais nem contornam autenticação. Integrações: quadro de alertas36155 ms e erros de lembretes19279 ms, ambos code0. Sintaxe695/308/44 aprovada. Backend inalterado:1 396/141 e quatro técnicos são os da492, sem nova execução alegada. PGlite não equivale a PostgreSQL16. [Prova495](evidence/20261001_task495_local.json).
+
+Publicação494 confirmada: código6372b2b4c32ee9a9ce269e9ccc72b3ca1bdbd9dc / árvore6a0366048ecd4335f13dc94e9d589cbd2be090a4; [CI494/36861734271](https://github.com/ts7520305-svg/cristalwater/actions/runs/36861734271) / job110367328949. CI492/493/494 têm dez etapas iniciais aprovadas e suites381 em execução; restauros pendentes. Publicação495/aceitação nativa das correções ainda pendentes nesta entrada.
+
+Novo resultado nativo verificado: CI491/36852272253 / job110336461457 falhou378/380. Head/checkout/árvore/cinco fontes/ordem380 conferidos. Só document-transition (timeout9000 ms após caso vehicle-online) e route-session (comparação antiga de confirmedAt após reabrir a conta) falharam; restantes378 grupos, unitários/técnicos/sintaxe/migrações passaram, restauro omitido. Correções493/494 ainda não existem nesse código491. TASK496 investigará a restauração genérica de campos da navegação e a fronteira de timezone/prontidão documental, sem concluir antecipadamente causa ou exposição.
+
+Última aceitação completa permanece TASK489:378 grupos/code0, PostgreSQL16.15/43 migrações, sintaxe695/308/44,1 396 unitários/141 ficheiros/quatro técnicos; restauro128 tabelas/51 ficheiros, linhas/hashes iguais, PASS2026-10-01T11:09:33.6871273Z. Código c00c2e0be796a94ab045d5ae0a5ebb3c327b620d / árvore12e7fb443353423934058f590da5b44fa8ed8426, [CI36847049628](https://github.com/ts7520305-svg/cristalwater/actions/runs/36847049628). CI490 falhou378/379 nos contadores do quadro de alertas; mecanismo idioma/storage agora coberto localmente.
+
+Próximo: TASK496 / navegação, viatura e documentos offline; continuar o manifesto e conferir CI/restauros. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes de fechar C32; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 01/10/2026, TASK494 / rótulo partilhado de listas vazias
 
 TASK494 implementada e validada localmente: o componente foundation empty-state.css usa agora uma variável de texto para Sem dados / No data / Aucune donnée / Sin datos / Keine Daten, seguindo o idioma HTML existente. Uma entrada / cinco variantes nos quatro seletores originais .cw-v2-state-empty/.empty/.empty-box/[data-cw-state=empty]. Estilos originais exatamente conservados; nenhum JS/DOM/API novo. Catálogo principal442, fontes do histórico/perfil e runner381 intactos; cache268→269.
