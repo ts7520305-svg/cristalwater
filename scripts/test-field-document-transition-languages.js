@@ -34,6 +34,9 @@ let browser,completed=false;const deadline=setTimeout(()=>{console.error("Docume
    if(process.env.CW_TRANSITION_CAPTURE&&width===320&&lang==='de')await page.locator('#documentCenterBox').screenshot({path:process.env.CW_TRANSITION_CAPTURE+'-'+label+'.png'});
   }}console.log('PASS '+label+' '+JSON.stringify({widths,languages}));
  }
+ // Finish the real public worker bootstrap before navigating between visits.
+ // The existing wait budgets and cases stay intact.
+ await page.goto(base+'/technician-login',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
  const midnight=await page.evaluate(()=>{const d=new Date();d.setHours(23,59,59,0);return d.getTime();});await page.clock.setFixedTime(new Date(midnight));
  await open('REGULAR');await page.locator('[data-field-tab-button=agora]').click();await page.locator('#notes').fill('REGULAR preserved <b>{date}</b>');await page.waitForFunction(()=>document.getElementById('fieldSaveStatus').dataset.state==='saved');
  await open('EXTRA');await page.locator('[data-field-tab-button=agora]').click();await page.locator('#notes').fill('EXTRA preserved <b>{date}</b>');await page.waitForFunction(()=>document.getElementById('fieldSaveStatus').dataset.state==='saved');
