@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#0f1723">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cristal Water - Perfil Tecnico</title>
+  <title data-cw-profile-copy="title" data-cw-no-i18n>Cristal Water - Perfil Tecnico</title>
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <script src="/cw-auth.js"></script>
@@ -19,7 +19,7 @@
     .status { border-radius: 12px; border: 1px solid #c9d8d2; background: #f4faf7; padding: 10px; font-weight: 700; margin-bottom: 10px; }
     .status[data-tone="error"] { border-color: #efbbc5; background: #fdecef; color: #6f1223; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-    .field { border: 1px solid #c9d8d2; border-radius: 12px; background: #fff; padding: 10px; }
+    .field { min-width: 0; overflow-wrap: anywhere; border: 1px solid #c9d8d2; border-radius: 12px; background: #fff; padding: 10px; }
     .field span { display: block; color: #577067; font-size: 11px; text-transform: uppercase; font-weight: 700; }
     .field b { font-size: 18px; line-height: 1.2; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
@@ -29,18 +29,19 @@
 <body data-required-role="TECHNICIAN">
   <main class="shell">
     <section class="card">
-      <p class="muted">Tecnico</p>
-      <h1 class="title">Perfil</h1>
-      <p class="muted">Dados operacionais da sessao atual, sem exposicao de contactos proibidos.</p>
+      <p class="muted" data-cw-profile-copy="technician" data-cw-no-i18n>Tecnico</p>
+      <h1 class="title" data-cw-profile-copy="heading" data-cw-no-i18n>Perfil</h1>
+      <p class="muted" data-cw-profile-copy="intro" data-cw-no-i18n>Dados operacionais da sessao atual, sem exposicao de contactos proibidos.</p>
     </section>
 
-    <p id="statusBox" class="status" aria-live="polite">A preparar perfil.</p>
+    <p id="statusBox" data-cw-profile-copy="preparing" data-cw-no-i18n class="status" aria-live="polite">A preparar perfil.</p>
 
     <section class="card">
-      <div class="grid" id="profileGrid"></div>
+      <div class="grid" id="profileGrid" data-cw-no-i18n></div>
     </section>
   </main>
   <script src="/technician-profile.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <script defer src="/ui/design-system.js"></script>
 </body>
 </html>

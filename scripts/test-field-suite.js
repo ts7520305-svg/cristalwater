@@ -26,6 +26,7 @@ const scripts=[
  'test-field-assist-languages.js',
  'test-field-proposal-list-languages.js',
  'test-field-module-fallback-languages.js',
+ 'test-field-profile-languages.js',
  'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
  'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
  'test-visit-os-operational.js','test-route-os-acceptance.js','test-customer-os-operational.js',
