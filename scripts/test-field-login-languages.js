@@ -18,6 +18,8 @@ const words = {
   pending: ['A entrar...','Signing in...','Connexion en cours...','Iniciando sesión...','Anmeldung läuft...'],
   invalid: ['PIN inválido.','Invalid PIN.','PIN incorrect.','PIN no válido.','Ungültige PIN.'],
   connection: ['Erro de ligação ao servidor.','Could not connect to the server.','Impossible de se connecter au serveur.','No se ha podido conectar con el servidor.','Verbindung zum Server fehlgeschlagen.'],
+  connectionNoSession: ['Ligação instável. Verifique a rede e tente novamente.','Unstable connection. Check the network and try again.','Connexion instable. Vérifiez le réseau et réessayez.','Conexión inestable. Comprueba la red y vuelve a intentarlo.','Instabile Verbindung. Prüfen Sie die Netzwerkverbindung und versuchen Sie es erneut.'],
+  connectionRetained: ['Ligação instável. A sessão foi mantida e os dados serão preservados.','Unstable connection. Your session was retained and your data will be preserved.','Connexion instable. La session a été conservée et les données seront préservées.','Conexión inestable. Se ha mantenido la sesión y se conservarán los datos.','Instabile Verbindung. Die Sitzung wurde beibehalten und Ihre Daten bleiben erhalten.'],
   welcome: ['Bem-vindo ','Welcome ','Bienvenue ','Bienvenido ','Willkommen '],
   technician: ['Técnico','Technician','Technicien','Técnico','Techniker'],
 };
@@ -43,6 +45,18 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   // The separate final context exercises the original worker and cache offline.
   const context = await browser.newContext({ viewport: { width: 390,height: 900 },timezoneId: 'Europe/Lisbon',serviceWorkers: 'block' });
   await context.route('**/*', route => new URL(route.request().url()).origin === base ? route.continue() : route.abort());
+  // This isolated boundary returns the original rejected Error to the shared
+  // fetch wrapper; real login/settings requests keep their native path.
+  await context.addInitScript(() => {
+    const native = window.fetch.bind(window),get = Storage.prototype.getItem;
+    window.qaConnectionReadFailure = false;
+    Storage.prototype.getItem = function(key) { if (qaConnectionReadFailure && key === 'cristalwater_jwt') throw new DOMException('QA credential read unavailable','SecurityError'); return get.call(this,key); };
+    window.fetch = (input,options) => {
+      if (new URL(typeof input === 'string' ? input : input.url,location.href).pathname !== '/api/qa-connection-toast') return native(input,options);
+      window.qaConnectionAuthorization = new Headers(options?.headers).get('Authorization');
+      return new Promise((resolve,reject) => { window.qaConnectionRelease = kind => { window.qaConnectionOriginalError = kind === 'abort' ? new DOMException('QA original cancellation','AbortError') : new TypeError('QA original network failure'); reject(qaConnectionOriginalError); }; });
+    };
+  });
   const page = await context.newPage(); page.setDefaultTimeout(10000);
   const errors = [],requests = [],logs = [];
   page.on('pageerror', error => errors.push(error.message)); page.on('console', message => logs.push(message.text()));
@@ -152,6 +166,32 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   }
   await page.goto(base + '/technician-login'); await page.locator('#cwLanguageSelect').waitFor(); await page.evaluate(() => logout()); await page.waitForFunction(() => !localStorage.getItem('cristalwater_jwt')); await page.waitForURL(base + '/technician-login');
   await preserve(false); assert.deepEqual(await page.evaluate(() => ['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key => localStorage.getItem(key))),Array(5).fill(null));
+  let connectionControls = 0;
+  const renewedToken = jwt.sign({ id: tech.id,technicianId: tech.id,role: 'TECHNICIAN',principalType: 'TECHNICIAN',techAuthVersion: tech.authVersion },getJwtSecret(),{ expiresIn: '1h',jwtid: randomUUID() });
+  async function connectionControl(name,{ captured = null,current = captured,readFailure = false,cancelled = false,retained = false } = {}) {
+    if (captured) await page.evaluate(({ token,user }) => CristalAuth.persistSession(token,user),{ token: captured,user });
+    else await page.evaluate(() => CristalAuth.clearSession());
+    const beforeTimer = await page.evaluate(() => document.getElementById('cw-v21-toast')?._t);
+    await page.evaluate(() => { window.qaConnectionDone = false; window.qaConnectionRelease = null; void fetch('/api/qa-connection-toast').catch(error => { window.qaConnectionReadFailure = false; window.qaConnectionSameError = error === qaConnectionOriginalError; window.qaConnectionDone = true; }); });
+    await page.waitForFunction(() => typeof qaConnectionRelease === 'function');
+    assert.equal(await page.evaluate(() => qaConnectionAuthorization),captured ? 'Bearer ' + captured : null);
+    if (current !== captured) {
+      if (current) await page.evaluate(({ token,user }) => CristalAuth.persistSession(token,user),{ token: current,user });
+      else await page.evaluate(() => CristalAuth.clearSession());
+    }
+    await page.evaluate(({ readFailure,cancelled }) => { qaConnectionReadFailure = readFailure; qaConnectionRelease(cancelled ? 'abort' : 'network'); },{ readFailure,cancelled });
+    await page.waitForFunction(() => qaConnectionDone); assert.equal(await page.evaluate(() => qaConnectionSameError),true,'The caller receives the identical original Error even if credential reads fail');
+    if (cancelled) assert.equal(await page.evaluate(() => document.getElementById('cw-v21-toast')?._t),beforeTimer,'Cancellation must not create or restart a connection notice');
+    else { const language = await page.evaluate(() => document.documentElement.lang); assert.equal(await page.locator('#cw-v21-toast').textContent(),words[retained ? 'connectionRetained' : 'connectionNoSession'][languages.indexOf(language)]); }
+    assert.equal(await page.evaluate(() => localStorage.getItem('cristalwater_jwt')),current); await preserve(false);
+    assert.equal(new URL(page.url()).pathname,'/technician-login'); connectionControls++; console.log('PASS connection toast boundary ' + JSON.stringify({ name,retained,cancelled,originalErrorPreserved: true,pendingRequests: 2 }));
+  }
+  await connectionControl('anonymous');
+  await connectionControl('same authenticated session',{ captured: oldToken,retained: true });
+  await connectionControl('renewed while request pending',{ captured: oldToken,current: renewedToken });
+  await connectionControl('logged out while request pending',{ captured: oldToken,current: null });
+  await connectionControl('credential read failure',{ captured: oldToken,readFailure: true });
+  await connectionControl('cancelled anonymous read',{ cancelled: true });
   assert(requests.filter(request => !['GET','HEAD'].includes(request.method)).every(request => ['/api/technician-auth/login','/api/settings/language/me'].includes(request.path)));
   assert.deepEqual(errors,[]); assert(!logs.some(log => log.includes(secretPin) || log.includes(oldToken)));
   await context.close();
@@ -162,9 +202,11 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await offlinePage.goto(base + '/technician-login'); await offlinePage.locator('#cwLanguageSelect').waitFor();
   await offlinePage.evaluate(() => navigator.serviceWorker.ready);
   await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
-  await offlinePage.waitForFunction(async () => { const cache = await caches.open('cristalwater-field-20261001-v272'); return Boolean(await cache.match('/technician-login.js')) && Boolean(await cache.match('/cw-i18n.js')); });
+  await offlinePage.waitForFunction(async () => { const cache = await caches.open('cristalwater-field-20261001-v273'); return Boolean(await cache.match('/technician-login.js')) && Boolean(await cache.match('/cw-i18n.js')); });
   const source = await fs.readFile(path.join(__dirname,'../frontend/technician-login.js'),'utf8');
-  assert.equal(await offlinePage.evaluate(async () => (await (await caches.open('cristalwater-field-20261001-v272')).match('/technician-login.js')).text()),source);
+  assert.equal(await offlinePage.evaluate(async () => (await (await caches.open('cristalwater-field-20261001-v273')).match('/technician-login.js')).text()),source);
+  const authSource = await fs.readFile(path.join(__dirname,'../frontend/cw-auth.js'),'utf8');
+  assert.equal(await offlinePage.evaluate(async () => (await (await caches.open('cristalwater-field-20261001-v273')).match('/cw-auth.js')).text()),authSource);
   await offlinePage.evaluate(work => { for (const [key,value] of Object.entries(work)) localStorage.setItem(key,value); localStorage.setItem('cw_language','de'); localStorage.setItem('cw_client_lang','de'); },work);
   await offlineContext.setOffline(true); await offlinePage.goto(base + '/technician-login?offline-shell=1'); await offlinePage.locator('#cwLanguageSelect').waitFor();
   assert.equal(await offlinePage.locator('#loginBox h3').textContent(),words.heading[4]); await offlinePage.locator('#pin').fill('offline PIN unchanged'); await offlinePage.locator('#pin').press('Enter');
@@ -172,10 +214,11 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   for (const [index,language] of languages.entries()) {
     await offlinePage.locator('#cwLanguageSelect').selectOption(language); await offlinePage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     assert.equal(await offlinePage.locator('#loginError').textContent(),words.connection[index]); assert.equal(await offlinePage.locator('#pin').inputValue(),'offline PIN unchanged');
+    assert.equal(await offlinePage.locator('#cw-v21-toast').textContent(),words.connectionNoSession[index]);
     assert.equal(await offlinePage.evaluate(() => localStorage.getItem('cristalwater_jwt')),null); assert.deepEqual(await offlinePage.evaluate(keys => Object.fromEntries(keys.map(key => [key,localStorage.getItem(key)])),Object.keys(work)),work);
     assert(await offlinePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); checks++;
   }
   if (process.env.CW_LOGIN_CAPTURE) await offlinePage.screenshot({ path: path.join(process.env.CW_LOGIN_CAPTURE,'cached-offline-de-320.png') });
   assert.deepEqual(offlineErrors,[]); await offlineContext.close();
-  console.log('PASS technician login language result ' + JSON.stringify({ checks,languages: 5,widths: [320,390,1440],nativeRoles: ['TECHNICIAN','TEAM_LEADER'],enterSerialized: true,serverMessagesLiteral: true,typedPendingRequests: 2,actualCachedShellOffline: true,noOperationalWrites: true })); completed = true;
+  console.log('PASS technician login language result ' + JSON.stringify({ checks,connectionControls,languages: 5,widths: [320,390,1440],nativeRoles: ['TECHNICIAN','TEAM_LEADER'],enterSerialized: true,serverMessagesLiteral: true,typedPendingRequests: 2,actualCachedShellOffline: true,noOperationalWrites: true })); completed = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { clearTimeout(deadline); await browser?.close(); await prisma.$disconnect(); });

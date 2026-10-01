@@ -1,0 +1,183 @@
+{
+  "task": 498,
+  "checkedAt": "2026-10-01T14:42:47.967779+00:00",
+  "parent": "d1c30e2a8d3d6c1e3f62dc539b7a8c94bca12465",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Connection notice only claims retained session when its captured credential still exists unchanged; otherwise generic network/retry copy. All original authentication and operational behavior retained.",
+  "sources": {
+    "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+    "frontend/sw.js": "b121ea50cd5b179c2d0067e3cd44d18e99d3e6bfc0e8ab8332d81d53c1aad2b8",
+    "scripts/test-field-login-languages.js": "9bf48b172c0107377aaba4bc87eec87e04b65526ab2efafa1a347a059a3ca9c3"
+  },
+  "productAudit": {
+    "parent": "d1c30e2a8d3d6c1e3f62dc539b7a8c94bca12465",
+    "existingAuthDictionaryExactlyPreserved": true,
+    "inverseOriginalWrapperExactlyRestored": true,
+    "newCopy": [
+      "Ligação instável. Verifique a rede e tente novamente.",
+      "Unstable connection. Check the network and try again.",
+      "Connexion instable. Vérifiez le réseau et réessayez.",
+      "Conexión inestable. Comprueba la red y vuelve a intentarlo.",
+      "Instabile Verbindung. Prüfen Sie die Netzwerkverbindung und versuchen Sie es erneut."
+    ],
+    "unchanged": {
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/technician-auth-guard.js": "8c58abca001040443985b9a8ebac0c9775bef0f389020bfa59211bce7e55b594",
+      "scripts/test-field-suite.js": "f3beff7b99117f4b2c0532a94e9bacd9dbe4dd5e3ac16fe9aa77f01150d94757"
+    },
+    "runner382Unchanged": true,
+    "worker": 273
+  },
+  "local": {
+    "runtime": "Isolated PGlite; external operations disabled; not native PostgreSQL acceptance",
+    "positive": [
+      {
+        "result": {
+          "script": "scripts/test-field-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 23234,
+          "logBytes": 2458
+        },
+        "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+        "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-auth-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 17970,
+          "logBytes": 734
+        },
+        "logSha256": "55a7d2e54bcee2aa2a2c56cc194b2a4cfa489d0c7d270540d40350fca52f300e",
+        "log": "PASS auth languages {\"name\":\"expired\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"connection\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"logout\",\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth languages {\"name\":\"expired\",\"type\":\"EXTRA\",\"widths\":[320],\"originalTimer\":true,\"originalSessionRules\":true,\"operationalWrites\":0}\nPASS auth language result {\"checks\":50,\"typedDrafts\":true,\"noOperationalWrites\":true,\"originalErrors\":true,\"noRedirectOnFieldExpiry\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-auth-entry-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 9839,
+          "logBytes": 884
+        },
+        "logSha256": "169c5992e72032b5c5c178dd16a6ed3d8a32510777ac936f9a4d40b1e6c5e5a9",
+        "log": "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script\nPASS login.js repeated login, retry, exact password and no token logging\nPASS admin-login.js repeated login, retry, exact password and no token logging\nPASS client-login.js repeated login, retry, exact password and no token logging\nPASS technician-login.js repeated login, retry, exact password and no token logging\nPASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox\nPASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved\nPASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-session-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 2169,
+          "logBytes": 581
+        },
+        "logSha256": "ca0b4bd1a5b0cbf004d295c1d5f299d3d171658e50a19e2e743a257ce00e7ae3",
+        "log": "PASS expiry preserves visible work; renewal recovers the original receipt and confirmed content cannot be replaced\nPASS delayed 401 cannot invalidate a newer login\nPASS account switch preserves both photo queues and prevents cross-account completion\nPASS permanent rejection blocks automatic resends and replacement; manual review reuses the same UUID/content\nPASS Retry-After prevents early automatic and manual sends; original request resumes after the pause\nPASS malformed and unattributed historical queues remain untouched and block accidental replacement\nSESSION RESULT=PASS\n"
+      }
+    ],
+    "negativeParentAuthProducer": {
+      "result": {
+        "script": "../qa-runtime/negative-auth498.cjs",
+        "code": 1,
+        "signal": null,
+        "ms": 16738,
+        "logBytes": 1964
+      },
+      "logSha256": "1e88b64e0524b604c86ebc88125f1c0561b0d41549144ff0d3ec56bdb0552be4",
+      "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Ligação instável. A sessão foi mantida e os dados serão preservados.'\n- 'Ligação instável. Verifique a rede e tente novamente.'\n\n    at connectionControl (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-login-languages.js:185:94)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-login-languages.js:189:3 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Ligação instável. A sessão foi mantida e os dados serão preservados.',\n  expected: 'Ligação instável. Verifique a rede e tente novamente.',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+    },
+    "checks": 110,
+    "connectionControls": 6,
+    "originalFieldAuthChecks": 50,
+    "controlNames": [
+      "anonymous",
+      "same authenticated session",
+      "renewed while request pending",
+      "logged out while request pending",
+      "credential read failure",
+      "cancelled anonymous read"
+    ],
+    "originalErrorObjectPreserved": true,
+    "cancelledNoticeAndTimerUnchanged": true,
+    "pinAndStoredFixturesAndTwoRealTypedRequestsPreserved": true,
+    "noOperationalWrites": true,
+    "syntax": [
+      695,
+      308,
+      44
+    ]
+  },
+  "visual": {
+    "reviewed": [
+      "cached-offline-de-320.png"
+    ],
+    "sha256": {
+      "cached-offline-de-320.png": "bf3ca6df749728da8931303505fc1a63d504d0c2d9310c8c276d7daa9451198c"
+    },
+    "result": "Anonymous cached shell displays network/retry guidance, not a retained-session promise; PIN/error and notice fit 320px."
+  },
+  "lastCompleteAcceptance": {
+    "task": 495,
+    "code": "077dd01ac10f03fc104c84705e433bb357924f14",
+    "tree": "4fd2508c9d27545301eaee6a879e89c9f8e8c0ae",
+    "run": 36866289542,
+    "job": 110382497425,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "groups": 381,
+    "distinctGroups": 381,
+    "allCodeZero": true,
+    "actualOrderExactlyMatched": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceSha256": {
+      "frontend/cw-field-reminders.js": "40106c2e95e9033a2a6838c791ccffd0cd857ea070f025fd8cd173546c66f330",
+      "frontend/sw.js": "f5e74ac7f43d7b05c35b613541197780186f91212e0bddfeaaf20934b912a359",
+      "scripts/test-field-alert-board-languages.js": "251691557e8f319245a219e76e1c9cd4628b175970142730bd909ca0aa97e5e3"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T14:20:18.4642896Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "e8f6bfd76584eda381e7772a7c67c51df6e5f67c9bc6999ac77cd5307044c358"
+  },
+  "publication497": {
+    "code": "d1c30e2a8d3d6c1e3f62dc539b7a8c94bca12465",
+    "tree": "59466a292888e7a6368c03d68021bf06809e2024",
+    "run": 36874647484,
+    "status": "in_progress"
+  },
+  "nativePending": [
+    496,
+    497,
+    498
+  ],
+  "nextTask": "TASK499: fallback mobile navigation owned labels/aria for technician/client. Stable German diagnostic after700ms confirms Ronda/Docs/Perfil and aria remain literal PT; preserve destinations, active links, focus and other navigation owners.",
+  "completion": {
+    "total": 32,
+    "complete": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "annualContract": "deferred",
+    "repoVisibility": "public until final acceptance; private before C32"
+  }
+}

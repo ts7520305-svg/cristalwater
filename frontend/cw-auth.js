@@ -52,7 +52,7 @@
   }
 
   // Only owned auth leaves are repainted; toast producers and timers stay independent.
-  const authCopy={"expiredMessage":["Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.","Session expired. Local records remain on this phone. Sign in again with the same account to send pending data.","Session expirée. Les enregistrements locaux restent sur ce téléphone. Reconnectez-vous avec le même compte pour envoyer les données en attente.","Sesión caducada. Los registros locales permanecen en este móvil. Inicia sesión de nuevo con la misma cuenta para enviar los datos pendientes.","Sitzung abgelaufen. Lokale Einträge bleiben auf diesem Handy. Melden Sie sich erneut mit demselben Konto an, um ausstehende Daten zu senden."],"expiredLink":["Voltar a entrar","Sign in again","Se reconnecter","Volver a entrar","Erneut anmelden"],"connection":["Ligação instável. A sessão foi mantida e os dados serão preservados.","Unstable connection. Your session was retained and your data will be preserved.","Connexion instable. La session a été conservée et les données seront préservées.","Conexión inestable. Se ha mantenido la sesión y se conservarán los datos.","Instabile Verbindung. Die Sitzung wurde beibehalten und Ihre Daten bleiben erhalten."],"logout":["Não foi possível terminar a sessão. Tente novamente.","Could not sign out. Try again.","Impossible de se déconnecter. Réessayez.","No se ha podido cerrar la sesión. Vuelve a intentarlo.","Abmelden war nicht möglich. Versuchen Sie es erneut."]};
+  const authCopy={"expiredMessage":["Sessão expirada. Os registos locais continuam neste telemóvel. Volte a entrar com a mesma conta para enviar os dados pendentes.","Session expired. Local records remain on this phone. Sign in again with the same account to send pending data.","Session expirée. Les enregistrements locaux restent sur ce téléphone. Reconnectez-vous avec le même compte pour envoyer les données en attente.","Sesión caducada. Los registros locales permanecen en este móvil. Inicia sesión de nuevo con la misma cuenta para enviar los datos pendientes.","Sitzung abgelaufen. Lokale Einträge bleiben auf diesem Handy. Melden Sie sich erneut mit demselben Konto an, um ausstehende Daten zu senden."],"expiredLink":["Voltar a entrar","Sign in again","Se reconnecter","Volver a entrar","Erneut anmelden"],"connection":["Ligação instável. A sessão foi mantida e os dados serão preservados.","Unstable connection. Your session was retained and your data will be preserved.","Connexion instable. La session a été conservée et les données seront préservées.","Conexión inestable. Se ha mantenido la sesión y se conservarán los datos.","Instabile Verbindung. Die Sitzung wurde beibehalten und Ihre Daten bleiben erhalten."],"logout":["Não foi possível terminar a sessão. Tente novamente.","Could not sign out. Try again.","Impossible de se déconnecter. Réessayez.","No se ha podido cerrar la sesión. Vuelve a intentarlo.","Abmelden war nicht möglich. Versuchen Sie es erneut."],"connectionNoSession":["Ligação instável. Verifique a rede e tente novamente.","Unstable connection. Check the network and try again.","Connexion instable. Vérifiez le réseau et réessayez.","Conexión inestable. Comprueba la red y vuelve a intentarlo.","Instabile Verbindung. Prüfen Sie die Netzwerkverbindung und versuchen Sie es erneut."]};
   const authLanguages=['pt','en','fr','es','de'], authLeaves=new Map();
   const authLanguage=()=>Math.max(0,authLanguages.indexOf(String(document.documentElement.lang||'pt').toLowerCase().split('-')[0]));
   function bindAuthCopy(node,key,notice=false){
@@ -208,7 +208,11 @@
         return res;
       }catch(err){
         // A cancelled stale read is not a connection failure; its caller owns the state.
-        if(err?.name !== 'AbortError') authToast('connection');
+        if(err?.name !== 'AbortError') {
+          let retainedSession = false;
+          try{retainedSession = Boolean(token && token === getToken());}catch(_){}
+          authToast(retainedSession ? 'connection' : 'connectionNoSession');
+        }
         throw err;
       }
     };
