@@ -5,7 +5,7 @@ const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/uti
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost','127.0.0.1'].includes(new URL(base).hostname));
 const languages=['pt','en','fr','es','de'],words={"routeSessionChanged":["A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.","The session changed. Saved data has been preserved. Reopen field mode with the current account.","La session a changé. Les données enregistrées ont été conservées. Rouvrez le mode terrain avec le compte actuel.","La sesión ha cambiado. Se han conservado los datos guardados. Vuelve a abrir el modo de campo con la cuenta actual.","Die Sitzung hat sich geändert. Gespeicherte Daten bleiben erhalten. Öffnen Sie den Außendienstmodus erneut mit dem aktuellen Konto."],"routeSessionReopen":["Reabrir modo de campo","Reopen field mode","Rouvrir le mode terrain","Volver a abrir el modo de campo","Außendienstmodus erneut öffnen"]};
-let browser,completed=false,checks=0,documentRefreshChecks=0;
+let browser,completed=false,checks=0,documentRefreshChecks=0,reopenedLanguageChecks=0;
 // Explicit online reopening re-reads the current account documents. Only their
 // observed live confirmation times may change; every data/context byte stays strict.
 function normalizeReopenedDocuments(saved, reopened, expected) {
@@ -118,12 +118,14 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
     if(mode!=='account'){assert(await page.locator('main.field').evaluate(node=>node.inert&&getComputedStyle(node).display==='none'));assert.deepEqual(await raw(),saved);assert.deepEqual(await rows(),pending);}
     await page.locator('#fieldRouteSessionChanged a').click();const expectedId=mode==='account'?otherVisit.id:id;
     await page.waitForFunction(expectedId=>window.CWFieldVisitContext?.()?.id===expectedId&&!document.querySelector('main.field').inert&&getComputedStyle(document.querySelector('main.field')).display!=='none',expectedId);
-    // Explicit online account reopening waits for its actual document refresh.
-    // Offline recovery retains the original route/draft checks; it does not
-    // promise that an asynchronous document producer has a live or cached result.
+    // Both account routes/documents were genuinely cached before the switch.
+    // Wait for this explicit account reopen to consume its own original load.
+    // This cache fixture does not promise documents for an uncached offline user.
     const reopenedOwner = 'TECH:' + (mode === 'account' ? other.id : tech.id), reopenedVehicle = mode === 'account' ? otherVehicle.id : vehicle.id;
-    if (mode === 'account' && !offline) {
-    const documentReady = { owner: reopenedOwner, vehicleId: reopenedVehicle, source: 'live' };
+    assert.equal(await page.locator('#vehicleId').inputValue(),String(reopenedVehicle),'Reopening must use the current-owner vehicle, never generic memory from the former account');
+    assert.equal(await page.locator('#technicianId').inputValue(),String(mode==='account'?other.id:tech.id));
+    if (mode === 'account') {
+    const documentReady = { owner: reopenedOwner, vehicleId: reopenedVehicle, source: offline?'cache':'live' };
     await page.waitForFunction(({owner, vehicleId, source}) => {
       const day = CWFieldRouteCache.today(), key = ['cwFieldDocuments', 'v3', owner, 'TECHNICIAN', vehicleId, day].join(':');
       let copy; try { copy = JSON.parse(localStorage.getItem(key)); } catch (_) { return false; }
@@ -197,9 +199,26 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
       }));
     }
     assert.deepEqual(reopened,saved,'Explicit navigation may update the selected visit and confirmation time, but preserves every draft, pending-work and former-account context byte');assert.deepEqual(await rows(),pending);assert.deepEqual(await database(),db);
+    if(mode==='account'&&offline){
+      const ownKey=['cwFieldDocuments','v3',reopenedOwner,'TECHNICIAN',reopenedVehicle,await page.evaluate(()=>CWFieldRouteCache.today())].join(':');
+      assert.equal((await raw())[ownKey],saved[ownKey],'Actual current-owner cached document bytes remain exact');
+      await page.locator('[data-field-tab-button=docs]').click();await page.locator('#loadGuidesBtn').focus();
+      await page.evaluate(()=>{window.qaReopenedNodes=[...document.querySelectorAll('.doc-tools,.doc-tools *,#transportGuideBox,#transportGuideBox *,#workGuideBox,#workGuideBox *,#insuranceBox,#insuranceBox *')];window.qaReopenedLoad=CWFieldDocuments.load;window.qaReopenedCalls=0;CWFieldDocuments.load=(...args)=>{qaReopenedCalls++;return qaReopenedLoad(...args);};});
+      const beforeLanguage=await raw(),beforeDatabase=await database();
+      const contextState=()=>page.evaluate(()=>({owner:CWFieldWriteStore.session().owner,visit:{id:CWFieldVisitContext().id,type:CWFieldVisitContext().visitType},vehicle:document.getElementById('vehicleId').value,technician:document.getElementById('technicianId').value,fields:['notes','ph','chlorine','alkalinity','salt','orp','temperature','cleaned','vacuumed','basketCleaned','brushed','waterlineClean','backwashDone'].map(id=>{const n=document.getElementById(id);return[id,n.value,n.checked];}),tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)),sources:['transportGuideBox','workGuideBox','insuranceBox'].map(id=>{const n=document.getElementById(id);return[id,n.dataset.source,n.dataset.confirmedAt];}),focus:document.activeElement.id,calls:qaReopenedCalls}));
+      const beforeContext=await contextState();
+      for(const language of languages){
+        await page.locator('#cwLanguageSelect').selectOption(language);await settle();
+        assert.equal(await page.evaluate(()=>document.documentElement.lang),language);
+        assert.deepEqual(await contextState(),beforeContext);assert.deepEqual(await raw(),beforeLanguage);assert.deepEqual(await rows(),pending);assert.deepEqual(await database(),beforeDatabase);
+        assert(await page.evaluate(()=>qaReopenedNodes.every(node=>node.isConnected)));reopenedLanguageChecks++;
+      }
+      if(process.env.CW_ROUTE_SESSION_CAPTURE){await fs.mkdir(process.env.CW_ROUTE_SESSION_CAPTURE,{recursive:true});await page.locator('#documentCenterBox').screenshot({path:process.env.CW_ROUTE_SESSION_CAPTURE+'/reopened-current-owner-cache-320.png'});}
+      console.log('PASS current-owner offline reopen '+JSON.stringify({owner:reopenedOwner,vehicleId:reopenedVehicle,cachedSections:3,originalCacheBytesExact:true,languageChecks:5,typedFields:13,pending:2,noDocumentReload:true,operationalWrites:0}));
+    }
     assert(requests.filter(request=>!['GET','HEAD'].includes(request.method)).every(request=>request.path==='/api/settings/language/me'&&request.method==='PUT'));assert.deepEqual(errors,[]);
     console.log('PASS route session languages '+JSON.stringify({name,mode,offline,type,widths,pending:2,heldReplyIgnored:hold,reopenedCurrentAccount:true,operationalWrites:0}));await context.close();
   }
   await scenario({name:'account-online',hold:true});await scenario({name:'renewal-offline',mode:'renewal',offline:true});await scenario({name:'missing-offline',mode:'missing',offline:true});await scenario({name:'extra-account-offline',offline:true,type:'EXTRA',widths:[320]});
-  console.log('PASS route session language result '+JSON.stringify({checks,documentRefreshChecks,typedDrafts:true,immutablePendingRequests:2,hiddenSelectorKept:true,noOperationalWrites:true,recoveryLink:true}));completed=true;
+  console.log('PASS route session language result '+JSON.stringify({checks,documentRefreshChecks,reopenedLanguageChecks,typedDrafts:true,immutablePendingRequests:2,hiddenSelectorKept:true,noOperationalWrites:true,recoveryLink:true}));completed=true;
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{for(const release of releases)release();clearTimeout(deadline);await browser?.close();await prisma.$disconnect();});

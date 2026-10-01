@@ -1,0 +1,2982 @@
+{
+  "task": 496,
+  "checkedAt": "2026-10-01T13:20:28.326542+00:00",
+  "parent": "077dd01ac10f03fc104c84705e433bb357924f14",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Existing recoverable-form memory boundary also owns technician/vehicle IDs; original navigation and document producers unchanged.",
+  "sources": {
+    "frontend/technician-field-mode.html": "9b7310a0e5bd5b16bd35af19cc14d69202e42947bd4124ae1125fd07ce76a217",
+    "frontend/sw.js": "c11c12bc505b0930020c05b48cd71cf43835893ed3cfc8095777c0dbc92d0c2b",
+    "scripts/test-field-draft-navigation-memory.js": "413af034744fe1d9d680c38d89b5fc039e9a1e1f757209af9de709bb7852c577",
+    "scripts/test-field-route-session-languages.js": "7ebf6df66b392f675966278cb7ba0ee26c855693d042d4d3bdb519e222738e6e",
+    "scripts/test-field-suite.js": "8692b94e9189acecc111061a68c1a02f039645d87524ffc90833d4f5a4ba0cc7"
+  },
+  "unchanged": {
+    "frontend/ui/core/navigation-context.js": "044f57289d9b263f0c70d137889a27abdfdd2c856272ec735f7bd106e0ea6497",
+    "frontend/technician-field-mode.js": "0aea74aba9ccf03fc4ea785142740ebcd3cfe35201994f350eef64ebbfca765f",
+    "frontend/cw-field-documents.js": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+    "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+    "scripts/test-field-suite.js": "8692b94e9189acecc111061a68c1a02f039645d87524ffc90833d4f5a4ba0cc7",
+    "scripts/test-field-document-transition-languages.js": "b780c08713c816eef3f2013a554db4fccecbd98de6911f80055853e559f72698"
+  },
+  "productAudit": {
+    "parent": "077dd01ac10f03fc104c84705e433bb357924f14",
+    "productOnlyManagedBoundary": true,
+    "navigationContextJsUnchanged": true,
+    "documentProducerUnchanged": true,
+    "transitionTimezoneAlreadyLisbon": true,
+    "worker": 271,
+    "runner381Unchanged": true
+  },
+  "cause": {
+    "priorObservedOfflineAccountReopen": "B owner/visit and stored B vehicle, former A input vehicle, three document boxes loading with both typed caches present",
+    "genericMemoryMechanism": "Unmanaged context fields were replayed after field context initialization; changing captured vehicle input invalidates original document relevance guard. Existing managed boundary excludes fields from collection and replay.",
+    "controlledImmutableParentHtmlNegative": {
+      "result": {
+        "script": "../qa-runtime/negative-navigation496.cjs",
+        "code": 1,
+        "signal": null,
+        "ms": 2386,
+        "logBytes": 687
+      },
+      "sha256": "82b9146645a2d898fb53523fa9f354c07397be121e849a105c68764a735a19a9",
+      "log": "PASS fixture calendar {\"instant\":\"2026-10-01T13:11:07.238Z\",\"serverTimezone\":\"Europe/Lisbon\",\"browserTimezone\":\"Europe/Lisbon\",\"day\":\"2026-10-01\",\"scheduledAt\":\"2026-10-01T12:00:00.000Z\",\"confirmedTypes\":2}\nAssertionError [ERR_ASSERTION]: Generic navigation restore must not replace the current-owner vehicle\n\n'100001' !== '1'\n\n    at verify (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-draft-navigation-memory.js:33:10)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-draft-navigation-memory.js:42:2 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: '100001',\n  expected: '1',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+    },
+    "native491TransitionRootNotClaimed": "Original timeout did not reproduce in these final local runs or native492. Original transition already used Europe/Lisbon; no timezone or timeout change."
+  },
+  "local": {
+    "runtime": "Isolated PGlite; external email, WhatsApp, fiscal, webhooks and AI disabled",
+    "positiveIndividualResults": [
+      {
+        "result": {
+          "script": "../qa-runtime/seed-admin476.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 287,
+          "logBytes": 46
+        },
+        "sha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+        "log": "PASS isolated administrator fixture available\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-draft-navigation-memory.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4094,
+          "logBytes": 839
+        },
+        "sha256": "434b7c2d3eafd4f215d19eca53c3c17444ab58fe62320108e32c59f6530e7688",
+        "log": "PASS fixture calendar {\"instant\":\"2026-10-01T13:11:09.613Z\",\"serverTimezone\":\"Europe/Lisbon\",\"browserTimezone\":\"Europe/Lisbon\",\"day\":\"2026-10-01\",\"scheduledAt\":\"2026-10-01T12:00:00.000Z\",\"confirmedTypes\":2}\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes EXTRA\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS real navigation script delayed without rewriting; REGULAR/EXTRA same id retain separate fields, normal owned editing persists, current-owner vehicle and technician remain scoped with three real documents, generic unmanaged control still restores, no operational writes\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-route-session-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 29690,
+          "logBytes": 1870
+        },
+        "sha256": "f8e302be6d5e00803486c9809cf8815d3e547ee161d6c23886224c1b24ebc568",
+        "log": "PASS exact reopened document boundary {\"owner\":\"TECH:4\",\"documentSections\":3,\"actualLiveRefresh\":true,\"sourceDataAndRequestedAtUnchanged\":true,\"confirmationTimesChanged\":true,\"rejectedChanges\":[\"foreign-owner\",\"wrong-vehicle\",\"changed-document-data\",\"changed-requestedAt\",\"missing-section\",\"extra-section\",\"invalid-confirmation\",\"backwards-confirmation\",\"confirmation-not-observed-in-dom\",\"former-account-document-byte\",\"current-account-draft-byte\",\"unexpected-storage-key\",\"pending-requestId\",\"pending-payloadHash\"],\"pending\":2,\"formerAccountAndDraftBytesExact\":true}\nPASS route session languages {\"name\":\"account-online\",\"mode\":\"account\",\"offline\":false,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":true,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"renewal-offline\",\"mode\":\"renewal\",\"offline\":true,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"missing-offline\",\"mode\":\"missing\",\"offline\":true,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS current-owner offline reopen {\"owner\":\"TECH:4\",\"vehicleId\":4,\"cachedSections\":3,\"originalCacheBytesExact\":true,\"languageChecks\":5,\"typedFields\":13,\"pending\":2,\"noDocumentReload\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"extra-account-offline\",\"mode\":\"account\",\"offline\":true,\"type\":\"EXTRA\",\"widths\":[320],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session language result {\"checks\":50,\"documentRefreshChecks\":14,\"reopenedLanguageChecks\":5,\"typedDrafts\":true,\"immutablePendingRequests\":2,\"hiddenSelectorKept\":true,\"noOperationalWrites\":true,\"recoveryLink\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-transition-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 17217,
+          "logBytes": 382
+        },
+        "sha256": "e65e3936a97506c962a48d26f0709397c007cebd00b043297d59586836e5bd6c",
+        "log": "PASS vehicle-online {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS vehicle-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS day-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS actual vehicle changes and day guard preserve typed drafts, raw source bytes, tokens, SQL and outbox; no operational writes\n"
+      },
+      {
+        "result": {
+          "script": "../qa-runtime/seed-admin476.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 309,
+          "logBytes": 46
+        },
+        "sha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+        "log": "PASS isolated administrator fixture available\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-draft-navigation-memory.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4239,
+          "logBytes": 829
+        },
+        "sha256": "65e986151f32bf3b4293784123fd44b7ff9b78750d49e815a80c1aac219b37c5",
+        "log": "PASS fixture calendar {\"instant\":\"2026-10-01T13:13:13.547Z\",\"serverTimezone\":\"UTC\",\"browserTimezone\":\"Europe/Lisbon\",\"day\":\"2026-10-01\",\"scheduledAt\":\"2026-10-01T12:00:00.000Z\",\"confirmedTypes\":2}\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes EXTRA\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS delayed generic restore preserves thirteen owned fields and full draft bytes REGULAR\nPASS real navigation script delayed without rewriting; REGULAR/EXTRA same id retain separate fields, normal owned editing persists, current-owner vehicle and technician remain scoped with three real documents, generic unmanaged control still restores, no operational writes\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-route-session-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 32962,
+          "logBytes": 1870
+        },
+        "sha256": "c6247be5aa0f404d296847650693a6736d31e4303b7c67cdcc592a6a36b3cd1c",
+        "log": "PASS exact reopened document boundary {\"owner\":\"TECH:3\",\"documentSections\":3,\"actualLiveRefresh\":true,\"sourceDataAndRequestedAtUnchanged\":true,\"confirmationTimesChanged\":true,\"rejectedChanges\":[\"foreign-owner\",\"wrong-vehicle\",\"changed-document-data\",\"changed-requestedAt\",\"missing-section\",\"extra-section\",\"invalid-confirmation\",\"backwards-confirmation\",\"confirmation-not-observed-in-dom\",\"former-account-document-byte\",\"current-account-draft-byte\",\"unexpected-storage-key\",\"pending-requestId\",\"pending-payloadHash\"],\"pending\":2,\"formerAccountAndDraftBytesExact\":true}\nPASS route session languages {\"name\":\"account-online\",\"mode\":\"account\",\"offline\":false,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":true,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"renewal-offline\",\"mode\":\"renewal\",\"offline\":true,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"missing-offline\",\"mode\":\"missing\",\"offline\":true,\"type\":\"REGULAR\",\"widths\":[320,390,1440],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS current-owner offline reopen {\"owner\":\"TECH:3\",\"vehicleId\":3,\"cachedSections\":3,\"originalCacheBytesExact\":true,\"languageChecks\":5,\"typedFields\":13,\"pending\":2,\"noDocumentReload\":true,\"operationalWrites\":0}\nPASS route session languages {\"name\":\"extra-account-offline\",\"mode\":\"account\",\"offline\":true,\"type\":\"EXTRA\",\"widths\":[320],\"pending\":2,\"heldReplyIgnored\":false,\"reopenedCurrentAccount\":true,\"operationalWrites\":0}\nPASS route session language result {\"checks\":50,\"documentRefreshChecks\":14,\"reopenedLanguageChecks\":5,\"typedDrafts\":true,\"immutablePendingRequests\":2,\"hiddenSelectorKept\":true,\"noOperationalWrites\":true,\"recoveryLink\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-transition-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 19080,
+          "logBytes": 382
+        },
+        "sha256": "e65e3936a97506c962a48d26f0709397c007cebd00b043297d59586836e5bd6c",
+        "log": "PASS vehicle-online {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS vehicle-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS day-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS actual vehicle changes and day guard preserve typed drafts, raw source bytes, tokens, SQL and outbox; no operational writes\n"
+      },
+      {
+        "result": {
+          "script": "../qa-runtime/seed-admin476.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 321,
+          "logBytes": 46
+        },
+        "sha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+        "log": "PASS isolated administrator fixture available\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-recovery.js",
+          "code": 0,
+          "signal": null,
+          "ms": 8079,
+          "logBytes": 779
+        },
+        "sha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+        "log": "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response\nPASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest\nPASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence\nPASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents\nPASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance\n"
+      }
+    ],
+    "expectedNegative": {
+      "code": 1,
+      "ms": 2386,
+      "source": "Only immutable parent495 HTML; original navigation JS delayed as in existing scenario, without rewriting its source. Browser worker blocked only for controlled source selection."
+    },
+    "utcBrowserCalendar": "Real server TZ=UTC, original browser Europe/Lisbon, original one-second day guard and real offline worker retained.",
+    "routeSessionChecks": 50,
+    "originalDocumentRefreshRejectionChecks": 14,
+    "newActualOfflineReopenedLanguageChecks": 5,
+    "sameIdTypedForms": {
+      "types": [
+        "REGULAR",
+        "EXTRA"
+      ],
+      "fieldsPerType": 13,
+      "genericDelayedReopens": 4,
+      "currentOwnerIds": true,
+      "unmanagedMemoryStillWorks": true
+    },
+    "pending": {
+      "count": 2,
+      "requestIdsAndPayloadHashesExact": true
+    },
+    "operationalWrites": 0,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "backendTestReference": "Unchanged backend; full native492 acceptance includes1396 tests/141 files and4 technician tests. No new local backend run claimed.",
+    "discardedQaInvocation": {
+      "script": "scripts/test-field-documents-readiness.js",
+      "code": 1,
+      "reason": "A nonexistent scratch invocation name was supplied after three passing scenarios. It is not a product failure or accepted test; the actual existing test-field-document-recovery.js was then run and passed."
+    }
+  },
+  "visual": {
+    "hashes": {
+      "renewal-offline-de-320.png": "4fe0f931244e22707bfca68d4a324a5164ae637399f43e774f5a08dc28cdac97",
+      "extra-account-offline-de-320.png": "4fe0f931244e22707bfca68d4a324a5164ae637399f43e774f5a08dc28cdac97",
+      "reopened-current-owner-cache-320.png": "b3abf528a28d836eb146a168f9bcb295957378b7e507da4738c273253cb09ea2",
+      "missing-offline-de-320.png": "4fe0f931244e22707bfca68d4a324a5164ae637399f43e774f5a08dc28cdac97",
+      "account-online-de-320.png": "4fe0f931244e22707bfca68d4a324a5164ae637399f43e774f5a08dc28cdac97",
+      "transition496-vehicle-offline.png": "ed89b0243843441155795a3a9fa8040cff184a2861866e7fd998ccff3861177c",
+      "transition496-vehicle-online.png": "5d82914bf7c1ed582b42bc07b23766e579a671e9645b6ac462e105e97c6827de",
+      "transition496-day-offline.png": "757ed2c87e48406ea97abe47eb6e6e029b0ddb4ed937341ccf8bd8d5b40f309e"
+    },
+    "reviewed": [
+      "reopened-current-owner-cache-320.png"
+    ],
+    "result": "German current-owner saved document summary fits320px; source and confirmation provenance visible."
+  },
+  "publication495": {
+    "code": "077dd01ac10f03fc104c84705e433bb357924f14",
+    "tree": "4fd2508c9d27545301eaee6a879e89c9f8e8c0ae",
+    "run": 36866289542,
+    "job": 110382497425
+  },
+  "lastCompleteAcceptance": {
+    "task": 492,
+    "code": "5b4fc2400358f37ba464714f463d7d13bf69d62b",
+    "tree": "e897a9c465f283316229cea09d2ff03591541fa7",
+    "run": 36857579300,
+    "job": 110353655330,
+    "status": "completed",
+    "conclusion": "success",
+    "groups": 381,
+    "distinctGroups": 381,
+    "allCodeZero": true,
+    "actualOrderExactlyMatched": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceSha256": {
+      "frontend/technician-history.js": "034f9b66309f22129595bef695db2c2a5a1df8a09bc36341e8823a94f659b239",
+      "frontend/technician-history.html": "52faa1030fc8be101dcee767e920c23b9317457986e27abccb9d50d59e28e239",
+      "frontend/sw.js": "b326f3c92d9065204f8997f129a530b5db1ce6b0bcdc9ef2b6372cba87224b0f",
+      "scripts/test-field-history-languages.js": "8917f7dec7898fadff94acab5d974a72fa3c872730fb215554ba0ed041c9ca2f",
+      "scripts/test-field-suite.js": "8692b94e9189acecc111061a68c1a02f039645d87524ffc90833d4f5a4ba0cc7"
+    },
+    "results": [
+      {
+        "script": "test-field-visual-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5383
+      },
+      {
+        "script": "test-field-reminder-delete.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11551
+      },
+      {
+        "script": "test-field-crm-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9095
+      },
+      {
+        "script": "test-field-language-reload.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4583
+      },
+      {
+        "script": "test-field-day-review-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6075
+      },
+      {
+        "script": "test-field-review-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10485
+      },
+      {
+        "script": "test-field-review-impediment-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8712
+      },
+      {
+        "script": "test-field-review-equipment-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9924
+      },
+      {
+        "script": "test-field-review-problem-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18755
+      },
+      {
+        "script": "test-field-problem-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9770
+      },
+      {
+        "script": "test-field-impediment-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22703
+      },
+      {
+        "script": "test-field-equipment-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25600
+      },
+      {
+        "script": "test-field-handover-receipt-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4845
+      },
+      {
+        "script": "test-field-chemical-preparation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4356
+      },
+      {
+        "script": "test-field-intake-review-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6032
+      },
+      {
+        "script": "test-field-recovery-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5892
+      },
+      {
+        "script": "test-field-photo-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5870
+      },
+      {
+        "script": "test-field-photo-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16063
+      },
+      {
+        "script": "test-field-legacy-photo-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4744
+      },
+      {
+        "script": "test-field-legacy-queue-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4821
+      },
+      {
+        "script": "test-field-gps-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6109
+      },
+      {
+        "script": "test-field-gps-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17360
+      },
+      {
+        "script": "test-field-pump-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22300
+      },
+      {
+        "script": "test-field-reminder-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13469
+      },
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21988
+      },
+      {
+        "script": "test-field-water-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25581
+      },
+      {
+        "script": "test-field-alert-board-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19730
+      },
+      {
+        "script": "test-field-alert-source-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33650
+      },
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 38172
+      },
+      {
+        "script": "test-field-current-visit-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 67891
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 63662
+      },
+      {
+        "script": "test-field-round-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26984
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23640
+      },
+      {
+        "script": "test-field-visit-shell-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 42047
+      },
+      {
+        "script": "test-field-visit-actions-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 47756
+      },
+      {
+        "script": "test-field-visit-feedback-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12500
+      },
+      {
+        "script": "test-field-visit-completion-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10183
+      },
+      {
+        "script": "test-field-visit-validation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20241
+      },
+      {
+        "script": "test-field-crew-status-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16473
+      },
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19402
+      },
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14227
+      },
+      {
+        "script": "test-field-document-body-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12290
+      },
+      {
+        "script": "test-field-document-toolbar-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8995
+      },
+      {
+        "script": "test-field-correction-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12064
+      },
+      {
+        "script": "test-field-download-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14764
+      },
+      {
+        "script": "test-field-push-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16059
+      },
+      {
+        "script": "test-field-auth-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7424
+      },
+      {
+        "script": "test-field-route-session-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17792
+      },
+      {
+        "script": "test-field-route-cache-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24352
+      },
+      {
+        "script": "test-field-sync-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2111
+      },
+      {
+        "script": "test-field-write-store-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2299
+      },
+      {
+        "script": "test-field-legacy-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6458
+      },
+      {
+        "script": "test-field-route-load-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26895
+      },
+      {
+        "script": "test-field-connection-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24649
+      },
+      {
+        "script": "test-field-map-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29084
+      },
+      {
+        "script": "test-field-access-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25018
+      },
+      {
+        "script": "test-field-assist-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30518
+      },
+      {
+        "script": "test-field-proposal-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27762
+      },
+      {
+        "script": "test-field-module-fallback-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 45240
+      },
+      {
+        "script": "test-field-profile-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25657
+      },
+      {
+        "script": "test-field-history-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35003
+      },
+      {
+        "script": "test-field-water-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8682
+      },
+      {
+        "script": "test-field-access-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 982
+      },
+      {
+        "script": "test-field-e2e.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31487
+      },
+      {
+        "script": "test-fcs-sec-tech-auth.js",
+        "code": 0,
+        "signal": null,
+        "ms": 646
+      },
+      {
+        "script": "test-fcs-sec-tech-workday.js",
+        "code": 0,
+        "signal": null,
+        "ms": 730
+      },
+      {
+        "script": "test-fcs-technician-t1.js",
+        "code": 0,
+        "signal": null,
+        "ms": 469
+      },
+      {
+        "script": "test-visit-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 590
+      },
+      {
+        "script": "test-route-os-acceptance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10157
+      },
+      {
+        "script": "test-customer-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 388
+      },
+      {
+        "script": "test-administration-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1250
+      },
+      {
+        "script": "test-finance-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 546
+      },
+      {
+        "script": "test-equipment-stock-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2382
+      },
+      {
+        "script": "test-repair-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 394
+      },
+      {
+        "script": "test-system-interconnections.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7048
+      },
+      {
+        "script": "test-real-month-flow-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9199
+      },
+      {
+        "script": "test-field-preflight.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3422
+      },
+      {
+        "script": "test-field-backup.js",
+        "code": 0,
+        "signal": null,
+        "ms": 582
+      },
+      {
+        "script": "test-production-runtime-health.js",
+        "code": 0,
+        "signal": null,
+        "ms": 115
+      },
+      {
+        "script": "test-field-gps-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 378
+      },
+      {
+        "script": "test-field-two-year-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17050
+      },
+      {
+        "script": "test-field-billing-automation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 276
+      },
+      {
+        "script": "test-field-commercial-quotes.js",
+        "code": 0,
+        "signal": null,
+        "ms": 510
+      },
+      {
+        "script": "test-field-client-rates.js",
+        "code": 0,
+        "signal": null,
+        "ms": 726
+      },
+      {
+        "script": "test-field-retention.js",
+        "code": 0,
+        "signal": null,
+        "ms": 289
+      },
+      {
+        "script": "test-field-quote-portal.js",
+        "code": 0,
+        "signal": null,
+        "ms": 893
+      },
+      {
+        "script": "test-field-resilience.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1612
+      },
+      {
+        "script": "test-field-equipment-maintenance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 458
+      },
+      {
+        "script": "test-field-equipment-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6546
+      },
+      {
+        "script": "test-field-equipment-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 716
+      },
+      {
+        "script": "test-field-chemical-options.js",
+        "code": 0,
+        "signal": null,
+        "ms": 398
+      },
+      {
+        "script": "test-field-inventory-count-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3660
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4478
+      },
+      {
+        "script": "test-field-service-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3998
+      },
+      {
+        "script": "test-field-reminder-lifecycle.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19623
+      },
+      {
+        "script": "test-field-alert-visibility.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4276
+      },
+      {
+        "script": "test-field-alert-resolution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9320
+      },
+      {
+        "script": "test-field-alert-billing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14964
+      },
+      {
+        "script": "test-field-draft-payments.js",
+        "code": 0,
+        "signal": null,
+        "ms": 715
+      },
+      {
+        "script": "test-field-draft-visibility.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5510
+      },
+      {
+        "script": "test-invoice-draft-classification-browser.js",
+        "code": 0,
+        "signal": null,
+        "ms": 670
+      },
+      {
+        "script": "test-field-payment-retry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1194
+      },
+      {
+        "script": "test-field-payment-retry-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6623
+      },
+      {
+        "script": "test-field-client-receipts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 923
+      },
+      {
+        "script": "test-field-client-receipts-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9333
+      },
+      {
+        "script": "test-field-credit-allocation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1087
+      },
+      {
+        "script": "test-field-monthly-credit.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1145
+      },
+      {
+        "script": "test-field-surplus-ledger.js",
+        "code": 0,
+        "signal": null,
+        "ms": 441
+      },
+      {
+        "script": "test-field-alert-states.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5251
+      },
+      {
+        "script": "test-field-credit-adjustment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8124
+      },
+      {
+        "script": "test-field-monthly-rates.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1592
+      },
+      {
+        "script": "test-field-invoice-regeneration.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2134
+      },
+      {
+        "script": "test-field-invoice-page-generation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2743
+      },
+      {
+        "script": "test-field-repair-monthly-once.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1575
+      },
+      {
+        "script": "test-field-repair-invoice-atomic.js",
+        "code": 0,
+        "signal": null,
+        "ms": 892
+      },
+      {
+        "script": "test-field-contract-activation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 799
+      },
+      {
+        "script": "test-field-contract-activation-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5949
+      },
+      {
+        "script": "test-field-invoice-cancellation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 643
+      },
+      {
+        "script": "test-field-invoice-credit-note.js",
+        "code": 0,
+        "signal": null,
+        "ms": 591
+      },
+      {
+        "script": "test-field-repair-payment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 720
+      },
+      {
+        "script": "test-field-cash-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1180
+      },
+      {
+        "script": "test-field-invoice-issue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 563
+      },
+      {
+        "script": "test-field-invoice-delivery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 369
+      },
+      {
+        "script": "test-field-invoice-pdf-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1947
+      },
+      {
+        "script": "test-field-financial-document-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 759
+      },
+      {
+        "script": "test-field-authenticated-document-opening.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3260
+      },
+      {
+        "script": "test-field-daily-service-log.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4646
+      },
+      {
+        "script": "test-field-company-closures.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7495
+      },
+      {
+        "script": "test-field-client-closures.js",
+        "code": 0,
+        "signal": null,
+        "ms": 609
+      },
+      {
+        "script": "test-field-client-closures-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8547
+      },
+      {
+        "script": "test-field-company-closure-edit.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6850
+      },
+      {
+        "script": "test-field-payment-ledger.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31832
+      },
+      {
+        "script": "test-field-pool-calculator-state.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35191
+      },
+      {
+        "script": "test-field-pool-calculator-writes.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1911
+      },
+      {
+        "script": "test-field-pool-calculator-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16022
+      },
+      {
+        "script": "test-field-pool-calculator-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23607
+      },
+      {
+        "script": "test-field-pool-calculator-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15071
+      },
+      {
+        "script": "test-field-extra-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35362
+      },
+      {
+        "script": "test-field-legacy-entry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36396
+      },
+      {
+        "script": "test-field-client-technical-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35619
+      },
+      {
+        "script": "test-field-collection-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29063
+      },
+      {
+        "script": "test-field-email-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31976
+      },
+      {
+        "script": "test-field-live-map.js",
+        "code": 0,
+        "signal": null,
+        "ms": 34543
+      },
+      {
+        "script": "test-field-payment-policy-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29614
+      },
+      {
+        "script": "test-field-admin-day.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35522
+      },
+      {
+        "script": "test-field-security-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33991
+      },
+      {
+        "script": "test-field-admin-catalogue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26240
+      },
+      {
+        "script": "test-field-admin-onboarding.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1839
+      },
+      {
+        "script": "test-field-admin-onboarding-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21073
+      },
+      {
+        "script": "test-field-navigation-preferences.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20171
+      },
+      {
+        "script": "test-field-supplier-hub.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1463
+      },
+      {
+        "script": "test-field-supplier-hub-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29659
+      },
+      {
+        "script": "test-field-technician-management.js",
+        "code": 0,
+        "signal": null,
+        "ms": 40467
+      },
+      {
+        "script": "test-field-technician-management-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 32771
+      },
+      {
+        "script": "test-field-fleet-management.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1631
+      },
+      {
+        "script": "test-field-fleet-management-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36693
+      },
+      {
+        "script": "test-field-vehicle-consumption.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3607
+      },
+      {
+        "script": "test-field-vehicle-consumption-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22644
+      },
+      {
+        "script": "test-field-transport-guide-create.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6414
+      },
+      {
+        "script": "test-field-transport-guide-create-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22092
+      },
+      {
+        "script": "test-field-transport-guide-items.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6700
+      },
+      {
+        "script": "test-field-transport-guide-items-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22151
+      },
+      {
+        "script": "test-field-transport-guide-manage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5267
+      },
+      {
+        "script": "test-field-transport-guide-manage-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23317
+      },
+      {
+        "script": "test-field-work-guide-close.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5019
+      },
+      {
+        "script": "test-field-work-guide-close-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27191
+      },
+      {
+        "script": "test-field-vehicle-maintenance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5956
+      },
+      {
+        "script": "test-field-vehicle-maintenance-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27581
+      },
+      {
+        "script": "test-field-vehicle-assignment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6433
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26018
+      },
+      {
+        "script": "test-field-vehicle-stock-preset.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6300
+      },
+      {
+        "script": "test-field-vehicle-stock-preset-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25234
+      },
+      {
+        "script": "test-field-operational-risk-rules.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5918
+      },
+      {
+        "script": "test-field-operational-risk-rules-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24956
+      },
+      {
+        "script": "test-field-operational-risk-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8607
+      },
+      {
+        "script": "test-field-incident-center.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8966
+      },
+      {
+        "script": "test-field-operational-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15794
+      },
+      {
+        "script": "test-field-ai-zone-grouping.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1972
+      },
+      {
+        "script": "test-field-admin-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15435
+      },
+      {
+        "script": "test-field-legacy-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18163
+      },
+      {
+        "script": "test-field-dashboard-metrics.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1023
+      },
+      {
+        "script": "test-field-summary-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30172
+      },
+      {
+        "script": "test-field-inventory-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15087
+      },
+      {
+        "script": "test-field-product-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 91235
+      },
+      {
+        "script": "test-field-agenda-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 99226
+      },
+      {
+        "script": "test-field-guide-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33574
+      },
+      {
+        "script": "test-field-report-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17863
+      },
+      {
+        "script": "test-field-pdf-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9653
+      },
+      {
+        "script": "test-field-attachment-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9570
+      },
+      {
+        "script": "test-field-photo-evidence-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9375
+      },
+      {
+        "script": "test-field-technician-guide-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20775
+      },
+      {
+        "script": "test-field-document-summary-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26236
+      },
+      {
+        "script": "test-field-materials-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17531
+      },
+      {
+        "script": "test-field-guide-read-scope.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4058
+      },
+      {
+        "script": "test-field-guide-read-scope-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15460
+      },
+      {
+        "script": "test-field-fleet-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3065
+      },
+      {
+        "script": "test-field-fleet-history-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24284
+      },
+      {
+        "script": "test-field-work-guide-start.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8405
+      },
+      {
+        "script": "test-field-work-guide-start-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26273
+      },
+      {
+        "script": "test-field-transport-guide-documents.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6678
+      },
+      {
+        "script": "test-field-transport-guide-documents-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23665
+      },
+      {
+        "script": "test-field-financial-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2947
+      },
+      {
+        "script": "test-field-invoice-document.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4891
+      },
+      {
+        "script": "test-field-legacy-alert-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 409
+      },
+      {
+        "script": "test-field-invoice-chat.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2523
+      },
+      {
+        "script": "test-field-chat-identity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 333
+      },
+      {
+        "script": "test-field-invoice-outbound.js",
+        "code": 0,
+        "signal": null,
+        "ms": 459
+      },
+      {
+        "script": "test-field-cash-methods.js",
+        "code": 0,
+        "signal": null,
+        "ms": 378
+      },
+      {
+        "script": "test-field-account-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 969
+      },
+      {
+        "script": "test-field-legacy-admin-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 652
+      },
+      {
+        "script": "test-field-resource-chat.js",
+        "code": 0,
+        "signal": null,
+        "ms": 596
+      },
+      {
+        "script": "test-field-internal-profile-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 429
+      },
+      {
+        "script": "test-field-route-privacy.js",
+        "code": 0,
+        "signal": null,
+        "ms": 313
+      },
+      {
+        "script": "test-field-manual-invoice-reminder.js",
+        "code": 0,
+        "signal": null,
+        "ms": 500
+      },
+      {
+        "script": "test-field-client-chat-privacy.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1153
+      },
+      {
+        "script": "test-field-chat-attachments.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2611
+      },
+      {
+        "script": "test-field-internal-chat-durability.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1837
+      },
+      {
+        "script": "test-field-internal-chat-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5506
+      },
+      {
+        "script": "test-field-notification-confirmation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9293
+      },
+      {
+        "script": "test-field-client-chat-retry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 400
+      },
+      {
+        "script": "test-field-client-chat-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12638
+      },
+      {
+        "script": "test-field-client-chat-consolidation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2062
+      },
+      {
+        "script": "test-field-client-chat-history-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5390
+      },
+      {
+        "script": "test-field-client-portal-requests.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1978
+      },
+      {
+        "script": "test-field-client-portal-requests-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10404
+      },
+      {
+        "script": "test-field-client-edit-preservation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1758
+      },
+      {
+        "script": "test-field-pool-edit-atomicity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 840
+      },
+      {
+        "script": "test-field-client-edit-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4026
+      },
+      {
+        "script": "test-field-client-edit-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31619
+      },
+      {
+        "script": "test-field-pool-edit-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1910
+      },
+      {
+        "script": "test-field-pool-edit-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24701
+      },
+      {
+        "script": "test-field-technical-sheet-atomicity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2652
+      },
+      {
+        "script": "test-field-technical-sheet-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1526
+      },
+      {
+        "script": "test-field-technical-sheet-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21169
+      },
+      {
+        "script": "test-field-technical-proposals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6866
+      },
+      {
+        "script": "test-field-proposal-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1914
+      },
+      {
+        "script": "test-field-proposal-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20155
+      },
+      {
+        "script": "test-field-gps-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8913
+      },
+      {
+        "script": "test-field-write-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2302
+      },
+      {
+        "script": "test-field-write-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10786
+      },
+      {
+        "script": "test-field-internal-alert.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1590
+      },
+      {
+        "script": "test-field-internal-alert-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8697
+      },
+      {
+        "script": "test-field-internal-alert-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12183
+      },
+      {
+        "script": "test-field-stock-requests.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1721
+      },
+      {
+        "script": "test-field-stock-requests-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15639
+      },
+      {
+        "script": "test-field-stock-request-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17150
+      },
+      {
+        "script": "test-field-problem-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1499
+      },
+      {
+        "script": "test-field-problem-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20582
+      },
+      {
+        "script": "test-field-client-intake.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2074
+      },
+      {
+        "script": "test-field-client-intake-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10950
+      },
+      {
+        "script": "test-field-admin-monthly-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4133
+      },
+      {
+        "script": "test-field-admin-monthly-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8525
+      },
+      {
+        "script": "test-field-monthly-print-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1367
+      },
+      {
+        "script": "test-field-monthly-print.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2408
+      },
+      {
+        "script": "test-field-monthly-print-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1061
+      },
+      {
+        "script": "test-field-report-settings.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2457
+      },
+      {
+        "script": "test-field-report-settings-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25680
+      },
+      {
+        "script": "test-field-visit-report.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7081
+      },
+      {
+        "script": "test-field-report-opening-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9899
+      },
+      {
+        "script": "test-field-report-history-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4813
+      },
+      {
+        "script": "test-field-route-preview.js",
+        "code": 0,
+        "signal": null,
+        "ms": 316
+      },
+      {
+        "script": "test-field-route-preview-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3836
+      },
+      {
+        "script": "test-field-route-preview-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14236
+      },
+      {
+        "script": "test-field-legacy-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3564
+      },
+      {
+        "script": "test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7545
+      },
+      {
+        "script": "test-field-legacy-draft-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27643
+      },
+      {
+        "script": "test-field-modern-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5072
+      },
+      {
+        "script": "test-field-workday-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4823
+      },
+      {
+        "script": "test-field-workday-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6936
+      },
+      {
+        "script": "test-field-visit-types.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6541
+      },
+      {
+        "script": "test-field-extra-execution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5106
+      },
+      {
+        "script": "test-field-extra-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16134
+      },
+      {
+        "script": "test-field-extra-correction.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8678
+      },
+      {
+        "script": "test-field-extra-equipment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5816
+      },
+      {
+        "script": "test-field-extra-incomplete.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13018
+      },
+      {
+        "script": "test-field-modern-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19855
+      },
+      {
+        "script": "test-field-draft-navigation-memory.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2474
+      },
+      {
+        "script": "test-field-modern-visit-draft-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18398
+      },
+      {
+        "script": "test-field-team-leader-entry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 38191
+      },
+      {
+        "script": "test-field-complete-daily-route.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17148
+      },
+      {
+        "script": "test-field-document-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6103
+      },
+      {
+        "script": "test-field-guide-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 960
+      },
+      {
+        "script": "test-field-alert-source.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6301
+      },
+      {
+        "script": "test-field-key-scope.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2812
+      },
+      {
+        "script": "test-field-operational-pages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9627
+      },
+      {
+        "script": "test-field-admin-map-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5408
+      },
+      {
+        "script": "test-field-geographic-areas.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3620
+      },
+      {
+        "script": "test-field-multi-map.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5246
+      },
+      {
+        "script": "test-field-operational-values.js",
+        "code": 0,
+        "signal": null,
+        "ms": 555
+      },
+      {
+        "script": "test-field-operational-values-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6096
+      },
+      {
+        "script": "test-field-planned-work.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3492
+      },
+      {
+        "script": "test-field-client-services.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5260
+      },
+      {
+        "script": "test-field-client-services-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12502
+      },
+      {
+        "script": "test-field-client-service-pricing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7762
+      },
+      {
+        "script": "test-field-alert-report-opening.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30204
+      },
+      {
+        "script": "test-field-visit-report-photos.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2234
+      },
+      {
+        "script": "test-field-extra-report.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4182
+      },
+      {
+        "script": "test-field-maintenance-billing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17329
+      },
+      {
+        "script": "test-field-client-monthly-report-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 829
+      },
+      {
+        "script": "test-field-client-monthly-generation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 972
+      },
+      {
+        "script": "test-field-client-monthly-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15626
+      },
+      {
+        "script": "test-field-client-documents-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1690
+      },
+      {
+        "script": "test-field-client-documents-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16217
+      },
+      {
+        "script": "test-field-external-invoice-registration.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5626
+      },
+      {
+        "script": "test-field-external-reference-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6516
+      },
+      {
+        "script": "test-field-external-invoice-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28898
+      },
+      {
+        "script": "test-field-monthly-email-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4105
+      },
+      {
+        "script": "test-field-monthly-email-delivery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2100
+      },
+      {
+        "script": "test-field-monthly-email-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10098
+      },
+      {
+        "script": "test-field-monthly-email-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1769
+      },
+      {
+        "script": "test-field-monthly-email-review-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4620
+      },
+      {
+        "script": "test-field-credit-note-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30037
+      },
+      {
+        "script": "test-field-credit-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36147
+      },
+      {
+        "script": "test-field-credit-revenue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25095
+      },
+      {
+        "script": "test-field-financial-ai.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10137
+      },
+      {
+        "script": "test-field-financial-ai-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28558
+      },
+      {
+        "script": "test-field-execution-values.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19873
+      },
+      {
+        "script": "test-field-execution-values-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27149
+      },
+      {
+        "script": "test-field-company-expenses.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2547
+      },
+      {
+        "script": "test-field-company-expenses-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7742
+      },
+      {
+        "script": "test-field-expense-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3140
+      },
+      {
+        "script": "test-field-expense-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10368
+      },
+      {
+        "script": "test-field-repair-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7282
+      },
+      {
+        "script": "test-field-repair-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11936
+      },
+      {
+        "script": "test-field-repair-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3592
+      },
+      {
+        "script": "test-field-repair-materials-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12067
+      },
+      {
+        "script": "test-field-repair-work.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2478
+      },
+      {
+        "script": "test-field-repair-work-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6322
+      },
+      {
+        "script": "test-field-repair-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4719
+      },
+      {
+        "script": "test-field-repair-labor-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13696
+      },
+      {
+        "script": "test-field-labor-composition.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5811
+      },
+      {
+        "script": "test-field-labor-composition-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5441
+      },
+      {
+        "script": "test-field-cost-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9459
+      },
+      {
+        "script": "test-field-cost-period-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10019
+      },
+      {
+        "script": "test-field-maintenance-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7740
+      },
+      {
+        "script": "test-field-maintenance-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10325
+      },
+      {
+        "script": "test-field-labor-distribution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3666
+      },
+      {
+        "script": "test-field-labor-distribution-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9737
+      },
+      {
+        "script": "test-field-labor-components.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5620
+      },
+      {
+        "script": "test-field-labor-components-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5212
+      },
+      {
+        "script": "test-field-work-time-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2485
+      },
+      {
+        "script": "test-field-expense-valuations.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4265
+      },
+      {
+        "script": "test-field-expense-valuations-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13174
+      },
+      {
+        "script": "test-field-financial-cost-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13493
+      },
+      {
+        "script": "test-field-composed-cost-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30166
+      },
+      {
+        "script": "test-field-equipment-work-time.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2861
+      },
+      {
+        "script": "test-field-maintenance-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13305
+      },
+      {
+        "script": "test-field-maintenance-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11287
+      },
+      {
+        "script": "test-field-equipment-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2959
+      },
+      {
+        "script": "test-field-equipment-material-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7418
+      },
+      {
+        "script": "test-field-reminder-resources.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5831
+      },
+      {
+        "script": "test-field-reminder-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16150
+      },
+      {
+        "script": "test-field-reminder-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11800
+      },
+      {
+        "script": "test-field-reminder-partial-returns.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8199
+      },
+      {
+        "script": "test-field-reminder-visits.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7664
+      },
+      {
+        "script": "test-field-reminder-visit-resources.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8918
+      },
+      {
+        "script": "test-field-reminder-visit-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19602
+      },
+      {
+        "script": "test-field-reminder-visit-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16269
+      },
+      {
+        "script": "test-field-reminder-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7201
+      },
+      {
+        "script": "test-field-equipment-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7816
+      },
+      {
+        "script": "test-field-equipment-time-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6895
+      },
+      {
+        "script": "test-field-maintenance-share-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19221
+      },
+      {
+        "script": "test-field-equipment-history-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4561
+      },
+      {
+        "script": "test-field-equipment-history-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6733
+      },
+      {
+        "script": "test-field-equipment-history-time.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8174
+      },
+      {
+        "script": "test-field-financial-revenue-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33586
+      },
+      {
+        "script": "test-field-monthly-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8364
+      },
+      {
+        "script": "test-field-monthly-revenue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12455
+      },
+      {
+        "script": "test-field-maintenance-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36199
+      },
+      {
+        "script": "test-field-repair-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 43206
+      },
+      {
+        "script": "test-field-repair-execution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1602
+      },
+      {
+        "script": "test-field-repair-execution-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28958
+      },
+      {
+        "script": "test-field-repair-execution-command.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1027
+      },
+      {
+        "script": "test-field-repair-no-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 813
+      },
+      {
+        "script": "test-field-repair-execution-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7536
+      },
+      {
+        "script": "test-field-visit-report-origin.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8582
+      },
+      {
+        "script": "test-field-product-identity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1154
+      },
+      {
+        "script": "test-field-product-identity-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8343
+      },
+      {
+        "script": "test-field-legacy-products.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6990
+      },
+      {
+        "script": "test-field-product-catalogue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12765
+      },
+      {
+        "script": "test-field-extra-products.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27134
+      }
+    ],
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T13:06:49.6995366Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "9f133461ad7c659415a771c7992575d5df435b26616af7c2ba1c1a8dc7342b6b",
+    "jobs": [
+      {
+        "id": 110353655330,
+        "name": "field",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 36857579300,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run npx prisma validate && npx prisma generate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Verify additive upgrade from the previous schema",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run npm run check:syntax",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run node scripts/test-field-suite.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Restore database and uploaded files in isolated QA",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 26
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          }
+        ]
+      }
+    ]
+  },
+  "nativePending": {
+    "493": {
+      "head": "a7edd27f50f4eb2830cea9ef85d57246e0bda871",
+      "run": 36858816732,
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 110357696160,
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null
+            }
+          ]
+        }
+      ]
+    },
+    "494": {
+      "head": "6372b2b4c32ee9a9ce269e9ccc72b3ca1bdbd9dc",
+      "run": 36861734271,
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 110367328949,
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null
+            }
+          ]
+        }
+      ]
+    },
+    "495": {
+      "head": "077dd01ac10f03fc104c84705e433bb357924f14",
+      "run": 36866289542,
+      "status": "in_progress",
+      "conclusion": null,
+      "jobs": [
+        {
+          "id": 110382497425,
+          "status": "in_progress",
+          "conclusion": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "nextTasks": {
+    "TASK497": "Localize own technician-login page/status copy with literal server errors, original authentication payload/session/Enter/pending behavior and preserved stored work.",
+    "nativeGate": "Verify493–496 full exact-code suites and restore results; do not replace full acceptance with localPGlite."
+  },
+  "completion": {
+    "total": 32,
+    "complete": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "annualContract": "deferred",
+    "repoVisibility": "public during development; private before C32 closes"
+  }
+}

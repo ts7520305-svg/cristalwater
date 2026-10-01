@@ -1,5 +1,23 @@
 # Inventário de idiomas — C05 / TASK415
 
+## Retoma atual — 01/10/2026, TASK496 / viatura e técnico protegidos da memória genérica
+
+TASK496 validada: os dois IDs dos documentos passam a usar a fronteira existente data-cw-form-memory=managed, tal como os treze campos do rascunho. A memória genérica deixava repor uma viatura/técnico anteriores depois da escolha da conta atual, invalidando a relevância da consulta original. Só um atributo HTML e cache270→271; navigation-context.js, produtor documental, API, auth, sessão, i18n e runner381 exatamente intactos. Campos genéricos não geridos continuam a ser recordados; a limpeza existente retira os IDs geridos do snapshot genérico. Os bytes dos rascunhos e caches operacionais atribuídos continuam conservados. [Prova496](evidence/20261001_task496_local.json).
+
+Controlo negativo: apenas HTML parent495 imutável no cenário final, com atraso do script genérico original até o rascunho real estar reposto. Repõe input100001 em vez da viatura1 e falha na nova asserção em2386 ms. Não substitui produtores nem autenticação. Com a correção: quatro navegações REGULAR/EXTRA de mesmo número preservam os treze campos e bytes completos; viatura/técnico atuais e três documentos online corretos; controlo genérico não gerido ainda funciona.
+
+Cenário de sessão: cinquenta verificações originais e14 rejeições de alterações documentais conservadas. A reabertura explícita da conta B tem as três cópias documentais realmente guardadas para B/viatura/dia; espera e verifica essas cópias, sem prometer documentos numa conta offline sem cache. Cinco mudanças reais de idioma depois de reabrir conservam IDs/contexto, treze campos, nós/foco, tokens, fontes/timestamps, raw storage, dois UUID/hash IndexedDB e SQL, sem nova consulta nem escrita operacional. Matrix de viatura online/offline e mudança real do dia continua aprovada; os limites originais mantêm-se.
+
+Integrações finais em PGlite: memória4094 ms, sessão29690 ms, transição17217 ms. Com servidorUTC/browserEurope-Lisbon: memória4239 ms, sessão32962 ms, transição19080 ms; recuperação documental original8079 ms também aprovada. Uma invocação scratch com nome de script inexistente foi excluída; a recuperação existente foi executada de seguida e passou. Sintaxe695/308/44 aprovada. Revisão alemã320 da fonte guardada atual sem corte. Sem nova execução local backend alegada; PGlite não equivale à aceitação nativa.
+
+O teste de transição já usava Europe/Lisbon na491. Nenhum fuso ou deadline foi alterado. A falha nativa491 não se repetiu nesta matriz nem no CI492; não se declara a causa daquele timeout provada. A interferência dos IDs é uma regressão de produto reproduzida separadamente.
+
+TASK495 publicada: código077dd01ac10f03fc104c84705e433bb357924f14 / árvore4fd2508c9d27545301eaee6a879e89c9f8e8c0ae, [CI495/36866289542](https://github.com/ts7520305-svg/cristalwater/actions/runs/36866289542) / job110382497425. CI493/494/495 nas suites381, restauros pendentes. Publicação496/aceitação nativa da correção pendentes nesta entrada.
+
+Nova última aceitação completa: TASK492,381 grupos distintos/code0 e ordem exata, cinco fontes SHA256/head/checkout/árvore conferidos. PostgreSQL16.15/43 migrações, sintaxe695/308/44,1 396 unitários/141 ficheiros/quatro técnicos; restauro128 tabelas/51 ficheiros com linhas/hashes iguais, PASS2026-10-01T13:06:49.6995366Z. Código5b4fc2400358f37ba464714f463d7d13bf69d62b / árvoree897a9c465f283316229cea09d2ff03591541fa7, [CI492/36857579300](https://github.com/ts7520305-svg/cristalwater/actions/runs/36857579300) / job110353655330. Inclui histórico130/18, preservação dos erros literais e todas as381 integrações; correções493–496 ainda exigem os próprios gates. CI489 permanece histórica com378 grupos; falhas490/491 conservadas.
+
+Próximo: TASK497 / textos próprios do login técnico; continuar C06 e conferir CI/restauros. C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público no desenvolvimento, privado antes de C32; contrato anual adiado. Entradas abaixo históricas.
+
 ## Retoma atual — 01/10/2026, TASK495 / idioma entre janelas sem releitura operacional
 
 TASK495 implementada e validada localmente: CWFieldReminders deixa de emitir atualizações operacionais quando um evento storage de user/cristalwater_user muda apenas o idioma. Exige a mesma sessão real capturada, técnico correspondente e perfil reconhecido; compara todos os outros campos. Dados, identidade, perfil, nome, viatura, token, remoção/corrupção e chave de lembretes mantêm as notificações originais. Inversão exata do produto comprovada. API/auth/session/sync/gravações/copys originais intactos; catálogo442/runner381 mantidos, cache269→270.
