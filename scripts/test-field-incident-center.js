@@ -168,10 +168,19 @@ const ids = [];
     let releaseRead, readStarted;
     const heldRead = new Promise(resolve => { releaseRead = resolve; });
     const firstRead = new Promise(resolve => { readStarted = resolve; });
-    const reads = [];
+    const reads = [], fixtureRequests = new Set();
+    let manualHeld = false;
+    if (index === 0) await page.evaluate(() => {
+      window.qaIncidentManualRefreshClicked = false;
+      document.getElementById('refreshBtn').addEventListener('click', () => { window.qaIncidentManualRefreshClicked = true; }, { capture: true, once: true });
+    });
     const readHandler = route => {
-      const hold = index === 0 && reads.length === 0;
+      const ordinal = reads.length;
+      fixtureRequests.add(route.request());
       const completion = (async () => {
+        const manualClicked = index === 0 && await page.evaluate(() => window.qaIncidentManualRefreshClicked === true);
+        const hold = index === 0 && manualClicked && !manualHeld;
+        if (hold) manualHeld = true;
         if (hold) { readStarted(route.request()); await heldRead; }
         await route.fulfill(response);
       })();
@@ -180,10 +189,22 @@ const ids = [];
     };
     await page.route('**/api/incidents', readHandler);
     try {
+      if (index === 0) {
+        // A real notification before the manual click must finish its read;
+        // it cannot consume the hold and keep the refresh button disabled.
+        const background = page.waitForResponse(result => new URL(result.url()).pathname === '/api/incidents' && result.request().method() === 'GET' && fixtureRequests.has(result.request()));
+        assert.equal((await call('/status/' + concurrent.id, 'POST', { status: 'OPEN' })).status, 200);
+        assert.equal((await background).status(), 503);
+        assert(!manualHeld && reads.length >= 1);
+        assert.equal(await page.evaluate(() => window.qaIncidentManualRefreshClicked), false);
+        const unchanged = await prisma.incident.findUniqueOrThrow({ where: { id: concurrent.id } });
+        for (const key of ['status', 'impactScore', 'priorityScore']) assert.equal(unchanged[key], escalated[key]);
+        console.log('PASS incident pre-click realtime read: native notification finishes without taking the manual hold or changing status/escalation scores');
+      }
       await page.locator('#refreshBtn').click();
       if (index === 0) {
         const manualRead = await firstRead;
-        const replacement = page.waitForResponse(result => new URL(result.url()).pathname === '/api/incidents' && result.request().method() === 'GET' && result.request() !== manualRead);
+        const replacement = page.waitForResponse(result => new URL(result.url()).pathname === '/api/incidents' && result.request().method() === 'GET' && result.request() !== manualRead && fixtureRequests.has(result.request()));
         // This real, authorized write emits incident-updated through Socket.IO.
         // It preserves OPEN and the escalation scores, and replaces the held GET.
         assert.equal((await call('/status/' + concurrent.id, 'POST', { status: 'OPEN' })).status, 200);
