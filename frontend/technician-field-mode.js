@@ -2815,7 +2815,7 @@
   let docsContext = null, docsRevision = 0, docsDetail = '', docsWarning = '';
   let docsDetailCopy = '', docsWarningCopy = '';
   let docsCompliance = null;
-  let documentsLoaded = false;
+  let documentsLoaded = false, documentsNeedVehicle = false;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
   let assistErrorPresentation = null;
   let notifiedVisitNoticeKey = "";
@@ -3572,7 +3572,7 @@
   }
 
   function clearFieldDocuments(message = '', copy = message) {
-    ++docsRevision; docsContext = null; documentsLoaded = false;
+    ++docsRevision; docsContext = null; documentsLoaded = false; documentsNeedVehicle = false;
     activeTransportGuide = null; activeWorkGuide = null; activeWorkStock = []; activeInsurance = null; activeVehicle = null;
     docsSource = 'unavailable'; docsDetail = ''; docsWarning = message;
     docsDetailCopy = ''; docsWarningCopy = copy;
@@ -4051,7 +4051,7 @@
       }, 'sourceDelayedTitle', alertUi.value('sourceDelayedDetail', { pool: visit?.pool?.name || alertUi.value('sourcePool') })));
     }
 
-    if (documentsLoaded && !opsSnapshot.docsReady) {
+    if ((documentsLoaded || documentsNeedVehicle) && !opsSnapshot.docsReady) {
       items.push(withAlertSource({
         id: `docs-missing:${Number($('#vehicleId')?.value) || 'none'}`,
         category: "DOC_MISSING",
@@ -4222,8 +4222,8 @@
     if (progressValue) alertUi.bind(progressValue, visit ? `${done} / ${total}` : `${total} / ${total}`);
     if (progressMeta) alertUi.bind(progressMeta, alertUi.value(visit ? (pending ? 'dashPendingVisits' : 'dashRoundReady') : 'dashScheduleFree', { count: pending }));
 
-    if (docsValue) alertUi.bind(docsValue, alertUi.value(!documentsLoaded ? 'dashValidating' : docsReady ? 'dashValid' : 'dashReview'));
-    if (docsMeta) alertUi.bind(docsMeta, alertUi.value(!documentsLoaded ? 'dashVehicleConfirm' : docsReady ? docsSource === 'live' ? 'dashDocsConfirmed' : 'dashDocsCached' : 'dashDocsMissing'));
+    if (docsValue) alertUi.bind(docsValue, alertUi.value(!documentsLoaded && !documentsNeedVehicle ? 'dashValidating' : docsReady ? 'dashValid' : 'dashReview'));
+    if (docsMeta) alertUi.bind(docsMeta, alertUi.value(!documentsLoaded && !documentsNeedVehicle ? 'dashVehicleConfirm' : docsReady ? docsSource === 'live' ? 'dashDocsConfirmed' : 'dashDocsCached' : 'dashDocsMissing'));
 
     const pendingPhotos = visitPhotos.filter(photo => photo.status !== "uploaded").length;
     const pendingRevision = ++fieldPendingRevision;
@@ -5399,7 +5399,7 @@
     const vehicleInput = $('#vehicleId'), technicianInput = $('#technicianId');
     const vehicleId = Number(vehicleInput?.value || localStorage.getItem('cwVehicleId'));
     clearFieldDocuments();
-    if (!Number.isSafeInteger(vehicleId) || vehicleId < 1) { docsWarning = 'Confirme a viatura atribuída antes de consultar documentos.'; docsWarningCopy = alertUi.value('centerVehicleConfirm'); renderCrewStatus(); return; }
+    if (!Number.isSafeInteger(vehicleId) || vehicleId < 1) { documentsNeedVehicle = true; docsWarning = 'Confirme a viatura atribuída antes de consultar documentos.'; docsWarningCopy = alertUi.value('centerVehicleConfirm'); renderCrewStatus(); updateFieldDashboard(current()); return; }
     const context = window.CWFieldDocuments.scope(fieldWriteSession, vehicleId), revision = docsRevision;
     const relevant = () => revision === docsRevision && window.CWFieldDocuments.same(context) && Number(vehicleInput?.value) === vehicleId;
     docsContext = context;

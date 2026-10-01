@@ -1,0 +1,366 @@
+{
+  "task": 499,
+  "checkedAt": "2026-10-01T15:31:15.678167+00:00",
+  "parent": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Owned fallback bottom-navigation labels/aria in five languages, adaptive touch targets, and truthful blocked documents when a vehicle prerequisite is absent; fixes both native496 failures without loosening document readiness or session guards.",
+  "sources": {
+    "frontend/ui/design-system.js": "eaee672c8ba8e8a6613d37b62a21b1780aa8c6b4113bc5266ec30bb209a24d33",
+    "frontend/ui/design-system.css": "fa56f79283ea6f8295de581e64ad0e338261a460a79339e70b2989faa314a797",
+    "frontend/technician-field-mode.js": "7d248a4f5db9b498c92086aa850655c315130105b3a4e2b5083476f160ff7446",
+    "frontend/technician-field-mode.html": "9b7310a0e5bd5b16bd35af19cc14d69202e42947bd4124ae1125fd07ce76a217",
+    "frontend/sw.js": "a08233e70e7a17802426789b3341c87b646d22f276eae2a013d374996859c39a",
+    "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+    "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+    "frontend/cw-field-documents.js": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+    "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+    "frontend/ui/core/navigation-context.js": "044f57289d9b263f0c70d137889a27abdfdd2c856272ec735f7bd106e0ea6497",
+    "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+    "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081",
+    "scripts/test-field-suite.js": "6bc317cdf1fb0ce42ceaf3ee2dc537c3ce5ea369e7935d2c6af360fb693707b5",
+    "scripts/test-field-bottom-navigation-languages.js": "f9806a15841e6515898467d4c7d490ac0c873f63fd13c93fbdd500be1f0784e1",
+    "scripts/test-field-current-visit-languages.js": "78dd9d982ee7f9e97bc296ce6367f646e258e77e801427de5e5c588dce4b6209",
+    "scripts/test-field-current-visit-time-languages.js": "94d18fce7907fe6ee7147d769fdcd59c8b4ad07b2127b00ce68d414799513c5a",
+    "scripts/test-field-dashboard-languages.js": "784dc27ccba11cd57141f2fee75dec528ac8714569e625bfd0429b87cb188ef8",
+    "scripts/test-field-login-languages.js": "41b1ef27e4572fc0766d36fa903ac1c383b97167ed3add7e1209165309b0b3e1"
+  },
+  "productAudit": {
+    "parent": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+    "inverseFallbackMenuExactlyRestored": true,
+    "inverseFieldModeExactlyRestored": true,
+    "documentsLoadedNotFalselySet": true,
+    "complianceAndOperationalGuardsExactlyPreserved": true,
+    "copyEntries": 12,
+    "copyVariants": 60,
+    "runnerPrevious382ExactOrderPreserved": true,
+    "runnerFinal": 383,
+    "worker": 274,
+    "unchanged": {
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-documents.js": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/technician-auth-guard.js": "8c58abca001040443985b9a8ebac0c9775bef0f389020bfa59211bce7e55b594",
+      "frontend/ui/core/navigation-context.js": "044f57289d9b263f0c70d137889a27abdfdd2c856272ec735f7bd106e0ea6497",
+      "frontend/technician-field-mode.html": "9b7310a0e5bd5b16bd35af19cc14d69202e42947bd4124ae1125fd07ce76a217",
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081"
+    },
+    "backendPrismaTestsUnchanged": true,
+    "existingLoginTestOnlyCacheReferencesChanged": true,
+    "CSS": "Adaptive five columns with minimum 44px width and original minimum height; 2px horizontal padding and emergency wrapping."
+  },
+  "local": {
+    "runtime": "Isolated application and Playwright with PGlite; this is not a complete native PostgreSQL16 acceptance.",
+    "positive": [
+      {
+        "result": {
+          "script": "scripts/test-field-dashboard-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 76489,
+          "logBytes": 630
+        },
+        "logSha256": "54324eaf92984778894cdd25a040c61022b5cc84321cd0cc9cdb67c862b922d0",
+        "log": "PASS real dashboard in five languages/three widths: critical problem is not a manual pump; real water/pump/unreadable sources, private names/fallbacks, progress, live/cache/missing/held docs, free/ongoing/completed extra visit, read acknowledgement does not close reminders, actual photo draft, typed asynchronous pending/failure/late-reply protection; unchanged nodes/focus/actions/bytes/SQL and no producers on locale change\nPASS late pending replies cannot repaint after account changes; missing technician name translates, old account work is not inherited, and actual refresh/schedule buttons keep their read-only navigation\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-current-visit-time-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 69097,
+          "logBytes": 2972
+        },
+        "logSha256": "4f9cd72f8ae2ee0ec19d12ba9cc4d3f3c6d213e42faff702a316c32639d25547",
+        "log": "Current-visit fixture ready\nCurrent-visit page ready\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TRAVEL\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"DONE\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":2,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":false,\"minutes\":null,\"free\":true,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS current-visit time profile; real rendering, language selector, captured source values and exact route restoration verified\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"-\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS account/session guard and four missing/invalid vehicle boundaries; no inherited documents, document requests, draft loss, water state or operational writes\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-bottom-navigation-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 9770,
+          "logBytes": 979
+        },
+        "logSha256": "1eb3b8fdcd0a2584f9b5dbf86a52a10576b4825ef4a0be651934c3514b0c5588",
+        "log": "PASS fallback navigation {\"name\":\"technician-login\",\"role\":\"TECHNICIAN\",\"languages\":5,\"widths\":[320,390,1440],\"nodesAndFocusAndDestinationsPreserved\":true,\"keyboardDestination\":\"/technician-route\"}\nPASS fallback navigation {\"name\":\"technician-profile\",\"role\":\"TECHNICIAN\",\"languages\":5,\"widths\":[320,390,1440],\"nodesAndFocusAndDestinationsPreserved\":true,\"keyboardDestination\":\"/technician-route\"}\nPASS fallback navigation {\"name\":\"technician-login\",\"role\":\"TEAM_LEADER\",\"languages\":5,\"widths\":[320,390,1440],\"nodesAndFocusAndDestinationsPreserved\":true,\"keyboardDestination\":\"/technician-route\"}\nPASS fallback navigation {\"name\":\"client-login\",\"role\":\"CLIENT\",\"languages\":5,\"widths\":[320,390,1440],\"nodesAndFocusAndDestinationsPreserved\":true,\"keyboardDestination\":\"/client\"}\nPASS fallback navigation language result {\"checks\":60,\"controls\":3,\"languages\":5,\"profiles\":[\"TECHNICIAN\",\"TEAM_LEADER\",\"CLIENT\"],\"ownedLeavesOnly\":true,\"noOperationalWrites\":true,\"componentOnly\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-shared-navigation-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 24325,
+          "logBytes": 1305
+        },
+        "logSha256": "aa662439092702f3fcd1ed858407ce524d9b86970be2b98b0bf1c5061fc69fe4",
+        "log": "PASS navigation admin-vehicles/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation help-center/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation settings/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation client-dashboard/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation client-menu/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-new-client/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-guide/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-route/TEAM_LEADER: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nNavigation visual evidence: /workspace/scratch/1c4fa52fd046/cristalwater/reports/field-visual/shared-navigation-1790868507668\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 24562,
+          "logBytes": 2458
+        },
+        "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+        "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-transition-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 26785,
+          "logBytes": 382
+        },
+        "logSha256": "e65e3936a97506c962a48d26f0709397c007cebd00b043297d59586836e5bd6c",
+        "log": "PASS vehicle-online {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS vehicle-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS day-offline {\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS actual vehicle changes and day guard preserve typed drafts, raw source bytes, tokens, SQL and outbox; no operational writes\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-center-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 32970,
+          "logBytes": 2627
+        },
+        "logSha256": "8815f34ee029db52f08451dc4dc030c7f0a3a6fcdc06576d17d87c69e5e9653f",
+        "log": "PASS document center {\"label\":\"live\",\"source\":\"centerLive\",\"warning\":null,\"widths\":[320,390,1440],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"blocked\",\"source\":\"centerLive\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"provisional\",\"source\":\"centerLive\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"missing-work\",\"source\":\"centerLive\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"restored\",\"source\":\"centerLive\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"mixed\",\"source\":\"centerMixed\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"offline-cache\",\"source\":\"centerCache\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"unavailable\",\"source\":\"centerUnconfirmed\",\"warning\":\"storedUnreadable\",\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"cache-recovered\",\"source\":\"centerCache\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"quota-literal\",\"source\":\"centerLive\",\"warning\":{\"key\":\"saveWarning\",\"detail\":\"Os documentos guardados estão ilegíveis. Foram preservados. <b>{detail}</b>\"},\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"unconfirmed-save\",\"source\":\"centerLive\",\"warning\":{\"key\":\"saveWarning\",\"detailKey\":\"saveUnconfirmed\"},\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"missing-locks\",\"source\":\"centerLive\",\"warning\":{\"key\":\"saveWarning\",\"detailKey\":\"locksUnavailable\"},\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"denied\",\"source\":\"centerUnconfirmed\",\"warning\":\"accessDenied\",\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"foreign-copy\",\"source\":\"centerUnconfirmed\",\"warning\":\"storedContext\",\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"old-access-rules\",\"source\":\"centerUnconfirmed\",\"warning\":\"storedAccessRules\",\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document center {\"label\":\"typed-extra\",\"source\":\"centerCache\",\"warning\":null,\"widths\":[320],\"languages\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS document overview, source provenance and owned warnings in five languages; raw errors, typed drafts, source bytes, outbox, SQL and guarded session preserved\n"
+      },
+      {
+        "result": {
+          "script": "scripts/test-field-document-recovery.js",
+          "code": 0,
+          "signal": null,
+          "ms": 13173,
+          "logBytes": 779
+        },
+        "logSha256": "4ec5eae4f8ca88bd10cbac1fedd1a9d61fb016b2c59af27ea8c36c81287a26fd",
+        "log": "PASS guide responses omit related credentials; failed document/stock/vehicle reads and corrupt official-document metadata cannot claim an empty successful response\nPASS real documents grouped by typed account/role/vehicle/day; legacy bytes preserved; mixed refresh keeps original section timestamp and current source honest\nPASS quota, missing readback, corrupt cache and wrong vehicle do not overwrite saved bytes or claim offline persistence\nPASS late reply cannot replace newer documents; cold offline reload retains section provenance; even a non-JSON 403 blocks cached operational documents\nPASS editing vehicle invalidates visible documents; another account on the same vehicle cannot inherit cache; current account must consult again and day changes invalidate provenance\n"
+      }
+    ],
+    "negativeParentBottomNavigation": {
+      "parent": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+      "selectedSourceOnly": "frontend/ui/design-system.js",
+      "mechanism": "Original fs reads except the immutable parent component; final HTML/CSS/i18n and original assertions.",
+      "evidence": {
+        "result": {
+          "script": "../qa-runtime/negative-bottom499.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 3264,
+          "logBytes": 363
+        },
+        "logSha256": "221985e55f2a4c8bdab4369c09f2315f5e35b255080e15f5bbf3b004ceb6de91",
+        "log": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ null\n- 'Documentos'\n\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-bottom-navigation-languages.js:63:46 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: null,\n  expected: 'Documentos',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+      }
+    },
+    "beforeDocumentFix": {
+      "source": "frontend/technician-field-mode.js unchanged from parent498 (and496); current499 fallback UI does not attach on field-tabs pages.",
+      "negative": [
+        {
+          "result": {
+            "script": "scripts/test-field-dashboard-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 82497,
+            "logBytes": 828
+          },
+          "logSha256": "a2c47b6a441a325440ef18e2d7c342b66b82bddf22418e78709fd5dcd4f660e1",
+          "log": "PASS real dashboard in five languages/three widths: critical problem is not a manual pump; real water/pump/unreadable sources, private names/fallbacks, progress, live/cache/missing/held docs, free/ongoing/completed extra visit, read acknowledgement does not close reminders, actual photo draft, typed asynchronous pending/failure/late-reply protection; unchanged nodes/focus/actions/bytes/SQL and no producers on locale change\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Hoje está livre'\n- 'Há alertas ativos'\n\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-dashboard-languages.js:468:190 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Hoje está livre',\n  expected: 'Há alertas ativos',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+        },
+        {
+          "result": {
+            "script": "scripts/test-field-current-visit-time-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 87624,
+            "logBytes": 2861
+          },
+          "logSha256": "89607c87ddf83746f505b8f0aec7e74adcddd7e250430c5ed8e4ecdbb266f204",
+          "log": "Current-visit fixture ready\nCurrent-visit page ready\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TRAVEL\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"DONE\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":2,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":false,\"minutes\":null,\"free\":true,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS current-visit time profile; real rendering, language selector, captured source values and exact route restoration verified\npage.waitForFunction: Timeout 9000ms exceeded.\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-current-visit-languages.js:214:772 {\n  log: [],\n  name: 'TimeoutError'\n}\n"
+        }
+      ]
+    },
+    "harnessIterations": {
+      "evidence": [
+        {
+          "result": {
+            "script": "scripts/test-field-current-visit-time-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 72932,
+            "logBytes": 3250
+          },
+          "logSha256": "d4f676270296891dd968c8efb70d8e9a5833b98cd957d498f5574e693e840a02",
+          "log": "Current-visit fixture ready\nCurrent-visit page ready\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TRAVEL\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"DONE\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":2,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":false,\"minutes\":null,\"free\":true,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS current-visit time profile; real rendering, language selector, captured source values and exact route restoration verified\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ '/api/technician/water-reminders'\n- '/api/settings/language/me'\n        ^\n\n    at matrix (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-current-visit-languages.js:169:48)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-current-visit-languages.js:214:1191 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '/api/technician/water-reminders',\n  expected: '/api/settings/language/me',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+        },
+        {
+          "result": {
+            "script": "scripts/test-field-current-visit-time-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 70809,
+            "logBytes": 3248
+          },
+          "logSha256": "36d3a04850a3360be63568f1da7dc110567816237b81261d133aaf25036f5d3b",
+          "log": "Current-visit fixture ready\nCurrent-visit page ready\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TRAVEL\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"DONE\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":2,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":false,\"minutes\":null,\"free\":true,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\nPASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\nPASS current-visit time profile; real rendering, language selector, captured source values and exact route restoration verified\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ '/api/technician/pump-reminders'\n- '/api/settings/language/me'\n        ^\n\n    at matrix (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-current-visit-languages.js:169:48)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-current-visit-languages.js:214:1534 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '/api/technician/pump-reminders',\n  expected: '/api/settings/language/me',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+        }
+      ],
+      "cause": "A native startup handover read and its queued reminder sync overlapped the new-account language matrix. A single HTTP response was not the completed bootstrap.",
+      "finalBoundary": "Wait for the real empty handover result in the five supported languages before instrumenting the locale matrix. No producer is replaced, no failed assertion removed and no timeout changed.",
+      "fourInvalidVehicleValues": [
+        "0",
+        "-1",
+        "1.5",
+        ""
+      ]
+    },
+    "footerChecks": 60,
+    "footerForeignOwnerControls": 3,
+    "footerFixtures": "Production HTML/CSS and original component/i18n; business/auth page scripts excluded explicitly. Native auth is tested separately.",
+    "nativeLoginChecks": 110,
+    "nativeLoginConnectionControls": 6,
+    "nativeLoginProfiles": [
+      "TECHNICIAN",
+      "TEAM_LEADER"
+    ],
+    "twoPreparedTypedRequestsRetained": true,
+    "actualShell274CachedAndReopenedOffline": true,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44,
+      "pass": true
+    },
+    "backendUnitTestsRerun": false,
+    "noOperationalAPIWrites": true
+  },
+  "visual": {
+    "reviewed": [
+      "client-login-CLIENT-fr-320.png",
+      "technician-profile-TECHNICIAN-fr-320.png",
+      "technician-profile-TECHNICIAN-de-320.png"
+    ],
+    "sha256": {
+      "client-login-CLIENT-fr-320.png": "bf5ac85c25880609d8c253dc32253e7df9db705d6b5143035732ca3ba08e9ec7",
+      "technician-profile-TECHNICIAN-fr-320.png": "c2c65a5a7d64b5aba0a08230afaf61de09c051153d0cfc8d4b79d9680095f585",
+      "technician-profile-TECHNICIAN-de-320.png": "e7f9f4e0acc13558c2dab910a3c8dad63c95350c22d8685adc60e561c95212a5"
+    },
+    "result": "French technician/client labels fit intact at 320px without reducing the original font; each touch target is at least44px wide/high. German active profile and literal names remain correct.",
+    "loginOffline": {
+      "file": "cached-offline-de-320.png",
+      "sha256": "a6c9a55f6cb19effb6d705cd2edc0e1406084637a04fc470844e03b4b688c379"
+    }
+  },
+  "native496": {
+    "task": 496,
+    "accepted": false,
+    "code": "00ac8928dc50f4ececfc741a1c448ea863b7c238",
+    "tree": "72a91e24ca085e36317ac30d582d355480938041",
+    "run": 36868131317,
+    "job": 110388711849,
+    "groups": 381,
+    "pass": 379,
+    "failures": [
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 37398
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 72131
+      }
+    ],
+    "sourceAndOrderVerified": true,
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "restore": "skipped",
+    "logSha256": "872d969b917319fd2fbc424653d6804aa3b2d69dcb9914cc7ade311d29ef9630"
+  },
+  "lastCompleteAcceptance": {
+    "task": 495,
+    "code": "077dd01ac10f03fc104c84705e433bb357924f14",
+    "tree": "4fd2508c9d27545301eaee6a879e89c9f8e8c0ae",
+    "run": 36866289542,
+    "job": 110382497425,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "groups": 381,
+    "distinctGroups": 381,
+    "allCodeZero": true,
+    "actualOrderExactlyMatched": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceSha256": {
+      "frontend/cw-field-reminders.js": "40106c2e95e9033a2a6838c791ccffd0cd857ea070f025fd8cd173546c66f330",
+      "frontend/sw.js": "f5e74ac7f43d7b05c35b613541197780186f91212e0bddfeaaf20934b912a359",
+      "scripts/test-field-alert-board-languages.js": "251691557e8f319245a219e76e1c9cd4628b175970142730bd909ca0aa97e5e3"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T14:20:18.4642896Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "e8f6bfd76584eda381e7772a7c67c51df6e5f67c9bc6999ac77cd5307044c358"
+  },
+  "publication498": {
+    "code": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+    "tree": "f5724a98f6045fc68bc98d4ffce649032c343cb3",
+    "run": 36878709471
+  },
+  "nativePending": {
+    "497": {
+      "run": 36874647484,
+      "sha": "d1c30e2a8d3d6c1e3f62dc539b7a8c94bca12465",
+      "status": "in_progress",
+      "conclusion": null,
+      "job": 110410844445
+    },
+    "498": {
+      "run": 36878709471,
+      "sha": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+      "status": "in_progress",
+      "conclusion": null,
+      "job": 110424687157
+    }
+  },
+  "nextTask": "TASK500: verify exact published499 head/tree/source hashes, native runner383 order and restore128 tables/51files; handle any real failures before further completion claims.",
+  "completion": {
+    "total": 32,
+    "complete": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "annualContract": "deferred",
+    "repoVisibility": "public until final acceptance; private before C32"
+  }
+}

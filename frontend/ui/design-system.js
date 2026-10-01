@@ -24,6 +24,47 @@
     });
   }
 
+  // This fallback menu owns only the leaves it creates. Existing menus and
+  // page navigation remain under their original owners.
+  var bottomLanguages = ['pt', 'en', 'fr', 'es', 'de'];
+  var bottomCopy = {
+    today: ['Hoje', 'Today', 'Aujourd’hui', 'Hoy', 'Heute'],
+    round: ['Ronda', 'Route', 'Tournée', 'Ruta', 'Route'],
+    visits: ['Visitas', 'Visits', 'Visites', 'Visitas', 'Besuche'],
+    docs: ['Docs', 'Docs', 'Docs', 'Docs', 'Dok.'],
+    documents: ['Documentos', 'Documents', 'Documents', 'Documentos', 'Dokumente'],
+    profile: ['Perfil', 'Profile', 'Profil', 'Perfil', 'Profil'],
+    home: ['Inicio', 'Home', 'Accueil', 'Inicio', 'Start'],
+    pool: ['Piscina', 'Pool', 'Piscine', 'Piscina', 'Pool'],
+    history: ['Historico', 'History', 'Historique', 'Historial', 'Verlauf'],
+    requests: ['Pedidos', 'Requests', 'Demandes', 'Pedidos', 'Anfragen'],
+    technicianNav: ['Navegacao rapida tecnico', 'Technician quick navigation', 'Navigation rapide du technicien', 'Navegación rápida del técnico', 'Techniker-Schnellnavigation'],
+    clientNav: ['Navegacao rapida cliente', 'Client quick navigation', 'Navigation rapide du client', 'Navegación rápida del cliente', 'Kunden-Schnellnavigation']
+  };
+  var bottomLeaves = [], bottomLabels = [];
+  function bottomText(key) {
+    var language = String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0];
+    return bottomCopy[key][Math.max(0, bottomLanguages.indexOf(language))];
+  }
+  function paintBottomNav() {
+    bottomLeaves = bottomLeaves.filter(function (leaf) {
+      if (!leaf.node.isConnected || leaf.node.childNodes.length !== 1 || leaf.node.firstChild !== leaf.textNode || leaf.node.textContent !== leaf.rendered) return false;
+      var rendered = bottomText(leaf.key);
+      if (leaf.rendered !== rendered) leaf.textNode.nodeValue = rendered;
+      leaf.rendered = rendered;
+      return true;
+    });
+    bottomLabels = bottomLabels.filter(function (leaf) {
+      if (!leaf.node.isConnected || leaf.node.getAttribute('aria-label') !== leaf.rendered) return false;
+      var rendered = bottomText(leaf.key);
+      if (leaf.rendered !== rendered) leaf.node.setAttribute('aria-label', rendered);
+      leaf.rendered = rendered;
+      return true;
+    });
+  }
+  window.addEventListener('cw-language-change', paintBottomNav);
+  new MutationObserver(paintBottomNav).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
   function makeBottomNav(profile) {
     if (document.querySelector(".field-tabs, .cw-v2-mobile-nav")) return;
     var existing = document.querySelector(".ds-bottom-nav");
@@ -32,28 +73,36 @@
 
     var nav = document.createElement("nav");
     nav.className = "ds-bottom-nav";
+    nav.setAttribute('data-cw-no-i18n', '');
     nav.setAttribute("aria-label", profile === "TECHNICIAN" ? "Navegacao rapida tecnico" : "Navegacao rapida cliente");
 
     if (profile === "TECHNICIAN") {
       nav.innerHTML = [
-        '<a href="/technician-field-mode">Hoje</a>',
-        '<a href="/technician-route">Ronda</a>',
-        '<a href="/technician-visit">Visitas</a>',
-        '<a href="/technician-guide">Docs</a>',
-        '<a href="/technician-profile">Perfil</a>'
+        '<a href="/technician-field-mode" data-cw-bottom-copy="today">Hoje</a>',
+        '<a href="/technician-route" data-cw-bottom-copy="round">Ronda</a>',
+        '<a href="/technician-visit" data-cw-bottom-copy="visits">Visitas</a>',
+        '<a href="/technician-guide" data-cw-bottom-copy="docs" aria-label="Documentos">Docs</a>',
+        '<a href="/technician-profile" data-cw-bottom-copy="profile">Perfil</a>'
       ].join("");
     } else {
       nav.innerHTML = [
-        '<a href="/client-portal">Inicio</a>',
-        '<a href="/client">Piscina</a>',
-        '<a href="/client-history">Historico</a>',
-        '<a href="/client-notifications">Pedidos</a>',
-        '<a href="/client-profile">Perfil</a>'
+        '<a href="/client-portal" data-cw-bottom-copy="home">Inicio</a>',
+        '<a href="/client" data-cw-bottom-copy="pool">Piscina</a>',
+        '<a href="/client-history" data-cw-bottom-copy="history">Historico</a>',
+        '<a href="/client-notifications" data-cw-bottom-copy="requests">Pedidos</a>',
+        '<a href="/client-profile" data-cw-bottom-copy="profile">Perfil</a>'
       ].join("");
     }
 
     markActiveBottomNav(nav);
     document.body.appendChild(nav);
+    Array.prototype.forEach.call(nav.querySelectorAll('[data-cw-bottom-copy]'), function (node) {
+      bottomLeaves.push({ node: node, key: node.dataset.cwBottomCopy, rendered: node.textContent, textNode: node.firstChild });
+    });
+    bottomLabels.push({ node: nav, key: profile === 'TECHNICIAN' ? 'technicianNav' : 'clientNav', rendered: nav.getAttribute('aria-label') });
+    var docs = nav.querySelector('[data-cw-bottom-copy=docs]');
+    if (docs) bottomLabels.push({ node: docs, key: 'documents', rendered: docs.getAttribute('aria-label') });
+    paintBottomNav();
   }
 
   function addTableWrappers() {

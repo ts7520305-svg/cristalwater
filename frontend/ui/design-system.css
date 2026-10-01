@@ -458,18 +458,20 @@ header,
   bottom: 0;
   z-index: 40;
   display: none;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(44px, auto));
   background: rgba(255, 255, 255, 0.96);
   border-top: 1px solid var(--ds-border);
   box-shadow: 0 -8px 26px rgba(10, 22, 40, 0.1);
 }
 
 .ds-bottom-nav a {
+  min-width: 0;
+  overflow-wrap: anywhere;
   min-height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 6px;
+  padding: 8px 2px;
   text-align: center;
   font: 700 0.78rem/1.1 var(--ds-font);
   color: #2a4158;
