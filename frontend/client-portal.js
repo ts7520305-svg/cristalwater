@@ -1604,6 +1604,14 @@ function renderPermissions(permissions = {}) {
   list.innerHTML = cards.map(([title, state, description]) => `<div class="client-focus-card"><span>${esc(title)}</span><b>${esc(state)}</b><small>${esc(description)}</small></div>`).join('');
 }
 
+function renderCustomerExtrasError(id, retryAction) {
+  const node=el(id);if(!node)return;
+  node.replaceChildren();const message=document.createElement('p');message.setAttribute('role','alert');
+  const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';
+  retry.onclick=retryAction;node.append(message,retry);
+  portalExtrasLabels.bind(message, "loadError");portalExtrasLabels.bind(retry, "retryExtras");
+}
+
 async function loadCustomerExtras() {
   const requestedClient = clientId;
   const selectionRevision = clientSelectionRevision;
@@ -1619,11 +1627,7 @@ async function loadCustomerExtras() {
       render(field==='permissions' ? data[field] || {} : Array.isArray(data[field]) ? data[field] : []);
     }catch(error){
       if(!selectionIsCurrent(requestedClient, selectionRevision) || revision !== extrasLoadRevision)return;
-      const node=el(id);if(!node)return;
-      node.replaceChildren();const message=document.createElement('p');message.setAttribute('role','alert');
-      const retry=document.createElement('button');retry.type='button';retry.className='cw-v2-btn';
-      retry.onclick=()=>loadCustomerExtras();node.append(message,retry);
-      portalExtrasLabels.bind(message, "loadError");portalExtrasLabels.bind(retry, "retryExtras");
+      renderCustomerExtrasError(id,()=>loadCustomerExtras());
     }
   }));
 }
@@ -1928,6 +1932,7 @@ async function loadPortal() {
     if (el("serviceHistorySummary")) el("serviceHistorySummary").hidden = true;
     if (el("serviceHistoryList")) el("serviceHistoryList").innerHTML = `<div class="empty">${esc(copy("servicesUnavailable"))}</div>`;
     if (el("invoiceList")) el("invoiceList").innerHTML = `<div class="empty">${esc(copy("billingUnavailable"))}</div>`;
+    ['notificationList', 'permissionsList'].forEach(id => renderCustomerExtrasError(id, () => loadPortal()));
   }
 }
 

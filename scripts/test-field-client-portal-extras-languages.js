@@ -124,21 +124,92 @@ async function database() {
     await page.evaluate(() => loadCustomerExtras()); await page.waitForLoadState('networkidle');
   }
   assert.deepEqual(errors, []); await ctx.close();
-  // Compare the real worker's warmed shell with current source, then continue
-  // this actual page offline. Cold offline bootstrap is a separate UI gate.
+  // Compare the real worker shell with current source before warm and cold
+  // offline cases; both retain the original producer guards and pending work.
   const offline = await context('allow'), offlinePage = await offline.newPage(); offlinePage.setDefaultTimeout(12000);
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v279')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v279')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v280')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v280')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
+  await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
+  await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
+  await offlinePage.locator('#visitRequestInput').fill('Cold visit pending <b>{retryExtras}</b>'); await offlinePage.locator('#visitRequestBtn').click(); await offlinePage.waitForFunction(() => document.getElementById('visitRequestRecovery').getAttribute('aria-busy') === 'false' && !document.getElementById('visitRequestRetry').hidden);
+  await offlinePage.locator('#paymentNoticeAmount').fill('98.76'); await offlinePage.locator('#paymentNoticeMethod').selectOption('MBWay'); await offlinePage.locator('#paymentNoticeNote').fill('Cold payment pending exact'); await offlinePage.locator('#paymentNoticeBtn').click(); await offlinePage.waitForFunction(() => document.getElementById('paymentNoticeRecovery').getAttribute('aria-busy') === 'false' && !document.getElementById('paymentNoticeRetry').hidden);
   await offlinePage.locator('#messageInput').fill('Offline message draft exact');
+  const coldPending = await pending(offlinePage); assert.equal(coldPending.length, 2); assert.notEqual(coldPending[0].requestId, coldPending[1].requestId); assert(coldPending.every(row => row.owner === 'CLIENT:' + client.id && row.payloadHash.length === 64));
+  const coldValues = (await fields(offlinePage)).values.map(({ id, value }) => ({ id, value }));
+  const coldSession = await offlinePage.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].map(key => [key, localStorage.getItem(key)])));
+  const coldRequests = []; offlinePage.on('request', request => { const url = new URL(request.url()); if (url.pathname.startsWith('/api/')) coldRequests.push({ path: url.pathname, method: request.method() }); });
   const offlineWork = await work(offlinePage); await offline.setOffline(true); await offlinePage.evaluate(() => loadCustomerExtras());
   for (const [index, language] of languages.entries()) { await offlinePage.locator('#cwLanguageSelect').selectOption(language); await settle(offlinePage); for (const id of Object.keys(endpoints)) assert.equal(await offlinePage.locator('#' + id + ' > button').textContent(), retryLabels[index]); assert.equal(await offlinePage.locator('#messageInput').inputValue(), 'Offline message draft exact'); assert.deepEqual(await work(offlinePage), offlineWork); checks++; }
-  await offlinePage.setViewportSize({ width: 320, height: 900 }); await capture(offlinePage, 'offline-de-320'); await offline.close();
+  await offlinePage.setViewportSize({ width: 320, height: 900 }); await capture(offlinePage, 'offline-de-320');
+  // A real cached-document reload must replace the original HTML loaders even
+  // though the primary read fails before the extra-section requests are made.
+  await offlinePage.reload({ waitUntil: 'domcontentloaded' });
+  await offlinePage.locator('#notificationList > p[role=alert]').waitFor(); await offlinePage.locator('#permissionsList > p[role=alert]').waitFor();
+  await offlinePage.waitForFunction(() => document.getElementById('messageInput').value === 'Offline message draft exact'); await offlinePage.waitForLoadState('networkidle');
+  async function coldPreserve() {
+    assert.deepEqual(await pending(offlinePage), coldPending); assert.deepEqual(await work(offlinePage), offlineWork);
+    assert.deepEqual((await fields(offlinePage)).values.map(({ id, value }) => ({ id, value })), coldValues);
+    assert.deepEqual(await offlinePage.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].map(key => [key, localStorage.getItem(key)]))), coldSession);
+    assert.equal(coldRequests.filter(request => request.method !== 'GET' && request.path !== '/api/settings/language/me' && request.path !== '/api/client-messages/seen/' + client.id).length, 0, 'Cold labels and primary retries cannot send any producer or notification acknowledgement');
+  }
+  async function coldLabels() {
+    const index = languages.indexOf(await offlinePage.evaluate(() => portalLanguage)), width = await offlinePage.evaluate(() => innerWidth);
+    for (const id of Object.keys(endpoints)) {
+      assert.equal(await offlinePage.locator('#' + id + ' > p[role=alert]').textContent(), errorLabels[index]); assert.equal(await offlinePage.locator('#' + id + ' > button').textContent(), retryLabels[index]);
+      const rect = await offlinePage.locator('#' + id + ' > button').boundingBox(); assert(rect.x >= 0 && rect.x + rect.width <= width && rect.height >= 44);
+    }
+    assert.equal(await offlinePage.evaluate(() => loadedClientId), 0);
+    for (const id of ['messageInput', 'sendBtn', 'photoBtn', 'visitRequestBtn', 'paymentNoticeBtn', 'visitRequestRetry', 'paymentNoticeRetry']) assert.equal(await offlinePage.locator('#' + id).isDisabled(), true);
+    assert(await offlinePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); await coldPreserve();
+  }
+  async function coldMatrix(name) {
+    const guardedReads = () => coldRequests.filter(request => request.method === 'GET' && (request.path === '/api/client-portal/' + client.id || Object.values(endpoints).some(endpoint => request.path === '/api/client-portal/' + client.id + '/' + endpoint))).length;
+    const fieldsBeforePaint = await fields(offlinePage), reads = guardedReads();
+    await offlinePage.evaluate(() => { window.qaColdNodes = [...document.querySelectorAll('#notificationList > p[role=alert],#notificationList > button,#permissionsList > p[role=alert],#permissionsList > button')]; window.qaColdTextNodes = qaColdNodes.map(node => node.firstChild); });
+    for (const width of [320, 390, 1440]) { await offlinePage.setViewportSize({ width, height: 900 }); for (const language of languages) {
+      await offlinePage.evaluate(language => { queryLanguage = language; applyLanguage(language); }, language); await settle(offlinePage); await coldLabels();
+      assert.deepEqual(await fields(offlinePage), fieldsBeforePaint); assert.equal(guardedReads(), reads); assert(await offlinePage.evaluate(() => qaColdNodes.every((node, index) => node.isConnected && node.firstChild === qaColdTextNodes[index]))); checks++;
+    } }
+    for (const width of [320, 390, 1440]) { await offlinePage.setViewportSize({ width, height: 900 }); for (const language of languages) {
+      await offlinePage.evaluate(() => { window.qaColdPrevious = document.querySelector('#notificationList > button'); });
+      await offlinePage.locator('#cwLanguageSelect').selectOption(language); await offlinePage.waitForFunction(() => !qaColdPrevious.isConnected); await offlinePage.waitForLoadState('networkidle'); await coldLabels(); checks++;
+    } }
+    await offlinePage.setViewportSize({ width: 320, height: 900 }); await capture(offlinePage, 'cold-' + name + '-de-320');
+    console.log('PASS cold portal extras ' + JSON.stringify({ name, languages: 5, widths: [320, 390, 1440], pureAndActualSelectorCases: 30, originalBusyGuard: true, exactPendingRequests: 2 }));
+  }
+  await coldMatrix('offline-cache-reload');
+  // Direct producer calls remain blocked by the existing primary-read guard.
+  await offlinePage.evaluate(() => Promise.all([requestVisit(), notifyPayment(), sendMessage()])); await coldLabels();
+  const corePath = '/api/client-portal/' + client.id, coldCoreReads = () => coldRequests.filter(request => request.method === 'GET' && request.path === corePath).length;
+  let beforeCore = coldCoreReads(); await offlinePage.evaluate(() => { window.qaColdPrevious = document.querySelector('#notificationList > button'); });
+  await offlinePage.locator('#notificationList > button').click(); await offlinePage.waitForFunction(() => !qaColdPrevious.isConnected); await offlinePage.waitForLoadState('networkidle');
+  assert.equal(coldCoreReads(), beforeCore + 1); await coldLabels(); checks++;
+  // These are primary-read faults; otherwise native extra endpoints stay live.
+  await offline.setOffline(false); let coreFault = '503';
+  const serverLiteral = '{"key":"retryExtras"} <b>primary source literal</b>';
+  await offlinePage.route(base + corePath + '?*', route => coreFault ? route.fulfill(coreFault === 'malformed' ? { status: 200, contentType: 'application/json', body: '{broken' } : { status: coreFault === '503' ? 503 : 200, json: { ok: false, error: serverLiteral } }) : route.continue());
+  for (const name of ['503', 'ok-false', 'malformed']) {
+    coreFault = name; const beforeExtras = coldRequests.filter(request => Object.values(endpoints).some(endpoint => request.path === corePath + '/' + endpoint)).length;
+    await offlinePage.evaluate(() => { window.qaColdPrevious = document.querySelector('#notificationList > button'); });
+    await offlinePage.locator('#permissionsList > button').click(); await offlinePage.waitForFunction(() => !qaColdPrevious.isConnected); await offlinePage.waitForLoadState('networkidle');
+    await coldMatrix(name);
+    assert.equal(coldRequests.filter(request => Object.values(endpoints).some(endpoint => request.path === corePath + '/' + endpoint)).length, beforeExtras, 'Primary failure must not launch extra reads');
+    if (name !== 'malformed') { assert.equal(await offlinePage.locator('#poolsList .empty').textContent(), serverLiteral); assert.equal(await offlinePage.locator('#poolsList b').count(), 0); }
+    assert.deepEqual(await database(), savedDatabase);
+  }
+  // Recovery reuses the original primary loader and its two native extra reads.
+  coreFault = null; beforeCore = coldCoreReads(); const beforeRecovery = coldRequests.length;
+  await offlinePage.locator('#notificationList > button').click(); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.locator('#permissionsList > button').waitFor({ state: 'detached' }); await offlinePage.locator('#notificationList > button').waitFor({ state: 'detached' }); await offlinePage.waitForLoadState('networkidle');
+  assert.equal(coldCoreReads(), beforeCore + 1); for (const endpoint of Object.values(endpoints)) assert.equal(coldRequests.slice(beforeRecovery).filter(request => request.path === corePath + '/' + endpoint).length, 1);
+  assert.equal(await offlinePage.locator('#notificationList .service-title').textContent(), notice.title); assert((await offlinePage.locator('#notificationList').textContent()).includes(notice.message));
+  await coldPreserve(); assert.equal(await offlinePage.locator('#messageInput').isDisabled(), false); assert.deepEqual(await database(), savedDatabase); checks++;
+  console.log('PASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work'); await offline.close();
   assert.deepEqual(await database(), savedDatabase);
-  console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 90, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true })); complete = true;
+  console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true })); complete = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   clearTimeout(deadline); await browser?.close(); await prisma.$disconnect();
   if (client) { if (notice) await prisma.notification.delete({ where: { id: notice.id } }); await prisma.clientMessage.deleteMany({ where: { clientId: client.id } }); const key = 'LANGUAGE:CLIENT:' + client.id; await prisma.systemSetting.deleteMany({ where: { key } }); if (originalLanguage) await prisma.systemSetting.create({ data: originalLanguage }); await prisma.client.delete({ where: { id: client.id } }); assert.equal(await prisma.client.count({ where: { id: client.id } }), 0); assert.deepEqual(await prisma.systemSetting.findUnique({ where: { key } }), originalLanguage); console.log('PASS portal extras fixtures removed and previous language setting restored'); }
