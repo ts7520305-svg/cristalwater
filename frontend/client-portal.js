@@ -75,6 +75,8 @@ const COPY = {
     quickAccess: "Acesso rapido",
     clientRole: "Cliente",
     documentsSectionTitle: "Relatórios e documentos",
+    portalRequestsNavigation: "Pedidos",
+    portalSidebarTagline: "Experiência premium simples e calma.",
     portalNavigationAria: "Navegação do cliente",
     portalMobileNavigationAria: "Navegação móvel",
     portalLanguageAria: "Idioma",
@@ -227,6 +229,8 @@ const COPY = {
     quickAccess: "Acceso rápido",
     clientRole: "Cliente",
     documentsSectionTitle: "Informes y documentos",
+    portalRequestsNavigation: "Solicitudes",
+    portalSidebarTagline: "Una experiencia premium sencilla y tranquila.",
     portalNavigationAria: "Navegación del cliente",
     portalMobileNavigationAria: "Navegación móvil",
     portalLanguageAria: "Idioma",
@@ -379,6 +383,8 @@ const COPY = {
     quickAccess: "Quick access",
     clientRole: "Client",
     documentsSectionTitle: "Reports and documents",
+    portalRequestsNavigation: "Requests",
+    portalSidebarTagline: "A simple, calm premium experience.",
     portalNavigationAria: "Client navigation",
     portalMobileNavigationAria: "Mobile navigation",
     portalLanguageAria: "Language",
@@ -531,6 +537,8 @@ const COPY = {
     quickAccess: "Acces rapide",
     clientRole: "Client",
     documentsSectionTitle: "Rapports et documents",
+    portalRequestsNavigation: "Demandes",
+    portalSidebarTagline: "Une expérience premium simple et sereine.",
     portalNavigationAria: "Navigation du client",
     portalMobileNavigationAria: "Navigation mobile",
     portalLanguageAria: "Langue",
@@ -683,6 +691,8 @@ const COPY = {
     quickAccess: "Schnellzugriff",
     clientRole: "Kunde",
     documentsSectionTitle: "Berichte und Dokumente",
+    portalRequestsNavigation: "Anfragen",
+    portalSidebarTagline: "Ein einfaches, entspanntes Premium-Erlebnis.",
     portalNavigationAria: "Kundennavigation",
     portalMobileNavigationAria: "Mobile Navigation",
     portalLanguageAria: "Sprache",
@@ -929,6 +939,12 @@ for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill'
 }
 const documentsHeading = el('documentsTitle');
 if (documentsHeading) portalExtrasLabels.bind(documentsHeading, 'documentsSectionTitle');
+for (const [selector, key] of [
+  ['.cw-v2-nav a[href="#permissionsPanel"]', 'portalRequestsNavigation'],
+  ['.cw-v2-sidebar > .small', 'portalSidebarTagline'],
+]) {
+  const node = document.querySelector?.(selector); if (node) portalExtrasLabels.bind(node, key);
+}
 for (const [selector, name, key] of [
   ['.cw-v2-sidebar', 'aria-label', 'portalNavigationAria'],
   ['.cw-v2-mobile-nav', 'aria-label', 'portalMobileNavigationAria'],
@@ -940,6 +956,7 @@ for (const [selector, name, key] of [
   ['#serviceHistoryDate', 'aria-label', 'portalHistoryDateAria'],
   ['#mensagens', 'aria-label', 'portalMessagesAria'],
   ['.cw-v2-search [data-cw-search-input]', 'placeholder', 'portalSearchPlaceholder'],
+  ['.cw-v2-nav a[href="#permissionsPanel"]', 'data-shell-search', 'portalRequestsNavigation'],
 ]) portalExtrasLabels.bindAttribute(document.querySelector?.(selector), name, key);
 
 function esc(value) {

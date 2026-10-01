@@ -177,6 +177,75 @@ async function database() {
   await search.fill(originalSearchValue); await page.locator('#messageInput').focus(); await page.evaluate(() => document.getElementById('messageInput').setSelectionRange(2, 8));
   assert.deepEqual(await database(), savedDatabase);
   console.log('PASS portal accessible attributes ' + JSON.stringify({ accessibleLabelCases, accessibleOwnershipControls, labels: 10, languages: 5, widths: [320, 390, 1440], privatePaintRetainsSearchFocusValueSelectionAndNodes: true, noPrivatePaintReadsOrWrites: true, originalSelectorPrimaryBusyGuardRetained: true, pendingRequests: 2 }));
+  // The two original sidebar leaves own their copy independently of the
+  // global translator; changing language never changes their destinations.
+  const sidebarSelectors = ['.cw-v2-nav a[href="#permissionsPanel"]', '.cw-v2-sidebar > .small'];
+  const sidebarNames = [
+    ['Pedidos', 'Requests', 'Demandes', 'Solicitudes', 'Anfragen'],
+    ['Experiência premium simples e calma.', 'A simple, calm premium experience.', 'Une expérience premium simple et sereine.', 'Una experiencia premium sencilla y tranquila.', 'Ein einfaches, entspanntes Premium-Erlebnis.'],
+  ];
+  let sidebarTextCases = 0, sidebarMetadataCases = 0, sidebarOwnershipControls = 0;
+  await page.evaluate(selectors => {
+    window.qaSidebarNodes = selectors.map(selector => document.querySelector(selector)); window.qaSidebarLeaves = qaSidebarNodes.map(node => node.firstChild);
+    window.qaSidebarDestinations = Array.from(document.querySelectorAll('.cw-v2-nav a,.cw-v2-mobile-nav a')).map(node => node.getAttribute('href'));
+  }, sidebarSelectors);
+  async function sidebarLabels(index) {
+    for (const [position, selector] of sidebarSelectors.entries()) { assert.equal(await page.locator(selector).textContent(), sidebarNames[position][index]); sidebarTextCases++; }
+    assert.equal(await page.locator(sidebarSelectors[0]).getAttribute('data-shell-search'), sidebarNames[0][index]); sidebarMetadataCases++;
+    assert.equal(await page.locator(sidebarSelectors[0]).getAttribute('href'), '#permissionsPanel');
+    assert.equal(await page.locator(sidebarSelectors[0]).getAttribute('aria-label'), null, 'The original visible link text remains its accessible name');
+    assert(await page.evaluate(selectors => selectors.every((selector, index) => document.querySelector(selector) === qaSidebarNodes[index] && qaSidebarNodes[index].firstChild === qaSidebarLeaves[index]), sidebarSelectors));
+    assert(await page.evaluate(() => JSON.stringify(Array.from(document.querySelectorAll('.cw-v2-nav a,.cw-v2-mobile-nav a')).map(node => node.getAttribute('href'))) === JSON.stringify(qaSidebarDestinations)));
+    if (page.viewportSize().width === 1440) {
+      for (const selector of sidebarSelectors) { const rect = await page.locator(selector).boundingBox(); assert(rect && rect.x >= 0 && rect.x + rect.width <= 1440); }
+      const rect = await page.locator(sidebarSelectors[0]).boundingBox(); assert(rect.height >= 44);
+    }
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); await preserve();
+  }
+  const sidebarReadCount = requests.length;
+  for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+    const focus = await page.evaluate(language => {
+      const originalLanguage = portalLanguage; portalLanguage = language; const input = document.getElementById('messageInput'); input.focus(); input.setSelectionRange(2, 8);
+      const snapshot = () => ({ focus: document.activeElement === input, value: input.value, start: input.selectionStart, end: input.selectionEnd, disabled: input.disabled });
+      const before = snapshot(); portalExtrasLabels.paint(); const after = snapshot(); portalLanguage = originalLanguage; return { before, after };
+    }, language);
+    assert.equal(focus.before.focus, true); assert.deepEqual(focus.after, focus.before); await sidebarLabels(index);
+    assert.equal(requests.length, sidebarReadCount, 'Private sidebar painting must not read or submit');
+  } }
+  const releaseSidebarCore = await holdCore();
+  try { for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+    await page.locator('#cwLanguageSelect').selectOption(language); await page.waitForFunction(() => loadedClientId === 0 && document.getElementById('messageInput').disabled); await settle(page);
+    await sidebarLabels(index); assert.equal(posts(requests).length, phasePosts);
+  } } } finally { await releaseSidebarCore(); }
+  const sidebarPathname = new URL(page.url()).pathname;
+  await page.locator(sidebarSelectors[0]).click(); assert.equal(new URL(page.url()).pathname, sidebarPathname); assert.equal(new URL(page.url()).hash, '#permissionsPanel'); await preserve();
+  await capture(page, 'sidebar-de-1440', '.cw-v2-sidebar');
+  for (const kind of ['changed-request-leaf', 'foreign-request-clone', 'changed-tagline-leaf', 'foreign-tagline-clone', 'changed-metadata', 'removed-metadata']) {
+    const foreignPage = await ctx.newPage(), foreignRequests = [];
+    foreignPage.on('request', request => foreignRequests.push({ method: request.method(), path: new URL(request.url()).pathname }));
+    await foreignPage.goto(base + '/client-portal?lang=pt'); await foreignPage.waitForFunction(() => loadedClientId === clientId); await foreignPage.waitForLoadState('networkidle'); const foreignWork = await work(foreignPage);
+    await foreignPage.evaluate(kind => {
+      const selector = kind.includes('tagline') ? '.cw-v2-sidebar > .small' : '.cw-v2-nav a[href="#permissionsPanel"]'; let node = document.querySelector(selector);
+      if (kind === 'changed-metadata') node.setAttribute('data-shell-search', 'Operator metadata literal <b>{portalRequestsNavigation}</b>');
+      else if (kind === 'removed-metadata') node.removeAttribute('data-shell-search');
+      else if (kind.startsWith('changed-')) node.firstChild.nodeValue = 'Operator sidebar literal <b>{portalSidebarTagline}</b>';
+      else { const clone = node.cloneNode(true); clone.textContent = 'Foreign sidebar literal {portalSidebarTagline}'; clone.dataset.cwI18n = 'portalSidebarTagline'; if (!kind.includes('tagline')) clone.setAttribute('data-shell-search', 'Foreign metadata literal {portalRequestsNavigation}'); node.replaceWith(clone); node = clone; }
+      window.qaForeignSidebar = node; window.qaForeignSidebarLeaf = node.firstChild; window.qaForeignSidebarText = node.textContent; window.qaForeignSidebarMetadata = node.getAttribute('data-shell-search');
+    }, kind);
+    for (const language of languages) {
+      const retained = await foreignPage.evaluate(({ kind, language }) => {
+        const originalLanguage = portalLanguage; portalLanguage = language; portalExtrasLabels.paint(); portalLanguage = originalLanguage;
+        const selector = kind.includes('tagline') ? '.cw-v2-sidebar > .small' : '.cw-v2-nav a[href="#permissionsPanel"]';
+        return document.querySelector(selector) === qaForeignSidebar && qaForeignSidebar.firstChild === qaForeignSidebarLeaf &&
+          (kind.endsWith('metadata') ? qaForeignSidebar.getAttribute('data-shell-search') === qaForeignSidebarMetadata : qaForeignSidebar.textContent === qaForeignSidebarText) &&
+          (kind !== 'foreign-request-clone' || qaForeignSidebar.getAttribute('data-shell-search') === qaForeignSidebarMetadata);
+      }, { kind, language });
+      assert(retained); sidebarOwnershipControls++;
+    }
+    assert.equal(posts(foreignRequests).filter(request => request.path !== '/api/client-messages/seen/' + client.id).length, 0); assert.deepEqual(await pending(foreignPage), originalPending); assert.deepEqual(await work(foreignPage), foreignWork); await foreignPage.close();
+  }
+  assert.deepEqual(await database(), savedDatabase);
+  console.log('PASS portal sidebar ' + JSON.stringify({ sidebarTextCases, sidebarMetadataCases, sidebarOwnershipControls, leaves: 2, dictionaryVariants: 10, languages: 5, widths: [320, 390, 1440], originalNodesAndTextLeavesRetained: true, privatePaintRetainsDraftFocusSelectionAndDisabledState: true, noPrivatePaintReadsOrWrites: true, originalSelectorPrimaryBusyGuardRetained: true, canonicalHashNavigation: true, pendingRequests: 2 }));
   await matrix('both-503', Object.keys(endpoints));
   for (const [name, selectedFaults] of [['notification-503', ['notificationList']], ['permissions-503', ['permissionsList']], ['both-invalid-ok', Object.keys(endpoints)], ['both-malformed', Object.keys(endpoints)]]) {
     faults = new Set(selectedFaults); responseStatus = name === 'both-invalid-ok' ? 200 : 503; malformed = name === 'both-malformed';
@@ -205,8 +274,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v285')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v285')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v286')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v286')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
