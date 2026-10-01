@@ -5,7 +5,30 @@ const {prisma}=require('../src/prismaClient'),{getJwtSecret}=require('../src/uti
 if(process.env.NODE_ENV!=='test'||process.env.QA_MODE!=='true'||process.env.QA_ENVIRONMENT_SAFE!=='true')throw Error('Isolated QA required');
 const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['localhost','127.0.0.1'].includes(new URL(base).hostname));
 const languages=['pt','en','fr','es','de'],words={"routeSessionChanged":["A sessão mudou. Os dados guardados foram preservados. Reabra o modo de campo com a conta atual.","The session changed. Saved data has been preserved. Reopen field mode with the current account.","La session a changé. Les données enregistrées ont été conservées. Rouvrez le mode terrain avec le compte actuel.","La sesión ha cambiado. Se han conservado los datos guardados. Vuelve a abrir el modo de campo con la cuenta actual.","Die Sitzung hat sich geändert. Gespeicherte Daten bleiben erhalten. Öffnen Sie den Außendienstmodus erneut mit dem aktuellen Konto."],"routeSessionReopen":["Reabrir modo de campo","Reopen field mode","Rouvrir le mode terrain","Volver a abrir el modo de campo","Außendienstmodus erneut öffnen"]};
-let browser,completed=false,checks=0;const releases=[];
+let browser,completed=false,checks=0,documentRefreshChecks=0;
+// Explicit online reopening re-reads the current account documents. Only their
+// observed live confirmation times may change; every data/context byte stays strict.
+function normalizeReopenedDocuments(saved, reopened, expected) {
+  assert(Object.hasOwn(saved, expected.key) && Object.hasOwn(reopened, expected.key), 'Both document copies must already belong to the reopened account');
+  const original = JSON.parse(saved[expected.key]), current = JSON.parse(reopened[expected.key]);
+  const identity = value => Object.fromEntries(['v', 'owner', 'role', 'technicianId', 'vehicleId', 'day'].map(key => [key, value[key]]));
+  const scope = { v: 3, owner: expected.owner, role: 'TECHNICIAN', technicianId: expected.technicianId, vehicleId: expected.vehicleId, day: expected.day };
+  assert.equal(expected.key, ['cwFieldDocuments', 'v3', expected.owner, 'TECHNICIAN', expected.vehicleId, expected.day].join(':'));
+  assert.deepEqual(identity(original), scope); assert.deepEqual(identity(current), scope);
+  assert.deepEqual(Object.keys(original.sections).sort(), ['insurance', 'transport', 'work']);
+  assert.deepEqual(Object.keys(current.sections).sort(), Object.keys(original.sections).sort());
+  for (const kind of ['transport', 'work', 'insurance']) {
+    const previous = original.sections[kind], section = current.sections[kind], observed = expected.observed[kind];
+    assert.equal(observed.source, 'live'); assert.equal(section.confirmedAt, observed.confirmedAt);
+    assert(Number.isFinite(Date.parse(previous.confirmedAt)) && Number.isFinite(Date.parse(section.confirmedAt)) && Date.parse(section.confirmedAt) >= Date.parse(previous.confirmedAt), 'Confirmation must be finite and cannot go backwards');
+    assert.equal(previous.requestedAt, expected.requestedAt); assert.equal(section.requestedAt, expected.requestedAt);
+    assert.deepEqual(section.data.scope, { version: 1, owner: expected.owner, technicianId: expected.technicianId, vehicleId: expected.vehicleId });
+    section.confirmedAt = previous.confirmedAt;
+  }
+  assert.deepEqual(current, original, 'Document data and all context fields must be identical after removing only observed confirmation times');
+  reopened[expected.key] = saved[expected.key];
+}
+const releases=[];
 const deadline=setTimeout(()=>{console.error('Route session language scenario incomplete');process.exit(1);},110000);
 process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
 (async()=>{
@@ -95,6 +118,18 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
     if(mode!=='account'){assert(await page.locator('main.field').evaluate(node=>node.inert&&getComputedStyle(node).display==='none'));assert.deepEqual(await raw(),saved);assert.deepEqual(await rows(),pending);}
     await page.locator('#fieldRouteSessionChanged a').click();const expectedId=mode==='account'?otherVisit.id:id;
     await page.waitForFunction(expectedId=>window.CWFieldVisitContext?.()?.id===expectedId&&!document.querySelector('main.field').inert&&getComputedStyle(document.querySelector('main.field')).display!=='none',expectedId);
+    // Visit restoration can finish before the three document reads/save. Compare
+    // storage only once the actual reopened page has consumed that original load.
+    const reopenedOwner = 'TECH:' + (mode === 'account' ? other.id : tech.id), reopenedVehicle = mode === 'account' ? otherVehicle.id : vehicle.id;
+    const documentReady = { owner: reopenedOwner, vehicleId: reopenedVehicle, source: offline ? 'cache' : 'live' };
+    await page.waitForFunction(({owner, vehicleId, source}) => {
+      const day = CWFieldRouteCache.today(), key = ['cwFieldDocuments', 'v3', owner, 'TECHNICIAN', vehicleId, day].join(':');
+      let copy; try { copy = JSON.parse(localStorage.getItem(key)); } catch (_) { return false; }
+      return copy?.owner === owner && copy.vehicleId === vehicleId && [['transport', 'transportGuideBox'], ['work', 'workGuideBox'], ['insurance', 'insuranceBox']].every(([kind, id]) => {
+        const box = document.getElementById(id), section = copy.sections?.[kind];
+        return box?.dataset.source === source && section && Number.isFinite(Date.parse(section.confirmedAt)) && box.dataset.confirmedAt === section.confirmedAt;
+      });
+    }, documentReady);
     assert.equal(await page.locator('#fieldRouteSessionChanged').count(),0);assert.equal(await page.locator('#notes').inputValue(),(mode==='account'?'B':type)+' draft <b>{owner}</b>');
     const reopened=await raw();
     if(mode==='account'&&!offline){
@@ -111,10 +146,57 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
     assert.equal(ui.selectedVisitId,String(expectedId));assert.equal(ui.selectedVisitType,mode==='account'?'REGULAR':type);assert.equal(ui.selectedVisitTitle,mode==='account'?otherPool.name:pools[type==='EXTRA'?1:0].name);
     assert(Number.isFinite(ui.scrollY)&&ui.scrollY>=0);assert(Number.isFinite(Date.parse(ui.savedAt))&&Date.parse(ui.savedAt)>=Date.parse(previousUi.savedAt));
     reopened[uiKey]=saved[uiKey];
+    if (mode === 'account' && !offline) {
+      const observed = await page.evaluate(() => ({
+        day: CWFieldRouteCache.today(),
+        sections: Object.fromEntries([['transport', 'transportGuideBox'], ['work', 'workGuideBox'], ['insurance', 'insuranceBox']].map(([kind, id]) => {
+          const box = document.getElementById(id); return [kind, { source: box.dataset.source, confirmedAt: box.dataset.confirmedAt }];
+        }))
+      }));
+      const expected = { key: ['cwFieldDocuments', 'v3', reopenedOwner, 'TECHNICIAN', reopenedVehicle, observed.day].join(':'), owner: reopenedOwner, technicianId: other.id, vehicleId: reopenedVehicle, day: observed.day, requestedAt: now, observed: observed.sections };
+      const verify = (snapshot, records = pending) => {
+        normalizeReopenedDocuments(saved, snapshot, expected);
+        assert.deepEqual(snapshot, saved, 'Only explicit current-account confirmation times and already verified navigation state may change');
+        assert.deepEqual(records, pending, 'Pending request IDs, hashes and payloads stay exact');
+      };
+      const liveCopy = JSON.parse(reopened[expected.key]), negative = [];
+      const rejectDocument = (name, change) => {
+        const snapshot = structuredClone(reopened), value = JSON.parse(snapshot[expected.key]); change(value); snapshot[expected.key] = JSON.stringify(value);
+        assert.throws(() => verify(snapshot), assert.AssertionError, name); negative.push(name);
+      };
+      rejectDocument('foreign-owner', value => { value.owner = 'TECH:' + tech.id; });
+      rejectDocument('wrong-vehicle', value => { value.vehicleId = vehicle.id; });
+      rejectDocument('changed-document-data', value => { value.sections.transport.data.guide.codeAT += '-changed'; });
+      rejectDocument('changed-requestedAt', value => { value.sections.work.requestedAt++; });
+      rejectDocument('missing-section', value => { delete value.sections.insurance; });
+      rejectDocument('extra-section', value => { value.sections.foreign = value.sections.work; });
+      rejectDocument('invalid-confirmation', value => { value.sections.work.confirmedAt = 'invalid'; });
+      rejectDocument('backwards-confirmation', value => { value.sections.transport.confirmedAt = new Date(Date.parse(JSON.parse(saved[expected.key]).sections.transport.confirmedAt) - 1).toISOString(); });
+      rejectDocument('confirmation-not-observed-in-dom', value => { value.sections.insurance.confirmedAt = new Date(Date.parse(value.sections.insurance.confirmedAt) + 1).toISOString(); });
+      for (const [name, key] of [
+        ['former-account-document-byte', Object.keys(saved).find(key => key.startsWith('cwFieldDocuments:v3:TECH:' + tech.id + ':'))],
+        ['current-account-draft-byte', 'cwFieldVisitDrafts:v2:TECH:' + other.id]
+      ]) {
+        assert(key && Object.hasOwn(saved, key)); const snapshot = structuredClone(reopened); snapshot[key] += ' ';
+        assert.throws(() => verify(snapshot), assert.AssertionError, name); negative.push(name);
+      }
+      const added = structuredClone(reopened); added['cwFieldUnexpectedRefresh'] = 'not allowed';
+      assert.throws(() => verify(added), assert.AssertionError, 'unexpected-storage-key'); negative.push('unexpected-storage-key');
+      for (const field of ['requestId', 'payloadHash']) {
+        const records = structuredClone(pending); records[0][field] += '-changed';
+        assert.throws(() => verify(structuredClone(reopened), records), assert.AssertionError, 'pending-' + field); negative.push('pending-' + field);
+      }
+      verify(reopened); documentRefreshChecks += negative.length;
+      console.log('PASS exact reopened document boundary ' + JSON.stringify({
+        owner: expected.owner, documentSections: 3, actualLiveRefresh: true,
+        sourceDataAndRequestedAtUnchanged: true, confirmationTimesChanged: ['transport', 'work', 'insurance'].every(kind => liveCopy.sections[kind].confirmedAt !== JSON.parse(saved[expected.key]).sections[kind].confirmedAt),
+        rejectedChanges: negative, pending: 2, formerAccountAndDraftBytesExact: true
+      }));
+    }
     assert.deepEqual(reopened,saved,'Explicit navigation may update the selected visit and confirmation time, but preserves every draft, pending-work and former-account context byte');assert.deepEqual(await rows(),pending);assert.deepEqual(await database(),db);
     assert(requests.filter(request=>!['GET','HEAD'].includes(request.method)).every(request=>request.path==='/api/settings/language/me'&&request.method==='PUT'));assert.deepEqual(errors,[]);
     console.log('PASS route session languages '+JSON.stringify({name,mode,offline,type,widths,pending:2,heldReplyIgnored:hold,reopenedCurrentAccount:true,operationalWrites:0}));await context.close();
   }
   await scenario({name:'account-online',hold:true});await scenario({name:'renewal-offline',mode:'renewal',offline:true});await scenario({name:'missing-offline',mode:'missing',offline:true});await scenario({name:'extra-account-offline',offline:true,type:'EXTRA',widths:[320]});
-  console.log('PASS route session language result '+JSON.stringify({checks,typedDrafts:true,immutablePendingRequests:2,hiddenSelectorKept:true,noOperationalWrites:true,recoveryLink:true}));completed=true;
+  console.log('PASS route session language result '+JSON.stringify({checks,documentRefreshChecks,typedDrafts:true,immutablePendingRequests:2,hiddenSelectorKept:true,noOperationalWrites:true,recoveryLink:true}));completed=true;
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{for(const release of releases)release();clearTimeout(deadline);await browser?.close();await prisma.$disconnect();});
