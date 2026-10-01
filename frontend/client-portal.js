@@ -836,26 +836,30 @@ function copy(key) {
   return COPY[portalLanguage]?.[key] || COPY.pt[key] || key;
 }
 
-// Repaint only the original labels authored by the extra-section error view.
+// Repaint only the original labels authored by the portal views.
 const portalExtrasLabels = (function () {
   const leaves = new Map();
   function paint() {
     for (const [node, leaf] of leaves) {
       if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered) { leaves.delete(node); continue; }
-      const rendered = copy(leaf.key);
+      const rendered = leaf.reader(leaf.key);
       if (rendered !== leaf.rendered) leaf.textNode.nodeValue = rendered;
       leaf.rendered = rendered;
     }
   }
-  function bind(node, key) {
+  function bind(node, key, reader = copy) {
     paint();
-    const rendered = copy(key);
+    const rendered = reader(key);
     if (node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE) node.firstChild.nodeValue = rendered;
     else node.textContent = rendered;
-    leaves.set(node, { key, rendered, textNode: node.firstChild });
+    leaves.set(node, { key, reader, rendered, textNode: node.firstChild });
   }
   return Object.freeze({ bind, paint });
 })();
+const portalNotificationText = key => notificationCopy()[key];
+for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill', 'updates']]) {
+  const node = el(id); if (node) portalExtrasLabels.bind(node, key, portalNotificationText);
+}
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({
@@ -986,7 +990,7 @@ function applyLanguage(language) {
     de: ['Besuchsanfrage', 'Fordern Sie einen Besuch oder eine vorrangige Betreuung an. Warten Sie auf die Terminbestätigung.', 'Beschreiben Sie Ihre Besuchsanfrage', 'Besuch anfragen'],
   }[portalLanguage];
   const requestLabels = { pt: ['Pedidos', 'Suporte'], en: ['Requests', 'Support'], fr: ['Demandes', 'Assistance'], es: ['Solicitudes', 'Asistencia'], de: ['Anfragen', 'Hilfe'] }[portalLanguage];
-  setText('permissionsTitle', requestLabels[0]); setText('permissionsBadge', requestLabels[1]);
+  setText('permissionsTitle', requestLabels[0]); setText('permissionsPill', requestLabels[1]);
   setHtml('visitRequestHelp', `<b>${visitLabels[0]}</b>${visitLabels[1]}`);
   setPlaceholder('visitRequestInput', visitLabels[2]); setText('visitRequestBtn', visitLabels[3]);
   setText("paymentWhatsappLink", copy("whatsapp"));
@@ -1558,7 +1562,7 @@ function renderInvoices(invoices = []) {
 }
 
 function notificationCopy(){
-  return ({pt:{empty:'Sem notificações recentes.',title:'Notificação',read:'Lida',unread:'Por ler',mark:'Marcar como lida',error:'Não foi possível confirmar a leitura. Tente novamente.'},en:{empty:'No recent notifications.',title:'Notification',read:'Read',unread:'Unread',mark:'Mark as read',error:'Could not confirm reading. Please try again.'},fr:{empty:'Aucune notification récente.',title:'Notification',read:'Lue',unread:'Non lue',mark:'Marquer comme lue',error:'Impossible de confirmer la lecture. Réessayez.'},de:{empty:'Keine aktuellen Mitteilungen.',title:'Mitteilung',read:'Gelesen',unread:'Ungelesen',mark:'Als gelesen markieren',error:'Lesebestätigung fehlgeschlagen. Bitte erneut versuchen.'}})[normalizeLanguage(portalLanguage)];
+  return ({pt:{heading:'Notificações',updates:'Atualizações',empty:'Sem notificações recentes.',title:'Notificação',read:'Lida',unread:'Por ler',mark:'Marcar como lida',error:'Não foi possível confirmar a leitura. Tente novamente.'},en:{heading:'Notifications',updates:'Updates',empty:'No recent notifications.',title:'Notification',read:'Read',unread:'Unread',mark:'Mark as read',error:'Could not confirm reading. Please try again.'},fr:{heading:'Notifications',updates:'Actualités',empty:'Aucune notification récente.',title:'Notification',read:'Lue',unread:'Non lue',mark:'Marquer comme lue',error:'Impossible de confirmer la lecture. Réessayez.'},es:{heading:'Notificaciones',updates:'Actualizaciones',empty:'No hay notificaciones recientes.',title:'Notificación',read:'Leída',unread:'Sin leer',mark:'Marcar como leída',error:'No se pudo confirmar la lectura. Vuelve a intentarlo.'},de:{heading:'Mitteilungen',updates:'Neuigkeiten',empty:'Keine aktuellen Mitteilungen.',title:'Mitteilung',read:'Gelesen',unread:'Ungelesen',mark:'Als gelesen markieren',error:'Lesebestätigung fehlgeschlagen. Bitte erneut versuchen.'}})[normalizeLanguage(portalLanguage)];
 }
 async function markPortalNotificationRead(notification,button,status){
   if(isAdminUser()||!clientId||loadedClientId!==clientId||button.disabled)return;
@@ -1570,13 +1574,13 @@ async function markPortalNotificationRead(notification,button,status){
     const data=await response.json();
     if(!current())return;
     if(!response.ok||data.ok===false)throw new Error('Read not confirmed');
-    notification.isRead=true;button.textContent=notificationCopy().read;
-    const pill=button.closest?.('article')?.querySelector('.pill');if(pill)pill.textContent=notificationCopy().read;
-  }catch(_){if(current()){button.disabled=false;if(status)status.textContent=notificationCopy().error;}}
+    notification.isRead=true;portalExtrasLabels.bind(button,'read',portalNotificationText);
+    const pill=button.closest?.('article')?.querySelector('.pill');if(pill)portalExtrasLabels.bind(pill,'read',portalNotificationText);
+  }catch(_){if(current()){button.disabled=false;if(status)portalExtrasLabels.bind(status,'error',portalNotificationText);}}
 }
 function renderNotifications(notifications = []) {
   const list=el('notificationList'),labels=notificationCopy();if(!list)return;
-  if(!notifications.length){list.innerHTML=`<div class="empty">${esc(labels.empty)}</div>`;return;}
+  if(!notifications.length){list.innerHTML=`<div class="empty">${esc(labels.empty)}</div>`;portalExtrasLabels.bind(list.firstElementChild,'empty',portalNotificationText);return;}
   list.innerHTML=notifications.slice(0,8).map((notification,index)=>`
     <article class="service-item">
       <div class="service-head"><div><div class="service-title">${esc(notification.title||labels.title)}</div><div class="muted">${esc(fmtDateTime(notification.createdAt))}</div></div><span class="pill">${esc(notification.isRead?labels.read:labels.unread)}</span></div>
@@ -1584,6 +1588,12 @@ function renderNotifications(notifications = []) {
       ${!notification.isRead&&!isAdminUser()?`<button type="button" data-notice-read="${index}" class="btn">${esc(labels.mark)}</button><div class="muted" role="status"></div>`:''}
     </article>`).join('');
   list.querySelectorAll?.('[data-notice-read]').forEach(button=>button.addEventListener('click',()=>markPortalNotificationRead(notifications[Number(button.dataset.noticeRead)],button,button.nextElementSibling)));
+  list.querySelectorAll('article').forEach((article,index)=>{
+    const notification=notifications[index];
+    if(!notification.title)portalExtrasLabels.bind(article.querySelector('.service-title'),'title',portalNotificationText);
+    portalExtrasLabels.bind(article.querySelector('.pill'),notification.isRead?'read':'unread',portalNotificationText);
+    const button=article.querySelector('[data-notice-read]');if(button)portalExtrasLabels.bind(button,'mark',portalNotificationText);
+  });
 }
 
 function renderPermissions(permissions = {}) {

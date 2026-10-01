@@ -144,8 +144,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v281')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v281')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v282')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v282')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
@@ -222,8 +222,62 @@ async function database() {
   assert.equal(coldCoreReads(), beforeCore + 1); for (const endpoint of Object.values(endpoints)) assert.equal(coldRequests.slice(beforeRecovery).filter(request => request.path === corePath + '/' + endpoint).length, 1);
   assert.equal(await offlinePage.locator('#notificationList .service-title').textContent(), notice.title); assert((await offlinePage.locator('#notificationList').textContent()).includes(notice.message));
   await coldPreserve(); assert.equal(await offlinePage.locator('#messageInput').isDisabled(), false); assert.deepEqual(await database(), savedDatabase); checks++;
+  // Healthy responses must render Spanish notifications instead of presenting
+  // the extra-section error view. Only an explicit read acknowledgement may
+  // change the fixture; every pending producer record remains unchanged.
+  const noticeReadPath = '/api/notifications/' + notice.id + '/read', noticeStart = coldRequests.length;
+  const noticeLabels = {
+    heading: ['Notificações', 'Notifications', 'Notifications', 'Notificaciones', 'Mitteilungen'], updates: ['Atualizações', 'Updates', 'Actualités', 'Actualizaciones', 'Neuigkeiten'], support: ['Suporte', 'Support', 'Assistance', 'Asistencia', 'Hilfe'],
+    mark: ['Marcar como lida', 'Mark as read', 'Marquer comme lue', 'Marcar como leída', 'Als gelesen markieren'], unread: ['Por ler', 'Unread', 'Non lue', 'Sin leer', 'Ungelesen'], read: ['Lida', 'Read', 'Lue', 'Leída', 'Gelesen'],
+    error: ['Não foi possível confirmar a leitura. Tente novamente.', 'Could not confirm reading. Please try again.', 'Impossible de confirmer la lecture. Réessayez.', 'No se pudo confirmar la lectura. Vuelve a intentarlo.', 'Lesebestätigung fehlgeschlagen. Bitte erneut versuchen.'],
+  };
+  let healthyNoticeCases = 0;
+  async function noticePreserve() {
+    assert.deepEqual(await pending(offlinePage), coldPending); assert.deepEqual(await work(offlinePage), offlineWork);
+    assert.deepEqual((await fields(offlinePage)).values.map(({ id, value }) => ({ id, value })), coldValues);
+    assert.deepEqual(await offlinePage.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user'].map(key => [key, localStorage.getItem(key)]))), coldSession);
+    assert.equal(coldRequests.filter(request => request.method !== 'GET' && request.path !== '/api/settings/language/me' && request.path !== '/api/client-messages/seen/' + client.id && request.path !== noticeReadPath).length, 0, 'Notification labels/read acknowledgement cannot send pending producers');
+  }
+  async function noticeNodes() { await offlinePage.evaluate(() => { window.qaNoticeNodes = [...document.querySelectorAll('#notificationsTitle,#notificationsPill,#notificationList .service-title,#notificationList .pill,#notificationList button,#notificationList [role=status]')]; window.qaNoticeLeaves = qaNoticeNodes.map(node => node.firstChild); }); }
+  async function healthyLabels(index, state, retainedButton = true) {
+    for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill', 'updates'], ['permissionsPill', 'support']]) assert.equal(await offlinePage.locator('#' + id).textContent(), noticeLabels[key][index]);
+    const headingLines = await offlinePage.evaluate(() => ['notificationsTitle', 'notificationsPill', 'permissionsPill'].map(id => { const range = document.createRange(); range.selectNodeContents(document.getElementById(id)); return { id, lines: range.getClientRects().length }; }));
+    for (const item of headingLines) assert.equal(item.lines, 1, 'Notification/support words must remain whole: ' + item.id);
+    assert.equal(await offlinePage.locator('#notificationList .service-title').textContent(), notice.title); assert((await offlinePage.locator('#notificationList').textContent()).includes(notice.message)); assert.equal(await offlinePage.locator('#notificationList .service-title b').count(), 0);
+    assert.equal(await offlinePage.locator('#notificationList .pill').textContent(), noticeLabels[state === 'read' ? 'read' : 'unread'][index]);
+    if (retainedButton) { assert.equal(await offlinePage.locator('#notificationList [data-notice-read]').textContent(), noticeLabels[state === 'read' ? 'read' : 'mark'][index]); assert.equal(await offlinePage.locator('#notificationList [data-notice-read]').isDisabled(), state === 'busy' || state === 'read'); const rect = await offlinePage.locator('#notificationList [data-notice-read]').boundingBox(); assert(rect.height >= 44 && rect.x >= 0 && rect.x + rect.width <= offlinePage.viewportSize().width); }
+    else assert.equal(await offlinePage.locator('#notificationList [data-notice-read]').count(), 0);
+    if (state === 'failed') assert.equal(await offlinePage.locator('#notificationList [role=status]').textContent(), noticeLabels.error[index]);
+    assert.equal(await offlinePage.locator('#notificationList > p[role=alert]').count(), 0); assert.equal(await offlinePage.locator('#permissionsList > p[role=alert]').count(), 0); await noticePreserve();
+  }
+  async function healthyMatrix(state) {
+    const guardedReads = () => coldRequests.filter(request => request.method === 'GET' && (request.path === corePath || Object.values(endpoints).some(endpoint => request.path === corePath + '/' + endpoint))).length;
+    const readsBefore = guardedReads(), writesBefore = coldRequests.filter(request => request.path === noticeReadPath).length;
+    await offlinePage.locator('#messageInput').focus(); await offlinePage.evaluate(() => document.getElementById('messageInput').setSelectionRange(2, 8)); const before = await fields(offlinePage); await noticeNodes();
+    for (const width of [320, 390, 1440]) { await offlinePage.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+      await offlinePage.evaluate(language => { queryLanguage = language; applyLanguage(language); }, language); await settle(offlinePage); await healthyLabels(index, state);
+      assert.deepEqual(await fields(offlinePage), before); assert.equal(guardedReads(), readsBefore); assert.equal(coldRequests.filter(request => request.path === noticeReadPath).length, writesBefore);
+      assert(await offlinePage.evaluate(() => qaNoticeNodes.every((node, index) => node.isConnected && node.firstChild === qaNoticeLeaves[index]))); assert(await offlinePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); healthyNoticeCases++;
+    } }
+    await offlinePage.setViewportSize({ width: 320, height: 900 }); await capture(offlinePage, 'notice-' + state + '-de-320', '#notificationsPanel');
+  }
+  await offlinePage.evaluate(() => { queryLanguage = 'es'; applyLanguage('es'); }); await offlinePage.evaluate(() => loadCustomerExtras()); await offlinePage.waitForLoadState('networkidle'); await healthyLabels(3, 'unread'); await healthyMatrix('unread');
+  await offlinePage.route(base + noticeReadPath, route => route.abort('failed'));
+  await offlinePage.locator('#notificationList [data-notice-read]').click(); await offlinePage.waitForFunction(() => document.querySelector('#notificationList [role=status]').textContent.length > 0); await healthyMatrix('failed'); assert.deepEqual(await database(), savedDatabase);
+  await offlinePage.unroute(base + noticeReadPath); let heldNotice;
+  await offlinePage.route(base + noticeReadPath, route => { assert.equal(route.request().headers().authorization, 'Bearer ' + token); assert.equal(route.request().postData(), null); heldNotice = route; });
+  await offlinePage.locator('#notificationList [data-notice-read]').click(); await offlinePage.waitForFunction(() => document.querySelector('#notificationList [data-notice-read]').disabled); await healthyMatrix('busy'); assert(heldNotice); assert.deepEqual(await database(), savedDatabase);
+  const noticeBeforeConfirm = Date.now(); await heldNotice.continue(); await offlinePage.unroute(base + noticeReadPath); await offlinePage.waitForFunction(() => document.querySelector('#notificationList [data-notice-read]').textContent === 'Gelesen'); await healthyMatrix('read');
+  const afterNotice = await database(); assert.equal(afterNotice[1].isRead, true); for (const key of ['readAt', 'updatedAt']) assert(afterNotice[1][key] instanceof Date && afterNotice[1][key].getTime() >= noticeBeforeConfirm && afterNotice[1][key].getTime() <= Date.now());
+  const finalDatabaseExpected = savedDatabase.map((row, index) => index === 1 ? { ...row, isRead: true, readAt: afterNotice[1].readAt, updatedAt: afterNotice[1].updatedAt } : row); assert.deepEqual(afterNotice, finalDatabaseExpected);
+  await offlinePage.evaluate(() => document.querySelector('#notificationList [data-notice-read]').dispatchEvent(new MouseEvent('click', { bubbles: true }))); await noticePreserve();
+  for (const width of [320, 390, 1440]) { await offlinePage.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+    await offlinePage.locator('#cwLanguageSelect').selectOption(language); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle'); await healthyLabels(index, 'read', false); healthyNoticeCases++;
+  } }
+  assert.equal(coldRequests.slice(noticeStart).filter(request => request.path === noticeReadPath).length, 2, 'One failed attempt and one explicit native confirmation; repaint/selector/disabled handler cannot retry automatically'); assert.deepEqual(await database(), finalDatabaseExpected);
+  console.log('PASS healthy portal notifications ' + JSON.stringify({ healthyNoticeCases, languages: 5, widths: [320, 390, 1440], spanishNativeResponseRendered: true, explicitReadAttempts: 2, nativeSqlConfirmations: 1, pendingRequests: 2, originalNodesFocusAndGuardRetained: true }));
   console.log('PASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work'); await offline.close();
-  assert.deepEqual(await database(), savedDatabase);
+  assert.deepEqual(await database(), finalDatabaseExpected);
   console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true }));
   console.log('PASS actual portal quote presentation ' + JSON.stringify({ quoteLanguageCases, cachedQuotesJsBytesEqualSource: true, coldOfflineQuoteErrors: true, realLanguageSelector: true, pureQuotePaintDoesNotReloadQuotes: true })); complete = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
