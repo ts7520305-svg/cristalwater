@@ -56,7 +56,7 @@ async function capture(page, name) {
   await page.screenshot({path:path.join(output, name+'.png'),fullPage:true});
 }
 async function runPersona(fixture, persona) {
-  const context = await browser.newContext({viewport:persona.role==='ADMIN'?{width:1440,height:1000}:{width:390,height:844},isMobile:persona.role!=='ADMIN',hasTouch:persona.role!=='ADMIN',geolocation:{latitude:37.087,longitude:-8.731},permissions:['geolocation']});
+  const context = await browser.newContext({locale:'pt-PT',viewport:persona.role==='ADMIN'?{width:1440,height:1000}:{width:390,height:844},isMobile:persona.role!=='ADMIN',hasTouch:persona.role!=='ADMIN',geolocation:{latitude:37.087,longitude:-8.731},permissions:['geolocation']});
   const page = await context.newPage();
   page.setDefaultTimeout(15000);
   const pageErrors = [], apiErrors = [];
