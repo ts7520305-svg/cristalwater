@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0f1723">
-  <title>Cristal Water - Login</title>
+  <title data-cw-entry-copy="title" data-cw-no-i18n>Cristal Water - Login</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <script src="/cw-auth.js"></script>
@@ -46,6 +46,7 @@
 
     .cw-login-brand h1 {
       margin: 0;
+      color: #eff4fb;
       font-size: 36px;
       line-height: 1.06;
     }
@@ -116,7 +117,7 @@
 
     .cw-pwd {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 8px;
       align-items: center;
     }
@@ -129,6 +130,7 @@
       border-radius: 10px;
       padding: 8px 10px;
       display: none;
+      overflow-wrap: anywhere;
     }
 
     #error:not(:empty) {
@@ -165,33 +167,33 @@
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body>
-  <main class="cw-login" aria-label="Login Cristal Water">
+  <main class="cw-login" aria-label="Login Cristal Water" data-cw-entry-aria="mainLabel" data-cw-no-i18n>
     <section class="cw-login-shell">
       <article class="cw-login-brand">
         <img class="cw-login-brand-logo" src="/logo-cristalwater.png" alt="Cristal Water">
         <div>
           <h1>Crystal OS V2</h1>
-          <p>Acesso reservado aos perfis autorizados da Cristal Water.</p>
+          <p data-cw-entry-copy="access">Acesso reservado aos perfis autorizados da Cristal Water.</p>
         </div>
-        <ul class="cw-login-trust" aria-label="Segurança">
-          <li>Dados sensíveis protegidos para operação diária.</li>
-          <li>Sessões autenticadas com controlo por perfil.</li>
-          <li>Registos de atividade para auditoria e suporte.</li>
+        <ul class="cw-login-trust" aria-label="Segurança" data-cw-entry-aria="security">
+          <li data-cw-entry-copy="trustData">Dados sensíveis protegidos para operação diária.</li>
+          <li data-cw-entry-copy="trustSession">Sessões autenticadas com controlo por perfil.</li>
+          <li data-cw-entry-copy="trustAudit">Registos de atividade para auditoria e suporte.</li>
         </ul>
       </article>
       <article class="cw-login-form">
-        <h2>Entrar no sistema</h2>
-        <p>Use as credenciais atribuídas para aceder ao seu espaço de trabalho.</p>
+        <h2 data-cw-entry-copy="heading">Entrar no sistema</h2>
+        <p data-cw-entry-copy="credentials">Use as credenciais atribuídas para aceder ao seu espaço de trabalho.</p>
         <form class="cw-form-grid" action="javascript:void(0)" autocomplete="on">
-          <label for="email">Email
-            <input id="email" type="email" placeholder="nome@empresa.pt" autocomplete="username">
+          <label for="email" data-cw-entry-copy="email">Email
+            <input id="email" type="email" placeholder="nome@empresa.pt" autocomplete="username" aria-label="Email" data-cw-entry-aria="email">
           </label>
-          <label for="password">Password</label>
+          <label for="password" data-cw-entry-copy="password">Password</label>
           <div class="cw-pwd">
-            <input id="password" type="password" placeholder="A sua password" autocomplete="current-password">
-            <button class="cw-v2-btn" id="togglePassword" type="button" aria-controls="password" aria-pressed="false">Mostrar</button>
+            <input id="password" type="password" placeholder="A sua password" autocomplete="current-password" aria-label="Password" data-cw-entry-placeholder="passwordPlaceholder" data-cw-entry-aria="password">
+            <button class="cw-v2-btn" id="togglePassword" type="button" aria-controls="password" aria-pressed="false" data-cw-entry-copy="show">Mostrar</button>
           </div>
-          <button class="cw-v2-btn primary" id="loginBtn" type="button">Entrar</button>
+          <button class="cw-v2-btn primary" id="loginBtn" type="button" data-cw-entry-copy="enter">Entrar</button>
           <div id="error" role="alert" aria-live="polite"></div>
         </form>
       </article>
@@ -199,6 +201,7 @@
   </main>
 
   <script defer src="/login.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <script>
     document.getElementById("togglePassword")?.addEventListener("click", function () {
       const input = document.getElementById("password");

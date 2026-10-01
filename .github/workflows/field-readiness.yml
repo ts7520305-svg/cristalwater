@@ -9,10 +9,10 @@ permissions:
 jobs:
   field:
     runs-on: ubuntu-latest
-    # TASK463 ended canceled after about 70m with 354/357 groups finished.
-    # The suite now has 360 groups; preserve per-script deadlines and leave room
-    # for setup, the complete suite and the isolated database/file restore gate.
-    timeout-minutes: 90
+    # TASK500 reached the 90m job cap after 382/383 passing groups; setup took
+    # about 14m before the 75m suite prefix. Reserve room for all 385 groups and
+    # the restore gate; retain every per-script deadline and assertion.
+    timeout-minutes: 105
     services:
       postgres:
         image: postgres:16

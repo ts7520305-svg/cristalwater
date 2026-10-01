@@ -30,6 +30,7 @@ const scripts=[
  'test-field-history-languages.js',
  'test-field-login-languages.js',
  'test-field-client-login-languages.js',
+ 'test-field-entry-login-languages.js',
  'test-field-bottom-navigation-languages.js',
  'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
  'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
