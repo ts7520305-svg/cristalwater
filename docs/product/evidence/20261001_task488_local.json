@@ -1,0 +1,537 @@
+{
+  "task": "TASK488",
+  "checkedAt": "2026-10-01T09:42:33.817664+00:00",
+  "parent": "6a2bfcaf208a44cb4516fb562b06ddabecf8a943",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": {
+    "productFiles": [],
+    "testFiles": [
+      "scripts/test-field-expense-valuations-ui.js"
+    ],
+    "documentFiles": [
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20261001_task488_local.json"
+    ],
+    "defaultBranchUntouched": true,
+    "merge": false,
+    "deploy": false,
+    "externalContacts": false
+  },
+  "sources": {
+    "scripts/test-field-expense-valuations-ui.js": "0154973ca82d64f960f036ac7eb624a9620d50ea146bb817e27cb2e5e587455d"
+  },
+  "unchangedSources": {
+    "frontend/cw-expense-valuation.js": "adb2683f78615800b45bd1c699d121e239f7b2dbcf531b0ccc53bc600e8b4f41",
+    "frontend/admin-expenses.js": "8583eca99d3308e0435b6126070b6df133bf423a6846d447ce50cbd6064c1466",
+    "src/services/expenseLedgerService.js": "2503c5afcb217ebb4bebd00b94f398c48da14d1ebe1a0d718d2ed95e55fc7f4d",
+    "src/services/expenseLedgerRules.js": "0b2fb61937c65d83404e11a2083ce227145f8ce05649a076f38548f4a2498ac2",
+    "scripts/test-field-suite.js": "ff3f50967e38f3d8242e7d33a68492093e0ec98882453c8193326fffa991d376",
+    "frontend/sw.js": "da611bc129ed6b929268e6e41a9187ff00ae33a1ea5a5bd32d1cbf2f2c726d52"
+  },
+  "change": {
+    "heldPreviewUsesRealApiBeforeInterception": true,
+    "responseStatus": 200,
+    "sourceAndResponseHashesVerified": true,
+    "kind": "LABOR",
+    "targetType": "REGULAR",
+    "quantitySeconds": 2400,
+    "amountCents": 4000,
+    "interceptedDeliveries": 1,
+    "originalAuthorizationRetained": true,
+    "routeFetchRemovedFromHeldPhase": true,
+    "responseBodyUnchanged": true,
+    "actualBrowserJsonConsumptionObserved": true,
+    "selectionCycle": [
+      "LABOR",
+      "MANUAL",
+      "LABOR"
+    ],
+    "latePreviewAmountMonthEmptyAndConfirmationFalse": true,
+    "commandsPersistentFinancialRowsVisitsStockAndPendingUnchangedDuringHeldRead": true,
+    "routeErrorsReportedToMainAssertions": true,
+    "existingUiTimeoutMs": 12000,
+    "fieldRunnerTimeoutMs": 120000,
+    "runnerGroups": 377,
+    "sourcePrefixAndSuffixExactlyPreserved": true,
+    "productAndFinancialRulesUnchanged": true
+  },
+  "local": {
+    "runtime": "Isolated PGlite; not native PostgreSQL16 acceptance",
+    "initialResults": [
+      {
+        "script": "../qa-runtime/seed-admin476.cjs",
+        "code": 0,
+        "signal": null,
+        "ms": 276
+      },
+      {
+        "script": "scripts/test-field-expense-valuations-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12816
+      },
+      {
+        "script": "scripts/test-field-expense-valuations.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6280
+      },
+      {
+        "script": "scripts/test-field-work-time-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4424
+      }
+    ],
+    "finalFreshDatabaseResults": [
+      {
+        "script": "../qa-runtime/seed-admin476.cjs",
+        "code": 0,
+        "signal": null,
+        "ms": 265
+      },
+      {
+        "script": "scripts/test-field-expense-valuations-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13389
+      }
+    ],
+    "initialUiLog": "PASS held real valuation preview: verified API hashes/2400s/4000 cents, one delivery consumed after selection change, no forwarded socket or commands/persistent/pending changes\nPASS real valuation browser: historical purchase and paid-time configuration, regular/extra identity, explicit calculation and confirmation, drafts, exact durable recovery after lost/malformed responses, corrections, uncertain totals, stale preview and session isolation, financial AI subsets and responsive/dark views\n",
+    "apiLog": "PASS expense valuations: documented purchase/net-consumption and paid-time bases, exact cents/quantities, typed equal visit IDs, shared source and expense budgets, concurrent reservations, immutable receipts, cancellation and rollback, corrections and changed sources, historical technician/customer identity, complete totals and read-only financial context without double counting\n",
+    "workTimeLog": "PASS work time cost integrity: typed regular/extra/repair overlaps, other clients and technicians, half-open UTC boundaries, open/closed/planned time, historical and voided intervals, immutable receipts/payments, late-source review, stale request/replay refusal, distributed and composed salaries, atomic concurrent refusals and historical void\n",
+    "finalUiLog": "PASS held real valuation preview: verified API hashes/2400s/4000 cents, one delivery consumed after selection change, no forwarded socket or commands/persistent/pending changes\nPASS real valuation browser: historical purchase and paid-time configuration, regular/extra identity, explicit calculation and confirmation, drafts, exact durable recovery after lost/malformed responses, corrections, uncertain totals, stale preview and session isolation, financial AI subsets and responsive/dark views\n",
+    "syntax": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 44 inline scripts.\n",
+    "unchangedProductUnits": {
+      "source": "20261001_task487_local.json",
+      "tests": 1396,
+      "files": 141,
+      "technicianTests": 4,
+      "rerunFor488": false
+    },
+    "negative": {
+      "expectedCode": 1,
+      "ms": 11730,
+      "modifiedModule": "Only two revision checks within calculate() omitted by QA route; actual repository module unchanged",
+      "failure": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Tempo do técnico #1 · 2001-04-01 a 2001-04-3040,00 €Tempo medido: 2400 segundos. Base: 480,00 € para 480 minutos pagos.'\n- ''\n\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-expense-valuations-ui.js:115:38 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Tempo do técnico #1 · 2001-04-01 a 2001-04-3040,00 €Tempo medido: 2400 segundos. Base: 480,00 € para 480 minutos pagos.',\n  expected: '',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n",
+      "browserRenderedRejectedAmount": 4000,
+      "naturalSocketFailureReproduction": false
+    },
+    "discardedContaminatedReplay": {
+      "results": [
+        {
+          "script": "scripts/test-field-expense-valuations-ui.js",
+          "code": 1,
+          "signal": null,
+          "ms": 9959
+        }
+      ],
+      "reason": "Running the negative and positive monthly finance fixture twice on the same database changed global monthly totals; not a product regression. Positive rerun above used a new isolated database.",
+      "log": "AssertionError [ERR_ASSERTION]: The input did not match the regular expression /15,00/. Input:\n\n'Consumo valorizadoPor confirmarTempo valorizado60,00 €'\n\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-expense-valuations-ui.js:59:428 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Consumo valorizadoPor confirmarTempo valorizado60,00 €',\n  expected: /15,00/,\n  operator: 'match',\n  diff: 'simple'\n}\n"
+    }
+  },
+  "nativeBeforePublication": {
+    "checkedAt": "2026-10-01T09:42:32.452Z",
+    "runs": [
+      {
+        "id": 36835718238,
+        "jobs": [
+          {
+            "id": 110282530571,
+            "name": "field",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 36835718238,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run npm ci",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run npx prisma validate && npx prisma generate",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify additive upgrade from the previous schema",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Run npx playwright install --with-deps chromium",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Run npm run check:syntax",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Run node scripts/test-field-suite.js",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 11
+              },
+              {
+                "name": "Restore database and uploaded files in isolated QA",
+                "status": "pending",
+                "conclusion": null,
+                "number": 12
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 13
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 14
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 26
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 27
+              },
+              {
+                "name": "Stop containers",
+                "status": "pending",
+                "conclusion": null,
+                "number": 28
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 36839287916,
+        "jobs": [
+          {
+            "id": 110294216490,
+            "name": "field",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 36839287916,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run npm ci",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run npx prisma validate && npx prisma generate",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify additive upgrade from the previous schema",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Run npx playwright install --with-deps chromium",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Run npm run check:syntax",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Run node scripts/test-field-suite.js",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 11
+              },
+              {
+                "name": "Restore database and uploaded files in isolated QA",
+                "status": "pending",
+                "conclusion": null,
+                "number": 12
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 13
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 14
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 26
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 27
+              },
+              {
+                "name": "Stop containers",
+                "status": "pending",
+                "conclusion": null,
+                "number": 28
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": 36843448330,
+        "jobs": [
+          {
+            "id": 110307766309,
+            "name": "field",
+            "status": "in_progress",
+            "conclusion": null,
+            "run_id": 36843448330,
+            "logs_url": null,
+            "steps": [
+              {
+                "name": "Set up job",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 1
+              },
+              {
+                "name": "Initialize containers",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 2
+              },
+              {
+                "name": "Run actions/checkout@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 3
+              },
+              {
+                "name": "Run actions/setup-node@v4",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 4
+              },
+              {
+                "name": "Run npm ci",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 5
+              },
+              {
+                "name": "Run npx prisma validate && npx prisma generate",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 6
+              },
+              {
+                "name": "Verify additive upgrade from the previous schema",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 7
+              },
+              {
+                "name": "Run npx playwright install --with-deps chromium",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 8
+              },
+              {
+                "name": "Run npm run check:syntax",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 9
+              },
+              {
+                "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+                "status": "completed",
+                "conclusion": "success",
+                "number": 10
+              },
+              {
+                "name": "Run node scripts/test-field-suite.js",
+                "status": "in_progress",
+                "conclusion": null,
+                "number": 11
+              },
+              {
+                "name": "Restore database and uploaded files in isolated QA",
+                "status": "pending",
+                "conclusion": null,
+                "number": 12
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 13
+              },
+              {
+                "name": "Run actions/upload-artifact@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 14
+              },
+              {
+                "name": "Post Run actions/setup-node@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 26
+              },
+              {
+                "name": "Post Run actions/checkout@v4",
+                "status": "pending",
+                "conclusion": null,
+                "number": 27
+              },
+              {
+                "name": "Stop containers",
+                "status": "pending",
+                "conclusion": null,
+                "number": 28
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "native484Failure": {
+    "source": "20261001_task487_local.json",
+    "run": 36831370265,
+    "job": 110268518638,
+    "head": "0ff7057fc67f9ea49a58159b70ff396ba91a7156",
+    "passed": 373,
+    "groups": 374,
+    "failed": "test-field-expense-valuations-ui.js",
+    "symptom": "route.fetch: socket hang up in held preview handler",
+    "restore": "skipped",
+    "rootCauseProven": false,
+    "nativeFixAcceptance": "pending new exact commit CI"
+  },
+  "publication487": {
+    "code": "6a2bfcaf208a44cb4516fb562b06ddabecf8a943",
+    "tree": "f787bd67be04612676bf85af880ee34a1f605e05",
+    "run": 36843448330,
+    "job": 110307766309
+  },
+  "lastCompleteAcceptance": {
+    "task": 483,
+    "code": "f32e3d4628c1e84d0970209468a9d4788d4c9e5f",
+    "run": 36822194203,
+    "job": 110239975117,
+    "groups": 373,
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "evidence": "20261001_task484_local.json"
+  },
+  "completion": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "complete": 5,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "next": "TASK487: presentation of assistance and early next-day rounds",
+    "annualContract": "deferred",
+    "task486Publication": "pending in this evidence snapshot"
+  }
+}

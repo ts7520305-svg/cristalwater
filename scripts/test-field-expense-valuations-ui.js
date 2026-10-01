@@ -72,7 +72,49 @@ let child, browser;
  await prisma.serviceVisit.update({where:{id:sameId},data:{endAt:new Date(month+'-10T08:40:00Z')}});await refresh();await open(laborId);assert.match(await page.locator('#allocationRows').textContent(),/Por rever/);assert.equal(await page.locator('#allocationRows').getByRole('button',{name:'Rever atribuição',exact:true}).count(),0);assert.match(await page.locator('#valuationMetrics').textContent(),/Por confirmar/);
  await page.locator('#allocationRows .row').filter({hasText:'Visita regular #'+sameId}).getByRole('button',{name:'Anular atribuição',exact:true}).click();await settled();await calculate('LABOR');assert.match(await page.locator('#valuationPreview').textContent(),/40,00/);
  const previewEndpoint='**/api/expenses/*/valuation-preview?*';await page.route(previewEndpoint,async r=>{const response=await r.fetch(),value=await response.json();value.preview.amountCents=1;value.preview.calculation.amountCents=1;await r.fulfill({json:value});});await page.locator('#valuationCalculate').click();await page.waitForFunction(()=>document.getElementById('valuationStatus').textContent.includes('não correspondem'));assert.equal(await page.locator('#valuationPreview').textContent(),'');assert.equal(await page.locator('#allocationAmount').inputValue(),'');await page.unroute(previewEndpoint);
- let entered,release,finished;const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r),done=new Promise(r=>finished=r);await page.route(previewEndpoint,async r=>{const response=await r.fetch();entered();await gate;try{await r.fulfill({response});}finally{finished();}});await page.locator('#valuationCalculate').click();await started;await page.locator('#valuationKind').selectOption('MANUAL');await page.locator('#valuationKind').selectOption('LABOR');release();await done;await page.unroute(previewEndpoint);assert.equal(await page.locator('#valuationPreview').textContent(),'');assert.equal(await page.locator('#allocationAmount').inputValue(),'');
+ // Delay a real, validated API response without opening a second forwarded socket
+ // inside the route handler. The browser must discard it after LABOR -> MANUAL -> LABOR.
+ const heldPath='/api/expenses/'+laborId+'/valuation-preview',heldQuery=new URLSearchParams({kind:'LABOR',targetType:'REGULAR',targetId:String(sameId)});
+ const heldResponse=await fetch(base+heldPath+'?'+heldQuery,{headers:auth,cache:'no-store',signal:AbortSignal.timeout(12000)});
+ assert.equal(heldResponse.status,200);assert.match(heldResponse.headers.get('cache-control'),/no-store/);
+ const heldBody=await heldResponse.json(),heldPreview=heldBody.preview,{hash:heldHash,...heldValue}=heldPreview;
+ const rules=require('../src/services/expenseLedgerRules');
+ assert.equal(heldBody.ok,true);assert.equal(heldPreview.expenseId,laborId);assert.equal(heldPreview.kind,'LABOR');assert.equal(heldPreview.targetType,'REGULAR');assert.equal(heldPreview.targetId,sameId);
+ assert.equal(heldPreview.quantity,'2400');assert.equal(heldPreview.amountCents,4000);assert.equal(heldPreview.calculation.amountCents,4000);assert.equal(rules.hash(heldValue),heldHash);assert.equal(rules.hash(heldPreview.source),heldPreview.valuationHash);
+ const persistent=async()=>JSON.stringify(await Promise.all([
+  prisma.companyExpense.findMany({where:{id:{in:[materialId,laborId]}},orderBy:{id:'asc'}}),
+  prisma.expenseAllocation.findMany({where:{expenseId:{in:[materialId,laborId]}},orderBy:{id:'asc'}}),
+  prisma.expenseEvent.findMany({where:{expenseId:{in:[materialId,laborId]}},orderBy:{id:'asc'}}),
+  prisma.expensePayment.findMany({where:{expenseId:{in:[materialId,laborId]}},orderBy:{id:'asc'}}),
+  prisma.serviceVisit.findUnique({where:{id:sameId}}),prisma.extraVisit.findUnique({where:{id:sameId}}),
+  prisma.stockMovement.findMany({where:{OR:[{visitId:sameId},{extraVisitId:sameId}]},orderBy:{id:'asc'}})
+ ]));
+ const pendingState=()=>page.evaluate(()=>new Promise((resolve,reject)=>{const open=indexedDB.open('cw-expense-commands-v1',1);open.onerror=()=>reject(open.error);open.onsuccess=()=>{const db=open.result,read=db.transaction('state').objectStore('state').getAll();read.onerror=()=>{db.close();reject(read.error);};read.onsuccess=()=>{db.close();resolve(JSON.stringify(read.result));};};}));
+ const beforeHeldRows=await persistent(),beforeHeldPending=await pendingState(),beforeHeldPosts=posts.length;
+ await page.evaluate(path=>{const original=window.fetch;window.qaLatePreviewConsumed=false;window.fetch=async function(...args){const response=await original.apply(this,args),url=new URL(args[0] instanceof Request?args[0].url:String(args[0]),location.href);if(url.pathname===path){const json=response.json.bind(response);response.json=async()=>{try{return await json();}finally{window.qaLatePreviewConsumed=true;window.fetch=original;}};}return response;};},heldPath);
+ let entered,release,finished,routeFailure,intercepted=0;
+ const gate=new Promise(r=>release=r),started=new Promise(r=>entered=r),done=new Promise(r=>finished=r);
+ const bounded=async promise=>{let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Held preview did not finish within the existing 12s UI timeout')),12000);})]);}finally{clearTimeout(timer);}};
+ const holdPreview=async route=>{
+  try{
+   intercepted++;const request=route.request(),url=new URL(request.url());
+   assert.equal(request.method(),'GET');assert.equal(url.pathname,heldPath);assert.deepEqual([...url.searchParams],[...heldQuery]);assert(request.headers().authorization===auth.Authorization,'Original admin authorization retained');
+   entered();await gate;await route.fulfill({status:200,contentType:'application/json',headers:{'Cache-Control':'private, no-store'},body:JSON.stringify(heldBody)});
+  }catch(error){routeFailure=error;entered();try{await route.abort('failed');}catch{}}
+  finally{finished();}
+ };
+ await page.route(previewEndpoint,holdPreview,{times:1});
+ const delivered=page.waitForResponse(response=>new URL(response.url()).pathname===heldPath).then(response=>({response}),error=>({error}));
+ try{
+  await page.locator('#valuationCalculate').click();await bounded(started);assert.ifError(routeFailure);
+  await page.locator('#valuationKind').selectOption('MANUAL');await page.locator('#valuationKind').selectOption('LABOR');
+  release();await bounded(done);assert.ifError(routeFailure);
+  const result=await delivered;assert.ifError(result.error);assert.equal(result.response.status(),200);assert.equal(await result.response.finished(),null);assert.deepEqual(await result.response.json(),heldBody);
+  await page.waitForFunction(()=>window.qaLatePreviewConsumed===true);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(intercepted,1);assert.equal(await page.locator('#valuationPreview').textContent(),'');assert.equal(await page.locator('#allocationAmount').inputValue(),'');assert.equal(await page.locator('#allocationMonth').inputValue(),'');assert.equal(await page.locator('#allocationConfirmed').isChecked(),false);
+  assert.equal(posts.length,beforeHeldPosts);assert.equal(await persistent(),beforeHeldRows);assert.equal(await pendingState(),beforeHeldPending);
+  console.log('PASS held real valuation preview: verified API hashes/2400s/4000 cents, one delivery consumed after selection change, no forwarded socket or commands/persistent/pending changes');
+ }finally{release();await page.unroute(previewEndpoint,holdPreview);}
  await page.locator('#valuationCalculate').click();await page.waitForFunction(()=>document.querySelector('#valuationPreview strong')!==null);await submit('VALUE_LABOR');assert.equal((await expense(laborId)).allocatedCents,5500);
  const costs='**/api/expenses/costs?*';await page.route(costs,async r=>{const response=await r.fetch(),value=await response.json();value.summary.valuations.materialAmountCents='0';await r.fulfill({json:value});});await page.locator('#costRefresh').click();await page.waitForFunction(()=>!document.getElementById('costStatus').textContent.startsWith('A consultar'));assert.equal(await page.locator('#valuationMetrics').textContent(),'');assert.equal(await page.locator('#costRows').textContent(),'');await page.unroute(costs);
  await page.evaluate(()=>{const original=localStorage.getItem('user');localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'}));localStorage.setItem('user',original);});await page.waitForFunction(()=>document.getElementById('expenseStatus').dataset.state==='session');for(const selector of ['#valuationPreview','#valuationMetrics','#laborBasisStatus','#laborTechnician','#allocationRows'])assert.equal(await page.locator(selector).textContent(),'');assert.equal(await page.evaluate(()=>localStorage.getItem('qaUnrelatedDraft')),'preserved');assert.deepEqual(errors,[]);
