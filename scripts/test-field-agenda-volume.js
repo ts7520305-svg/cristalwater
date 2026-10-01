@@ -156,9 +156,16 @@ async function browserProbe(f) {
     exact(await rowKeys(), plannerKeys(expected), 'planner DOM');
     const loadMs = performance.now() - start;
     for (const status of ['extra', '', 'extra', '']) { await page.locator('#visitStatusFilter').selectOption(status); exact(await rowKeys(), plannerKeys(status ? expected.filter(r => r.kind === 'EXTRA') : expected), 'planner repeated filter'); }
-    await page.locator('#visitDateFilter').fill(f.day); await page.locator('#visitDateFilter').dispatchEvent('change');
+    // Chromium date fill already emits the native change event. Measure it and
+    // verify the resulting rows instead of dispatching a second full repaint.
+    await page.evaluate(() => { window.qaAgendaDateChanges = []; document.getElementById('visitDateFilter').addEventListener('change', event => qaAgendaDateChanges.push(event.target.value)); });
+    await page.locator('#visitDateFilter').fill(f.day);
     exact(await rowKeys(), plannerKeys(expected.filter(r => key(new Date(r.at)) === f.day)), 'planner selected day');
-    await page.locator('#visitDateFilter').fill(''); await page.locator('#visitDateFilter').dispatchEvent('change'); exact(await rowKeys(), plannerKeys(expected), 'planner restored');
+    assert.deepEqual(await page.evaluate(() => qaAgendaDateChanges), [f.day], 'One actual date change updates the selected-day rows');
+    await page.locator('#visitDateFilter').fill(''); exact(await rowKeys(), plannerKeys(expected), 'planner restored');
+    const dateChanges = await page.evaluate(() => qaAgendaDateChanges);
+    assert.deepEqual(dateChanges, [f.day, ''], 'Clearing the actual date updates the complete original set');
+    mark('planner-date-changes-verified', { changes: dateChanges.length });
     assert.equal(await page.locator('#weekVisits img').count(), 0);
     const cdp = await context.newCDPSession(page); await cdp.send('Performance.enable'); const metrics = await cdp.send('Performance.getMetrics');
     const plannerHeapMiB = mib(metrics.metrics.find(m => m.name === 'JSHeapUsedSize').value);
@@ -220,7 +227,7 @@ async function browserProbe(f) {
     assert(readinessTraffic.started > 0 && readinessTraffic.completed > 0, 'Continuous reads exercised during field readiness');
     mark('technician-verified', { rows: expectedTech.length, readinessTraffic });
     await field.locator('#visitList [data-visit-index]').last().scrollIntoViewIfNeeded(); await field.screenshot({ path: path.join(folder, 'technician-390.png') });
-    return { mode: 'UI', pools: f.pools.length, plannerRows: expected.length, plannerLoadMs: Math.round(loadMs * 10) / 10, plannerJsHeapMiB: plannerHeapMiB, dayRows: seen.length, dayPages: pages, dayTraversalMs: Math.round(dayTraversalMs * 10) / 10, technicianRows: expectedTech.length, technicianLoadAndNavigationMs: Math.round(technicianMs * 10) / 10, technicianJsHeapMiB: technicianHeapMiB, exactIds: true, repeatedFilters: true, pageErrors: errors.length, writes: writes.length, readinessTraffic, phases };
+    return { mode: 'UI', pools: f.pools.length, plannerRows: expected.length, plannerLoadMs: Math.round(loadMs * 10) / 10, plannerJsHeapMiB: plannerHeapMiB, dayRows: seen.length, dayPages: pages, dayTraversalMs: Math.round(dayTraversalMs * 10) / 10, technicianRows: expectedTech.length, technicianLoadAndNavigationMs: Math.round(technicianMs * 10) / 10, technicianJsHeapMiB: technicianHeapMiB, exactIds: true, repeatedFilters: true, dateChangeEvents: dateChanges.length, pageErrors: errors.length, writes: writes.length, readinessTraffic, phases };
   } finally { await browser.close(); }
 }
 

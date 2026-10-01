@@ -339,10 +339,10 @@ function getVisitFilters(){
   };
 }
 
-function filterVisits(){
+function filterVisits(visits = allPlannerVisits()){
   const filters = getVisitFilters();
   const query = normalizeText(filters.query);
-  return allPlannerVisits().filter(visit => {
+  return visits.filter(visit => {
     const date = getVisitDate(visit);
     if(query && !visitSearchText(visit).includes(query)) return false;
     if(filters.date && formatDateInput(date) !== filters.date) return false;
@@ -602,10 +602,9 @@ function technicianOptions(selected){
   return `<option value="">Sem tecnico</option>${options}`;
 }
 
-function renderPlanner(){
+function renderPlanner(visits = filterVisits()){
   const box = document.getElementById("visitPlanner");
   if(!box) return;
-  const visits = filterVisits();
   const columns = [
     { id: "", name: "Sem tecnico" },
     ...state.technicians.filter((tech) => tech.active !== false).map((tech) => ({ id: String(tech.id), name: tech.name || `Tecnico #${tech.id}` }))
@@ -661,8 +660,9 @@ function renderVisitChip(visit){
 function renderVisits(){
   const box = document.getElementById("weekVisits");
   if(!box) return;
-  const filteredVisits = filterVisits();
+  // Normalize once so the table and planner use the same visit snapshot.
   const allVisits = allPlannerVisits();
+  const filteredVisits = filterVisits(allVisits);
   const summary = document.getElementById("visitFilterSummary");
   if(summary){
     const alertCount = filteredVisits.filter(visitHasAlert).length;
@@ -672,7 +672,7 @@ function renderVisits(){
     summary.textContent = `${filteredVisits.length} de ${allVisits.length} visita(s) - ${alertCount} alerta(s) - ${lateCount} atrasada(s) - ${extraCount} extra(s) - ${billableCount} cobravel(is)`;
   }
 
-  renderPlanner();
+  renderPlanner(filteredVisits);
 
   if(!allVisits.length){
     box.innerHTML = `<div class="empty">Ainda nao existem visitas geradas para esta semana.</div>`;

@@ -1,0 +1,1676 @@
+{
+  "task": 500,
+  "checkedAt": "2026-10-01T16:15:29.057472+00:00",
+  "parent": "92b5f3837d132a7184bb150d4e3ba9cc5eb3ea8d",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Normalize and filter one fresh visit snapshot per repaint for the administrator table, totals and planner. Remove duplicated manual date-change dispatches in QA and assert the two actual events. No persistent cache or calendar-policy change.",
+  "sources": {
+    "frontend/admin-rounds.js": "f057ffdc791f2a466adf8928f18fa1535b3e5e6a30cd08d1e85e2d1bdae750f1",
+    "frontend/admin-rounds.html": "948e0320a26ecd5753a5cf16930b3055222bd8f1a186b9f16228ba5b7a5faf0b",
+    "frontend/sw.js": "1728a889b6feea991d4b056839586dbf34baf5a72153a5dc36c875bd3c4f12bb",
+    "scripts/test-field-agenda-volume.js": "1961b43198d71d0c73d4c5d09ffb1d3884f3e665002a73a01afaee4838976f84",
+    "scripts/test-field-login-languages.js": "b5a269ee353c092b037360727e668dc97266fb7165266836485464cae4921e97",
+    "scripts/test-field-suite.js": "6bc317cdf1fb0ce42ceaf3ee2dc537c3ce5ea369e7935d2c6af360fb693707b5",
+    "frontend/technician-field-mode.js": "7d248a4f5db9b498c92086aa850655c315130105b3a4e2b5083476f160ff7446",
+    "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+    "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+    "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+    "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+    "frontend/cw-field-route-cache.js": "78684a6819ca8fad45c18aee1521506dfce4bc5c099f20d7541b99d20a2fc28b"
+  },
+  "productAudit": {
+    "parent": "92b5f3837d132a7184bb150d4e3ba9cc5eb3ea8d",
+    "inversePlannerExactlyRestored": true,
+    "sameLiveSnapshotPerRepaintNoPersistentCache": true,
+    "statusDateOrderEscapingAssignmentEditingAndApiPayloadsUnchanged": true,
+    "deadlineChildMs": 75000,
+    "originalLoadAndTechnicianLimitMs": 30000,
+    "heapLimitMiB": 256,
+    "nativeDateFillCountsAsserted": 2,
+    "allIdsFiltersPagesScopePermissionsFailureAndCleanupAssertionsPreserved": true,
+    "runner": 383,
+    "runnerExactBytesUnchanged": true,
+    "backendSchemaTestsUnchanged": true,
+    "cacheOnly": {
+      "previous": 274,
+      "current": 275,
+      "writeLogicUnchanged": true,
+      "loginTestOnlyThreeCacheReferencesChanged": true
+    },
+    "unchanged": {
+      "frontend/admin-rounds.html": "948e0320a26ecd5753a5cf16930b3055222bd8f1a186b9f16228ba5b7a5faf0b",
+      "frontend/technician-field-mode.js": "7d248a4f5db9b498c92086aa850655c315130105b3a4e2b5083476f160ff7446",
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/cw-field-route-cache.js": "78684a6819ca8fad45c18aee1521506dfce4bc5c099f20d7541b99d20a2fc28b",
+      "scripts/test-field-suite.js": "6bc317cdf1fb0ce42ceaf3ee2dc537c3ce5ea369e7935d2c6af360fb693707b5"
+    }
+  },
+  "limits": {
+    "hardBrowserChildMs": 75000,
+    "originalPlannerLoadMs": 30000,
+    "originalTechnicianLoadAndNavigationMs": 30000,
+    "browserHeapMiB": 256,
+    "apiRequestMs": 30000,
+    "apiRssMiB": 768,
+    "apiJsonMiB": 64,
+    "allOriginalAssertionsPreserved": true,
+    "runnerGroups": 383,
+    "runnerBytesUnchanged": true
+  },
+  "local": {
+    "runtime": "Isolated application, actual Playwright Chromium and PGlite. Does not replace full native PostgreSQL16 acceptance.",
+    "positive": [
+      {
+        "run": "volume500-baseline",
+        "result": {
+          "script": "scripts/test-field-agenda-volume.js",
+          "code": 0,
+          "signal": null,
+          "ms": 92712
+        },
+        "logSha256": "c096c4a55b8f07280b4cbdb13ac21f68b45ea7b938f33f6b9319d16f964446fb",
+        "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":46}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":85}\n{\"agendaVolume\":\"UI\",\"pools\":400,\"plannerRows\":1200}\nPASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup\n"
+      },
+      {
+        "run": "volume500-profile-parent",
+        "result": {
+          "script": "scripts/test-field-agenda-volume.js",
+          "code": 0,
+          "signal": null,
+          "ms": 100753
+        },
+        "logSha256": "c096c4a55b8f07280b4cbdb13ac21f68b45ea7b938f33f6b9319d16f964446fb",
+        "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":46}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":85}\n{\"agendaVolume\":\"UI\",\"pools\":400,\"plannerRows\":1200}\nPASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup\n"
+      },
+      {
+        "run": "volume500-final-utc",
+        "result": {
+          "script": "scripts/test-field-agenda-volume.js",
+          "code": 0,
+          "signal": null,
+          "ms": 100889
+        },
+        "logSha256": "a9a0a1310bc7ca61e4181916653e7f9f322f43482dfd1ae1a69af5e34049cfc4",
+        "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":48}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":93}\n{\"agendaVolume\":\"UI\",\"pools\":400,\"plannerRows\":1200}\nPASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup\n"
+      },
+      {
+        "run": "volume500-final-lisbon",
+        "result": {
+          "script": "scripts/test-field-agenda-volume.js",
+          "code": 0,
+          "signal": null,
+          "ms": 97290
+        },
+        "logSha256": "c096c4a55b8f07280b4cbdb13ac21f68b45ea7b938f33f6b9319d16f964446fb",
+        "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":46}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":85}\n{\"agendaVolume\":\"UI\",\"pools\":400,\"plannerRows\":1200}\nPASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup\n"
+      },
+      {
+        "run": "volume500-plain-final",
+        "result": {
+          "script": "scripts/test-field-agenda-volume.js",
+          "code": 0,
+          "signal": null,
+          "ms": 105213
+        },
+        "logSha256": "a9a0a1310bc7ca61e4181916653e7f9f322f43482dfd1ae1a69af5e34049cfc4",
+        "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":48}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":93}\n{\"agendaVolume\":\"UI\",\"pools\":400,\"plannerRows\":1200}\nPASS agenda volume: 25/100/400 pools, 16 technicians, two-year history, exact rolling/calendar/day/month IDs, recurrence, pagination, real UI, permissions, failures and cleanup\n"
+      },
+      {
+        "run": "volume500-plain-final",
+        "result": {
+          "script": "scripts/test-field-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 26482
+        },
+        "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+        "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+      }
+    ],
+    "volumes": {
+      "plainParentLisbon": {
+        "ok": true,
+        "phase": "assertions-completed",
+        "serverTimeZone": "Europe/Lisbon",
+        "cleanupVerified": true,
+        "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change.",
+        "api": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 25,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 2737,
+            "extras": 637,
+            "rollingVisits": 50,
+            "technicianVisits": 52,
+            "technicianPages": 1,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 36,
+              "maxMs": 245.3,
+              "maxRssMiB": 161.14,
+              "maxHeapMiB": 35.67,
+              "maxJsonBytes": 1107406,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "bf0bb114c5e82a3c828b70e66a1b8ecb0f71cc81181a613de13bb24803729ba1"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 100,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 10912,
+            "extras": 2512,
+            "rollingVisits": 200,
+            "technicianVisits": 207,
+            "technicianPages": 2,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 46,
+              "maxMs": 507.5,
+              "maxRssMiB": 208.29,
+              "maxHeapMiB": 55.53,
+              "maxJsonBytes": 2459064,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "c0f0eb5eee9be8f14be66590fee452a2dbca40f0b55e251a0b5f250b96016f90"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 400,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 43612,
+            "extras": 10012,
+            "rollingVisits": 800,
+            "technicianVisits": 825,
+            "technicianPages": 5,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 85,
+              "maxMs": 1526.7,
+              "maxRssMiB": 435.43,
+              "maxHeapMiB": 99.22,
+              "maxJsonBytes": 7852868,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "8b4a2c0db3b173ac50feb8220dd9fb7631b7feea5e0a88a0e042c37c08c6200d"
+            }
+          }
+        ],
+        "ui": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "UI",
+            "pools": 400,
+            "plannerRows": 1200,
+            "plannerLoadMs": 11097.5,
+            "plannerJsHeapMiB": 39.76,
+            "dayRows": 1200,
+            "dayPages": 24,
+            "dayTraversalMs": 8216.5,
+            "technicianRows": 825,
+            "technicianLoadAndNavigationMs": 2503.9,
+            "technicianJsHeapMiB": 11.14,
+            "exactIds": true,
+            "repeatedFilters": true,
+            "pageErrors": 0,
+            "writes": 0,
+            "readinessTraffic": {
+              "started": 15,
+              "completed": 15
+            },
+            "phases": [
+              {
+                "phase": "planner-open",
+                "elapsedMs": 542
+              },
+              {
+                "phase": "planner-verified",
+                "elapsedMs": 37447,
+                "rows": 1200
+              },
+              {
+                "phase": "day-verified",
+                "elapsedMs": 45819,
+                "rows": 1200,
+                "pages": 24
+              },
+              {
+                "phase": "technician-open",
+                "elapsedMs": 45898,
+                "expectedRows": 825
+              },
+              {
+                "phase": "technician-snapshot-verified",
+                "elapsedMs": 46909,
+                "rows": 825
+              },
+              {
+                "phase": "technician-dom-verified",
+                "elapsedMs": 47381,
+                "rows": 825
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 47708,
+                "index": 824
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 48044,
+                "index": 0
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 48376,
+                "index": 824
+              },
+              {
+                "phase": "technician-verified",
+                "elapsedMs": 48418,
+                "rows": 825,
+                "readinessTraffic": {
+                  "started": 15,
+                  "completed": 15
+                }
+              }
+            ]
+          }
+        ],
+        "fullProofSha256": "b9354f727dd202d958bfd97bbbfdce7d46e24f519bdbade97bc19992a66ea296"
+      },
+      "profiledParentLisbon": {
+        "ok": true,
+        "phase": "assertions-completed",
+        "serverTimeZone": "Europe/Lisbon",
+        "cleanupVerified": true,
+        "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change.",
+        "api": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 25,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 2737,
+            "extras": 637,
+            "rollingVisits": 50,
+            "technicianVisits": 52,
+            "technicianPages": 1,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 36,
+              "maxMs": 223.4,
+              "maxRssMiB": 156.53,
+              "maxHeapMiB": 35.69,
+              "maxJsonBytes": 1107406,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "755fdcd71df0b6d0f16dff0c1d50c517a3e26611829ac874f1ca20bb45331271"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 100,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 10912,
+            "extras": 2512,
+            "rollingVisits": 200,
+            "technicianVisits": 207,
+            "technicianPages": 2,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 46,
+              "maxMs": 712.6,
+              "maxRssMiB": 221.05,
+              "maxHeapMiB": 55.33,
+              "maxJsonBytes": 2459064,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "b9bb9ae927edf4f33eac2db2dc0e513c35eaea57d3064c4f8f0b69c8ef97baa5"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 400,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 43612,
+            "extras": 10012,
+            "rollingVisits": 800,
+            "technicianVisits": 825,
+            "technicianPages": 5,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 85,
+              "maxMs": 1461.1,
+              "maxRssMiB": 473.32,
+              "maxHeapMiB": 99.25,
+              "maxJsonBytes": 7852868,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "1cd0ed9aa03b4620ec5d68ac72339afd091e76b6d31638affadaac6741e89936"
+            }
+          }
+        ],
+        "ui": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "UI",
+            "pools": 400,
+            "plannerRows": 1200,
+            "plannerLoadMs": 14587.2,
+            "plannerJsHeapMiB": 40.5,
+            "dayRows": 1200,
+            "dayPages": 24,
+            "dayTraversalMs": 8457.7,
+            "technicianRows": 825,
+            "technicianLoadAndNavigationMs": 4022.9,
+            "technicianJsHeapMiB": 8.49,
+            "exactIds": true,
+            "repeatedFilters": true,
+            "pageErrors": 0,
+            "writes": 0,
+            "readinessTraffic": {
+              "started": 22,
+              "completed": 20
+            },
+            "phases": [
+              {
+                "phase": "planner-open",
+                "elapsedMs": 940
+              },
+              {
+                "phase": "planner-query-profile",
+                "elapsedMs": 15435,
+                "normalizationCalls": 3
+              },
+              {
+                "phase": "planner-date-profile",
+                "elapsedMs": 31684,
+                "changes": [
+                  "2026-10-01",
+                  "2026-10-01"
+                ]
+              },
+              {
+                "phase": "planner-date-restored-profile",
+                "elapsedMs": 37613,
+                "changes": [
+                  "2026-10-01",
+                  "2026-10-01",
+                  "",
+                  ""
+                ],
+                "normalizationCalls": 27
+              },
+              {
+                "phase": "planner-verified",
+                "elapsedMs": 41939,
+                "rows": 1200
+              },
+              {
+                "phase": "day-verified",
+                "elapsedMs": 50561,
+                "rows": 1200,
+                "pages": 24
+              },
+              {
+                "phase": "technician-open",
+                "elapsedMs": 50629,
+                "expectedRows": 825
+              },
+              {
+                "phase": "technician-snapshot-verified",
+                "elapsedMs": 52109,
+                "rows": 825
+              },
+              {
+                "phase": "technician-dom-verified",
+                "elapsedMs": 53247,
+                "rows": 825
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 53707,
+                "index": 824
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 54143,
+                "index": 0
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 54581,
+                "index": 824
+              },
+              {
+                "phase": "technician-verified",
+                "elapsedMs": 54675,
+                "rows": 825,
+                "readinessTraffic": {
+                  "started": 22,
+                  "completed": 20
+                }
+              }
+            ]
+          }
+        ],
+        "fullProofSha256": "4894f0106d435575a1a793b8297771322200330d1a66b02d7656c48024f3cded"
+      },
+      "profiledFinalUTC": {
+        "ok": true,
+        "phase": "assertions-completed",
+        "serverTimeZone": "UTC",
+        "cleanupVerified": true,
+        "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change.",
+        "api": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 25,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 2737,
+            "extras": 637,
+            "rollingVisits": 50,
+            "technicianVisits": 52,
+            "technicianPages": 1,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 36,
+              "maxMs": 215.4,
+              "maxRssMiB": 159.42,
+              "maxHeapMiB": 35.7,
+              "maxJsonBytes": 1107406,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "1d0044c7b1a5a7bdd9dbaa55733089030295667b93d345b8ab2c55467a449393"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 100,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 10912,
+            "extras": 2512,
+            "rollingVisits": 200,
+            "technicianVisits": 207,
+            "technicianPages": 2,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 48,
+              "maxMs": 756,
+              "maxRssMiB": 221.82,
+              "maxHeapMiB": 55.23,
+              "maxJsonBytes": 2459064,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "167f9a699b1020278cd1720b50a7c0fcdef92ba9792619adbd4174abd6f34a88"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 400,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 43612,
+            "extras": 10012,
+            "rollingVisits": 800,
+            "technicianVisits": 825,
+            "technicianPages": 5,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 93,
+              "maxMs": 2131.3,
+              "maxRssMiB": 452.71,
+              "maxHeapMiB": 99.35,
+              "maxJsonBytes": 7852868,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "902fda03d41d24160b5dd4f6e84b732b73dade4e4467e65d3d42c3745c23e346"
+            }
+          }
+        ],
+        "ui": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "UI",
+            "pools": 400,
+            "plannerRows": 1200,
+            "plannerLoadMs": 12793.9,
+            "plannerJsHeapMiB": 27.96,
+            "dayRows": 1600,
+            "dayPages": 32,
+            "dayTraversalMs": 13975.9,
+            "technicianRows": 825,
+            "technicianLoadAndNavigationMs": 3634.6,
+            "technicianJsHeapMiB": 9.89,
+            "exactIds": true,
+            "repeatedFilters": true,
+            "dateChangeEvents": 2,
+            "pageErrors": 0,
+            "writes": 0,
+            "readinessTraffic": {
+              "started": 19,
+              "completed": 18
+            },
+            "phases": [
+              {
+                "phase": "planner-open",
+                "elapsedMs": 896
+              },
+              {
+                "phase": "planner-query-profile",
+                "elapsedMs": 13622,
+                "normalizationCalls": 1
+              },
+              {
+                "phase": "planner-date-profile",
+                "elapsedMs": 26764,
+                "changes": [
+                  "2026-10-01"
+                ]
+              },
+              {
+                "phase": "planner-date-changes-verified",
+                "elapsedMs": 29871,
+                "changes": 2
+              },
+              {
+                "phase": "planner-date-restored-profile",
+                "elapsedMs": 29882,
+                "changes": [
+                  "2026-10-01",
+                  ""
+                ],
+                "normalizationCalls": 7
+              },
+              {
+                "phase": "planner-verified",
+                "elapsedMs": 36230,
+                "rows": 1200
+              },
+              {
+                "phase": "day-verified",
+                "elapsedMs": 50368,
+                "rows": 1600,
+                "pages": 32
+              },
+              {
+                "phase": "technician-open",
+                "elapsedMs": 50448,
+                "expectedRows": 825
+              },
+              {
+                "phase": "technician-snapshot-verified",
+                "elapsedMs": 51766,
+                "rows": 825
+              },
+              {
+                "phase": "technician-dom-verified",
+                "elapsedMs": 52712,
+                "rows": 825
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 53151,
+                "index": 824
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 53598,
+                "index": 0
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 54034,
+                "index": 824
+              },
+              {
+                "phase": "technician-verified",
+                "elapsedMs": 54093,
+                "rows": 825,
+                "readinessTraffic": {
+                  "started": 19,
+                  "completed": 18
+                }
+              }
+            ]
+          }
+        ],
+        "fullProofSha256": "ef4afd69a72117cb95bacb46f7eb595c2cbc5ebee7abc815a80e4cb25a234c70"
+      },
+      "profiledFinalLisbon": {
+        "ok": true,
+        "phase": "assertions-completed",
+        "serverTimeZone": "Europe/Lisbon",
+        "cleanupVerified": true,
+        "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change.",
+        "api": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 25,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 2737,
+            "extras": 637,
+            "rollingVisits": 50,
+            "technicianVisits": 52,
+            "technicianPages": 1,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 36,
+              "maxMs": 230.2,
+              "maxRssMiB": 160.41,
+              "maxHeapMiB": 35.69,
+              "maxJsonBytes": 1107406,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "a78f9d9be36ed665f13c548a2ae6b9ea87d616b28d3a43ef9b5dbf8ec9cfbfd7"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 100,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 10912,
+            "extras": 2512,
+            "rollingVisits": 200,
+            "technicianVisits": 207,
+            "technicianPages": 2,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 46,
+              "maxMs": 520.2,
+              "maxRssMiB": 229.25,
+              "maxHeapMiB": 55.32,
+              "maxJsonBytes": 2459064,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "c5e07b5efddd157a72c9b879586219a534f1cf58f350f44a83a59349916e7ff9"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 400,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 43612,
+            "extras": 10012,
+            "rollingVisits": 800,
+            "technicianVisits": 825,
+            "technicianPages": 5,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 85,
+              "maxMs": 1462.5,
+              "maxRssMiB": 480.91,
+              "maxHeapMiB": 99.08,
+              "maxJsonBytes": 7852868,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "b09458f5a84b9169bceb1eb2f94e44b80ca1b17e0232ac5bbba492f056060d89"
+            }
+          }
+        ],
+        "ui": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "UI",
+            "pools": 400,
+            "plannerRows": 1200,
+            "plannerLoadMs": 13734.8,
+            "plannerJsHeapMiB": 25.8,
+            "dayRows": 1200,
+            "dayPages": 24,
+            "dayTraversalMs": 8970.3,
+            "technicianRows": 825,
+            "technicianLoadAndNavigationMs": 3122.3,
+            "technicianJsHeapMiB": 15.03,
+            "exactIds": true,
+            "repeatedFilters": true,
+            "dateChangeEvents": 2,
+            "pageErrors": 0,
+            "writes": 0,
+            "readinessTraffic": {
+              "started": 17,
+              "completed": 17
+            },
+            "phases": [
+              {
+                "phase": "planner-open",
+                "elapsedMs": 498
+              },
+              {
+                "phase": "planner-query-profile",
+                "elapsedMs": 14157,
+                "normalizationCalls": 1
+              },
+              {
+                "phase": "planner-date-profile",
+                "elapsedMs": 28860,
+                "changes": [
+                  "2026-10-01"
+                ]
+              },
+              {
+                "phase": "planner-date-changes-verified",
+                "elapsedMs": 32478,
+                "changes": 2
+              },
+              {
+                "phase": "planner-date-restored-profile",
+                "elapsedMs": 32489,
+                "changes": [
+                  "2026-10-01",
+                  ""
+                ],
+                "normalizationCalls": 7
+              },
+              {
+                "phase": "planner-verified",
+                "elapsedMs": 42133,
+                "rows": 1200
+              },
+              {
+                "phase": "day-verified",
+                "elapsedMs": 51276,
+                "rows": 1200,
+                "pages": 24
+              },
+              {
+                "phase": "technician-open",
+                "elapsedMs": 51335,
+                "expectedRows": 825
+              },
+              {
+                "phase": "technician-snapshot-verified",
+                "elapsedMs": 52978,
+                "rows": 825
+              },
+              {
+                "phase": "technician-dom-verified",
+                "elapsedMs": 53413,
+                "rows": 825
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 53735,
+                "index": 824
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 54108,
+                "index": 0
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 54415,
+                "index": 824
+              },
+              {
+                "phase": "technician-verified",
+                "elapsedMs": 54467,
+                "rows": 825,
+                "readinessTraffic": {
+                  "started": 17,
+                  "completed": 17
+                }
+              }
+            ]
+          }
+        ],
+        "fullProofSha256": "8a755e018ec3dfece20d0cfb88d9624534201799e72ed73354d7d8f77173ea0f"
+      },
+      "plainFinalUTC": {
+        "ok": true,
+        "phase": "assertions-completed",
+        "serverTimeZone": "UTC",
+        "cleanupVerified": true,
+        "scope": "Fresh Node process per API profile; RSS includes routers, HTTP client and fixture oracle, excludes DB/browser. Real browser, 1440/390px. Synthetic history does not certify generation or physical devices. Existing temporal contracts are distinct; no calendar-policy change.",
+        "api": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 25,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 2737,
+            "extras": 637,
+            "weekProofs": [
+              {
+                "day": "2032-02-29",
+                "fixtureVisits": 28,
+                "orderedIdsSha256": "128ee234a3591d53cb0666db930f1a35cb7951871c77b19a6a9b6bbeacf880a7"
+              },
+              {
+                "day": "2032-12-31",
+                "fixtureVisits": 27,
+                "orderedIdsSha256": "15ecb6b26c7bc6d1fe6fb5ab933ed89fb4060fbf1f37cf83fed0269e406b19b3"
+              },
+              {
+                "day": "2033-01-01",
+                "fixtureVisits": 27,
+                "orderedIdsSha256": "15ecb6b26c7bc6d1fe6fb5ab933ed89fb4060fbf1f37cf83fed0269e406b19b3"
+              },
+              {
+                "day": "2026-10-01",
+                "fixtureVisits": 75,
+                "orderedIdsSha256": "b1e93fa15806816ed2018dc4991db2778d873e8a31562b52dcd2eb131436c4a8"
+              }
+            ],
+            "dayProofs": [
+              {
+                "day": "2032-02-29",
+                "rows": 54,
+                "pages": 2,
+                "orderedKeysSha256": "95aae00c42dd9bffb7c4e96b4362595d63fbf94fe6e74c7ec539d95d9295ac05",
+                "hours": 24
+              },
+              {
+                "day": "2032-03-28",
+                "rows": 4,
+                "pages": 1,
+                "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+                "hours": 23
+              },
+              {
+                "day": "2032-10-31",
+                "rows": 29,
+                "pages": 1,
+                "orderedKeysSha256": "cc219334fe33b6972ec5ac182bb7a67b09c4a8e778ea5e166dbcb9597e97c14e",
+                "hours": 25
+              },
+              {
+                "day": "2026-10-01",
+                "rows": 100,
+                "pages": 2,
+                "orderedKeysSha256": "6261ee70f45afdb5a1f398009cf9052cf9b54954c85846a38c0bcb01f6a95318",
+                "hours": 24
+              }
+            ],
+            "monthProofs": [
+              {
+                "month": "2032-02",
+                "fixtureVisits": 128,
+                "idsSha256": "97a36838fa8b39f1e59ab5dc4957fdf918390e934e4d07e66cbd1789a05626cb"
+              },
+              {
+                "month": "2032-12",
+                "fixtureVisits": 101,
+                "idsSha256": "f0207a855b491b65d6bcacffe13e47dd2aaae1e153a17f54988b3479fc157013"
+              },
+              {
+                "month": "2033-01",
+                "fixtureVisits": 101,
+                "idsSha256": "10c280ecd1e77b6998ad6632e3cc36d943c76d1bd010e04462fbf33a25aa67db"
+              }
+            ],
+            "rollingVisits": 50,
+            "technicianVisits": 52,
+            "technicianPages": 1,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 36,
+              "maxMs": 186,
+              "maxRssMiB": 159.42,
+              "maxHeapMiB": 35.68,
+              "maxJsonBytes": 1107406,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "3cd72f848974b68053acaf7cd737dc1d1fe1bda7b1d4013cb1fcac76f2ad44ba"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 100,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 10912,
+            "extras": 2512,
+            "weekProofs": [
+              {
+                "day": "2032-02-29",
+                "fixtureVisits": 103,
+                "orderedIdsSha256": "32cc6484b2a280db3292e39b0ed6448107df232100bfa58547a0dc92899a08b8"
+              },
+              {
+                "day": "2032-12-31",
+                "fixtureVisits": 102,
+                "orderedIdsSha256": "158077993f8738fc87e0540dc7cec807b3db8bdf3ab2b907fa620e82f98380ed"
+              },
+              {
+                "day": "2033-01-01",
+                "fixtureVisits": 102,
+                "orderedIdsSha256": "158077993f8738fc87e0540dc7cec807b3db8bdf3ab2b907fa620e82f98380ed"
+              },
+              {
+                "day": "2026-10-01",
+                "fixtureVisits": 300,
+                "orderedIdsSha256": "f68335701fdef891c382b87b1eb8e668a6aa074d8d0cf9b6fa78444a0c8b91bf"
+              }
+            ],
+            "dayProofs": [
+              {
+                "day": "2032-02-29",
+                "rows": 204,
+                "pages": 5,
+                "orderedKeysSha256": "f033e89eb588e4a551a22f480ff489096b327088087f3d6a6abb5211a7471337",
+                "hours": 24
+              },
+              {
+                "day": "2032-03-28",
+                "rows": 4,
+                "pages": 1,
+                "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+                "hours": 23
+              },
+              {
+                "day": "2032-10-31",
+                "rows": 104,
+                "pages": 3,
+                "orderedKeysSha256": "1c552ec898abc0eadef21f962a61e61480c0bd56a3cd379c68e526678cc7d048",
+                "hours": 25
+              },
+              {
+                "day": "2026-10-01",
+                "rows": 400,
+                "pages": 8,
+                "orderedKeysSha256": "6b017791bcb3a8b0cf1f3697d0c6670705d9bcff7a4b4e4b05c98e818479a493",
+                "hours": 24
+              }
+            ],
+            "monthProofs": [
+              {
+                "month": "2032-02",
+                "fixtureVisits": 503,
+                "idsSha256": "d65c955a2b37c9149df1231f4c438140ec9aded2cc68d5c39ced23e82611bfc9"
+              },
+              {
+                "month": "2032-12",
+                "fixtureVisits": 401,
+                "idsSha256": "0cc0f9c85accc55bc36bce94f31f38c0e6231532679715459d67a7d53e6bd1ca"
+              },
+              {
+                "month": "2033-01",
+                "fixtureVisits": 401,
+                "idsSha256": "91d39991be9adc311c11a4775612b5c85e0126a79e5d4bade1a5c590792a78ec"
+              }
+            ],
+            "rollingVisits": 200,
+            "technicianVisits": 207,
+            "technicianPages": 2,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 48,
+              "maxMs": 691.3,
+              "maxRssMiB": 221.05,
+              "maxHeapMiB": 55.21,
+              "maxJsonBytes": 2459064,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "b2b835bac420e14a972949b05a05ac2b5a85d0183cfdf19d687fa6dbfea8fb99"
+            }
+          },
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "API",
+            "pools": 400,
+            "historicalWeeks": 104,
+            "historicalMonths": 24,
+            "regular": 43612,
+            "extras": 10012,
+            "weekProofs": [
+              {
+                "day": "2032-02-29",
+                "fixtureVisits": 403,
+                "orderedIdsSha256": "3ecc4e55dd2167954cccc277d451385f911c2e4f769e34dbb99cd5175bec190a"
+              },
+              {
+                "day": "2032-12-31",
+                "fixtureVisits": 402,
+                "orderedIdsSha256": "f6fa73ca39de3e58c9e498f6b87ed15a92beb931ed871fe3847eb105d7a10445"
+              },
+              {
+                "day": "2033-01-01",
+                "fixtureVisits": 402,
+                "orderedIdsSha256": "f6fa73ca39de3e58c9e498f6b87ed15a92beb931ed871fe3847eb105d7a10445"
+              },
+              {
+                "day": "2026-10-01",
+                "fixtureVisits": 1200,
+                "orderedIdsSha256": "1a246b90ca31baf8a17a1587bced0f9333176bc18890214ec1ded0f759766e31"
+              }
+            ],
+            "dayProofs": [
+              {
+                "day": "2032-02-29",
+                "rows": 804,
+                "pages": 17,
+                "orderedKeysSha256": "8a9db6c87926fd721e44f4109c77ddc70396dd1b5a990cbc1e1c2aac0c7eca03",
+                "hours": 24
+              },
+              {
+                "day": "2032-03-28",
+                "rows": 4,
+                "pages": 1,
+                "orderedKeysSha256": "e194bce0c016e940201d8e6625bd53fdbbf81e747e7860d281ce0384f6f75d72",
+                "hours": 23
+              },
+              {
+                "day": "2032-10-31",
+                "rows": 404,
+                "pages": 9,
+                "orderedKeysSha256": "f3815bad00cb7458f13f756de5ccc769e4a06ae3bb28c1fc223d33b79c362cdb",
+                "hours": 25
+              },
+              {
+                "day": "2026-10-01",
+                "rows": 1600,
+                "pages": 32,
+                "orderedKeysSha256": "fa4b86b6069aa9d41c070923547bd4068bfaf46dcbe54724444d76440db566d7",
+                "hours": 24
+              }
+            ],
+            "monthProofs": [
+              {
+                "month": "2032-02",
+                "fixtureVisits": 2003,
+                "idsSha256": "64587c7ec28f3eb9b9f23bd8e3aa853d03aebbeb11dea69fb163c9432e8b2faa"
+              },
+              {
+                "month": "2032-12",
+                "fixtureVisits": 1601,
+                "idsSha256": "0d1cac66a462b70bc614ed4fefe35e7525ff67d155c7e9eb933949418fee17a1"
+              },
+              {
+                "month": "2033-01",
+                "fixtureVisits": 1601,
+                "idsSha256": "e890cd0b9f10a601eafeca5dad2dad924bf31c89227ee3c17cf9d8dc88b68fda"
+              }
+            ],
+            "rollingVisits": 800,
+            "technicianVisits": 825,
+            "technicianPages": 5,
+            "permissions": true,
+            "partialFailuresRejected": 3,
+            "writes": 0,
+            "readSummary": {
+              "count": 93,
+              "maxMs": 1281.7,
+              "maxRssMiB": 461.95,
+              "maxHeapMiB": 99.15,
+              "maxJsonBytes": 7852868,
+              "allReadSqlWritesZero": true,
+              "readsSha256": "e84a1ae3dbb73ff5cfa591a9201ea3041915d8a4c3e3bb85e73e98eb6b053827"
+            }
+          }
+        ],
+        "ui": [
+          {
+            "ok": true,
+            "phase": "assertions-completed",
+            "mode": "UI",
+            "pools": 400,
+            "plannerRows": 1200,
+            "plannerLoadMs": 13976.4,
+            "plannerJsHeapMiB": 23.66,
+            "dayRows": 1600,
+            "dayPages": 32,
+            "dayTraversalMs": 11995.2,
+            "technicianRows": 825,
+            "technicianLoadAndNavigationMs": 4044.6,
+            "technicianJsHeapMiB": 10.72,
+            "exactIds": true,
+            "repeatedFilters": true,
+            "dateChangeEvents": 2,
+            "pageErrors": 0,
+            "writes": 0,
+            "readinessTraffic": {
+              "started": 21,
+              "completed": 20
+            },
+            "phases": [
+              {
+                "phase": "planner-open",
+                "elapsedMs": 657
+              },
+              {
+                "phase": "planner-date-changes-verified",
+                "elapsedMs": 31769,
+                "changes": 2
+              },
+              {
+                "phase": "planner-verified",
+                "elapsedMs": 36335,
+                "rows": 1200
+              },
+              {
+                "phase": "day-verified",
+                "elapsedMs": 48505,
+                "rows": 1600,
+                "pages": 32
+              },
+              {
+                "phase": "technician-open",
+                "elapsedMs": 48625,
+                "expectedRows": 825
+              },
+              {
+                "phase": "technician-snapshot-verified",
+                "elapsedMs": 50362,
+                "rows": 825
+              },
+              {
+                "phase": "technician-dom-verified",
+                "elapsedMs": 51121,
+                "rows": 825
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 51527,
+                "index": 824
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 52020,
+                "index": 0
+              },
+              {
+                "phase": "technician-selection-verified",
+                "elapsedMs": 52617,
+                "index": 824
+              },
+              {
+                "phase": "technician-verified",
+                "elapsedMs": 52685,
+                "rows": 825,
+                "readinessTraffic": {
+                  "started": 21,
+                  "completed": 20
+                }
+              }
+            ]
+          }
+        ],
+        "fullProofSha256": "a99cecf011f9f2a79b66dea555277d8e6b083d76aa126a0118ec69b432ee84c9"
+      }
+    },
+    "negativeDuplicateDate": {
+      "ok": false,
+      "phase": "profiles-in-progress",
+      "serverTimeZone": null,
+      "cleanupVerified": true,
+      "scope": null,
+      "api": [
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 25,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 2737,
+          "extras": 637,
+          "rollingVisits": 50,
+          "technicianVisits": 52,
+          "technicianPages": 1,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0,
+          "readSummary": {
+            "count": 36,
+            "maxMs": 256.8,
+            "maxRssMiB": 157.22,
+            "maxHeapMiB": 35.71,
+            "maxJsonBytes": 1107406,
+            "allReadSqlWritesZero": true,
+            "readsSha256": "778704f91014620d62a5da345f102d1369387c42debb066b36f9e3bd43136fff"
+          }
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 100,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 10912,
+          "extras": 2512,
+          "rollingVisits": 200,
+          "technicianVisits": 207,
+          "technicianPages": 2,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0,
+          "readSummary": {
+            "count": 48,
+            "maxMs": 490.8,
+            "maxRssMiB": 221.63,
+            "maxHeapMiB": 55.23,
+            "maxJsonBytes": 2459064,
+            "allReadSqlWritesZero": true,
+            "readsSha256": "6c0611efc79fdc296d8c21e16f568af6d1076c7bd779c6f3679f536dc3ac0958"
+          }
+        },
+        {
+          "ok": true,
+          "phase": "assertions-completed",
+          "mode": "API",
+          "pools": 400,
+          "historicalWeeks": 104,
+          "historicalMonths": 24,
+          "regular": 43612,
+          "extras": 10012,
+          "rollingVisits": 800,
+          "technicianVisits": 825,
+          "technicianPages": 5,
+          "permissions": true,
+          "partialFailuresRejected": 3,
+          "writes": 0,
+          "readSummary": {
+            "count": 93,
+            "maxMs": 1348.3,
+            "maxRssMiB": 501.52,
+            "maxHeapMiB": 99.38,
+            "maxJsonBytes": 7852868,
+            "allReadSqlWritesZero": true,
+            "readsSha256": "4866b1aa45e0e26fbdbc0ed3455d0c07793fb3bbabd369f7223dd4ac29a4ac47"
+          }
+        }
+      ],
+      "ui": [],
+      "fullProofSha256": "614ded930e5d96d8e59c586e7f54a11fa02703e92e9d77b846d0f3b6cb4be090",
+      "result": {
+        "script": "scripts/test-field-agenda-volume.js",
+        "code": 1,
+        "signal": null,
+        "ms": 74926
+      },
+      "logSha256": "a5aecb950465d47bb65c2c9dd89dbe14289201181806e8ad2e5021a5d434f8d2",
+      "log": "{\"agendaVolume\":\"API\",\"pools\":25,\"reads\":36}\n{\"agendaVolume\":\"API\",\"pools\":100,\"reads\":48}\n{\"agendaVolume\":\"API\",\"pools\":400,\"reads\":93}\nError: UI failed 1/null\n{\"agendaVolumeStage\":{\"phase\":\"planner-open\",\"elapsedMs\":809}}\nAssertionError [ERR_ASSERTION]: One actual date change updates the selected-day rows\n+ actual - expected\n\n  [\n    '2026-10-01',\n+   '2026-10-01'\n  ]\n\n    at browserProbe (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-agenda-volume.js:164:12)\n    at async child (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-agenda-volume.js:234:141) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: [Array],\n  expected: [Array],\n  operator: 'deepStrictEqual',\n  diff: 'simple'\n}\n\n    at ChildProcess.<anonymous> (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-agenda-volume.js:240:47)\n    at Object.onceWrapper (node:events:631:26)\n    at ChildProcess.emit (node:events:509:28)\n    at maybeClose (node:internal/child_process:1141:16)\n    at ChildProcess._handle.onexit (node:internal/child_process:306:5)\n",
+      "boundary": "Scratch hook reintroduced only the two former manual date-change dispatches into the final QA script; product unchanged. The exact selected-day rows pass before the duplicate-event assertion fails. Does not reproduce or prove the sole cause of native497 SIGKILL."
+    },
+    "profilingBoundary": "Scratch-only hook wraps the actual allPlannerVisits with a forwarding counter and records native date events; no data, business function, assertion or deadline substituted. plainFinalUTC runs exact final files without NODE_OPTIONS or wrappers. Parent profile actually ran Europe/Lisbon because the environment fixture overrode outer TZ; final runner uses explicit CW_QA_TIMEZONE.",
+    "deterministicWorkReduction": {
+      "normalizationsPerQuery": [
+        3,
+        1
+      ],
+      "normalizationsThroughSameQueryFourStatusChangesAndDateSequence": [
+        27,
+        7
+      ],
+      "dateChangeEvents": [
+        4,
+        2
+      ]
+    },
+    "performanceLimit": "No end-to-end percentage claim: runtime, instrumentation and time-zone differences make wall-clock comparisons unsuitable. The duplicated work is proven and removed; native497 global 75s failure still requires a new full native gate.",
+    "syntax": {
+      "code": 0,
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44,
+      "diffCheck": true,
+      "logSha256": "137b59b3894ca00449a35eaccbde6f96d26dd938546d4ec8b4b6c1f70c11c046",
+      "log": "Command: npm run check:syntax && git diff --check\nExit code: 0\nSyntax OK: 695 backend JS files, 308 frontend JS files and 44 inline scripts.\n"
+    },
+    "localUnitTestsRerun": false
+  },
+  "visual": {
+    "planner390": "Inspected the final Lisbon screenshot: literal QA HTML-like name remains escaped. No layout change in this task.",
+    "physicalDevicesCertified": false
+  },
+  "native497": {
+    "task": 497,
+    "accepted": false,
+    "code": "d1c30e2a8d3d6c1e3f62dc539b7a8c94bca12465",
+    "tree": "59466a292888e7a6368c03d68021bf06809e2024",
+    "run": 36874647484,
+    "job": 110410844445,
+    "groups": 382,
+    "pass": 379,
+    "failures": [
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 38092
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 72245
+      },
+      {
+        "script": "test-field-agenda-volume.js",
+        "code": 1,
+        "signal": null,
+        "ms": 101731
+      }
+    ],
+    "sourceAndOrderVerified": true,
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "restore": "skipped",
+    "sourceSha256": {
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081",
+      "frontend/sw.js": "f783521ab977d911013f480d4b2130e5de7af4d8282c475b833c7af7c0b6501f",
+      "scripts/test-field-login-languages.js": "89ecb8f4ca7edc38bfcf41ced9234fdd97be308b99e943e9449761dcd53c2bd3",
+      "scripts/test-field-suite.js": "f3beff7b99117f4b2c0532a94e9bacd9dbe4dd5e3ac16fe9aa77f01150d94757"
+    },
+    "logSha256": "94db797f4164f0e956cb7af71739d3d7b8cf6a1eb5d6ccab27d34cd9b41bb780"
+  },
+  "native498": {
+    "task": 498,
+    "accepted": false,
+    "code": "01365df4b46d033b854695e1bdbcde29e1ebc15c",
+    "tree": "f5724a98f6045fc68bc98d4ffce649032c343cb3",
+    "run": 36878709471,
+    "job": 110424687157,
+    "groups": 382,
+    "pass": 380,
+    "failures": [
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 37427
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 72150
+      }
+    ],
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceAndOrderVerified": true,
+    "sourceSha256": {
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/sw.js": "b121ea50cd5b179c2d0067e3cd44d18e99d3e6bfc0e8ab8332d81d53c1aad2b8",
+      "scripts/test-field-login-languages.js": "9bf48b172c0107377aaba4bc87eec87e04b65526ab2efafa1a347a059a3ca9c3"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "restore": "skipped",
+    "logSha256": "298b927a80b566cb5b7f671b839d285cb4541a15fa77a3dc94a56bf00a29828f",
+    "agendaVolume": {
+      "script": "test-field-agenda-volume.js",
+      "code": 0,
+      "signal": null,
+      "ms": 92939
+    },
+    "loginLanguages": {
+      "script": "test-field-login-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 10813
+    },
+    "failureContext": {
+      "test-field-dashboard-languages.js": "2026-10-01T14:54:28.3013738Z PASS real dashboard in five languages/three widths: critical problem is not a manual pump; real water/pump/unreadable sources, private names/fallbacks, progress, live/cache/missing/held docs, free/ongoing/completed extra visit, read acknowledgement does not close reminders, actual photo draft, typed asynchronous pending/failure/late-reply protection; unchanged nodes/focus/actions/bytes/SQL and no producers on locale change\n2026-10-01T14:54:28.3016131Z AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n2026-10-01T14:54:28.3016698Z + actual - expected\n2026-10-01T14:54:28.3017371Z \n2026-10-01T14:54:28.3017794Z + 'Hoje está livre'\n2026-10-01T14:54:28.3018152Z - 'Há alertas ativos'\n2026-10-01T14:54:28.3018337Z \n2026-10-01T14:54:28.3018788Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-dashboard-languages.js:468:190 {\n2026-10-01T14:54:28.3019456Z   generatedMessage: true,\n2026-10-01T14:54:28.3019755Z   code: 'ERR_ASSERTION',\n2026-10-01T14:54:28.3020098Z   actual: 'Hoje está livre',\n2026-10-01T14:54:28.3020482Z   expected: 'Há alertas ativos',\n2026-10-01T14:54:28.3020822Z   operator: 'strictEqual',\n2026-10-01T14:54:28.3021150Z   diff: 'simple'\n2026-10-01T14:54:28.3021432Z }\n2026-10-01T14:54:28.3021556Z",
+      "test-field-current-visit-time-languages.js": "2026-10-01T14:56:48.2071287Z Current-visit fixture ready\n2026-10-01T14:56:48.2071736Z Current-visit page ready\n2026-10-01T14:56:48.2072912Z PASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\n2026-10-01T14:56:48.2074231Z PASS now-board {\"code\":\"TRAVEL\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2075364Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2076303Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2077577Z PASS now-board {\"code\":\"DONE\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2078554Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2079542Z PASS now-board {\"code\":\"TODO\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\n2026-10-01T14:56:48.2080487Z PASS now-board {\"code\":\"TODO\",\"poolName\":\"\",\"repair\":false,\"minutes\":null,\"free\":false,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\n2026-10-01T14:56:48.2081401Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2082321Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2083582Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2084801Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":2,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2085742Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2086710Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":0,\"free\":false,\"widths\":[390],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\n2026-10-01T14:56:48.2088135Z PASS now-board {\"code\":\"IN_PROGRESS\",\"poolName\":\"Extra <b>{minutes}</b>\",\"repair\":false,\"minutes\":1,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2089056Z PASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":false,\"minutes\":null,\"free\":true,\"widths\":[320],\"locales\":[\"pt\",\"en\",\"fr\",\"es\",\"de\"]}\n2026-10-01T14:56:48.2089906Z PASS now-board {\"code\":\"TODO\",\"poolName\":\"Piscina\",\"repair\":true,\"minutes\":65,\"free\":false,\"widths\":[390],\"locales\":[\"de\"]}\n2026-10-01T14:56:48.2090791Z PASS current-visit time profile; real rendering, language selector, captured source values and exact route restoration verified\n2026-10-01T14:56:48.2091563Z page.waitForFunction: Timeout 9000ms exceeded.\n2026-10-01T14:56:48.2092140Z     at /home/runner/work/cristalwater/cristalwater/scripts/test-field-current-visit-languages.js:214:772 {\n2026-10-01T14:56:48.2092628Z   log: [],\n2026-10-01T14:56:48.2092841Z   name: 'TimeoutError'\n2026-10-01T14:56:48.2093072Z }\n2026-10-01T14:56:48.2093186Z"
+    }
+  },
+  "native497AgendaLimit": {
+    "hardChildMs": 75000,
+    "plannerVerifiedMs": 60576,
+    "dayVerifiedMs": 73264,
+    "dayRows": 1600,
+    "dayPages": 32,
+    "technicianOpenMs": 73307,
+    "snapshotVerifiedMs": 74115,
+    "domVerifiedMs": 74442,
+    "firstSelectionVerifiedMs": 74703,
+    "signal": "SIGKILL",
+    "mainMs": 101731,
+    "interpretation": "Global UI child deadline after planner and all day pages. The first technician selection passed; remaining selections were not reached. This is not evidence that readiness alone failed."
+  },
+  "lastCompleteAcceptance": {
+    "task": 495,
+    "code": "077dd01ac10f03fc104c84705e433bb357924f14",
+    "tree": "4fd2508c9d27545301eaee6a879e89c9f8e8c0ae",
+    "run": 36866289542,
+    "job": 110382497425,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "groups": 381,
+    "distinctGroups": 381,
+    "allCodeZero": true,
+    "actualOrderExactlyMatched": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "sourceSha256": {
+      "frontend/cw-field-reminders.js": "40106c2e95e9033a2a6838c791ccffd0cd857ea070f025fd8cd173546c66f330",
+      "frontend/sw.js": "f5e74ac7f43d7b05c35b613541197780186f91212e0bddfeaaf20934b912a359",
+      "scripts/test-field-alert-board-languages.js": "251691557e8f319245a219e76e1c9cd4628b175970142730bd909ca0aa97e5e3"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T14:20:18.4642896Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "e8f6bfd76584eda381e7772a7c67c51df6e5f67c9bc6999ac77cd5307044c358"
+  },
+  "publication499": {
+    "code": "92b5f3837d132a7184bb150d4e3ba9cc5eb3ea8d",
+    "tree": "ce716213b479e9bab1cafef10e118badc8e5397e",
+    "published": true,
+    "exactParentTreeAndRefPreviouslyVerified": true
+  },
+  "nativePending": {
+    "task": 499,
+    "checkedAt": "2026-10-01T16:14:40.743Z",
+    "run": 36885265458,
+    "job": 110446843123,
+    "head": "92b5f3837d132a7184bb150d4e3ba9cc5eb3ea8d",
+    "tree": "ce716213b479e9bab1cafef10e118badc8e5397e",
+    "status": "in_progress",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Initialize containers",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Run npm ci",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run npx prisma validate && npx prisma generate",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Verify additive upgrade from the previous schema",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Run npx playwright install --with-deps chromium",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Run npm run check:syntax",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Run node scripts/test-field-suite.js",
+        "status": "in_progress",
+        "conclusion": null,
+        "number": 11
+      },
+      {
+        "name": "Restore database and uploaded files in isolated QA",
+        "status": "pending",
+        "conclusion": null,
+        "number": 12
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 13
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 14
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 26
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 27
+      },
+      {
+        "name": "Stop containers",
+        "status": "pending",
+        "conclusion": null,
+        "number": 28
+      }
+    ],
+    "fullAcceptance": false
+  },
+  "nextTask": "TASK501: verify exact publication500 and native499/500 heads, trees, source hashes, ordered 383 groups and restore128/51. Handle any real failure first; only then continue client-login language work.",
+  "completion": {
+    "milestones": 32,
+    "completed": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "deployed": false,
+    "mergePerformed": false,
+    "productionCertified": false,
+    "repository": "Public during development; private before C32",
+    "annualContract": "Deferred"
+  }
+}
