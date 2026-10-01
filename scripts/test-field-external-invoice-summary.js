@@ -104,9 +104,8 @@ let browser;
   finally { prisma.$transaction = transaction; }
   console.log('PASS historical confirmation updates counts without financial changes; read-only summaries, ADMIN scope, private responses and unavailable-source failure preserved');
 
-  const payload = await dashboard(new Date().toISOString().slice(0, 7));
   browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
-  const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 1000 } });
+  const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 1000 }, timezoneId: 'Europe/Lisbon' });
   await context.route('**/*', route => new URL(route.request().url()).origin === new URL(base).origin ? route.continue() : route.abort());
   await context.addInitScript(({ user, token }) => {
     for (const key of ['token', 'cristalwater_jwt', 'adminToken']) localStorage.setItem(key, token);
@@ -114,10 +113,15 @@ let browser;
     localStorage.setItem('cw_language', 'pt');
   }, { user, token });
   const page = await context.newPage(), errors = []; page.setDefaultTimeout(12000); page.on('pageerror', e => errors.push(e.message));
+  await page.clock.setFixedTime(Date.now());
   const card = kind => page.locator(`[data-external-invoice="${kind}"]`);
   const ready = () => page.waitForFunction(() => document.getElementById('status').textContent === 'Resumo Operacional online');
   const load = async () => { await page.goto(base + '/admin-dashboard', { waitUntil: 'networkidle' }); await ready(); };
   await load();
+  // Fixtures follow the month actually selected by the page, including Lisbon midnight.
+  const selectedMonth = await page.locator('#monthRef').inputValue(), payload = await dashboard(selectedMonth);
+  assert.equal(payload.monthRef, selectedMonth);
+  console.log('PASS external summary fixture month '+JSON.stringify({selectedMonth,payloadMonth:payload.monthRef,browserTimezone:'Europe/Lisbon'}));
   assert.equal(await card('pending').locator('strong').textContent(), String(payload.summary.officialInvoicePending));
   assert.equal(await card('review').locator('strong').textContent(), String(payload.summary.officialInvoiceReview));
   assert.match(await card('pending').textContent(), new RegExp(payload.summary.officialInvoiceConfirmed + ' referência'));
@@ -148,19 +152,29 @@ let browser;
   await load();
   const endpoint = '**/api/dashboard/admin?*';
   await page.route(endpoint, route => route.fulfill({ status: 503, contentType: 'application/json', json: { ok: false } }));
-  await page.evaluate(() => loadDashboard());
+  assert.equal(await page.evaluate(() => loadDashboard()), false);
   assert.equal(await card('pending').locator('strong').textContent(), '—'); assert.equal(await card('review').locator('strong').textContent(), '—');
+  assert.equal(await page.locator('#status').getAttribute('data-state'), 'error');
   assert.equal(await card('pending').getAttribute('href'), '/to-issue?status=all'); await page.unroute(endpoint);
   const malformed = structuredClone(payload); delete malformed.summary.officialInvoiceReview;
   await page.route(endpoint, route => route.fulfill({ contentType: 'application/json', json: malformed }));
-  await page.evaluate(() => loadDashboard()); assert.equal(await card('review').locator('strong').textContent(), '—');
-  assert.match(await page.locator('#status').textContent(), /indisponível/); await page.unroute(endpoint);
+  assert.equal(await page.evaluate(() => loadDashboard()), true); assert.equal(await card('review').locator('strong').textContent(), '—');
+  assert.equal(await page.locator('#status').getAttribute('data-state'), 'ready');
+  assert.equal(await page.locator('#status').textContent(), 'Resumo carregado; faturação externa indisponível'); await page.unroute(endpoint);
   const zero = structuredClone(payload);
   for (const key of Object.keys(mapping)) zero.summary[key] = 0;
   await page.route(endpoint, route => route.fulfill({ contentType: 'application/json', json: zero }));
-  await page.evaluate(() => loadDashboard());
+  assert.equal(await page.evaluate(() => loadDashboard()), true);
   assert.equal(await card('pending').locator('strong').textContent(), '0'); assert.equal(await card('review').locator('strong').textContent(), '0');
   assert.equal(await card('review').getAttribute('href'), '/to-issue?status=all'); await page.unroute(endpoint);
+
+  const wrongMonth = { ...payload, monthRef: selectedMonth === '1999-01' ? '1999-02' : '1999-01' };
+  await page.route(endpoint, route => route.fulfill({ contentType: 'application/json', json: wrongMonth }));
+  assert.equal(await page.evaluate(() => loadDashboard()), false);
+  assert.equal(await card('pending').locator('strong').textContent(), '—'); assert.equal(await card('review').locator('strong').textContent(), '—');
+  assert.equal(await card('pending').getAttribute('href'), '/to-issue?status=all');
+  assert.equal(await page.locator('#status').getAttribute('data-state'), 'error');
+  assert.equal(await page.locator('#status').textContent(), 'Não foi possível confirmar os dados. Os valores estão indisponíveis.'); await page.unroute(endpoint);
 
   for (const mode of ['newer request', 'session A-B-A', 'month changed']) {
     const arrived = gate(), release = gate(), finished = gate(); let calls = 0;
