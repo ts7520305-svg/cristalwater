@@ -7,7 +7,7 @@
 
 <meta charset="utf-8">
 
-<title>
+<title data-cw-client-login-copy="title" data-cw-no-i18n>
   Cristal Water - Login Cliente
 </title>
 
@@ -45,7 +45,11 @@ body {
 
   box-shadow:0 2px 12px rgba(0,0,0,0.15);
 
-  width:320px;
+  box-sizing:border-box;
+
+  width:380px;
+
+  max-width:calc(100vw - 24px);
 
   text-align:center;
 }
@@ -83,6 +87,8 @@ input {
   border:1px solid #ccc;
 
   box-sizing:border-box;
+
+  min-height:44px;
 }
 
 button {
@@ -104,6 +110,8 @@ button {
   font-weight:bold;
 
   cursor:pointer;
+
+  min-height:44px;
 }
 
 button:hover {
@@ -118,6 +126,8 @@ button:hover {
   font-size:13px;
 
   margin-top:10px;
+
+  overflow-wrap:anywhere;
 }
 
 </style>
@@ -131,13 +141,13 @@ button:hover {
 
 <body>
 
-<div class="login-box">
+<div class="login-box" data-cw-no-i18n>
 
   <div class="logo">
     Cristal Water
   </div>
 
-  <h2>
+  <h2 data-cw-client-login-copy="heading">
     Área do Cliente
   </h2>
 
@@ -145,15 +155,19 @@ button:hover {
     type="email"
     id="email"
     placeholder="Email"
+    aria-label="Email"
+    data-cw-client-login-placeholder="email"
   >
 
   <input
     type="password"
     id="password"
     placeholder="Password"
+    aria-label="Password"
+    data-cw-client-login-placeholder="password"
   >
 
-  <button id="loginBtn">
+  <button id="loginBtn" data-cw-client-login-copy="enter">
     Entrar
   </button>
 
@@ -162,6 +176,7 @@ button:hover {
 </div>
 
 <script src="/client-login.js"></script>
+<script defer src="/cw-i18n.js"></script>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>

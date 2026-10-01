@@ -1,0 +1,440 @@
+{
+  "task": 501,
+  "checkedAt": "2026-10-01T17:09:21.676743+00:00",
+  "parent": "0816432601682b5434716be2edc89d7159df96b3",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Client login labels, owned state notices and accessible input labels in PT/EN/FR/ES/DE. Preserve native login/session/redirect behavior and literal server messages; fit the card at320px.",
+  "sources": {
+    "frontend/client-login.js": "f53b3b0a7978b6163ac97b1124d33bce3084b7e02df481d46da0cc6f0023bb43",
+    "frontend/client-login.html": "de74a9d9976d3d550a1e209bc9e229d73826f193417088328b11fd5070334219",
+    "frontend/sw.js": "b8a114116917e6dcc78e131fc2659a43f8a0f8ac242079f77b1d5a3d975e3e3a",
+    "scripts/test-field-client-login-languages.js": "efc983c29f29042b98ea0574dd1e683567f7d1053802fd508a810ee81a81d530",
+    "scripts/test-field-login-languages.js": "0e2b1a4eca83ebd2d984870ceead126c4fd9475550b447b5a8d720e969e1b660",
+    "scripts/test-field-suite.js": "5247fd1c171b3c3fec9b2dffb6d4e7bc61c0320b7e55e3f793ac09924eed6549",
+    "scripts/test-auth-entry-browser.js": "8ffa08ee19edba613568744ed857a04e3ed18c164a56efe96715806ac2ecb771",
+    "frontend/client-auth-guard.js": "34e6d617857e6dc7a95272b8eacde502cb245c63e5b26d872baa658254747936",
+    "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+    "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+    "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+    "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+    "frontend/admin-rounds.js": "f057ffdc791f2a466adf8928f18fa1535b3e5e6a30cd08d1e85e2d1bdae750f1",
+    "scripts/test-field-agenda-volume.js": "1961b43198d71d0c73d4c5d09ffb1d3884f3e665002a73a01afaee4838976f84",
+    "src/routes/clientAuthRoutes.js": "33c046e4434137005a464a28844206bacd970f99f5d7d65ce009d4a89c6fe361",
+    "prisma/schema.prisma": "8846715eb9449b35ad64b4b07de74620d6bbd92da0691d4bc9a798fd299e4e8b"
+  },
+  "productAudit": {
+    "parent": "0816432601682b5434716be2edc89d7159df96b3",
+    "keys": [
+      "title",
+      "heading",
+      "email",
+      "password",
+      "enter",
+      "pending",
+      "required",
+      "invalid",
+      "notClient",
+      "connection"
+    ],
+    "entries": 10,
+    "languageVariants": 50,
+    "businessBodyExactlyRestoredIncludingOriginalUntouchedLineEndings": true,
+    "onlyNineChangedBodyLinesAndNewHelperUseLF": true,
+    "htmlChangesExactlyAccountedFor": true,
+    "emailTrimPasswordBytesSerializeRoleTokenIdGuardsPersistAndRedirectUnchanged": true,
+    "privateDescriptorIdentityAndOriginalNodeOwnership": true,
+    "cachePrevious": 275,
+    "cacheCurrent": 276,
+    "cacheLogicUnchanged": true,
+    "technicianTestOnlyThreeCacheReferencesChanged": true,
+    "runner": 384,
+    "previousRunner": 383,
+    "previousOrderExactlyPreserved": true,
+    "backendSchemaTestsUnchanged": true,
+    "unchanged": {
+      "frontend/admin-rounds.js": "f057ffdc791f2a466adf8928f18fa1535b3e5e6a30cd08d1e85e2d1bdae750f1",
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/technician-field-mode.js": "7d248a4f5db9b498c92086aa850655c315130105b3a4e2b5083476f160ff7446",
+      "frontend/client-auth-guard.js": "34e6d617857e6dc7a95272b8eacde502cb245c63e5b26d872baa658254747936",
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/cw-field-route-cache.js": "78684a6819ca8fad45c18aee1521506dfce4bc5c099f20d7541b99d20a2fc28b",
+      "src/routes/clientAuthRoutes.js": "33c046e4434137005a464a28844206bacd970f99f5d7d65ce009d4a89c6fe361",
+      "src/services/languagePreferenceService.js": "1b8bcfa0bd4e2b6179423986e90e696653aa58123b46556d2d9e50101f332490",
+      "prisma/schema.prisma": "8846715eb9449b35ad64b4b07de74620d6bbd92da0691d4bc9a798fd299e4e8b",
+      "scripts/test-auth-entry-browser.js": "8ffa08ee19edba613568744ed857a04e3ed18c164a56efe96715806ac2ecb771",
+      "scripts/test-field-agenda-volume.js": "1961b43198d71d0c73d4c5d09ffb1d3884f3e665002a73a01afaee4838976f84"
+    }
+  },
+  "local": {
+    "runtime": "Isolated application and actual Chromium with PGlite; does not replace full native PostgreSQL16 acceptance.",
+    "positive": [
+      {
+        "run": "client501-verified",
+        "result": {
+          "script": "scripts/test-field-client-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 18080,
+          "logBytes": 1967
+        },
+        "logSha256": "bf9c4b7314403deea48ce5d9a79680930c8d72677d088cbd03c0577f9147ffe5",
+        "log": "PASS client login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"notClient\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=501\",\"pendingRequests\":2}\nPASS client login ownership changed-text\nPASS client login ownership replaced-node\nPASS client login ownership changed-attributes\nPASS client login language result {\"checks\":148,\"languages\":5,\"widths\":[320,390,1440],\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS client login fixtures removed\n"
+      },
+      {
+        "run": "client501-final",
+        "result": {
+          "script": "scripts/test-auth-entry-browser.js",
+          "code": 0,
+          "signal": null,
+          "ms": 5281,
+          "logBytes": 884
+        },
+        "logSha256": "169c5992e72032b5c5c178dd16a6ed3d8a32510777ac936f9a4d40b1e6c5e5a9",
+        "log": "PASS client guard: 24 entry cases, preserved drafts/documents/corrupt legacy bytes, expiry/identity validation, storage failure, administrator preview/chat and real settings script\nPASS login.js repeated login, retry, exact password and no token logging\nPASS admin-login.js repeated login, retry, exact password and no token logging\nPASS client-login.js repeated login, retry, exact password and no token logging\nPASS technician-login.js repeated login, retry, exact password and no token logging\nPASS HTML login, account switch and cross-tab session change disconnect private sockets; logout preserves field outbox\nPASS actual administrative visits page: shared logout, disabled repeated action, awaited cleanup, session removed and all saved work preserved\nPASS actual technician page: visible logout, 320px Spanish header, no network overlap, busy guard and preserved pending work\n"
+      },
+      {
+        "run": "client501-first",
+        "result": {
+          "script": "scripts/test-field-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 16039,
+          "logBytes": 2458
+        },
+        "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+        "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+      }
+    ],
+    "distinctPositiveGroups": 3,
+    "clientMatrix": {
+      "checks": 148,
+      "languages": 5,
+      "widths": [
+        320,
+        390,
+        1440
+      ],
+      "states": [
+        "initial",
+        "required",
+        "pending",
+        "invalid",
+        "literal-html-like",
+        "literal-descriptor-like",
+        "notClient",
+        "connection"
+      ],
+      "invalidAccountControls": 7,
+      "nativeLogins": 2,
+      "nativeClientPassword": "Bcrypt fixture with surrounding spaces and literal punctuation; exact bytes delivered to original endpoint.",
+      "nativeEmailTrimmed": true,
+      "actualDestinations": [
+        "/client-portal",
+        "/invoice-document?id=501"
+      ],
+      "passwordSelectionAndFocusPreserved": true,
+      "originalNodesPreserved": true,
+      "serverErrorDataErrorLiteral": true,
+      "serverMessageFallbackContractUnchanged": true,
+      "typedPendingRequests": 2,
+      "differentRequestIdsAnd64CharacterPayloadHashes": true,
+      "rawDraftDocumentRouteAndCorruptWorkPreserved": true,
+      "sqlAndClientTechnicianRowsUnchanged": true,
+      "ownershipControls": [
+        "changed text/title",
+        "replaced heading node retaining public marker",
+        "changed input placeholder/aria"
+      ],
+      "actualCachedHTMLAndThreeJsFilesMatchCurrentSource": true,
+      "cacheVersion": 276,
+      "offlineAnonymousRetryInFiveLanguages": true,
+      "pageErrors": 0,
+      "noOperationalWrites": true,
+      "nativeLanguagePreferenceWritesAllowed": true,
+      "fixturesRemoved": true
+    },
+    "negativeParent500": {
+      "run": "client501-parent-confirmed",
+      "result": {
+        "script": "scripts/test-field-client-login-languages.js",
+        "code": 1,
+        "signal": null,
+        "ms": 1406,
+        "logBytes": 622
+      },
+      "logSha256": "740b4d51fab68cc1150df46ab68468a6792323c9f3c2f0f6850b1047d0ea7635",
+      "log": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Cristal Water - Login Cliente'\n- 'Cristal Water - Client login'\n                   ^\n\n    at labels (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-login-languages.js:95:16)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-login-languages.js:113:3 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Cristal Water - Login Cliente',\n  expected: 'Cristal Water - Client login',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\nPASS client login fixtures removed\n",
+      "boundary": "Only client-login.js is served from the immutable parent500. Current HTML, language selector, test, backend and persisted data stay actual. Final failure is the English title remaining Portuguese.",
+      "parentClientScriptSha256": "555c4417d0177fb06b758b7d6ec6d246d453e8edb08d79e6ec1f49832fa1c7a0",
+      "hookSha256": "e8b4a198e141936e031c9a6e5b5c854379708cb26153472dd3017abe4abfb753"
+    },
+    "harnessBoundary": {
+      "firstNegative": {
+        "run": "client501-parent-negative",
+        "result": {
+          "script": "scripts/test-field-client-login-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 1369,
+          "logBytes": 571
+        },
+        "logSha256": "cad217766c28d43579b845c0becb91f8a6c1599d4350e289268061aaff6c3414",
+        "log": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ '\\n    Área do Cliente\\n  '\n- 'Área do Cliente'\n\n    at labels (/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-login-languages.js:95:70)\n    at async /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-login-languages.js:113:3 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: '\\n    Área do Cliente\\n  ',\n  expected: 'Área do Cliente',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\nPASS client login fixtures removed\n"
+      },
+      "explanation": "The first parent probe failed on surrounding HTML indentation in the visible heading. Normal labels now trim only surrounding whitespace; server errors still compare exact bytes. This is a semantic label comparison, no dropped locale/state/data assertion or larger deadline. The final parent probe fails on the missing English translation."
+    },
+    "sourceFinalisation": "New helper and nine changed display statements use LF; all untouched original mixed line endings remain. Exact inverse restores every original business byte. Verified final client run has no NODE_OPTIONS or source override.",
+    "syntax": {
+      "code": 0,
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44,
+      "newScriptNodeCheck": true,
+      "diffCheck": true,
+      "logSha256": "53f4bb5c803368be7084d8ba1fb07aebbf578b426a2c56c6f119981985e34fa4",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 44 inline scripts.\n"
+    },
+    "localUnitTestsRerun": false
+  },
+  "visual": {
+    "reviewed": [
+      "French initial320",
+      "German anonymous offline320"
+    ],
+    "screenshotsSha256": {
+      "initial-fr-320.png": "c46472b81b35652fb56bce86a649e67121b7112b18b7fb4b332ce461bb989631",
+      "initial-de-320.png": "2b625d8ec8570b76bf9ebc74da77174d323cc0ebc9e5a728f33bbd8b4902b8aa",
+      "literal-fr-320.png": "325a42c9c13d1abab827be7ec9da5c5cc3fb6eb661a5cfa017f69f134faa46ba",
+      "literal-de-320.png": "d15afc2fdcb0969ec54c597a0b14eaade0aa771b55cc47c359be303add434c2b",
+      "cached-offline-de-320.png": "06fa7187d72224423375f434998865fb552fef265a8ad3058b1d9f66063b51fd"
+    },
+    "cardAndFieldsFitAllTestedWidths": true,
+    "inputAndButtonMinimumPx": 44,
+    "literalErrorsWrap": true,
+    "physicalDevicesCertified": false
+  },
+  "lastCompleteAcceptance": {
+    "task": 499,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "code": "92b5f3837d132a7184bb150d4e3ba9cc5eb3ea8d",
+    "tree": "ce716213b479e9bab1cafef10e118badc8e5397e",
+    "run": 36885265458,
+    "job": 110446843123,
+    "groups": 383,
+    "distinctGroups": 383,
+    "allCodeZero": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "actualOrderExactlyMatched": true,
+    "sourceSha256": {
+      "frontend/ui/design-system.js": "eaee672c8ba8e8a6613d37b62a21b1780aa8c6b4113bc5266ec30bb209a24d33",
+      "frontend/ui/design-system.css": "fa56f79283ea6f8295de581e64ad0e338261a460a79339e70b2989faa314a797",
+      "frontend/technician-field-mode.js": "7d248a4f5db9b498c92086aa850655c315130105b3a4e2b5083476f160ff7446",
+      "frontend/technician-field-mode.html": "9b7310a0e5bd5b16bd35af19cc14d69202e42947bd4124ae1125fd07ce76a217",
+      "frontend/sw.js": "a08233e70e7a17802426789b3341c87b646d22f276eae2a013d374996859c39a",
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/cw-field-documents.js": "e705db7b0e641d79954d0b32f9b07059d321e79d1daf2eba0804f0af9e76c381",
+      "frontend/cw-field-write-store.js": "112c081b01f6ffef6b2d17afb7309ea051f37bcc784cf32c3733b9e625c02ae0",
+      "frontend/ui/core/navigation-context.js": "044f57289d9b263f0c70d137889a27abdfdd2c856272ec735f7bd106e0ea6497",
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/technician-login.html": "3a95133e1f54b6c247bff575433c58ae2fde77d9049f1feca98a937bae128081",
+      "scripts/test-field-suite.js": "6bc317cdf1fb0ce42ceaf3ee2dc537c3ce5ea369e7935d2c6af360fb693707b5",
+      "scripts/test-field-bottom-navigation-languages.js": "f9806a15841e6515898467d4c7d490ac0c873f63fd13c93fbdd500be1f0784e1",
+      "scripts/test-field-current-visit-languages.js": "78dd9d982ee7f9e97bc296ce6367f646e258e77e801427de5e5c588dce4b6209",
+      "scripts/test-field-current-visit-time-languages.js": "94d18fce7907fe6ee7147d769fdcd59c8b4ad07b2127b00ce68d414799513c5a",
+      "scripts/test-field-dashboard-languages.js": "784dc27ccba11cd57141f2fee75dec528ac8714569e625bfd0429b87cb188ef8",
+      "scripts/test-field-login-languages.js": "41b1ef27e4572fc0766d36fa903ac1c383b97167ed3add7e1209165309b0b3e1"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T16:56:31.5618044Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "4031874e54e5f09a743c001d1a2e0c63e8afa57f4705facaa6c79bc0ddca477e",
+    "selectedResults": [
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 39078
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 64327
+      },
+      {
+        "script": "test-field-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10915
+      },
+      {
+        "script": "test-field-bottom-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4063
+      },
+      {
+        "script": "test-field-agenda-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 101766
+      }
+    ],
+    "orderedScriptNamesSha256": "aca9ccc42cefc7f220d9ba7939918467145e8e033d692047f1663630cbdba831",
+    "all383ResultsSha256": "c66bd6fa82315f5c8be2ade4ebc9a9b77e6bd0d96366cfbeb38c30cd651b5183"
+  },
+  "native495HistoricalAcceptancePreserved": true,
+  "publication500": {
+    "code": "0816432601682b5434716be2edc89d7159df96b3",
+    "tree": "f058ad5918d1a7095d36a59abdad0ed0a43a886c",
+    "published": true,
+    "exactParentTreeAndRefPreviouslyVerified": true
+  },
+  "nativePending": {
+    "task": 500,
+    "checkedAt": "2026-10-01T17:09:20.356Z",
+    "run": 36890903682,
+    "job": 110465988109,
+    "head": "0816432601682b5434716be2edc89d7159df96b3",
+    "tree": "f058ad5918d1a7095d36a59abdad0ed0a43a886c",
+    "status": "in_progress",
+    "steps": [
+      {
+        "name": "Set up job",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 1
+      },
+      {
+        "name": "Initialize containers",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 2
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 3
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 4
+      },
+      {
+        "name": "Run npm ci",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 5
+      },
+      {
+        "name": "Run npx prisma validate && npx prisma generate",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 6
+      },
+      {
+        "name": "Verify additive upgrade from the previous schema",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 7
+      },
+      {
+        "name": "Run npx playwright install --with-deps chromium",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 8
+      },
+      {
+        "name": "Run npm run check:syntax",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 9
+      },
+      {
+        "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+        "status": "completed",
+        "conclusion": "success",
+        "number": 10
+      },
+      {
+        "name": "Run node scripts/test-field-suite.js",
+        "status": "in_progress",
+        "conclusion": null,
+        "number": 11
+      },
+      {
+        "name": "Restore database and uploaded files in isolated QA",
+        "status": "pending",
+        "conclusion": null,
+        "number": 12
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 13
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 14
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 26
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "status": "pending",
+        "conclusion": null,
+        "number": 27
+      },
+      {
+        "name": "Stop containers",
+        "status": "pending",
+        "conclusion": null,
+        "number": 28
+      }
+    ],
+    "fullAcceptance": false
+  },
+  "nextTask": "TASK502: verify exact publication501 and native500/501 heads, trees, source hashes, ordered383/384 groups and restore128/51. Handle any real failure first; continue remaining general/admin login language work if clean.",
+  "completion": {
+    "milestones": 32,
+    "completed": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "deployed": false,
+    "mergePerformed": false,
+    "productionCertified": false,
+    "repository": "Public during development; private before C32",
+    "annualContract": "Deferred"
+  }
+}
