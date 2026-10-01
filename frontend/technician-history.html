@@ -5,7 +5,7 @@
   <meta name="theme-color" content="#0f1723">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Cristal Water - Historico Tecnico</title>
+  <title data-cw-history-copy="title" data-cw-no-i18n>Cristal Water - Historico Tecnico</title>
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <script src="/cw-auth.js"></script>
@@ -20,7 +20,7 @@
     .status[data-tone="error"] { border-color: #efbbc5; background: #fdecef; color: #6f1223; }
     .status[data-tone="warning"] { border-color: #e4c289; background: #fff6e7; color: #5f3900; }
     .list { display: grid; gap: 8px; }
-    .item { border: 1px solid #c9d8d2; border-radius: 12px; padding: 10px; background: #fff; }
+    .item { min-width: 0; overflow-wrap: anywhere; border: 1px solid #c9d8d2; border-radius: 12px; padding: 10px; background: #fff; }
     .item small { display: block; color: #577067; font-size: 12px; margin-top: 2px; }
     .empty { color: #577067; border: 1px dashed #c9d8d2; border-radius: 12px; padding: 14px; text-align: center; }
   </style>
@@ -29,18 +29,19 @@
 <body data-required-role="TECHNICIAN">
   <main class="shell">
     <section class="card">
-      <p class="muted">Tecnico</p>
-      <h1 class="title">Historico de Visitas</h1>
-      <p class="muted">Consulta rapida das ultimas visitas concluidas, sem escrita.</p>
+      <p class="muted" data-cw-history-copy="technician" data-cw-no-i18n>Tecnico</p>
+      <h1 class="title" data-cw-history-copy="heading" data-cw-no-i18n>Historico de Visitas</h1>
+      <p class="muted" data-cw-history-copy="intro" data-cw-no-i18n>Consulta rapida das ultimas visitas concluidas, sem escrita.</p>
     </section>
 
-    <p id="statusBox" class="status" aria-live="polite">A carregar historico.</p>
+    <p id="statusBox" data-cw-history-copy="loading" data-cw-no-i18n class="status" aria-live="polite">A carregar historico.</p>
 
     <section class="card">
-      <div id="historyList" class="list"></div>
+      <div id="historyList" data-cw-no-i18n class="list"></div>
     </section>
   </main>
   <script src="/technician-history.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <script defer src="/ui/design-system.js"></script>
 </body>
 </html>
