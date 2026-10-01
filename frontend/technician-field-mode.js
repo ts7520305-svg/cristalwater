@@ -426,6 +426,8 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "problemModuleUnavailable": ["Ocorrências indisponíveis. Conserve o texto e reabra a página.", "Problem reports unavailable. Keep the text and reopen the page.", "Signalements indisponibles. Conservez le texte et rouvrez la page.", "Incidencias no disponibles. Conserva el texto y vuelve a abrir la página.", "Problemmeldungen sind nicht verfügbar. Bewahren Sie den Text auf und öffnen Sie die Seite erneut."],
+  "stockModuleUnavailable": ["Pedidos de material indisponíveis. Conserve o texto e reabra a página.", "Material requests unavailable. Keep the text and reopen the page.", "Demandes de matériel indisponibles. Conservez le texte et rouvrez la page.", "Solicitudes de material no disponibles. Conserva el texto y vuelve a abrir la página.", "Materialanfragen sind nicht verfügbar. Bewahren Sie den Text auf und öffnen Sie die Seite erneut."],
   "proposalEmpty": ["Sem propostas desta piscina nesta sessão.", "No proposals for this pool in this session.", "Aucune proposition pour cette piscine dans cette session.", "No hay propuestas para esta piscina en esta sesión.", "In dieser Sitzung gibt es keine Vorschläge für diesen Pool."],
   "proposalLoading": ["A consultar propostas...", "Loading proposals...", "Chargement des propositions…", "Consultando propuestas...", "Vorschläge werden geladen…"],
   "proposalLoadFailed": ["Não foi possível consultar as propostas. Atualize antes de repetir um envio.", "Could not load the proposals. Refresh before sending again.", "Impossible de charger les propositions. Actualisez avant de renvoyer.", "No se pudieron consultar las propuestas. Actualiza antes de volver a enviar.", "Die Vorschläge konnten nicht geladen werden. Aktualisieren Sie, bevor Sie erneut senden."],
@@ -6028,13 +6030,13 @@
 
   async function saveProblem() {
     if (!requireRegularVisit(current())) return;
-    if (!window.CWFieldProblemReport) { toast('Ocorrências indisponíveis. Conserve o texto e reabra a página.'); return; }
+    if (!window.CWFieldProblemReport) { alertUi.notify(alertUi.value('problemModuleUnavailable')); return; }
     return window.CWFieldProblemReport.send();
   }
 
   async function sendAdminStockAlert() {
     if (!requireRegularVisit(current())) return;
-    if (!window.CWFieldStockRequest) { toast('Pedidos de material indisponíveis. Conserve o texto e reabra a página.'); return; }
+    if (!window.CWFieldStockRequest) { alertUi.notify(alertUi.value('stockModuleUnavailable')); return; }
     return window.CWFieldStockRequest.send();
   }
 
