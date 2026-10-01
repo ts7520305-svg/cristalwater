@@ -75,6 +75,16 @@ const COPY = {
     quickAccess: "Acesso rapido",
     clientRole: "Cliente",
     documentsSectionTitle: "Relatórios e documentos",
+    portalNavigationAria: "Navegação do cliente",
+    portalMobileNavigationAria: "Navegação móvel",
+    portalLanguageAria: "Idioma",
+    portalClientSelectAria: "Escolher cliente",
+    portalSummaryAria: "Resumo principal do cliente",
+    portalHistoryPoolAria: "Piscina",
+    portalHistoryPeriodAria: "Período",
+    portalHistoryDateAria: "Data de referência",
+    portalMessagesAria: "Mensagens com administração",
+    portalSearchPlaceholder: "Pesquisar relatório, fatura, mensagem ou visita",
     message: "Mensagem",
     agenda: "Agenda",
     services: "Servicos",
@@ -217,6 +227,16 @@ const COPY = {
     quickAccess: "Acceso rápido",
     clientRole: "Cliente",
     documentsSectionTitle: "Informes y documentos",
+    portalNavigationAria: "Navegación del cliente",
+    portalMobileNavigationAria: "Navegación móvil",
+    portalLanguageAria: "Idioma",
+    portalClientSelectAria: "Seleccionar cliente",
+    portalSummaryAria: "Resumen principal del cliente",
+    portalHistoryPoolAria: "Piscina",
+    portalHistoryPeriodAria: "Período",
+    portalHistoryDateAria: "Fecha de referencia",
+    portalMessagesAria: "Mensajes con la administración",
+    portalSearchPlaceholder: "Buscar informe, factura, mensaje o visita",
     message: "Mensaje",
     agenda: "Agenda",
     services: "Servicios",
@@ -359,6 +379,16 @@ const COPY = {
     quickAccess: "Quick access",
     clientRole: "Client",
     documentsSectionTitle: "Reports and documents",
+    portalNavigationAria: "Client navigation",
+    portalMobileNavigationAria: "Mobile navigation",
+    portalLanguageAria: "Language",
+    portalClientSelectAria: "Choose client",
+    portalSummaryAria: "Main client summary",
+    portalHistoryPoolAria: "Pool",
+    portalHistoryPeriodAria: "Period",
+    portalHistoryDateAria: "Reference date",
+    portalMessagesAria: "Messages with administration",
+    portalSearchPlaceholder: "Search for a report, invoice, message or visit",
     message: "Message",
     agenda: "Schedule",
     services: "Services",
@@ -501,6 +531,16 @@ const COPY = {
     quickAccess: "Acces rapide",
     clientRole: "Client",
     documentsSectionTitle: "Rapports et documents",
+    portalNavigationAria: "Navigation du client",
+    portalMobileNavigationAria: "Navigation mobile",
+    portalLanguageAria: "Langue",
+    portalClientSelectAria: "Choisir un client",
+    portalSummaryAria: "Résumé principal du client",
+    portalHistoryPoolAria: "Piscine",
+    portalHistoryPeriodAria: "Période",
+    portalHistoryDateAria: "Date de référence",
+    portalMessagesAria: "Messages avec l’administration",
+    portalSearchPlaceholder: "Rechercher un rapport, une facture, un message ou une visite",
     message: "Message",
     agenda: "Planning",
     services: "Services",
@@ -643,6 +683,16 @@ const COPY = {
     quickAccess: "Schnellzugriff",
     clientRole: "Kunde",
     documentsSectionTitle: "Berichte und Dokumente",
+    portalNavigationAria: "Kundennavigation",
+    portalMobileNavigationAria: "Mobile Navigation",
+    portalLanguageAria: "Sprache",
+    portalClientSelectAria: "Kunde auswählen",
+    portalSummaryAria: "Kundenübersicht",
+    portalHistoryPoolAria: "Pool",
+    portalHistoryPeriodAria: "Zeitraum",
+    portalHistoryDateAria: "Bezugsdatum",
+    portalMessagesAria: "Nachrichten mit der Verwaltung",
+    portalSearchPlaceholder: "Bericht, Rechnung, Nachricht oder Besuch suchen",
     message: "Nachricht",
     agenda: "Termine",
     services: "Services",
@@ -843,13 +893,19 @@ function copy(key) {
 
 // Repaint only the original labels authored by the portal views.
 const portalExtrasLabels = (function () {
-  const leaves = new Map();
+  const leaves = new Map(), attributes = new Map();
   function paint() {
     for (const [node, leaf] of leaves) {
       if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered) { leaves.delete(node); continue; }
       const rendered = leaf.reader(leaf.key);
       if (rendered !== leaf.rendered) leaf.textNode.nodeValue = rendered;
       leaf.rendered = rendered;
+    }
+    for (const [node, attribute] of attributes) {
+      if (!node.isConnected || node.getAttribute(attribute.name) !== attribute.rendered) { attributes.delete(node); continue; }
+      const rendered = copy(attribute.key);
+      if (rendered !== attribute.rendered) node.setAttribute(attribute.name, rendered);
+      attribute.rendered = rendered;
     }
   }
   function bind(node, key, reader = copy) {
@@ -859,7 +915,13 @@ const portalExtrasLabels = (function () {
     else node.textContent = rendered;
     if (node.nodeType === 1) leaves.set(node, { key, reader, rendered, textNode: node.firstChild });
   }
-  return Object.freeze({ bind, paint });
+  function bindAttribute(node, name, key) {
+    if (!node || node.nodeType !== 1) return;
+    const rendered = copy(key);
+    node.setAttribute(name, rendered);
+    attributes.set(node, { name, key, rendered });
+  }
+  return Object.freeze({ bind, bindAttribute, paint });
 })();
 const portalNotificationText = key => notificationCopy()[key];
 for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill', 'updates']]) {
@@ -867,6 +929,18 @@ for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill'
 }
 const documentsHeading = el('documentsTitle');
 if (documentsHeading) portalExtrasLabels.bind(documentsHeading, 'documentsSectionTitle');
+for (const [selector, name, key] of [
+  ['.cw-v2-sidebar', 'aria-label', 'portalNavigationAria'],
+  ['.cw-v2-mobile-nav', 'aria-label', 'portalMobileNavigationAria'],
+  ['#cwLanguageSelect', 'aria-label', 'portalLanguageAria'],
+  ['#adminClientSelect', 'aria-label', 'portalClientSelectAria'],
+  ['.portal-title', 'aria-label', 'portalSummaryAria'],
+  ['#serviceHistoryPool', 'aria-label', 'portalHistoryPoolAria'],
+  ['#serviceHistoryPeriod', 'aria-label', 'portalHistoryPeriodAria'],
+  ['#serviceHistoryDate', 'aria-label', 'portalHistoryDateAria'],
+  ['#mensagens', 'aria-label', 'portalMessagesAria'],
+  ['.cw-v2-search [data-cw-search-input]', 'placeholder', 'portalSearchPlaceholder'],
+]) portalExtrasLabels.bindAttribute(document.querySelector?.(selector), name, key);
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({

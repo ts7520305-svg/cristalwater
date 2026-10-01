@@ -116,6 +116,67 @@ async function database() {
     assert.deepEqual(await fields(page), idleFields); assert.equal(coreReads(), idleReads); await preserve(); checks++;
   } }
   console.log('PASS pure portal extras repaint: original focused composer and selection preserved without a core reload');
+  // Inspect the private attribute painter without a core reload, then keep
+  // the original selector's primary-read busy guard while its requests wait.
+  const accessibleSelectors = ['.cw-v2-sidebar', '.cw-v2-mobile-nav', '#cwLanguageSelect', '#adminClientSelect', '.portal-title', '#serviceHistoryPool', '#serviceHistoryPeriod', '#serviceHistoryDate', '#mensagens', '.cw-v2-search [data-cw-search-input]'];
+  const accessibleNames = [
+    ['Navegação do cliente', 'Client navigation', 'Navigation du client', 'Navegación del cliente', 'Kundennavigation'],
+    ['Navegação móvel', 'Mobile navigation', 'Navigation mobile', 'Navegación móvil', 'Mobile Navigation'],
+    ['Idioma', 'Language', 'Langue', 'Idioma', 'Sprache'],
+    ['Escolher cliente', 'Choose client', 'Choisir un client', 'Seleccionar cliente', 'Kunde auswählen'],
+    ['Resumo principal do cliente', 'Main client summary', 'Résumé principal du client', 'Resumen principal del cliente', 'Kundenübersicht'],
+    ['Piscina', 'Pool', 'Piscine', 'Piscina', 'Pool'],
+    ['Período', 'Period', 'Période', 'Período', 'Zeitraum'],
+    ['Data de referência', 'Reference date', 'Date de référence', 'Fecha de referencia', 'Bezugsdatum'],
+    ['Mensagens com administração', 'Messages with administration', 'Messages avec l’administration', 'Mensajes con la administración', 'Nachrichten mit der Verwaltung'],
+    ['Pesquisar relatório, fatura, mensagem ou visita', 'Search for a report, invoice, message or visit', 'Rechercher un rapport, une facture, un message ou une visite', 'Buscar informe, factura, mensaje o visita', 'Bericht, Rechnung, Nachricht oder Besuch suchen'],
+  ];
+  let accessibleLabelCases = 0, accessibleOwnershipControls = 0;
+  const search = page.locator('.cw-v2-search [data-cw-search-input]'), originalSearchValue = await search.inputValue();
+  await search.fill('Search draft <b>{portalSearchPlaceholder}</b>');
+  await page.evaluate(selectors => { window.qaAccessibleNodes = selectors.map(selector => document.querySelector(selector)); window.qaAccessibleSearch = qaAccessibleNodes.at(-1); }, accessibleSelectors);
+  async function accessibleLabels(index) {
+    for (const [position, selector] of accessibleSelectors.entries()) {
+      assert.equal(await page.locator(selector).getAttribute(position === 9 ? 'placeholder' : 'aria-label'), accessibleNames[position][index]); accessibleLabelCases++;
+    }
+    assert(await page.evaluate(selectors => selectors.every((selector, index) => document.querySelector(selector) === qaAccessibleNodes[index]), accessibleSelectors));
+    assert.equal(await search.inputValue(), 'Search draft <b>{portalSearchPlaceholder}</b>'); await preserve();
+  }
+  const accessibleReadCount = requests.length;
+  for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+    const focus = await page.evaluate(language => {
+      const originalLanguage = portalLanguage; portalLanguage = language; qaAccessibleSearch.focus(); qaAccessibleSearch.setSelectionRange(2, 8);
+      const snapshot = () => ({ focused: document.activeElement === qaAccessibleSearch, value: qaAccessibleSearch.value, start: qaAccessibleSearch.selectionStart, end: qaAccessibleSearch.selectionEnd, disabled: qaAccessibleSearch.disabled });
+      const before = snapshot(); portalExtrasLabels.paint(); const after = snapshot(); portalLanguage = originalLanguage; return { before, after };
+    }, language);
+    assert.equal(focus.before.focused, true); assert.deepEqual(focus.after, focus.before); await accessibleLabels(index);
+    assert.equal(requests.length, accessibleReadCount, 'Private attribute painting must not read or submit');
+  } }
+  const releaseAccessibleCore = await holdCore();
+  try { for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
+    await page.locator('#cwLanguageSelect').selectOption(language); await page.waitForFunction(() => loadedClientId === 0 && document.getElementById('messageInput').disabled); await settle(page);
+    await accessibleLabels(index); assert.equal(posts(requests).length, phasePosts);
+  } } } finally { await releaseAccessibleCore(); }
+  for (const kind of ['changed-attribute', 'removed-attribute', 'foreign-clone']) {
+    const foreignPage = await ctx.newPage(), foreignRequests = [];
+    foreignPage.on('request', request => foreignRequests.push({ method: request.method(), path: new URL(request.url()).pathname }));
+    await foreignPage.goto(base + '/client-portal?lang=pt'); await foreignPage.waitForFunction(() => loadedClientId === clientId); await foreignPage.waitForLoadState('networkidle'); const foreignWork = await work(foreignPage);
+    await foreignPage.evaluate(kind => {
+      const node = document.getElementById('serviceHistoryDate');
+      if (kind === 'changed-attribute') node.setAttribute('aria-label', 'Operator literal <b>{portalHistoryDateAria}</b>');
+      else if (kind === 'removed-attribute') node.removeAttribute('aria-label');
+      else { const clone = node.cloneNode(true); clone.setAttribute('aria-label', 'Foreign literal {portalHistoryDateAria}'); clone.dataset.cwI18n = 'portalHistoryDateAria'; node.replaceWith(clone); }
+      window.qaForeignAccessible = document.getElementById('serviceHistoryDate'); window.qaForeignAccessibleLabel = qaForeignAccessible.getAttribute('aria-label');
+    }, kind);
+    for (const language of languages) {
+      await foreignPage.evaluate(language => { const originalLanguage = portalLanguage; portalLanguage = language; portalExtrasLabels.paint(); portalLanguage = originalLanguage; }, language);
+      assert(await foreignPage.evaluate(() => document.getElementById('serviceHistoryDate') === qaForeignAccessible && qaForeignAccessible.getAttribute('aria-label') === qaForeignAccessibleLabel)); accessibleOwnershipControls++;
+    }
+    assert.equal(posts(foreignRequests).filter(request => request.path !== '/api/client-messages/seen/' + client.id).length, 0); assert.deepEqual(await pending(foreignPage), originalPending); assert.deepEqual(await work(foreignPage), foreignWork); await foreignPage.close();
+  }
+  await search.fill(originalSearchValue); await page.locator('#messageInput').focus(); await page.evaluate(() => document.getElementById('messageInput').setSelectionRange(2, 8));
+  assert.deepEqual(await database(), savedDatabase);
+  console.log('PASS portal accessible attributes ' + JSON.stringify({ accessibleLabelCases, accessibleOwnershipControls, labels: 10, languages: 5, widths: [320, 390, 1440], privatePaintRetainsSearchFocusValueSelectionAndNodes: true, noPrivatePaintReadsOrWrites: true, originalSelectorPrimaryBusyGuardRetained: true, pendingRequests: 2 }));
   await matrix('both-503', Object.keys(endpoints));
   for (const [name, selectedFaults] of [['notification-503', ['notificationList']], ['permissions-503', ['permissionsList']], ['both-invalid-ok', Object.keys(endpoints)], ['both-malformed', Object.keys(endpoints)]]) {
     faults = new Set(selectedFaults); responseStatus = name === 'both-invalid-ok' ? 200 : 503; malformed = name === 'both-malformed';
@@ -144,8 +205,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v284')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v284')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v285')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v285')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
