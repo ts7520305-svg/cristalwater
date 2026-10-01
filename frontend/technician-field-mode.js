@@ -426,6 +426,43 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "accessTitle": ["Acesso e avisos", "Access and notices", "Accès et consignes", "Acceso y avisos", "Zugang und Hinweise"],
+  "accessLoading": ["A carregar chave ou código desta piscina...", "Loading the key or code for this pool...", "Chargement de la clé ou du code de cette piscine…", "Cargando la llave o el código de esta piscina...", "Schlüssel oder Code für diesen Pool wird geladen…"],
+  "accessSectionHint": ["chaves e codigos", "keys and codes", "clés et codes", "llaves y códigos", "Schlüssel und Codes"],
+  "accessGeneric": ["Acesso", "Access", "Accès", "Acceso", "Zugang"],
+  "accessGate": ["Portao", "Gate", "Portail", "Puerta", "Tor"],
+  "accessAlarm": ["Alarme", "Alarm", "Alarme", "Alarma", "Alarm"],
+  "accessKeyBox": ["Caixa de chaves", "Key box", "Boîte à clés", "Caja de llaves", "Schlüsselkasten"],
+  "accessKey": ["Chave", "Key", "Clé", "Llave", "Schlüssel"],
+  "accessCode": ["Codigo", "Code", "Code", "Código", "Code"],
+  "accessPoolKey": ["Chave / codigo da piscina", "Pool key / code", "Clé / code de la piscine", "Llave / código de la piscina", "Poolschlüssel / Code"],
+  "accessClientKey": ["Chave / codigo do cliente", "Client key / code", "Clé / code du client", "Llave / código del cliente", "Kundenschlüssel / Code"],
+  "accessRequired": ["obrigatorio", "required", "obligatoire", "obligatorio", "erforderlich"],
+  "accessNoCode": ["Sem codigo", "No code", "Aucun code", "Sin código", "Kein Code"],
+  "accessWeekly": ["Repeticao semanal", "Repeats weekly", "Répétition hebdomadaire", "Repetición semanal", "Wöchentliche Wiederholung"],
+  "accessMonthly": ["Repeticao mensal", "Repeats monthly", "Répétition mensuelle", "Repetición mensual", "Monatliche Wiederholung"],
+  "accessQuarterly": ["Repeticao trimestral", "Repeats quarterly", "Répétition trimestrielle", "Repetición trimestral", "Vierteljährliche Wiederholung"],
+  "accessSemiannual": ["Repeticao semestral", "Repeats every six months", "Répétition semestrielle", "Repetición semestral", "Halbjährliche Wiederholung"],
+  "accessYearly": ["Repeticao anual", "Repeats yearly", "Répétition annuelle", "Repetición anual", "Jährliche Wiederholung"],
+  "accessCustom": ["Repeticao personalizada: {detail}", "Custom repetition: {detail}", "Répétition personnalisée : {detail}", "Repetición personalizada: {detail}", "Benutzerdefinierte Wiederholung: {detail}"],
+  "accessReminder": ["Lembrete", "Reminder", "Rappel", "Recordatorio", "Erinnerung"],
+  "accessRecurringLate": ["Lembrete recorrente atrasado", "Overdue recurring reminder", "Rappel récurrent en retard", "Recordatorio recurrente vencido", "Überfällige wiederkehrende Erinnerung"],
+  "accessLate": ["Lembrete atrasado", "Overdue reminder", "Rappel en retard", "Recordatorio vencido", "Überfällige Erinnerung"],
+  "accessRecurring": ["Lembrete recorrente", "Recurring reminder", "Rappel récurrent", "Recordatorio recurrente", "Wiederkehrende Erinnerung"],
+  "accessOneTime": ["Lembrete pontual", "One-time reminder", "Rappel ponctuel", "Recordatorio puntual", "Einmalige Erinnerung"],
+  "accessNoDate": ["Sem data definida", "No date set", "Aucune date définie", "Sin fecha definida", "Kein Datum festgelegt"],
+  "accessWhen": ["Quando: {date}", "When: {date}", "Quand : {date}", "Cuándo: {date}", "Wann: {date}"],
+  "accessPoolNotes": ["Notas da piscina", "Pool notes", "Consignes de la piscine", "Notas de la piscina", "Poolhinweise"],
+  "accessAttention": ["Atencao antes de entrar", "Check before entering", "À vérifier avant d’entrer", "Atención antes de entrar", "Vor dem Betreten prüfen"],
+  "accessReturn": ["Regresso agendado pelo escritório", "Return scheduled by the office", "Retour planifié par le bureau", "Regreso programado por la oficina", "Rückkehr vom Büro geplant"],
+  "accessConfirmReturn": ["Confirme as instruções com o escritório", "Confirm the instructions with the office", "Confirmez les consignes avec le bureau", "Confirma las instrucciones con la oficina", "Bestätigen Sie die Anweisungen mit dem Büro"],
+  "accessConfirm": ["Confirma codigos, chaves e instrucoes desta piscina antes de iniciar ou concluir a visita.", "Check this pool’s codes, keys and instructions before starting or completing the visit.", "Vérifiez les codes, clés et consignes de cette piscine avant de commencer ou de terminer la visite.", "Confirma los códigos, llaves e instrucciones de esta piscina antes de iniciar o completar la visita.", "Prüfen Sie die Codes, Schlüssel und Anweisungen dieses Pools, bevor Sie den Besuch beginnen oder abschließen."],
+  "accessCount": ["{count} acesso(s)", "{count} access item(s)", "{count} accès", "{count} acceso(s)", "{count} Zugangshinweise"],
+  "accessReminderCount": ["{count} lembrete(s)", "{count} reminder(s)", "{count} rappel(s)", "{count} recordatorio(s)", "{count} Erinnerungen"],
+  "accessToast": ["Atencao: esta visita tem {count} aviso(s), notas ou lembretes.", "Attention: this visit has {count} notice(s), notes or reminders.", "Attention : cette visite comporte {count} consigne(s), notes ou rappels.", "Atención: esta visita tiene {count} aviso(s), notas o recordatorios.", "Achtung: Dieser Besuch hat {count} Hinweise, Notizen oder Erinnerungen."],
+  "accessNoPool": ["Sem piscina selecionada.", "No pool selected.", "Aucune piscine sélectionnée.", "No hay una piscina seleccionada.", "Kein Pool ausgewählt."],
+  "accessNone": ["Sem código, nota ou lembrete registado", "No access code, note or reminder recorded", "Aucun code d’accès, consigne ou rappel enregistré", "No hay códigos, notas ni recordatorios registrados", "Kein Zugangscode, Hinweis oder Erinnerung gespeichert"],
+  "accessRegister": ["Se esta piscina precisar de codigo de portao, alarme, chave ou aviso permanente, o administrador deve registar na ficha do cliente ou da piscina.", "If this pool needs a gate code, alarm, key or permanent notice, the administrator must record it in the client or pool record.", "Si cette piscine nécessite un code de portail, une alarme, une clé ou une consigne permanente, l’administrateur doit l’enregistrer dans la fiche du client ou de la piscine.", "Si esta piscina necesita un código de puerta, una alarma, una llave o un aviso permanente, el administrador debe registrarlo en la ficha del cliente o de la piscina.", "Benötigt dieser Pool einen Torcode, einen Alarm, einen Schlüssel oder einen dauerhaften Hinweis, muss der Administrator dies im Kunden- oder Pooldatensatz eintragen."],
   "navDayPage": ["O meu dia","My day","Ma journée","Mi día","Mein Tag"],
   "navVisit": ["Visita","Visit","Visite","Visita","Besuch"],
   "navVehicleDocs": ["Viatura e documentos","Vehicle and documents","Véhicule et documents","Vehículo y documentos","Fahrzeug und Dokumente"],
@@ -2688,6 +2725,7 @@
   for (const node of document.querySelectorAll('[data-document-toolbar-copy]')) alertUi.bind(node, alertUi.value(node.dataset.documentToolbarCopy));
   for (const node of document.querySelectorAll('[data-correction-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.correctionInitialCopy));
   for (const node of document.querySelectorAll('[data-route-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.routeInitialCopy));
+  for (const node of document.querySelectorAll('[data-access-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.accessInitialCopy));
   for (const node of document.querySelectorAll('[data-map-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.mapInitialCopy));
   for (const node of document.querySelectorAll('[data-field-navigation-copy]')) alertUi.bind(node, alertUi.value(node.dataset.fieldNavigationCopy));
   // Attribute-only presentation preserves the original inputs, values and selection.
@@ -4617,6 +4655,21 @@
     });
   }
 
+  const accessPresentation = new WeakMap(), reminderPresentation = new WeakMap();
+  function withAccessPresentation(access, title, source) {
+    accessPresentation.set(access, { title, source }); return access;
+  }
+  function accessTypeCopy(type) {
+    return alertUi.value({ Portao: 'accessGate', Alarme: 'accessAlarm', 'Caixa de chaves': 'accessKeyBox', Chave: 'accessKey', Codigo: 'accessCode', Acesso: 'accessGeneric' }[accessTypeLabel(type)]);
+  }
+  function repeatCopy(rule) {
+    const value = String(rule || '').trim();
+    const keys = { WEEKLY: 'accessWeekly', MONTHLY: 'accessMonthly', QUARTERLY: 'accessQuarterly', SEMIANNUAL: 'accessSemiannual', YEARLY: 'accessYearly', ANNUAL: 'accessYearly' };
+    if (Object.hasOwn(keys,value)) return alertUi.value(keys[value]);
+    if (value.startsWith('CUSTOM')) return alertUi.value('accessCustom', { detail: value.replace(/^CUSTOM[:|]?/i,'') });
+    return repeatLabel(rule);
+  }
+
   function accessTypeLabel(type) {
     const normalized = String(type || "").trim().toUpperCase();
     if (normalized.includes("GATE") || normalized.includes("PORT")) return "Portao";
@@ -4630,28 +4683,28 @@
   function visibleAccesses(visit) {
     const poolKeys = listOf(visit?.pool?.keyAccesses)
       .filter((key) => key && key.active !== false && key.visibleToTechnician !== false)
-      .map((key) => ({
+      .map((key) => withAccessPresentation({
         source: "Piscina",
         code: key.keyCode,
         title: "Chave / codigo da piscina",
         type: "KEY",
         instructions: key.description || "",
         required: key.requiredForVisit !== false
-      }));
+      }, alertUi.value('accessPoolKey'), alertUi.value('sourcePool')));
 
     const clientKeys = [
       ...listOf(visit?.client?.accesses),
       ...listOf(visit?.pool?.client?.accesses)
     ]
       .filter((key) => key && key.active !== false && key.visibleToTechnician !== false)
-      .map((key) => ({
+      .map((key) => withAccessPresentation({
         source: "Cliente",
         code: key.codeValue,
         title: key.title || "Chave / codigo do cliente",
         type: key.accessType,
         instructions: key.instructions || "",
         required: true
-      }));
+      }, key.title || alertUi.value('accessClientKey'), alertUi.value('sourceClient')));
 
     return uniqueByKey([...poolKeys, ...clientKeys].filter((key) => key.code || key.instructions), (key) => (
       `${key.source}:${key.type || ""}:${key.code || ""}:${key.instructions || ""}`
@@ -4681,7 +4734,7 @@
     const hasValidDue = dueDate && !Number.isNaN(dueDate.getTime());
     const recurring = reminderIsRecurring(reminder);
     const overdue = Boolean(hasValidDue && dueDate < new Date());
-    return {
+    const normalized = {
       id: reminder?.id,
       model,
       source,
@@ -4695,6 +4748,8 @@
       overdue,
       label: overdue ? (recurring ? "Lembrete recorrente atrasado" : "Lembrete atrasado") : (recurring ? "Lembrete recorrente" : "Lembrete pontual")
     };
+    reminderPresentation.set(normalized, { title: reminder?.title || alertUi.value('accessReminder'), source: source === 'Piscina' ? alertUi.value('sourcePool') : source === 'Cliente' ? alertUi.value('sourceClient') : source, label: alertUi.value(overdue ? recurring ? 'accessRecurringLate' : 'accessLate' : recurring ? 'accessRecurring' : 'accessOneTime') });
+    return normalized;
   }
 
   function visibleReminders(visit) {
@@ -4722,6 +4777,7 @@
     const strip = $("#visitNoticeStrip");
     const nextCard = document.querySelector(".next");
     if (!strip) return;
+    alertUi.clearTree(strip); strip.setAttribute('data-cw-no-i18n','');
 
     const returnInstructions = visit?.reason === "INCOMPLETE_RETURN" ? String(visit.returnInstructions || "Confirme as instruções com o escritório") : "";
     const hasNotices = Boolean(visit && (accesses.length || reminders.length || notes || returnInstructions));
@@ -4744,6 +4800,12 @@
       <div class="visit-notice-pills">${pills}</div>
       <small>Confirma codigos, chaves e instrucoes desta piscina antes de iniciar ou concluir a visita.</small>
     `;
+    alertUi.bind(strip.querySelector('b'), alertUi.value(returnInstructions ? 'accessReturn' : 'accessAttention'));
+    if (returnInstructions) alertUi.bind(strip.querySelector('p'), visit.returnInstructions ? returnInstructions : alertUi.value('accessConfirmReturn'));
+    alertUi.bind(strip.querySelector('small'), alertUi.value('accessConfirm'));
+    if (notes) alertUi.bind(strip.querySelector('.visit-notice-pill.reminder'), alertUi.value('accessPoolNotes'));
+    if (accesses.length) alertUi.bind(strip.querySelector('.visit-notice-pill.access'), alertUi.value('accessCount', { count: accesses.length }));
+    if (reminders.length) alertUi.bind(strip.querySelector('.visit-notice-pills > .reminder:last-child'), alertUi.value('accessReminderCount', { count: reminders.length }));
   }
 
   function maybeNotifyVisitNotices(visit, accesses, reminders, notes) {
@@ -4755,19 +4817,21 @@
     const key = `${visitKey(visit)}:${accesses.length}:${reminders.length}:${notes || ""}`;
     if (notifiedVisitNoticeKey === key) return;
     notifiedVisitNoticeKey = key;
-    toast(`Atencao: esta visita tem ${total} aviso(s), notas ou lembretes.`);
+    alertUi.notify(alertUi.value('accessToast', { count: total }));
   }
 
   function renderAccessCard(visit) {
     const card = $("#accessCard");
     const list = $("#accessList");
     if (!card || !list) return;
+    alertUi.clearTree(list); list.setAttribute('data-cw-no-i18n','');
 
     if (!visit) {
       card.hidden = false;
       card.classList.remove("has-alerts");
       renderVisitNoticeStrip(null, [], []);
       list.innerHTML = '<div class="muted">Sem piscina selecionada.</div>';
+      alertUi.bind(list.firstElementChild, alertUi.value('accessNoPool'));
       return;
     }
 
@@ -4787,36 +4851,41 @@
           <div class="access-meta">Se esta piscina precisar de codigo de portao, alarme, chave ou aviso permanente, o administrador deve registar na ficha do cliente ou da piscina.</div>
         </div>
       `;
+      alertUi.bind(list.querySelector('.access-code'), alertUi.value('accessNone'));
+      alertUi.bind(list.querySelector('.access-meta'), alertUi.value('accessRegister'));
       return;
     }
 
+    const entries = [];
+    const leaf = entry => { const id = entries.push(entry)-1; return `<span data-access-copy="${id}">${esc(alertUi.format(entry))}</span>`; };
     const accessHtml = accesses.map((access) => `
       <div class="access-item access-code-item">
-        <span class="chip">${esc(accessTypeLabel(access.type))} - ${esc(access.source)}${access.required ? " - obrigatorio" : ""}</span>
-        <div class="access-code">${esc(access.code || "Sem codigo")}</div>
-        <div class="access-meta">${esc(access.title || "")}${access.instructions ? `<br>${esc(access.instructions)}` : ""}</div>
+        <span class="chip">${leaf(alertUi.join([accessTypeCopy(access.type), accessPresentation.get(access).source, ...(access.required ? [alertUi.value('accessRequired')] : [])], ' - '))}</span>
+        <div class="access-code">${leaf(access.code || alertUi.value('accessNoCode'))}</div>
+        <div class="access-meta">${leaf(accessPresentation.get(access).title)}${access.instructions ? `<br>${leaf(access.instructions)}` : ""}</div>
       </div>
     `).join("");
 
     const reminderHtml = reminders.map((reminder) => {
-      const repeat = repeatLabel(reminder.repeatRule);
-      const when = reminder.due ? formatDate(reminder.due) : "Sem data definida";
+      const repeat = repeatCopy(reminder.repeatRule);
+      const when = reminder.due ? formatDate(reminder.due) : alertUi.value('accessNoDate');
       const meta = [
         reminder.description,
-        `Quando: ${when}`,
+        alertUi.value('accessWhen', { date: when }),
         repeat
-      ].filter(Boolean).map((part) => esc(part)).join("<br>");
+      ].filter(Boolean).map(leaf).join("<br>");
       return `
         <div class="access-item ${reminderClass(reminder)}">
-          <span class="chip"><span>${esc(reminder.label)}</span> - <span>${esc(reminder.source)}</span></span>
-          <div class="access-code" data-cw-no-i18n>${esc(reminder.title)}</div>
+          <span class="chip">${leaf(reminderPresentation.get(reminder).label)} - ${leaf(reminderPresentation.get(reminder).source)}</span>
+          <div class="access-code" data-cw-no-i18n>${leaf(reminderPresentation.get(reminder).title)}</div>
           <div class="access-meta">${meta}</div>
         </div>
       `;
     }).join("");
 
-    const notesHtml = notes ? `<div class="access-item reminder-permanent" data-pool-notes><span class="chip">Notas da piscina</span><div class="access-meta" data-cw-no-i18n style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(notes)}</div></div>` : "";
+    const notesHtml = notes ? `<div class="access-item reminder-permanent" data-pool-notes><span class="chip">${leaf(alertUi.value('accessPoolNotes'))}</span><div class="access-meta" data-cw-no-i18n style="white-space:pre-wrap;overflow-wrap:anywhere">${leaf(notes)}</div></div>` : "";
     list.innerHTML = `${notesHtml}${accessHtml}${reminderHtml}`;
+    for (const node of list.querySelectorAll('[data-access-copy]')) alertUi.bind(node, entries[Number(node.dataset.accessCopy)]);
   }
 
   function photoTypeKey(type) {
@@ -6011,6 +6080,8 @@
     bindPhotoUi($('#photosCard .field-tab-title h2'), 'title');
     bindPhotoUi($('#photosCard .field-tab-title span'), 'quick');
     markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
+    alertUi.bind($('#accessCard .field-tab-title h2'), alertUi.value('accessGeneric'));
+    alertUi.bind($('#accessCard .field-tab-title span'), alertUi.value('accessSectionHint'));
     markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
     alertUi.bind($('#routeCard .field-tab-title h2'), alertUi.value('mapSection'));
     alertUi.bind($('#routeCard .field-tab-title span'), alertUi.value('mapSectionHint'));

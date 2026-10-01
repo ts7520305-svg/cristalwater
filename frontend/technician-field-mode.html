@@ -547,6 +547,25 @@
       display: none;
     }
 
+    .visit-notice-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .visit-notice-pill {
+      max-width: 100%;
+      padding: 4px 8px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .access-item { overflow-wrap: anywhere; }
+    .access-item > .chip { display: inline-block; max-width: 100%; }
+
     .map-box {
       margin-top: 10px;
       min-height: 220px;
@@ -1477,8 +1496,8 @@
     </section>
 
     <section class="card access-card field-panel field-panel-agora" id="accessCard">
-      <span class="chip">Acesso e avisos</span>
-      <div class="access-list" id="accessList"><div class="empty">A carregar chave ou código desta piscina...</div></div>
+      <span class="chip" data-access-initial-copy="accessTitle" data-cw-no-i18n>Acesso e avisos</span>
+      <div class="access-list" id="accessList" data-cw-no-i18n><div class="empty" data-access-initial-copy="accessLoading">A carregar chave ou código desta piscina...</div></div>
     </section>
 
     <section class="card route-card field-panel field-panel-hoje" id="routeCard">

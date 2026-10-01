@@ -1,0 +1,1145 @@
+{
+  "task": 486,
+  "checkedAt": "2026-10-01T08:52:57.407308+00:00",
+  "parent": "3cc49949d83e761d0ec6fbc21cbc9322f7e56b6d",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": {
+    "productFiles": [
+      "frontend/technician-field-mode.js",
+      "frontend/technician-field-mode.html",
+      "frontend/sw.js"
+    ],
+    "testFiles": [
+      "scripts/test-field-access-languages.js",
+      "scripts/test-field-suite.js"
+    ],
+    "documentFiles": [
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/evidence/20261001_task486_local.json"
+    ],
+    "defaultBranchUntouched": true,
+    "merge": false,
+    "deploy": false,
+    "vps": false,
+    "externalContacts": false
+  },
+  "sources": {
+    "frontend/technician-field-mode.js": "dd2784799c86e59fbfa5286da277ad42f947d7ce84bd7069b69f47688d65fe29",
+    "frontend/technician-field-mode.html": "019e39a02bd5d7b37eb0f016a85c6133fe89a09e9935a07c2e7e0ab58ef60f4d",
+    "frontend/sw.js": "f7344049a33a302c6431ee6820935767fa9436e06d9d0832d5feb78866c5e67e",
+    "scripts/test-field-access-languages.js": "c5ec4b89b35afad4c98c48f79c3d24e3530006a883be5d9acd96a37f1d6a128f",
+    "scripts/test-field-suite.js": "e29f22fc4c71f36d583b463df9eedef686a7280140a17d66b59fc3fd93927304"
+  },
+  "changes": {
+    "ownedEntries": 37,
+    "variants": 185,
+    "previousCatalogue": 379,
+    "catalogue": 416,
+    "allPreviousEntriesExactlyPreserved": true,
+    "copy": {
+      "accessTitle": [
+        "Acesso e avisos",
+        "Access and notices",
+        "Accès et consignes",
+        "Acceso y avisos",
+        "Zugang und Hinweise"
+      ],
+      "accessLoading": [
+        "A carregar chave ou código desta piscina...",
+        "Loading the key or code for this pool...",
+        "Chargement de la clé ou du code de cette piscine…",
+        "Cargando la llave o el código de esta piscina...",
+        "Schlüssel oder Code für diesen Pool wird geladen…"
+      ],
+      "accessSectionHint": [
+        "chaves e codigos",
+        "keys and codes",
+        "clés et codes",
+        "llaves y códigos",
+        "Schlüssel und Codes"
+      ],
+      "accessGeneric": [
+        "Acesso",
+        "Access",
+        "Accès",
+        "Acceso",
+        "Zugang"
+      ],
+      "accessGate": [
+        "Portao",
+        "Gate",
+        "Portail",
+        "Puerta",
+        "Tor"
+      ],
+      "accessAlarm": [
+        "Alarme",
+        "Alarm",
+        "Alarme",
+        "Alarma",
+        "Alarm"
+      ],
+      "accessKeyBox": [
+        "Caixa de chaves",
+        "Key box",
+        "Boîte à clés",
+        "Caja de llaves",
+        "Schlüsselkasten"
+      ],
+      "accessKey": [
+        "Chave",
+        "Key",
+        "Clé",
+        "Llave",
+        "Schlüssel"
+      ],
+      "accessCode": [
+        "Codigo",
+        "Code",
+        "Code",
+        "Código",
+        "Code"
+      ],
+      "accessPoolKey": [
+        "Chave / codigo da piscina",
+        "Pool key / code",
+        "Clé / code de la piscine",
+        "Llave / código de la piscina",
+        "Poolschlüssel / Code"
+      ],
+      "accessClientKey": [
+        "Chave / codigo do cliente",
+        "Client key / code",
+        "Clé / code du client",
+        "Llave / código del cliente",
+        "Kundenschlüssel / Code"
+      ],
+      "accessRequired": [
+        "obrigatorio",
+        "required",
+        "obligatoire",
+        "obligatorio",
+        "erforderlich"
+      ],
+      "accessNoCode": [
+        "Sem codigo",
+        "No code",
+        "Aucun code",
+        "Sin código",
+        "Kein Code"
+      ],
+      "accessWeekly": [
+        "Repeticao semanal",
+        "Repeats weekly",
+        "Répétition hebdomadaire",
+        "Repetición semanal",
+        "Wöchentliche Wiederholung"
+      ],
+      "accessMonthly": [
+        "Repeticao mensal",
+        "Repeats monthly",
+        "Répétition mensuelle",
+        "Repetición mensual",
+        "Monatliche Wiederholung"
+      ],
+      "accessQuarterly": [
+        "Repeticao trimestral",
+        "Repeats quarterly",
+        "Répétition trimestrielle",
+        "Repetición trimestral",
+        "Vierteljährliche Wiederholung"
+      ],
+      "accessSemiannual": [
+        "Repeticao semestral",
+        "Repeats every six months",
+        "Répétition semestrielle",
+        "Repetición semestral",
+        "Halbjährliche Wiederholung"
+      ],
+      "accessYearly": [
+        "Repeticao anual",
+        "Repeats yearly",
+        "Répétition annuelle",
+        "Repetición anual",
+        "Jährliche Wiederholung"
+      ],
+      "accessCustom": [
+        "Repeticao personalizada: {detail}",
+        "Custom repetition: {detail}",
+        "Répétition personnalisée : {detail}",
+        "Repetición personalizada: {detail}",
+        "Benutzerdefinierte Wiederholung: {detail}"
+      ],
+      "accessReminder": [
+        "Lembrete",
+        "Reminder",
+        "Rappel",
+        "Recordatorio",
+        "Erinnerung"
+      ],
+      "accessRecurringLate": [
+        "Lembrete recorrente atrasado",
+        "Overdue recurring reminder",
+        "Rappel récurrent en retard",
+        "Recordatorio recurrente vencido",
+        "Überfällige wiederkehrende Erinnerung"
+      ],
+      "accessLate": [
+        "Lembrete atrasado",
+        "Overdue reminder",
+        "Rappel en retard",
+        "Recordatorio vencido",
+        "Überfällige Erinnerung"
+      ],
+      "accessRecurring": [
+        "Lembrete recorrente",
+        "Recurring reminder",
+        "Rappel récurrent",
+        "Recordatorio recurrente",
+        "Wiederkehrende Erinnerung"
+      ],
+      "accessOneTime": [
+        "Lembrete pontual",
+        "One-time reminder",
+        "Rappel ponctuel",
+        "Recordatorio puntual",
+        "Einmalige Erinnerung"
+      ],
+      "accessNoDate": [
+        "Sem data definida",
+        "No date set",
+        "Aucune date définie",
+        "Sin fecha definida",
+        "Kein Datum festgelegt"
+      ],
+      "accessWhen": [
+        "Quando: {date}",
+        "When: {date}",
+        "Quand : {date}",
+        "Cuándo: {date}",
+        "Wann: {date}"
+      ],
+      "accessPoolNotes": [
+        "Notas da piscina",
+        "Pool notes",
+        "Consignes de la piscine",
+        "Notas de la piscina",
+        "Poolhinweise"
+      ],
+      "accessAttention": [
+        "Atencao antes de entrar",
+        "Check before entering",
+        "À vérifier avant d’entrer",
+        "Atención antes de entrar",
+        "Vor dem Betreten prüfen"
+      ],
+      "accessReturn": [
+        "Regresso agendado pelo escritório",
+        "Return scheduled by the office",
+        "Retour planifié par le bureau",
+        "Regreso programado por la oficina",
+        "Rückkehr vom Büro geplant"
+      ],
+      "accessConfirmReturn": [
+        "Confirme as instruções com o escritório",
+        "Confirm the instructions with the office",
+        "Confirmez les consignes avec le bureau",
+        "Confirma las instrucciones con la oficina",
+        "Bestätigen Sie die Anweisungen mit dem Büro"
+      ],
+      "accessConfirm": [
+        "Confirma codigos, chaves e instrucoes desta piscina antes de iniciar ou concluir a visita.",
+        "Check this pool’s codes, keys and instructions before starting or completing the visit.",
+        "Vérifiez les codes, clés et consignes de cette piscine avant de commencer ou de terminer la visite.",
+        "Confirma los códigos, llaves e instrucciones de esta piscina antes de iniciar o completar la visita.",
+        "Prüfen Sie die Codes, Schlüssel und Anweisungen dieses Pools, bevor Sie den Besuch beginnen oder abschließen."
+      ],
+      "accessCount": [
+        "{count} acesso(s)",
+        "{count} access item(s)",
+        "{count} accès",
+        "{count} acceso(s)",
+        "{count} Zugangshinweise"
+      ],
+      "accessReminderCount": [
+        "{count} lembrete(s)",
+        "{count} reminder(s)",
+        "{count} rappel(s)",
+        "{count} recordatorio(s)",
+        "{count} Erinnerungen"
+      ],
+      "accessToast": [
+        "Atencao: esta visita tem {count} aviso(s), notas ou lembretes.",
+        "Attention: this visit has {count} notice(s), notes or reminders.",
+        "Attention : cette visite comporte {count} consigne(s), notes ou rappels.",
+        "Atención: esta visita tiene {count} aviso(s), notas o recordatorios.",
+        "Achtung: Dieser Besuch hat {count} Hinweise, Notizen oder Erinnerungen."
+      ],
+      "accessNoPool": [
+        "Sem piscina selecionada.",
+        "No pool selected.",
+        "Aucune piscine sélectionnée.",
+        "No hay una piscina seleccionada.",
+        "Kein Pool ausgewählt."
+      ],
+      "accessNone": [
+        "Sem código, nota ou lembrete registado",
+        "No access code, note or reminder recorded",
+        "Aucun code d’accès, consigne ou rappel enregistré",
+        "No hay códigos, notas ni recordatorios registrados",
+        "Kein Zugangscode, Hinweis oder Erinnerung gespeichert"
+      ],
+      "accessRegister": [
+        "Se esta piscina precisar de codigo de portao, alarme, chave ou aviso permanente, o administrador deve registar na ficha do cliente ou da piscina.",
+        "If this pool needs a gate code, alarm, key or permanent notice, the administrator must record it in the client or pool record.",
+        "Si cette piscine nécessite un code de portail, une alarme, une clé ou une consigne permanente, l’administrateur doit l’enregistrer dans la fiche du client ou de la piscine.",
+        "Si esta piscina necesita un código de puerta, una alarma, una llave o un aviso permanente, el administrador debe registrarlo en la ficha del cliente o de la piscina.",
+        "Benötigt dieser Pool einen Torcode, einen Alarm, einen Schlüssel oder einen dauerhaften Hinweis, muss der Administrator dies im Kunden- oder Pooldatensatz eintragen."
+      ]
+    },
+    "existingGlobalVariantsPreserved": [
+      "accessPoolNotes",
+      "accessRecurringLate",
+      "accessRecurring",
+      "accessLate",
+      "accessOneTime",
+      "accessNone"
+    ],
+    "privatePresentationMaps": true,
+    "originalDataObjectsFiltersFingerprintsDatesAndHandlersPreserved": true,
+    "publicShellCache": {
+      "previous": 262,
+      "current": 263
+    },
+    "runner": {
+      "previousCount": 375,
+      "count": 376,
+      "allPreviousOrderPreserved": true,
+      "scripts": [
+        "test-field-visual-flow.js",
+        "test-field-reminder-delete.js",
+        "test-field-crm-reminders.js",
+        "test-field-language-reload.js",
+        "test-field-day-review-languages.js",
+        "test-field-review-summary-languages.js",
+        "test-field-review-impediment-languages.js",
+        "test-field-review-equipment-languages.js",
+        "test-field-review-problem-languages.js",
+        "test-field-problem-form-languages.js",
+        "test-field-impediment-form-languages.js",
+        "test-field-equipment-form-languages.js",
+        "test-field-handover-receipt-languages.js",
+        "test-field-chemical-preparation-languages.js",
+        "test-field-intake-review-languages.js",
+        "test-field-recovery-languages.js",
+        "test-field-photo-error-languages.js",
+        "test-field-photo-panel-languages.js",
+        "test-field-legacy-photo-languages.js",
+        "test-field-legacy-queue-languages.js",
+        "test-field-gps-languages.js",
+        "test-field-gps-page-languages.js",
+        "test-field-pump-panel-languages.js",
+        "test-field-reminder-error-languages.js",
+        "test-field-water-panel-languages.js",
+        "test-field-water-list-languages.js",
+        "test-field-alert-board-languages.js",
+        "test-field-alert-source-languages.js",
+        "test-field-dashboard-languages.js",
+        "test-field-current-visit-languages.js",
+        "test-field-current-visit-time-languages.js",
+        "test-field-round-list-languages.js",
+        "test-field-round-navigation-languages.js",
+        "test-field-visit-shell-languages.js",
+        "test-field-visit-actions-languages.js",
+        "test-field-visit-feedback-languages.js",
+        "test-field-visit-completion-languages.js",
+        "test-field-visit-validation-languages.js",
+        "test-field-crew-status-languages.js",
+        "test-field-document-center-languages.js",
+        "test-field-document-transition-languages.js",
+        "test-field-document-body-languages.js",
+        "test-field-document-toolbar-languages.js",
+        "test-field-correction-summary-languages.js",
+        "test-field-download-error-languages.js",
+        "test-field-push-languages.js",
+        "test-field-auth-languages.js",
+        "test-field-route-session-languages.js",
+        "test-field-route-cache-languages.js",
+        "test-field-sync-languages.js",
+        "test-field-write-store-languages.js",
+        "test-field-legacy-page-languages.js",
+        "test-field-route-load-languages.js",
+        "test-field-connection-languages.js",
+        "test-field-map-navigation-languages.js",
+        "test-field-access-languages.js",
+        "test-field-water-api.js",
+        "test-field-access-api.js",
+        "test-field-e2e.js",
+        "test-fcs-sec-tech-auth.js",
+        "test-fcs-sec-tech-workday.js",
+        "test-fcs-technician-t1.js",
+        "test-visit-os-operational.js",
+        "test-route-os-acceptance.js",
+        "test-customer-os-operational.js",
+        "test-administration-os-operational.js",
+        "test-finance-os-operational.js",
+        "test-equipment-stock-os-operational.js",
+        "test-repair-os-operational.js",
+        "test-system-interconnections.js",
+        "test-real-month-flow-api.js",
+        "test-field-preflight.js",
+        "test-field-backup.js",
+        "test-production-runtime-health.js",
+        "test-field-gps-flow.js",
+        "test-field-two-year-api.js",
+        "test-field-billing-automation.js",
+        "test-field-commercial-quotes.js",
+        "test-field-client-rates.js",
+        "test-field-retention.js",
+        "test-field-quote-portal.js",
+        "test-field-resilience.js",
+        "test-field-equipment-maintenance.js",
+        "test-field-equipment-flow.js",
+        "test-field-equipment-reminders.js",
+        "test-field-chemical-options.js",
+        "test-field-inventory-count-flow.js",
+        "test-field-visit-briefing.js",
+        "test-field-service-reminders.js",
+        "test-field-reminder-lifecycle.js",
+        "test-field-alert-visibility.js",
+        "test-field-alert-resolution.js",
+        "test-field-alert-billing.js",
+        "test-field-draft-payments.js",
+        "test-field-draft-visibility.js",
+        "test-invoice-draft-classification-browser.js",
+        "test-field-payment-retry.js",
+        "test-field-payment-retry-ui.js",
+        "test-field-client-receipts.js",
+        "test-field-client-receipts-ui.js",
+        "test-field-credit-allocation.js",
+        "test-field-monthly-credit.js",
+        "test-field-surplus-ledger.js",
+        "test-field-alert-states.js",
+        "test-field-credit-adjustment.js",
+        "test-field-monthly-rates.js",
+        "test-field-invoice-regeneration.js",
+        "test-field-invoice-page-generation.js",
+        "test-field-repair-monthly-once.js",
+        "test-field-repair-invoice-atomic.js",
+        "test-field-contract-activation.js",
+        "test-field-contract-activation-ui.js",
+        "test-field-invoice-cancellation.js",
+        "test-field-invoice-credit-note.js",
+        "test-field-repair-payment.js",
+        "test-field-cash-reports.js",
+        "test-field-invoice-issue.js",
+        "test-field-invoice-delivery.js",
+        "test-field-invoice-pdf-access.js",
+        "test-field-financial-document-pdf.js",
+        "test-field-authenticated-document-opening.js",
+        "test-field-daily-service-log.js",
+        "test-field-company-closures.js",
+        "test-field-client-closures.js",
+        "test-field-client-closures-ui.js",
+        "test-field-company-closure-edit.js",
+        "test-field-payment-ledger.js",
+        "test-field-pool-calculator-state.js",
+        "test-field-pool-calculator-writes.js",
+        "test-field-pool-calculator-recovery.js",
+        "test-field-pool-calculator-drafts.js",
+        "test-field-pool-calculator-languages.js",
+        "test-field-extra-history.js",
+        "test-field-legacy-entry.js",
+        "test-field-client-technical-history.js",
+        "test-field-collection-summary.js",
+        "test-field-email-history.js",
+        "test-field-live-map.js",
+        "test-field-payment-policy-review.js",
+        "test-field-admin-day.js",
+        "test-field-security-review.js",
+        "test-field-admin-catalogue.js",
+        "test-field-admin-onboarding.js",
+        "test-field-admin-onboarding-ui.js",
+        "test-field-navigation-preferences.js",
+        "test-field-supplier-hub.js",
+        "test-field-supplier-hub-ui.js",
+        "test-field-technician-management.js",
+        "test-field-technician-management-ui.js",
+        "test-field-fleet-management.js",
+        "test-field-fleet-management-ui.js",
+        "test-field-vehicle-consumption.js",
+        "test-field-vehicle-consumption-ui.js",
+        "test-field-transport-guide-create.js",
+        "test-field-transport-guide-create-ui.js",
+        "test-field-transport-guide-items.js",
+        "test-field-transport-guide-items-ui.js",
+        "test-field-transport-guide-manage.js",
+        "test-field-transport-guide-manage-ui.js",
+        "test-field-work-guide-close.js",
+        "test-field-work-guide-close-ui.js",
+        "test-field-vehicle-maintenance.js",
+        "test-field-vehicle-maintenance-ui.js",
+        "test-field-vehicle-assignment.js",
+        "test-field-vehicle-assignment-ui.js",
+        "test-field-vehicle-stock-preset.js",
+        "test-field-vehicle-stock-preset-ui.js",
+        "test-field-operational-risk-rules.js",
+        "test-field-operational-risk-rules-ui.js",
+        "test-field-operational-risk-summary.js",
+        "test-field-incident-center.js",
+        "test-field-operational-dashboard.js",
+        "test-field-ai-zone-grouping.js",
+        "test-field-admin-dashboard.js",
+        "test-field-legacy-dashboard.js",
+        "test-field-dashboard-metrics.js",
+        "test-field-summary-volume.js",
+        "test-field-inventory-volume.js",
+        "test-field-product-volume.js",
+        "test-field-agenda-volume.js",
+        "test-field-guide-volume.js",
+        "test-field-report-volume.js",
+        "test-field-pdf-volume.js",
+        "test-field-attachment-volume.js",
+        "test-field-photo-evidence-volume.js",
+        "test-field-technician-guide-ui.js",
+        "test-field-document-summary-ui.js",
+        "test-field-materials-ui.js",
+        "test-field-guide-read-scope.js",
+        "test-field-guide-read-scope-ui.js",
+        "test-field-fleet-history.js",
+        "test-field-fleet-history-ui.js",
+        "test-field-work-guide-start.js",
+        "test-field-work-guide-start-ui.js",
+        "test-field-transport-guide-documents.js",
+        "test-field-transport-guide-documents-ui.js",
+        "test-field-financial-pdf.js",
+        "test-field-invoice-document.js",
+        "test-field-legacy-alert-access.js",
+        "test-field-invoice-chat.js",
+        "test-field-chat-identity.js",
+        "test-field-invoice-outbound.js",
+        "test-field-cash-methods.js",
+        "test-field-account-access.js",
+        "test-field-legacy-admin-access.js",
+        "test-field-resource-chat.js",
+        "test-field-internal-profile-access.js",
+        "test-field-route-privacy.js",
+        "test-field-manual-invoice-reminder.js",
+        "test-field-client-chat-privacy.js",
+        "test-field-chat-attachments.js",
+        "test-field-internal-chat-durability.js",
+        "test-field-internal-chat-ui.js",
+        "test-field-notification-confirmation.js",
+        "test-field-client-chat-retry.js",
+        "test-field-client-chat-recovery-ui.js",
+        "test-field-client-chat-consolidation.js",
+        "test-field-client-chat-history-ui.js",
+        "test-field-client-portal-requests.js",
+        "test-field-client-portal-requests-ui.js",
+        "test-field-client-edit-preservation.js",
+        "test-field-pool-edit-atomicity.js",
+        "test-field-client-edit-recovery.js",
+        "test-field-client-edit-recovery-ui.js",
+        "test-field-pool-edit-recovery.js",
+        "test-field-pool-edit-recovery-ui.js",
+        "test-field-technical-sheet-atomicity.js",
+        "test-field-technical-sheet-recovery.js",
+        "test-field-technical-sheet-recovery-ui.js",
+        "test-field-technical-proposals.js",
+        "test-field-proposal-recovery.js",
+        "test-field-proposal-recovery-ui.js",
+        "test-field-gps-recovery.js",
+        "test-field-write-recovery.js",
+        "test-field-write-recovery-ui.js",
+        "test-field-internal-alert.js",
+        "test-field-internal-alert-ui.js",
+        "test-field-internal-alert-languages.js",
+        "test-field-stock-requests.js",
+        "test-field-stock-requests-ui.js",
+        "test-field-stock-request-languages.js",
+        "test-field-problem-reports.js",
+        "test-field-problem-reports-ui.js",
+        "test-field-client-intake.js",
+        "test-field-client-intake-ui.js",
+        "test-field-admin-monthly-reports.js",
+        "test-field-admin-monthly-reports-ui.js",
+        "test-field-monthly-print-access.js",
+        "test-field-monthly-print.js",
+        "test-field-monthly-print-ui.js",
+        "test-field-report-settings.js",
+        "test-field-report-settings-ui.js",
+        "test-field-visit-report.js",
+        "test-field-report-opening-ui.js",
+        "test-field-report-history-review.js",
+        "test-field-route-preview.js",
+        "test-field-route-preview-ui.js",
+        "test-field-route-preview-languages.js",
+        "test-field-legacy-route-recovery.js",
+        "test-field-legacy-visit-drafts.js",
+        "test-field-legacy-draft-languages.js",
+        "test-field-modern-route-recovery.js",
+        "test-field-workday-recovery.js",
+        "test-field-workday-languages.js",
+        "test-field-visit-types.js",
+        "test-field-extra-execution.js",
+        "test-field-extra-reminders.js",
+        "test-field-extra-correction.js",
+        "test-field-extra-equipment.js",
+        "test-field-extra-incomplete.js",
+        "test-field-modern-visit-drafts.js",
+        "test-field-draft-navigation-memory.js",
+        "test-field-modern-visit-draft-languages.js",
+        "test-field-team-leader-entry.js",
+        "test-field-complete-daily-route.js",
+        "test-field-document-recovery.js",
+        "test-field-guide-pdf.js",
+        "test-field-alert-source.js",
+        "test-field-key-scope.js",
+        "test-field-operational-pages.js",
+        "test-field-admin-map-recovery.js",
+        "test-field-geographic-areas.js",
+        "test-field-multi-map.js",
+        "test-field-operational-values.js",
+        "test-field-operational-values-ui.js",
+        "test-field-planned-work.js",
+        "test-field-client-services.js",
+        "test-field-client-services-ui.js",
+        "test-field-client-service-pricing.js",
+        "test-field-alert-report-opening.js",
+        "test-field-visit-report-photos.js",
+        "test-field-extra-report.js",
+        "test-field-maintenance-billing.js",
+        "test-field-client-monthly-report-access.js",
+        "test-field-client-monthly-generation.js",
+        "test-field-client-monthly-reports-ui.js",
+        "test-field-client-documents-access.js",
+        "test-field-client-documents-ui.js",
+        "test-field-external-invoice-registration.js",
+        "test-field-external-reference-review.js",
+        "test-field-external-invoice-summary.js",
+        "test-field-monthly-email-period.js",
+        "test-field-monthly-email-delivery.js",
+        "test-field-monthly-email-ui.js",
+        "test-field-monthly-email-review.js",
+        "test-field-monthly-email-review-ui.js",
+        "test-field-credit-note-revenue.js",
+        "test-field-credit-revenue.js",
+        "test-field-credit-revenue-ui.js",
+        "test-field-financial-ai.js",
+        "test-field-financial-ai-ui.js",
+        "test-field-execution-values.js",
+        "test-field-execution-values-ui.js",
+        "test-field-company-expenses.js",
+        "test-field-company-expenses-ui.js",
+        "test-field-expense-costs.js",
+        "test-field-expense-costs-ui.js",
+        "test-field-repair-costs.js",
+        "test-field-repair-costs-ui.js",
+        "test-field-repair-materials.js",
+        "test-field-repair-materials-ui.js",
+        "test-field-repair-work.js",
+        "test-field-repair-work-ui.js",
+        "test-field-repair-labor.js",
+        "test-field-repair-labor-ui.js",
+        "test-field-labor-composition.js",
+        "test-field-labor-composition-ui.js",
+        "test-field-cost-period.js",
+        "test-field-cost-period-ui.js",
+        "test-field-maintenance-costs.js",
+        "test-field-maintenance-costs-ui.js",
+        "test-field-labor-distribution.js",
+        "test-field-labor-distribution-ui.js",
+        "test-field-labor-components.js",
+        "test-field-labor-components-ui.js",
+        "test-field-work-time-costs.js",
+        "test-field-expense-valuations.js",
+        "test-field-expense-valuations-ui.js",
+        "test-field-financial-cost-coverage.js",
+        "test-field-composed-cost-coverage.js",
+        "test-field-equipment-work-time.js",
+        "test-field-maintenance-labor.js",
+        "test-field-maintenance-materials.js",
+        "test-field-equipment-materials.js",
+        "test-field-equipment-material-review.js",
+        "test-field-reminder-resources.js",
+        "test-field-reminder-labor.js",
+        "test-field-reminder-materials.js",
+        "test-field-reminder-partial-returns.js",
+        "test-field-reminder-visits.js",
+        "test-field-reminder-visit-resources.js",
+        "test-field-reminder-visit-costs.js",
+        "test-field-reminder-visit-intervals.js",
+        "test-field-reminder-intervals.js",
+        "test-field-equipment-intervals.js",
+        "test-field-equipment-time-review.js",
+        "test-field-maintenance-share-period.js",
+        "test-field-equipment-history-review.js",
+        "test-field-equipment-history-materials.js",
+        "test-field-equipment-history-time.js",
+        "test-field-financial-revenue-coverage.js",
+        "test-field-monthly-revenue.js",
+        "test-field-monthly-revenue-ui.js",
+        "test-field-maintenance-revenue.js",
+        "test-field-repair-revenue.js",
+        "test-field-repair-execution.js",
+        "test-field-repair-execution-revenue.js",
+        "test-field-repair-execution-command.js",
+        "test-field-repair-no-materials.js",
+        "test-field-repair-execution-ui.js",
+        "test-field-visit-report-origin.js",
+        "test-field-product-identity.js",
+        "test-field-product-identity-ui.js",
+        "test-field-legacy-products.js",
+        "test-field-product-catalogue-ui.js",
+        "test-field-extra-products.js"
+      ]
+    }
+  },
+  "local": {
+    "database": "isolated PGlite / schema-task474.sql",
+    "serverTimezone": "UTC",
+    "browserTimezone": "Europe/Lisbon",
+    "externalOperations": false,
+    "nativePostgresAcceptance": false,
+    "unit": {
+      "files": 141,
+      "tests": 1396,
+      "logSummary": "Test Files  141 passed (141)\n      Tests  1396 passed (1396)\n   Start at  09:49:29\n   Duration  9.59s (transform 3.22s, setup 0ms, import 9.92s, tests 16.98s, environment 19ms)"
+    },
+    "technician": {
+      "tests": 4,
+      "logSummary": "Test Files  1 passed (1)\n      Tests  4 passed (4)\n   Start at  09:38:17\n   Duration  538ms (transform 105ms, setup 0ms, import 138ms, tests 64ms, environment 0ms)"
+    },
+    "syntax": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 44 inline scripts.",
+    "sequentialIntegrations": [
+      {
+        "script": "../qa-runtime/seed-admin476.cjs",
+        "code": 0,
+        "signal": null,
+        "ms": 244
+      },
+      {
+        "script": "scripts/test-field-access-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33716
+      },
+      {
+        "script": "scripts/test-field-visit-briefing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5368
+      },
+      {
+        "script": "scripts/test-field-key-scope.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2663
+      },
+      {
+        "script": "scripts/test-field-water-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10857
+      },
+      {
+        "script": "scripts/test-field-briefing-browser.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2780
+      },
+      {
+        "script": "scripts/test-field-modern-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23176
+      },
+      {
+        "script": "scripts/test-field-map-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35602
+      }
+    ],
+    "finalCssChecks": {
+      "access": {
+        "script": "scripts/test-field-access-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33714
+      },
+      "briefing": {
+        "script": "scripts/test-field-visit-briefing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5428
+      },
+      "connection": {
+        "script": "scripts/test-field-connection-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31018
+      }
+    },
+    "semanticNegativeAndFinal": [
+      {
+        "script": "../qa-runtime/seed-admin476.cjs",
+        "code": 0,
+        "signal": null,
+        "ms": 437
+      },
+      {
+        "script": "../qa-runtime/negative-access486.cjs",
+        "code": 1,
+        "signal": null,
+        "ms": 6717
+      },
+      {
+        "script": "scripts/test-field-access-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30453
+      }
+    ],
+    "negativeControl": {
+      "scope": "Only renderAccessCard and renderVisitNoticeStrip from immutable TASK485 parent are substituted into the final module. Final helpers, dictionary, HTML and CSS remain. Service workers blocked for source selection.",
+      "expectedFailure": true,
+      "ms": 6717,
+      "assertion": "English retains Notas da piscina instead of Pool notes",
+      "isWholeParentAcceptance": false,
+      "isOfflineAcceptance": false,
+      "log": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n+ actual - expected\n\n+ 'Notas da piscina'\n- 'Pool notes'\n\n    at matrix (/workspace/scratch/1c4fa52fd046/qa-runtime/negative-access486.cjs:143:166)\n    at async /workspace/scratch/1c4fa52fd046/qa-runtime/negative-access486.cjs:173:126 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 'Notas da piscina',\n  expected: 'Pool notes',\n  operator: 'strictEqual',\n  diff: 'simple'\n}"
+    },
+    "languageResult": {
+      "checks": 105,
+      "scenarios": 10,
+      "languages": 5,
+      "widths": [
+        320,
+        390,
+        1440
+      ],
+      "typedDraftFields": 13,
+      "sameNumericVisitIdAcrossTypes": true,
+      "immutablePending": 2,
+      "exactPendingPayloadHashesAndRequestIds": true,
+      "originalCodesInstructionsDatesAndUnknownRepeatRules": true,
+      "foreignIdenticalCopiesLiteral": true,
+      "missingDateWrapper": true,
+      "toastCountAndLanguages": true,
+      "cachedExtraShell": true,
+      "noOperationalWritesDuringLanguageMatrices": true,
+      "noPageErrors": true
+    },
+    "relevantLogs": {
+      "semantic486-scripts_test-field-access-languages.js.log": "PASS access languages {\"name\":\"regular-full\",\"widths\":[320,390,1440],\"checks\":20,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"foreign-identical-owned-leaves\",\"widths\":[320],\"checks\":25,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"return-source-instructions\",\"widths\":[320,390,1440],\"checks\":40,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"return-fallback-instructions\",\"widths\":[320],\"checks\":45,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"source-reminder-without-date\",\"widths\":[320],\"checks\":50,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"extra-client-notices\",\"widths\":[320,390,1440],\"checks\":65,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"extra-no-instructions\",\"widths\":[320,390,1440],\"checks\":80,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"no-selected-pool\",\"widths\":[320],\"checks\":85,\"pendingCount\":0,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"regular-offline-event\",\"widths\":[320,390,1440],\"checks\":100,\"pendingCount\":2,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access languages {\"name\":\"extra-offline-cached-shell\",\"widths\":[320],\"checks\":105,\"pendingCount\":2,\"noOperationalWrites\":true,\"originalCodesInstructionsDates\":true}\nPASS access language result {\"checks\":105,\"scenarios\":10,\"ownedEntries\":37,\"languages\":5,\"typedDraftFields\":13,\"immutablePending\":2,\"originalCodesInstructionsDates\":true,\"foreignCopiesLiteral\":true,\"cachedExtraShell\":true,\"noOperationalWrites\":true}",
+      "final486-scripts_test-field-visit-briefing.js.log": "PASS regular/extra briefing, pool notes, exact pool/client and technician scope, 505 general + 23 operational notices, closed exclusion, team leader, reassignment and read-only history\nPASS real field notes, recurring overdue warning, literal text, full check-in, cancellation, explicit persisted start, refresh, PT/EN/FR/ES/DE and responsive review\nVisual evidence: /workspace/scratch/1c4fa52fd046/cristalwater/reports/field-visual/visit-briefing-1790844068881",
+      "final486-scripts_test-field-key-scope.js.log": "PASS morning UI preserves the selected day against delayed replies, clears stale keys on failure/session change and renders both visit types at 320/390/1440 px\nPASS local leap-day boundaries, regular/extra ID collisions, required key filters, tech/user/leader isolation, private reads and immediate reassignment",
+      "final486-scripts_test-field-water-api.js.log": "PASS unauthenticated create rejected\nPASS foreign visit create rejected\nPASS spoofed technician rejected\nPASS concurrent replay creates one reminder\nPASS pump reminder persists, escalates and closes with isolated ownership\nPASS foreign close rejected\nPASS unknown close returns404\nPASS server escalates without browser and repeats safely\nPASS foreign list hides reminder\nPASS close resolves linked alarm only\nPASS late alarm cannot reopen a closed reminder\nPASS replayed create preserves closed state\nPASS field reload can retrieve authoritative state\nPASS handover retains owner until acceptance and rejects outsiders/stale requests\nPASS cancelled or physically closed requests cannot be accepted\nPASS critical reminders repeat every 15 minutes, follow acceptance and stop on closure\nPASS incomplete visit preserves work, notifies once and rejects foreign/completed visits",
+      "final486-scripts_test-field-briefing-browser.js.log": "PASS full instructions, safe text, mobile scrolling and one explicit start\nPASS cancel never starts or records a confirmation\nPASS changing only the selected visit cannot confirm the old instructions\nPASS changed instructions invalidate the open review and require reading again\nPASS session change clears the review and a late confirmation does nothing\nPASS visit type changes invalidate review even with identical numeric IDs and labels\nPASS disabled start cannot record a confirmation or bypass the next review",
+      "final486-scripts_test-field-modern-visit-drafts.js.log": "PASS seven readings/notes, checklist and products survive offline reload; quota preserves saved bytes and visible changes, blocks completion, and supports explicit retry\nPASS server changes merge untouched fields and require explicit decisions for overlapping edits; unresolved differences survive reload and literal text is safe\nPASS real competing Web Locks prevent silent replacement; disjoint edits combine, overlapping text remains reviewable, and 320/390/1440 layouts fit\nPASS same-number REGULAR/EXTRA drafts remain separate; corrupt, wrong-owner and wrong-pool bytes are preserved; unsupported locks and failed readback never claim success\nPASS prior typed drafts without a baseline remain intact until explicit field review; text, measurements and private EXTRA photo survive review with the original typed identity\nPASS frozen offline completion recovers the original UUID once with one stock debit; EXTRA same-number completion remains separate; account callbacks cannot overwrite another draft",
+      "final486-scripts_test-field-map-navigation-languages.js.log": "PASS map/navigation languages {\"name\":\"gps-address\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":15,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"context-agora\",\"widths\":[320],\"pendingCount\":0,\"checks\":20,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"context-docs\",\"widths\":[320],\"pendingCount\":0,\"checks\":25,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"context-more\",\"widths\":[320],\"pendingCount\":0,\"checks\":30,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"foreign-identical-leaves\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":45,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"foreign-frame-title\",\"widths\":[320],\"pendingCount\":0,\"checks\":50,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"extra-address\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":65,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"extra-missing-location\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":80,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"gps-missing-address\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":95,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"empty-round\",\"widths\":[320,390,1440],\"pendingCount\":0,\"checks\":110,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"gps-offline-real-event\",\"widths\":[320,390,1440],\"pendingCount\":2,\"checks\":125,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation languages {\"name\":\"extra-offline-cached-shell\",\"widths\":[320],\"pendingCount\":2,\"checks\":130,\"unchangedDestinations\":true,\"noOperationalWrites\":true}\nPASS map/navigation language result {\"checks\":130,\"scenarios\":12,\"ownedEntries\":33,\"languages\":5,\"typedDraftFields\":13,\"immutablePending\":2,\"foreignCopiesLiteral\":true,\"unchangedDestinations\":true,\"cachedExtraShell\":true,\"noOperationalWrites\":true}",
+      "exact486-scripts_test-field-connection-languages.js.log": "PASS connection languages {\"name\":\"no-legacy\",\"widths\":[320,390,1440],\"historyHidden\":true,\"pendingCount\":0,\"checks\":15,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"empty-legacy\",\"widths\":[320,390,1440],\"historyHidden\":true,\"pendingCount\":0,\"checks\":30,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"unattributed-legacy\",\"widths\":[320,390,1440],\"historyHidden\":false,\"pendingCount\":0,\"checks\":45,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"foreign-identical-node\",\"widths\":[320,390,1440],\"historyHidden\":false,\"pendingCount\":0,\"checks\":60,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"session-pending-is-not-network\",\"widths\":[320,390,1440],\"historyHidden\":false,\"pendingCount\":0,\"checks\":75,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"extra-online\",\"widths\":[320],\"historyHidden\":false,\"pendingCount\":0,\"checks\":80,\"badgeOffline\":\"false\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"offline-real-event\",\"widths\":[320,390,1440],\"historyHidden\":false,\"pendingCount\":2,\"checks\":95,\"badgeOffline\":\"true\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"foreign-markup-offline\",\"widths\":[320,390,1440],\"historyHidden\":false,\"pendingCount\":2,\"checks\":110,\"badgeOffline\":\"true\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection languages {\"name\":\"extra-offline-cached-shell\",\"widths\":[320],\"historyHidden\":false,\"pendingCount\":2,\"checks\":115,\"badgeOffline\":\"true\",\"typedDrafts\":true,\"noOperationalWrites\":true}\nPASS connection language result {\"checks\":115,\"scenarios\":9,\"ownedEntries\":3,\"languages\":5,\"typedDraftFields\":13,\"immutablePending\":2,\"privateLegacyHidden\":true,\"foreignCopiesLiteral\":true,\"realOfflineEvent\":true,\"cachedExtraShell\":true,\"noOperationalWrites\":true}"
+    }
+  },
+  "visual": {
+    "captures": 15,
+    "width": 320,
+    "finalCssSeparationVerified": true,
+    "reviewed": [
+      "regular access beginning, middle and end",
+      "regular notice counts",
+      "return source instructions",
+      "return office fallback",
+      "extra client notices",
+      "empty notices card"
+    ],
+    "captureHashes": {
+      "extra-client-notices-access-de-320.png": "f443ca2b7d8f3068febd60037a999d64fb1f9e220778ba80a03af1562186cca8",
+      "extra-client-notices-notice-de-320.png": "57765799c02640fc63d8254689f41776948041b49e6aad4bcddb5bfac663b152",
+      "extra-no-instructions-access-de-320.png": "5c09f6791145a923c599f42e3b458fe91769870e6fcdd32bfc6ffad3d3e5d2c9",
+      "extra-offline-cached-shell-access-de-320.png": "b1249741cf322ba7d0208599b479763948406e35e3a8de6173bde3acf73e2bb2",
+      "extra-offline-cached-shell-notice-de-320.png": "2932ada54f29bf3d9e1ed9f16c5c0df529db44393dbc50f049da4e57498de471",
+      "regular-full-access-de-320.png": "953efb14cb95fe61589277453a56fb99ab06a1c6c9cc626ecc0eeceb0d32ede0",
+      "regular-full-notice-de-320.png": "85cd00960fbbe2ef158073f05222a5517543a5041ff5b39cdab58676e211eff2",
+      "regular-offline-event-access-de-320.png": "a1f1d9ec96445d5bb69b1f76541e0af78729f0d8a991293ab86a7d923a1f187b",
+      "regular-offline-event-notice-de-320.png": "ec343abe3997f44df7bef220454f39c0604d166d0cd76e5e061ac2013f224ee8",
+      "return-fallback-instructions-access-de-320.png": "ba8eb520e8a3222c802f3ca63f61a71a19228e5feb32ba7898bb87657ee0dbe5",
+      "return-fallback-instructions-notice-de-320.png": "b4364afdb2e22875a07e38a858e7f872acd9730dffa7d27e1f8acd4a817fe32f",
+      "return-source-instructions-access-de-320.png": "01a488e1e9e21af3b187fe545e361d05f33f78b0b1e31ca92a171d4017468dde",
+      "return-source-instructions-notice-de-320.png": "349cc18017be86a311fd0d88a2d5b79ca3e287a9e3324706bd4b49c93796b291",
+      "source-reminder-without-date-access-de-320.png": "64db3aeb4beaa4ef02ede90e6820f399af2405ebe70645b3851fc34699e7eabb",
+      "source-reminder-without-date-notice-de-320.png": "85cd00960fbbe2ef158073f05222a5517543a5041ff5b39cdab58676e211eff2"
+    },
+    "externalServicesBlockedInBrowserQa": true
+  },
+  "nativeBeforePublication": {
+    "checkedAt": "2026-10-01T08:50:35.440Z",
+    "task485": {
+      "code": "3cc49949d83e761d0ec6fbc21cbc9322f7e56b6d",
+      "tree": "766957c9473e465d9d55606f59f8158945f7898b",
+      "run": 36835718238,
+      "jobs": [
+        {
+          "id": 110282530571,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36835718238,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "task484": {
+      "code": "0ff7057fc67f9ea49a58159b70ff396ba91a7156",
+      "run": 36831370265,
+      "jobs": [
+        {
+          "id": 110268518638,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36831370265,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "lastCompleteAcceptance": {
+    "task": 483,
+    "code": "f32e3d4628c1e84d0970209468a9d4788d4c9e5f",
+    "run": 36822194203,
+    "job": 110239975117,
+    "groups": 373,
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "evidence": "20261001_task484_local.json"
+  },
+  "completion": {
+    "total": 32,
+    "notStarted": 26,
+    "inProgress": 1,
+    "complete": 5,
+    "open": [
+      "C06",
+      "C08",
+      "C10"
+    ],
+    "next": "TASK487: presentation of assistance and early next-day rounds",
+    "annualContract": "deferred",
+    "task486Publication": "pending in this evidence snapshot"
+  }
+}
