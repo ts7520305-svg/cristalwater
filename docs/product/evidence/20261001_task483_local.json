@@ -5976,8 +5976,35 @@
     }
   },
   "publication": {
-    "status": "not_published_yet",
-    "ci": null
+    "status": "published",
+    "code": "f32e3d4628c1e84d0970209468a9d4788d4c9e5f",
+    "tree": "ab4a2115aea8177f1553bf89768a3a88d2811a25",
+    "parent": "05d0199c5c5052923ef2c40324d6e5b7d649da96",
+    "treeMatchesLocal": true,
+    "sourceHashesMatch": true,
+    "observedAt": "2026-10-01T05:58:42.523Z",
+    "ci": {
+      "run": 36822194203,
+      "job": 110239975117,
+      "url": "https://github.com/ts7520305-svg/cristalwater/actions/runs/36822194203",
+      "head": "f32e3d4628c1e84d0970209468a9d4788d4c9e5f",
+      "status": "in_progress",
+      "conclusion": null,
+      "initialPassedSteps": 6,
+      "suite": {
+        "name": "Run node scripts/test-field-suite.js",
+        "status": "pending",
+        "conclusion": null,
+        "number": 11
+      },
+      "restore": {
+        "name": "Restore database and uploaded files in isolated QA",
+        "status": "pending",
+        "conclusion": null,
+        "number": 12
+      }
+    },
+    "documentationFollowup": "This [skip ci] update records publication and observed CI state; product and test sources are unchanged from the validated TASK483 commit."
   },
   "completion": {
     "tasks": 32,
