@@ -563,6 +563,9 @@
       display: block;
     }
 
+    .map-overlay { padding: 8px 12px; overflow-wrap: anywhere; }
+    .map-overlay span { display: block; }
+
     .map-fallback {
       min-height: 220px;
       display: grid;
@@ -1479,20 +1482,20 @@
     </section>
 
     <section class="card route-card field-panel field-panel-hoje" id="routeCard">
-      <span class="chip">Próximo local</span>
-      <div class="title" id="routeTitle">Mapa da próxima piscina</div>
-      <div class="muted" id="routeSummary">A carregar localização do serviço atribuído...</div>
-      <div class="map-box" id="mapBox"><div class="map-fallback">A carregar mapa...</div></div>
-      <div class="muted" id="routeMeta" style="margin-top:10px"></div>
+      <span class="chip" data-map-initial-copy="mapNext" data-cw-no-i18n>Próximo local</span>
+      <div class="title" id="routeTitle" data-map-initial-copy="mapTitle" data-cw-no-i18n>Mapa da próxima piscina</div>
+      <div class="muted" id="routeSummary" data-map-initial-copy="mapLoadingLocation" data-cw-no-i18n>A carregar localização do serviço atribuído...</div>
+      <div class="map-box" id="mapBox" data-cw-no-i18n><div class="map-fallback" data-map-initial-copy="mapLoading">A carregar mapa...</div></div>
+      <div class="muted" id="routeMeta" data-cw-no-i18n style="margin-top:10px"></div>
       <div class="route-actions">
-        <a class="big ok route-btn" id="navLink" href="#" target="_blank" rel="noopener">Navegar</a>
-        <a class="big ghost route-btn" id="mapsLink" href="#" target="_blank" rel="noopener">Ver mapa</a>
+        <a class="big ok route-btn" id="navLink" data-map-initial-copy="dashNavigate" data-cw-no-i18n href="#" target="_blank" rel="noopener">Navegar</a>
+        <a class="big ghost route-btn" id="mapsLink" data-map-initial-copy="mapShow" data-cw-no-i18n href="#" target="_blank" rel="noopener">Ver mapa</a>
       </div>
     </section>
 
-    <section class="card field-panel field-panel-more"><h2>Apoio e conta</h2><div class="field-account-links"><a href="/technician-chat">Conversa da equipa</a><a href="/technician-chat#noticesTitle">Notificações</a><a href="/technician-profile">O meu perfil</a><a href="/technician-route">Agenda</a></div></section>
+    <section class="card field-panel field-panel-more"><h2 data-field-navigation-copy="navSupport" data-cw-no-i18n>Apoio e conta</h2><div class="field-account-links"><a href="/technician-chat" data-field-navigation-copy="navTeamChat" data-cw-no-i18n>Conversa da equipa</a><a href="/technician-chat#noticesTitle" data-field-navigation-copy="navNotifications" data-cw-no-i18n>Notificações</a><a href="/technician-profile" data-field-navigation-copy="navProfile" data-cw-no-i18n>O meu perfil</a><a href="/technician-route" data-field-navigation-copy="navSchedule" data-cw-no-i18n>Agenda</a></div></section>
 
-    <details class="card field-panel field-panel-more"><summary>Histórico de alertas</summary><div id="fieldAlertHistoryList"></div></details>
+    <details class="card field-panel field-panel-more"><summary data-field-navigation-copy="historyTitle" data-cw-no-i18n>Histórico de alertas</summary><div id="fieldAlertHistoryList"></div></details>
 
     <section class="card water-card field-panel field-panel-more">
       <span class="chip">Água aberta</span>

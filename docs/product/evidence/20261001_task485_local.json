@@ -1,0 +1,386 @@
+{
+  "task": 485,
+  "checkedAt": "2026-10-01T08:19:34.676895+00:00",
+  "parent": "d9026e077f4a25dd74f29c8cb81edfe75b92aaf2",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": {
+    "productFiles": [
+      "frontend/technician-field-mode.js",
+      "frontend/technician-field-mode.html",
+      "frontend/sw.js"
+    ],
+    "testFiles": [
+      "scripts/test-field-map-navigation-languages.js",
+      "scripts/test-field-connection-languages.js",
+      "scripts/test-field-suite.js"
+    ],
+    "documentFiles": [
+      "docs/product/CURRENT_WORK_CHECKPOINT.md",
+      "docs/product/LANGUAGE_INVENTORY_20260928.md",
+      "docs/product/COMPLETION_PLAN_20260928.md",
+      "docs/product/evidence/20261001_task485_local.json"
+    ],
+    "defaultBranchUntouched": true,
+    "merge": false,
+    "deploy": false,
+    "vps": false,
+    "externalContacts": false
+  },
+  "sources": {
+    "frontend/technician-field-mode.js": "1121b224baf13adcd85b093fac16b111fb12be104bfb20ebc19752649c1b4c7e",
+    "frontend/technician-field-mode.html": "5c5bdf2cc5aa4f1d7c661bc690f4b65d1562067333e0f175647f358469c90ed6",
+    "frontend/sw.js": "3d943596725df045b2143f161bd2f603a3730547cce060198ea5ac6a0f6dba79",
+    "scripts/test-field-map-navigation-languages.js": "d2bbb119e82f20124492b3dab3e4b648595ec6937de643e6b6a25b15130a941f",
+    "scripts/test-field-connection-languages.js": "ee41623c7a22f09c2bd4324068a15479a61c570349c9b07f482cd5e821b7ead5",
+    "scripts/test-field-suite.js": "f1d7fc970d77a3a7cacbe5e58693cb88d56ad7bb182a8a816d3039eacf72e6b0"
+  },
+  "changes": {
+    "ownedEntries": 33,
+    "variants": 165,
+    "copy": {
+      "navDayPage": [
+        "O meu dia",
+        "My day",
+        "Ma journée",
+        "Mi día",
+        "Mein Tag"
+      ],
+      "navVisit": [
+        "Visita",
+        "Visit",
+        "Visite",
+        "Visita",
+        "Besuch"
+      ],
+      "navVehicleDocs": [
+        "Viatura e documentos",
+        "Vehicle and documents",
+        "Véhicule et documents",
+        "Vehículo y documentos",
+        "Fahrzeug und Dokumente"
+      ],
+      "navHelp": [
+        "Apoio",
+        "Support",
+        "Assistance",
+        "Ayuda",
+        "Hilfe"
+      ],
+      "navToday": [
+        "Hoje",
+        "Today",
+        "Aujourd’hui",
+        "Hoy",
+        "Heute"
+      ],
+      "navMap": [
+        "Mapa",
+        "Map",
+        "Carte",
+        "Mapa",
+        "Karte"
+      ],
+      "navVehicle": [
+        "Viatura",
+        "Vehicle",
+        "Véhicule",
+        "Vehículo",
+        "Fahrzeug"
+      ],
+      "navMore": [
+        "Mais",
+        "More",
+        "Plus",
+        "Más",
+        "Mehr"
+      ],
+      "navAria": [
+        "Navegacao do tecnico em campo",
+        "Field technician navigation",
+        "Navigation du technicien sur le terrain",
+        "Navegación del técnico de campo",
+        "Navigation für Außendiensttechniker"
+      ],
+      "mapSection": [
+        "Rota",
+        "Route",
+        "Itinéraire",
+        "Ruta",
+        "Route"
+      ],
+      "mapSectionHint": [
+        "proximo local",
+        "next location",
+        "prochain lieu",
+        "próximo lugar",
+        "nächster Ort"
+      ],
+      "mapNext": [
+        "Próximo local",
+        "Next location",
+        "Prochain lieu",
+        "Próximo lugar",
+        "Nächster Ort"
+      ],
+      "mapTitle": [
+        "Mapa da próxima piscina",
+        "Map of the next pool",
+        "Carte de la prochaine piscine",
+        "Mapa de la próxima piscina",
+        "Karte des nächsten Pools"
+      ],
+      "mapLoadingLocation": [
+        "A carregar localização do serviço atribuído...",
+        "Loading the assigned service location...",
+        "Chargement du lieu du service attribué…",
+        "Cargando la ubicación del servicio asignado...",
+        "Ort des zugewiesenen Einsatzes wird geladen…"
+      ],
+      "mapLoading": [
+        "A carregar mapa...",
+        "Loading map...",
+        "Chargement de la carte…",
+        "Cargando mapa...",
+        "Karte wird geladen…"
+      ],
+      "mapFree": [
+        "Hoje livre",
+        "Free today",
+        "Libre aujourd’hui",
+        "Hoy libre",
+        "Heute frei"
+      ],
+      "mapNoVisits": [
+        "Não tens visitas atribuídas neste momento.",
+        "You have no assigned visits at the moment.",
+        "Aucune visite ne vous est attribuée pour le moment.",
+        "No tienes visitas asignadas en este momento.",
+        "Zurzeit sind Ihnen keine Besuche zugewiesen."
+      ],
+      "mapRefresh": [
+        "Atualiza a agenda ou comunica com o administrador.",
+        "Refresh the schedule or contact the administrator.",
+        "Actualisez le planning ou contactez l’administrateur.",
+        "Actualiza la agenda o contacta con el administrador.",
+        "Aktualisieren Sie den Zeitplan oder kontaktieren Sie den Administrator."
+      ],
+      "mapNoNext": [
+        "Sem próxima piscina para navegar.",
+        "No next pool to navigate to.",
+        "Aucune prochaine piscine pour lancer l’itinéraire.",
+        "No hay una próxima piscina a la que navegar.",
+        "Kein nächster Pool für die Navigation."
+      ],
+      "mapFrameTitle": [
+        "Mapa da proxima piscina",
+        "Map of the next pool",
+        "Carte de la prochaine piscine",
+        "Mapa de la próxima piscina",
+        "Karte des nächsten Pools"
+      ],
+      "mapDestination": [
+        "Destino",
+        "Destination",
+        "Destination",
+        "Destino",
+        "Ziel"
+      ],
+      "mapCoordinates": [
+        "Coordenadas: {coordinates}",
+        "Coordinates: {coordinates}",
+        "Coordonnées : {coordinates}",
+        "Coordenadas: {coordinates}",
+        "Koordinaten: {coordinates}"
+      ],
+      "mapNoAddress": [
+        "Morada nao indicada",
+        "Address not provided",
+        "Adresse non indiquée",
+        "Dirección no indicada",
+        "Adresse nicht angegeben"
+      ],
+      "mapNoGps": [
+        "Sem coordenadas GPS nesta piscina.",
+        "This pool has no GPS coordinates.",
+        "Cette piscine n’a pas de coordonnées GPS.",
+        "Esta piscina no tiene coordenadas GPS.",
+        "Für diesen Pool sind keine GPS-Koordinaten vorhanden."
+      ],
+      "mapAddressRoute": [
+        "A navegação abre pela morada/zona registada.",
+        "Navigation uses the recorded address or area.",
+        "L’itinéraire utilise l’adresse ou la zone enregistrée.",
+        "La navegación usa la dirección o zona registrada.",
+        "Die Navigation nutzt die gespeicherte Adresse oder Gegend."
+      ],
+      "mapConfirmAddress": [
+        "Sem morada confirmada. Peça a localização ao escritório antes de navegar.",
+        "No confirmed address. Ask the office for the location before navigating.",
+        "Aucune adresse confirmée. Demandez le lieu au bureau avant de lancer l’itinéraire.",
+        "No hay una dirección confirmada. Pide la ubicación a la oficina antes de navegar.",
+        "Keine bestätigte Adresse. Fragen Sie vor der Navigation im Büro nach dem Standort."
+      ],
+      "mapAddressUnknown": [
+        "Morada ou zona por confirmar",
+        "Address or area needs confirmation",
+        "Adresse ou zone à confirmer",
+        "Dirección o zona por confirmar",
+        "Adresse oder Gegend muss bestätigt werden"
+      ],
+      "mapShow": [
+        "Ver mapa",
+        "View map",
+        "Voir la carte",
+        "Ver mapa",
+        "Karte ansehen"
+      ],
+      "navSupport": [
+        "Apoio e conta",
+        "Support and account",
+        "Assistance et compte",
+        "Ayuda y cuenta",
+        "Hilfe und Konto"
+      ],
+      "navTeamChat": [
+        "Conversa da equipa",
+        "Team chat",
+        "Discussion d’équipe",
+        "Chat del equipo",
+        "Teamchat"
+      ],
+      "navNotifications": [
+        "Notificações",
+        "Notifications",
+        "Notifications",
+        "Notificaciones",
+        "Benachrichtigungen"
+      ],
+      "navProfile": [
+        "O meu perfil",
+        "My profile",
+        "Mon profil",
+        "Mi perfil",
+        "Mein Profil"
+      ],
+      "navSchedule": [
+        "Agenda",
+        "Schedule",
+        "Planning",
+        "Agenda",
+        "Zeitplan"
+      ]
+    },
+    "mainCatalog": 379,
+    "previousEntriesPreserved": 346,
+    "runner": 375,
+    "previousRunner": 374,
+    "previousRelativeOrderExact": true,
+    "serviceWorker": 262,
+    "previousServiceWorker": 261,
+    "ownedTextAndAttributesOnly": true,
+    "literalPoolClientAddressCoordinatesAndStatusPreserved": true,
+    "navigationDestinationsIframeSrcAndAccountLinksUnchanged": true,
+    "mapDestinationLabelOnSeparateLine": true
+  },
+  "local": {
+    "database": "isolated PGlite compatibility QA",
+    "serverTimezone": "UTC",
+    "browserTimezone": "Europe/Lisbon",
+    "nativePostgresAcceptanceEquivalent": false,
+    "languageChecks": 130,
+    "scenarios": 12,
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "typedDraftFields": 13,
+    "immutableTypedPendingRequests": 2,
+    "sameDatabaseSequentialNoReset": true,
+    "exactIntegration": [
+      {
+        "script": "scripts/test-field-map-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 39962
+      },
+      {
+        "script": "scripts/test-field-connection-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 34942
+      },
+      {
+        "script": "scripts/test-field-modern-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8501
+      },
+      {
+        "script": "scripts/test-field-draft-navigation-memory.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2834
+      },
+      {
+        "script": "scripts/test-field-map-browser.js",
+        "code": 0,
+        "signal": null,
+        "ms": 871
+      }
+    ],
+    "finalMapAndRendererNegative": [
+      {
+        "script": "../qa-runtime/negative-map485.cjs",
+        "code": 1,
+        "signal": null,
+        "ms": 4490
+      },
+      {
+        "script": "scripts/test-field-map-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 42700
+      }
+    ],
+    "negativeScope": "Only renderRouteCard restored from immutable parent into the final module; SW blocked for source selection. English fails at Destino vs Destination. This is a controlled renderer regression, not a full-parent/offline acceptance.",
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 44
+    },
+    "visual": {
+      "captures": 12,
+      "mapStatesReviewed": 6,
+      "accountLinksReviewed": true,
+      "width": 320,
+      "language": "de",
+      "mapIframeExternalNetworkBlockedInQA": true
+    },
+    "noOperationalWritesOrPageErrorsInLanguageMatrices": true,
+    "fixtureScroll": "Tab clicks remain real. QA forces scrollIntoView motion to instant and begins every locale at top=0. All session values, fields, producer calls, drafts/cache/journal bytes, UUIDs/payload hashes, SQL and DOM/focus comparisons remain strict. No product scroll/timer/callback changes."
+  },
+  "preservation": {
+    "backendSchemaMigrationsDependenciesWorkflowsAuthAndPermissionsUnchanged": true,
+    "draftOutboxReplayPhotosAndDocumentProducersUnchanged": true,
+    "unknownForeignTextAndReplacedTextNodesLiteral": true,
+    "foreignIframeTitleLiteral": true,
+    "connectionAvailableDoesNotConfirmServerRound": true
+  },
+  "nativeAcceptance": {
+    "latestFullyVerifiedTask": 483,
+    "runId": 36822194203,
+    "jobId": 110239975117,
+    "proof": "20261001_task484_local.json",
+    "task484RunId": 36831370265,
+    "task484JobId": 110268518638,
+    "task484Status": "in_progress: ten initial steps passed, full suite running; restore pending"
+  },
+  "publication": {
+    "status": "pending",
+    "ci": "pending"
+  }
+}

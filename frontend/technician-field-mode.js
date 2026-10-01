@@ -426,6 +426,39 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "navDayPage": ["O meu dia","My day","Ma journée","Mi día","Mein Tag"],
+  "navVisit": ["Visita","Visit","Visite","Visita","Besuch"],
+  "navVehicleDocs": ["Viatura e documentos","Vehicle and documents","Véhicule et documents","Vehículo y documentos","Fahrzeug und Dokumente"],
+  "navHelp": ["Apoio","Support","Assistance","Ayuda","Hilfe"],
+  "navToday": ["Hoje","Today","Aujourd’hui","Hoy","Heute"],
+  "navMap": ["Mapa","Map","Carte","Mapa","Karte"],
+  "navVehicle": ["Viatura","Vehicle","Véhicule","Vehículo","Fahrzeug"],
+  "navMore": ["Mais","More","Plus","Más","Mehr"],
+  "navAria": ["Navegacao do tecnico em campo","Field technician navigation","Navigation du technicien sur le terrain","Navegación del técnico de campo","Navigation für Außendiensttechniker"],
+  "mapSection": ["Rota","Route","Itinéraire","Ruta","Route"],
+  "mapSectionHint": ["proximo local","next location","prochain lieu","próximo lugar","nächster Ort"],
+  "mapNext": ["Próximo local","Next location","Prochain lieu","Próximo lugar","Nächster Ort"],
+  "mapTitle": ["Mapa da próxima piscina","Map of the next pool","Carte de la prochaine piscine","Mapa de la próxima piscina","Karte des nächsten Pools"],
+  "mapLoadingLocation": ["A carregar localização do serviço atribuído...","Loading the assigned service location...","Chargement du lieu du service attribué…","Cargando la ubicación del servicio asignado...","Ort des zugewiesenen Einsatzes wird geladen…"],
+  "mapLoading": ["A carregar mapa...","Loading map...","Chargement de la carte…","Cargando mapa...","Karte wird geladen…"],
+  "mapFree": ["Hoje livre","Free today","Libre aujourd’hui","Hoy libre","Heute frei"],
+  "mapNoVisits": ["Não tens visitas atribuídas neste momento.","You have no assigned visits at the moment.","Aucune visite ne vous est attribuée pour le moment.","No tienes visitas asignadas en este momento.","Zurzeit sind Ihnen keine Besuche zugewiesen."],
+  "mapRefresh": ["Atualiza a agenda ou comunica com o administrador.","Refresh the schedule or contact the administrator.","Actualisez le planning ou contactez l’administrateur.","Actualiza la agenda o contacta con el administrador.","Aktualisieren Sie den Zeitplan oder kontaktieren Sie den Administrator."],
+  "mapNoNext": ["Sem próxima piscina para navegar.","No next pool to navigate to.","Aucune prochaine piscine pour lancer l’itinéraire.","No hay una próxima piscina a la que navegar.","Kein nächster Pool für die Navigation."],
+  "mapFrameTitle": ["Mapa da proxima piscina","Map of the next pool","Carte de la prochaine piscine","Mapa de la próxima piscina","Karte des nächsten Pools"],
+  "mapDestination": ["Destino","Destination","Destination","Destino","Ziel"],
+  "mapCoordinates": ["Coordenadas: {coordinates}","Coordinates: {coordinates}","Coordonnées : {coordinates}","Coordenadas: {coordinates}","Koordinaten: {coordinates}"],
+  "mapNoAddress": ["Morada nao indicada","Address not provided","Adresse non indiquée","Dirección no indicada","Adresse nicht angegeben"],
+  "mapNoGps": ["Sem coordenadas GPS nesta piscina.","This pool has no GPS coordinates.","Cette piscine n’a pas de coordonnées GPS.","Esta piscina no tiene coordenadas GPS.","Für diesen Pool sind keine GPS-Koordinaten vorhanden."],
+  "mapAddressRoute": ["A navegação abre pela morada/zona registada.","Navigation uses the recorded address or area.","L’itinéraire utilise l’adresse ou la zone enregistrée.","La navegación usa la dirección o zona registrada.","Die Navigation nutzt die gespeicherte Adresse oder Gegend."],
+  "mapConfirmAddress": ["Sem morada confirmada. Peça a localização ao escritório antes de navegar.","No confirmed address. Ask the office for the location before navigating.","Aucune adresse confirmée. Demandez le lieu au bureau avant de lancer l’itinéraire.","No hay una dirección confirmada. Pide la ubicación a la oficina antes de navegar.","Keine bestätigte Adresse. Fragen Sie vor der Navigation im Büro nach dem Standort."],
+  "mapAddressUnknown": ["Morada ou zona por confirmar","Address or area needs confirmation","Adresse ou zone à confirmer","Dirección o zona por confirmar","Adresse oder Gegend muss bestätigt werden"],
+  "mapShow": ["Ver mapa","View map","Voir la carte","Ver mapa","Karte ansehen"],
+  "navSupport": ["Apoio e conta","Support and account","Assistance et compte","Ayuda y cuenta","Hilfe und Konto"],
+  "navTeamChat": ["Conversa da equipa","Team chat","Discussion d’équipe","Chat del equipo","Teamchat"],
+  "navNotifications": ["Notificações","Notifications","Notifications","Notificaciones","Benachrichtigungen"],
+  "navProfile": ["O meu perfil","My profile","Mon profil","Mi perfil","Mein Profil"],
+  "navSchedule": ["Agenda","Schedule","Planning","Agenda","Zeitplan"],
   "connectionAvailable": ["Rede disponível","Connection available","Connexion disponible","Conexión disponible","Verbindung verfügbar"],
   "connectionUnavailable": ["Sem rede","No connection","Sans connexion","Sin conexión","Keine Verbindung"],
   "routeLegacyDraftHistory": ["Existem rascunhos antigos sem conta e tipo de visita confirmados. Foram conservados para revisão pelo escritório; não limpe os dados da aplicação.","Old drafts have no confirmed account or visit type. They were kept for office review; do not clear the app data.","Des brouillons anciens n’ont pas de compte ni de type de visite confirmés. Ils ont été conservés pour examen par le bureau ; n’effacez pas les données de l’application.","Hay borradores antiguos sin cuenta ni tipo de visita confirmados. Se han conservado para que la oficina los revise; no borres los datos de la aplicación.","Alte Entwürfe haben kein bestätigtes Konto und keinen bestätigten Besuchstyp. Sie bleiben zur Prüfung durch das Büro erhalten; löschen Sie die App-Daten nicht."],
@@ -2655,6 +2688,8 @@
   for (const node of document.querySelectorAll('[data-document-toolbar-copy]')) alertUi.bind(node, alertUi.value(node.dataset.documentToolbarCopy));
   for (const node of document.querySelectorAll('[data-correction-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.correctionInitialCopy));
   for (const node of document.querySelectorAll('[data-route-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.routeInitialCopy));
+  for (const node of document.querySelectorAll('[data-map-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.mapInitialCopy));
+  for (const node of document.querySelectorAll('[data-field-navigation-copy]')) alertUi.bind(node, alertUi.value(node.dataset.fieldNavigationCopy));
   // Attribute-only presentation preserves the original inputs, values and selection.
   const documentToolbarInputs = [...document.querySelectorAll('[data-document-toolbar-placeholder]')].map(node => ({ node, entry: alertUi.value(node.dataset.documentToolbarPlaceholder) }));
   function paintDocumentToolbarInputs() {
@@ -4275,6 +4310,24 @@
     return mapsSearchUrl(visit);
   }
 
+  const routeNavigationAttributes = new Map();
+  function bindRouteNavigationAttribute(node, attribute, key) {
+    const rendered = alertUi.format(alertUi.value(key));
+    node.setAttribute(attribute, rendered); routeNavigationAttributes.set(node, { attribute, key, rendered });
+  }
+  function paintRouteNavigationAttributes() {
+    for (const [node, entry] of routeNavigationAttributes) {
+      if (!node.isConnected || node.getAttribute(entry.attribute) !== entry.rendered) { routeNavigationAttributes.delete(node); continue; }
+      bindRouteNavigationAttribute(node, entry.attribute, entry.key);
+    }
+  }
+  window.addEventListener('cw-language-change', paintRouteNavigationAttributes);
+  let routeMapLanguage = document.documentElement.lang;
+  new MutationObserver(() => {
+    if (document.documentElement.lang === routeMapLanguage) return;
+    routeMapLanguage = document.documentElement.lang; paintRouteNavigationAttributes();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+
   function renderRouteCard(visit) {
     const title = $("#routeTitle");
     const summary = $("#routeSummary");
@@ -4283,21 +4336,26 @@
     const navLink = $("#navLink");
     const mapsLink = $("#mapsLink");
     if (!title || !summary || !mapBox || !meta || !navLink || !mapsLink) return;
+    alertUi.clearTree(mapBox); alertUi.clearTree(meta);
+    for (const node of routeNavigationAttributes.keys()) if (!node.isConnected || mapBox.contains(node)) routeNavigationAttributes.delete(node);
+    for (const node of [mapBox,meta]) node.setAttribute('data-cw-no-i18n','');
 
     if (!visit) {
-      title.textContent = "Hoje livre";
-      summary.textContent = "Não tens visitas atribuídas neste momento.";
+      alertUi.bind(title, alertUi.value('mapFree'));
+      alertUi.bind(summary, alertUi.value('mapNoVisits'));
       mapBox.innerHTML = '<div class="map-fallback">Atualiza a agenda ou comunica com o administrador.</div>';
       meta.innerHTML = `<span>Sem próxima piscina para navegar.</span>`;
+      alertUi.bind(mapBox.firstElementChild, alertUi.value('mapRefresh'));
+      alertUi.bind(meta.firstElementChild, alertUi.value('mapNoNext'));
       [navLink,mapsLink].forEach(link=>{link.removeAttribute("href");link.setAttribute("aria-disabled","true");});
       return;
     }
 
     const location = visitLocation(visit);
-    const poolName = visit.pool?.name || "Piscina";
-    const clientName = visit.client?.name || "Cliente";
-    title.textContent = poolName;
-    summary.textContent = `${clientName} - ${visit.status || "Pendente"}`;
+    const poolName = visit.pool?.name || alertUi.value('sourcePool');
+    const clientName = visit.client?.name || alertUi.value('sourceClient');
+    alertUi.bind(title, poolName);
+    alertUi.bind(summary, alertUi.join([clientName, visit.status || alertUi.value('roundPending')], ' - '));
     for(const [link,url] of [[navLink,navigationUrl(visit)],[mapsLink,mapsSearchUrl(visit)]]){
       if(url){link.href=url;link.removeAttribute('aria-disabled');}
       else{link.removeAttribute('href');link.setAttribute('aria-disabled','true');}
@@ -4318,12 +4376,18 @@
           loading="lazy"
           src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${encodeURIComponent(`${location.lat},${location.lng}`)}">
         </iframe>
-        <div class="map-overlay"><span>Destino</span><strong>${esc(poolName)}</strong></div>
+        <div class="map-overlay"><span>Destino</span><strong>${esc(alertUi.format(poolName))}</strong></div>
       `;
       meta.innerHTML = `
         <span>Coordenadas: ${esc(location.lat.toFixed(6))}, ${esc(location.lng.toFixed(6))}</span>
         <span>${esc(location.address || "Morada nao indicada")}</span>
       `;
+      const frame = mapBox.querySelector('#fieldMapFrame');
+      bindRouteNavigationAttribute(frame, 'title', 'mapFrameTitle');
+      alertUi.bind(mapBox.querySelector('.map-overlay span'), alertUi.value('mapDestination'));
+      alertUi.bind(mapBox.querySelector('.map-overlay strong'), poolName);
+      alertUi.bind(meta.children[0], alertUi.value('mapCoordinates', { coordinates: `${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}` }));
+      alertUi.bind(meta.children[1], location.address || alertUi.value('mapNoAddress'));
       return;
     }
 
@@ -4331,11 +4395,14 @@
       <div class="map-fallback">
         <div>
           <strong>Sem coordenadas GPS nesta piscina.</strong><br>
-          ${location.address ? "A navegação abre pela morada/zona registada." : "Sem morada confirmada. Peça a localização ao escritório antes de navegar."}
+          <span data-map-fallback-detail>${location.address ? "A navegação abre pela morada/zona registada." : "Sem morada confirmada. Peça a localização ao escritório antes de navegar."}</span>
         </div>
       </div>
     `;
     meta.innerHTML = `<span>${esc(location.address || "Morada ou zona por confirmar")}</span>`;
+    alertUi.bind(mapBox.querySelector('strong'), alertUi.value('mapNoGps'));
+    alertUi.bind(mapBox.querySelector('[data-map-fallback-detail]'), alertUi.value(location.address ? 'mapAddressRoute' : 'mapConfirmAddress'));
+    alertUi.bind(meta.firstElementChild, location.address || alertUi.value('mapAddressUnknown'));
   }
 
   function readingNumber(value) {
@@ -5903,7 +5970,7 @@
 
     const safeTab = ["hoje", "agora", "docs", "more"].includes(tab) ? tab : "hoje";
     document.body.dataset.fieldTab = safeTab;
-    if ($("#fieldPageTitle")) $("#fieldPageTitle").textContent = {hoje:"O meu dia",agora:"Visita",docs:"Viatura e documentos",more:"Apoio"}[safeTab];
+    alertUi.bind($('#fieldPageTitle'), alertUi.value({ hoje: 'navDayPage', agora: 'navVisit', docs: 'navVehicleDocs', more: 'navHelp' }[safeTab]));
     try {
       localStorage.setItem("cwFieldActiveTab", safeTab);
     } catch (_) {}
@@ -5945,6 +6012,8 @@
     bindPhotoUi($('#photosCard .field-tab-title span'), 'quick');
     markFieldSection("#accessCard", "field-panel-agora", "Acesso", "chaves e codigos");
     markFieldSection("#routeCard", "field-panel-hoje", "Rota", "proximo local");
+    alertUi.bind($('#routeCard .field-tab-title h2'), alertUi.value('mapSection'));
+    alertUi.bind($('#routeCard .field-tab-title span'), alertUi.value('mapSectionHint'));
     markFieldSection("#visitList", "field-panel-hoje", "Lista do dia", "corrigir ou avancar");
     alertUi.bind($('#dayVisitsCard .field-tab-title h2'), alertUi.value('roundTitle'));
     alertUi.bind($('#dayVisitsCard .field-tab-title span'), alertUi.value('roundHint'));
@@ -5977,6 +6046,10 @@
       `;
       document.body.appendChild(nav);
     }
+    const fieldNavigation = document.querySelector('.field-tabs');
+    fieldNavigation?.setAttribute('data-cw-no-i18n','');
+    if (fieldNavigation) bindRouteNavigationAttribute(fieldNavigation, 'aria-label', 'navAria');
+    for (const button of document.querySelectorAll('[data-field-tab-button]')) { const key = { hoje: 'navToday', agora: 'navVisit', mapa: 'navMap', docs: 'navVehicle', more: 'navMore' }[button.dataset.fieldTabButton]; if (key) alertUi.bind(button, alertUi.value(key)); }
 
     document.querySelectorAll("[data-field-tab-button]").forEach((button) => {
       button.addEventListener("click", () => {
