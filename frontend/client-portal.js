@@ -850,9 +850,9 @@ const portalExtrasLabels = (function () {
   function bind(node, key, reader = copy) {
     paint();
     const rendered = reader(key);
-    if (node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE) node.firstChild.nodeValue = rendered;
+    if (node.childNodes?.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE) node.firstChild.nodeValue = rendered;
     else node.textContent = rendered;
-    leaves.set(node, { key, reader, rendered, textNode: node.firstChild });
+    if (node.nodeType === 1) leaves.set(node, { key, reader, rendered, textNode: node.firstChild });
   }
   return Object.freeze({ bind, paint });
 })();
@@ -1588,7 +1588,7 @@ function renderNotifications(notifications = []) {
       ${!notification.isRead&&!isAdminUser()?`<button type="button" data-notice-read="${index}" class="btn">${esc(labels.mark)}</button><div class="muted" role="status"></div>`:''}
     </article>`).join('');
   list.querySelectorAll?.('[data-notice-read]').forEach(button=>button.addEventListener('click',()=>markPortalNotificationRead(notifications[Number(button.dataset.noticeRead)],button,button.nextElementSibling)));
-  list.querySelectorAll('article').forEach((article,index)=>{
+  list.querySelectorAll?.('article').forEach((article,index)=>{
     const notification=notifications[index];
     if(!notification.title)portalExtrasLabels.bind(article.querySelector('.service-title'),'title',portalNotificationText);
     portalExtrasLabels.bind(article.querySelector('.pill'),notification.isRead?'read':'unread',portalNotificationText);
