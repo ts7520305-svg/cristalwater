@@ -74,6 +74,7 @@ const COPY = {
     nextVisitMetric: "Proxima visita",
     quickAccess: "Acesso rapido",
     clientRole: "Cliente",
+    documentsSectionTitle: "Relatórios e documentos",
     message: "Mensagem",
     agenda: "Agenda",
     services: "Servicos",
@@ -215,6 +216,7 @@ const COPY = {
     nextVisitMetric: "Próxima visita",
     quickAccess: "Acceso rápido",
     clientRole: "Cliente",
+    documentsSectionTitle: "Informes y documentos",
     message: "Mensaje",
     agenda: "Agenda",
     services: "Servicios",
@@ -356,6 +358,7 @@ const COPY = {
     nextVisitMetric: "Next visit",
     quickAccess: "Quick access",
     clientRole: "Client",
+    documentsSectionTitle: "Reports and documents",
     message: "Message",
     agenda: "Schedule",
     services: "Services",
@@ -497,6 +500,7 @@ const COPY = {
     nextVisitMetric: "Prochaine visite",
     quickAccess: "Acces rapide",
     clientRole: "Client",
+    documentsSectionTitle: "Rapports et documents",
     message: "Message",
     agenda: "Planning",
     services: "Services",
@@ -638,6 +642,7 @@ const COPY = {
     nextVisitMetric: "Naechster Besuch",
     quickAccess: "Schnellzugriff",
     clientRole: "Kunde",
+    documentsSectionTitle: "Berichte und Dokumente",
     message: "Nachricht",
     agenda: "Termine",
     services: "Services",
@@ -860,6 +865,8 @@ const portalNotificationText = key => notificationCopy()[key];
 for (const [id, key] of [['notificationsTitle', 'heading'], ['notificationsPill', 'updates']]) {
   const node = el(id); if (node) portalExtrasLabels.bind(node, key, portalNotificationText);
 }
+const documentsHeading = el('documentsTitle');
+if (documentsHeading) portalExtrasLabels.bind(documentsHeading, 'documentsSectionTitle');
 
 function esc(value) {
   return String(value ?? "").replace(/[&<>'"]/g, (char) => ({

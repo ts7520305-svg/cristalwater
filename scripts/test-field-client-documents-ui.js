@@ -157,7 +157,9 @@ let browser;
   assert.equal((await info(page)).created, beforeDelay); await page.locator('#documentClear').click();
   await hold(page, download(a.id, current), () => first().click(), async () => {
     await page.locator('#cwLanguageSelect').selectOption('en'); await state(page, 'ready'); await downloadState(page, 'idle');
+    assert.equal(await page.locator('#documentsTitle').textContent(), 'Reports and documents');
     await page.locator('#cwLanguageSelect').selectOption('pt'); await state(page, 'ready');
+    assert.equal(await page.locator('#documentsTitle').textContent(), 'Relatórios e documentos');
   }); assert.equal((await info(page)).created, beforeDelay);
   await page.evaluate(() => window.qaShortTimeout = true);
   await hold(page, download(a.id, current), () => first().click(), () => downloadState(page, 'error'));
@@ -169,6 +171,40 @@ let browser;
   for (const [language, title] of Object.entries(titleByLanguage)) {
     await page.locator('#cwLanguageSelect').selectOption(language); await state(page, 'ready'); await page.waitForFunction(title => document.getElementById('documentTitle').textContent === title, title);
   }
+  const sectionTitles = { pt: 'Relatórios e documentos', en: 'Reports and documents', fr: 'Rapports et documents', es: 'Informes y documentos', de: 'Berichte und Dokumente' }; let headingCases = 0;
+  await page.locator('#documentSearch').fill('manual'); await page.locator('#documentSearch').focus(); await page.evaluate(() => document.getElementById('documentSearch').setSelectionRange(1, 4));
+  await page.evaluate(() => { window.qaDocumentsHeading = document.getElementById('documentsTitle'); window.qaDocumentsHeadingLeaf = qaDocumentsHeading.firstChild; window.qaDocumentSearch = document.getElementById('documentSearch'); });
+  const sessionBeforeHeading = await page.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user', 'qaDocumentsDraft'].map(key => [key, localStorage.getItem(key)]))), filesBeforeHeading = await info(page), downloadsBeforeHeading = requests.filter(row => row.url.endsWith('/download')).length;
+  async function heading(title) {
+    await page.waitForFunction(title => document.getElementById('documentsTitle').textContent === title, title);
+    assert(await page.evaluate(() => document.getElementById('documentsTitle') === qaDocumentsHeading && qaDocumentsHeading.firstChild === qaDocumentsHeadingLeaf && document.getElementById('documentSearch') === qaDocumentSearch));
+    assert.equal(await page.locator('#documentSearch').inputValue(), 'manual');
+    assert.deepEqual(await page.evaluate(() => Object.fromEntries(['token', 'cristalwater_jwt', 'user', 'cristalwater_user', 'qaDocumentsDraft'].map(key => [key, localStorage.getItem(key)]))), sessionBeforeHeading);
+    assert.equal(requests.filter(row => row.url.endsWith('/download')).length, downloadsBeforeHeading); assert.deepEqual(await info(page), filesBeforeHeading);
+    const words = await page.evaluate(() => { const leaf = document.getElementById('documentsTitle').firstChild; return [...leaf.nodeValue.matchAll(/\S+/g)].map(match => { const range = document.createRange(); range.setStart(leaf, match.index); range.setEnd(leaf, match.index + match[0].length); return [...range.getClientRects()].map(rect => ({ left: rect.left, right: rect.right })); }); });
+    assert(words.every(rects => rects.length === 1 && rects.every(rect => rect.left >= 0 && rect.right <= page.viewportSize().width)), 'Document heading words must remain whole and inside the viewport'); headingCases++;
+  }
+  for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 1000 }); for (const [language, title] of Object.entries(sectionTitles)) {
+    // Inspect the heading painter atomically, then allow the original widget
+    // locale refresh to disable/re-enable its search while reading. That guard
+    // can blur the search and must not be lifted for presentation testing.
+    const focus = await page.evaluate(language => { queryLanguage = language; portalLanguage = language; qaDocumentSearch.focus(); qaDocumentSearch.setSelectionRange(1, 4); const snapshot = () => ({ focus: document.activeElement === qaDocumentSearch, value: qaDocumentSearch.value, disabled: qaDocumentSearch.disabled, start: qaDocumentSearch.selectionStart, end: qaDocumentSearch.selectionEnd }); const before = snapshot(); portalExtrasLabels.paint(); return { before, after: snapshot() }; }, language);
+    assert.equal(focus.before.focus, true); assert.deepEqual(focus.after, focus.before);
+    await page.waitForFunction(title => document.getElementById('documentTitle').textContent === title, titleByLanguage[language]); await state(page, 'ready'); await heading(title);
+    assert.equal(await page.locator('#documentList article').count(), 6); assert((await page.locator('#documentList').textContent()).includes(current.title));
+  } }
+  for (const width of [320, 390, 1440]) { await page.setViewportSize({ width, height: 1000 }); for (const [language, title] of Object.entries(sectionTitles)) {
+    await page.locator('#cwLanguageSelect').selectOption(language); await state(page, 'ready'); await heading(title); assert.equal(await page.locator('#documentList article').count(), 6);
+    if (width === 320 && language === 'de' && process.env.CW_DOCUMENT_HEADING_CAPTURE) { await page.locator('#documentsTitle').scrollIntoViewIfNeeded(); await page.screenshot({ path: process.env.CW_DOCUMENT_HEADING_CAPTURE }); }
+  } }
+  for (const kind of ['edited-leaf', 'new-text-node', 'foreign-clone']) {
+    const foreignPage = await pageFor(context); await state(foreignPage, 'ready');
+    await foreignPage.evaluate(kind => { const item = document.getElementById('documentsTitle'); if (kind === 'edited-leaf') item.firstChild.nodeValue = 'Operador literal <b>{documentsSectionTitle}</b>'; else if (kind === 'new-text-node') item.replaceChildren(document.createTextNode(item.textContent)); else { const clone = item.cloneNode(true); clone.textContent = 'Foreign literal {documentsSectionTitle}'; clone.dataset.cwI18n = 'documentsSectionTitle'; item.replaceWith(clone); } window.qaForeignHeading = document.getElementById('documentsTitle'); window.qaForeignHeadingBytes = qaForeignHeading.textContent; }, kind);
+    for (const language of Object.keys(sectionTitles)) { await foreignPage.locator('#cwLanguageSelect').selectOption(language); await state(foreignPage, 'ready'); assert(await foreignPage.evaluate(() => document.getElementById('documentsTitle') === qaForeignHeading && qaForeignHeading.textContent === qaForeignHeadingBytes)); headingCases++; }
+    await foreignPage.close();
+  }
+  await page.locator('#documentClear').click(); await page.locator('#cwLanguageSelect').selectOption('pt'); await state(page, 'ready');
+  console.log('PASS document section heading ' + JSON.stringify({ headingCases, languages: Object.keys(sectionTitles), widths: [320, 390, 1440], privateHeadingPaintRetainsSearchFocusSelection: true, actualSelectorRetainsSearchNodeValueSessionAndReadBusyGuard: true, languagePaintDoesNotDownloadOrCreateBlob: true, nativeWidgetsAndLanguageCancellationRetained: true, ownershipControls: 3 }));
   const evidence = path.join(__dirname, '../reports/field-visual/client-documents-' + Date.now()); fs.mkdirSync(evidence, { recursive: true });
   await page.locator('#cw-v21-toast').waitFor({ state: 'hidden' });
   for (const width of [320, 390, 1440]) {
