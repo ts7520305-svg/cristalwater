@@ -426,6 +426,11 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "proposalEmpty": ["Sem propostas desta piscina nesta sessão.", "No proposals for this pool in this session.", "Aucune proposition pour cette piscine dans cette session.", "No hay propuestas para esta piscina en esta sesión.", "In dieser Sitzung gibt es keine Vorschläge für diesen Pool."],
+  "proposalLoading": ["A consultar propostas...", "Loading proposals...", "Chargement des propositions…", "Consultando propuestas...", "Vorschläge werden geladen…"],
+  "proposalLoadFailed": ["Não foi possível consultar as propostas. Atualize antes de repetir um envio.", "Could not load the proposals. Refresh before sending again.", "Impossible de charger les propositions. Actualisez avant de renvoyer.", "No se pudieron consultar las propuestas. Actualiza antes de volver a enviar.", "Die Vorschläge konnten nicht geladen werden. Aktualisieren Sie, bevor Sie erneut senden."],
+  "proposalNoReason": ["Sem motivo", "No reason", "Sans motif", "Sin motivo", "Kein Grund"],
+  "proposalSummary": ["{date} | {changes} alteração(ões) | {photos} foto(s)", "{date} | {changes} change(s) | {photos} photo(s)", "{date} | {changes} modification(s) | {photos} photo(s)", "{date} | {changes} cambio(s) | {photos} foto(s)", "{date} | {changes} Änderung(en) | {photos} Foto(s)"],
   "assistTitle": ["Depois da ronda", "After the round", "Après la tournée", "Después de la ronda", "Nach der Tour"],
   "assistCount": ["{other} colega(s) pendente(s) - {tomorrow} para antecipar", "{other} pending colleague visit(s) - {tomorrow} to bring forward", "{other} visite(s) de collègues en attente - {tomorrow} à avancer", "{other} visita(s) pendiente(s) de compañeros - {tomorrow} para adelantar", "{other} ausstehende Kollegenbesuche - {tomorrow} zum Vorziehen"],
   "assistHelpAction": ["Ajudar colegas", "Help colleagues", "Aider les collègues", "Ayudar a compañeros", "Kollegen helfen"],
@@ -3850,18 +3855,23 @@
   function renderTechnicalProposalList() {
     const list = $("#technicalProposalList");
     if (!list) return;
+    alertUi.clearTree(list); list.setAttribute('data-cw-no-i18n', '');
     if (!technicalProposals.length) {
-      list.textContent = "Sem propostas desta piscina nesta sessão.";
+      alertUi.bind(list, alertUi.value('proposalEmpty'));
       return;
     }
+    const entries = [];
+    const leaf = (entry, tag = 'div', className = '') => { const id = entries.push(entry)-1; return `<${tag} data-proposal-copy="${id}"${className ? ` class="${className}"` : ''}>${esc(alertUi.format(entry))}</${tag}>`; };
     list.innerHTML = technicalProposals.slice(0, 4).map((item) => {
-      const when = formatDate(item.submittedAt || item.createdAt);
-      const risk = esc(item.riskLevel || "MEDIUM");
-      const reason = esc(item.reason || "Sem motivo");
+      const raw = item.submittedAt || item.createdAt;
+      const when = !raw || Number.isNaN(new Date(raw).getTime()) ? alertUi.value('accessNoDate') : formatDate(raw);
+      const risk = item.riskLevel || "MEDIUM";
+      const reason = item.reason || alertUi.value('proposalNoReason');
       const changesCount = Array.isArray(item.changes) ? item.changes.length : 0;
       const photosCount = Array.isArray(item.photos) ? item.photos.length : 0;
-      return `<div class="interrupt-item" data-tech-proposal-id="${esc(item.id)}"><strong>${risk}</strong><div>${reason}</div><div class="muted">${when} | ${changesCount} alteração(ões) | ${photosCount} foto(s)</div></div>`;
+      return `<div class="interrupt-item" data-tech-proposal-id="${esc(item.id)}">${leaf(risk, 'strong')}${leaf(reason)}${leaf(alertUi.value('proposalSummary', { date: when, changes: changesCount, photos: photosCount }), 'div', 'muted')}</div>`;
     }).join("");
+    for (const node of list.querySelectorAll('[data-proposal-copy]')) alertUi.bind(node, entries[Number(node.dataset.proposalCopy)]);
   }
 
   async function loadTechnicalProposals(poolId) {
@@ -3875,7 +3885,7 @@
     const relevant = () => currentPoolId() === String(poolId) && credential === (localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || '');
     technicalProposals = [];
     const list = $("#technicalProposalList");
-    if (list) list.textContent = "A consultar propostas...";
+    if (list) { alertUi.clearTree(list); list.setAttribute('data-cw-no-i18n', ''); alertUi.bind(list, alertUi.value('proposalLoading')); }
     try {
       const data = await api(`/api/core/pools/${encodeURIComponent(poolId)}/technical-change-proposals?onlyPending=true`);
       if (!relevant()) return;
@@ -3883,7 +3893,7 @@
       renderTechnicalProposalList();
     } catch (_) {
       if (!relevant()) return;
-      if (list) list.textContent = "Não foi possível consultar as propostas. Atualize antes de repetir um envio.";
+      if (list) { alertUi.clearTree(list); alertUi.bind(list, alertUi.value('proposalLoadFailed')); }
     }
   }
 
