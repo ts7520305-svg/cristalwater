@@ -59,7 +59,7 @@ body.cw-tech-field-page .field-account-links a{display:flex;align-items:center;m
 body.cw-tech-field-page .field-load-feedback{background:#fff4e1;border:1px solid #d6aa52;border-radius:12px;padding:14px;margin-bottom:12px;color:#62430c;font-size:14px}
 body.cw-tech-field-page #fieldSaveStatus{font-size:12px;color:#48645f;margin-bottom:8px}
 body.cw-tech-field-page #fieldSaveStatus[data-state=error]{color:#a72331;font-weight:750}
-body.cw-tech-field-page #connectionState{font-size:11px;min-width:auto;padding:5px 8px;background:#edf5f1;color:#075c4c;white-space:nowrap}
+body.cw-tech-field-page #connectionState{font-size:11px;min-width:auto;padding:5px 8px;background:#edf5f1;color:#075c4c;max-width:45%;flex-shrink:0;white-space:normal;overflow-wrap:anywhere;text-align:center}
 body.cw-tech-field-page #connectionState[data-offline=true]{background:#fff0ce;color:#714e00;border-color:#d3ae52}
 body.cw-tech-field-page section{scroll-margin-top:100px}
 body.cw-tech-field-page :is(button,a,input,textarea,select):focus-visible{outline:3px solid #087660;outline-offset:3px}

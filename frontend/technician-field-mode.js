@@ -426,6 +426,9 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "connectionAvailable": ["Rede disponível","Connection available","Connexion disponible","Conexión disponible","Verbindung verfügbar"],
+  "connectionUnavailable": ["Sem rede","No connection","Sans connexion","Sin conexión","Keine Verbindung"],
+  "routeLegacyDraftHistory": ["Existem rascunhos antigos sem conta e tipo de visita confirmados. Foram conservados para revisão pelo escritório; não limpe os dados da aplicação.","Old drafts have no confirmed account or visit type. They were kept for office review; do not clear the app data.","Des brouillons anciens n’ont pas de compte ni de type de visite confirmés. Ils ont été conservés pour examen par le bureau ; n’effacez pas les données de l’application.","Hay borradores antiguos sin cuenta ni tipo de visita confirmados. Se han conservado para que la oficina los revise; no borres los datos de la aplicación.","Alte Entwürfe haben kein bestätigtes Konto und keinen bestätigten Besuchstyp. Sie bleiben zur Prüfung durch das Büro erhalten; löschen Sie die App-Daten nicht."],
   "routeConfirmFailed": ["Não foi possível confirmar a ronda no servidor.","Could not confirm the round on the server.","Impossible de confirmer la tournée sur le serveur.","No se pudo confirmar la ronda en el servidor.","Die Tour konnte auf dem Server nicht bestätigt werden."],
   "routeNoSavedRound": ["Sem ronda guardada para esta conta e este dia. Abra o modo de campo com ligação antes de sair.","No saved round for this account and day. Open field mode online before leaving.","Aucune tournée enregistrée pour ce compte et ce jour. Ouvrez le mode terrain en ligne avant de partir.","No hay una ronda guardada para esta cuenta y este día. Abre el modo de campo con conexión antes de salir.","Für dieses Konto und diesen Tag ist keine Tour gespeichert. Öffnen Sie den Außendienstmodus online, bevor Sie losfahren."],
   "routeSessionPending": ["Sessão por validar","Session needs validation","Session à valider","Sesión pendiente de validar","Sitzung muss bestätigt werden"],
@@ -2651,6 +2654,7 @@
   for (const node of document.querySelectorAll('[data-center-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.centerInitialCopy));
   for (const node of document.querySelectorAll('[data-document-toolbar-copy]')) alertUi.bind(node, alertUi.value(node.dataset.documentToolbarCopy));
   for (const node of document.querySelectorAll('[data-correction-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.correctionInitialCopy));
+  for (const node of document.querySelectorAll('[data-route-initial-copy]')) alertUi.bind(node, alertUi.value(node.dataset.routeInitialCopy));
   // Attribute-only presentation preserves the original inputs, values and selection.
   const documentToolbarInputs = [...document.querySelectorAll('[data-document-toolbar-placeholder]')].map(node => ({ node, entry: alertUi.value(node.dataset.documentToolbarPlaceholder) }));
   function paintDocumentToolbarInputs() {
@@ -5915,7 +5919,7 @@
 
   function updateFieldConnection() {
     const badge = $("#connectionState"); if (!badge) return;
-    badge.textContent = navigator.onLine ? "Rede disponível" : "Sem rede";
+    alertUi.bind(badge, alertUi.value(navigator.onLine ? 'connectionAvailable' : 'connectionUnavailable'));
     badge.dataset.offline = String(!navigator.onLine);
   }
   window.addEventListener("online", updateFieldConnection);
