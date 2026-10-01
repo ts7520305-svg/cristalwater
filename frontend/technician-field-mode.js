@@ -426,6 +426,25 @@
   const alertUi = (() => {
     const languages = ['pt', 'en', 'fr', 'es', 'de'];
     const copy = {
+  "assistTitle": ["Depois da ronda", "After the round", "Après la tournée", "Después de la ronda", "Nach der Tour"],
+  "assistCount": ["{other} colega(s) pendente(s) - {tomorrow} para antecipar", "{other} pending colleague visit(s) - {tomorrow} to bring forward", "{other} visite(s) de collègues en attente - {tomorrow} à avancer", "{other} visita(s) pendiente(s) de compañeros - {tomorrow} para adelantar", "{other} ausstehende Kollegenbesuche - {tomorrow} zum Vorziehen"],
+  "assistHelpAction": ["Ajudar colegas", "Help colleagues", "Aider les collègues", "Ayudar a compañeros", "Kollegen helfen"],
+  "assistTomorrowAction": ["Antecipar amanha", "Bring tomorrow forward", "Avancer la tournée de demain", "Adelantar la ronda de mañana", "Morgige Tour vorziehen"],
+  "assistLoading": ["A procurar trabalho pendente...", "Looking for pending work...", "Recherche de travail en attente…", "Buscando trabajo pendiente...", "Ausstehende Arbeit wird gesucht…"],
+  "assistNoOther": ["Nenhuma piscina pendente de colegas neste momento.", "No colleague pools are pending at the moment.", "Aucune piscine de collègues en attente pour le moment.", "No hay piscinas pendientes de compañeros en este momento.", "Derzeit stehen keine Pools von Kollegen aus."],
+  "assistNoTomorrow": ["A ronda do proximo dia ainda nao tem piscinas pendentes.", "The next day’s round has no pending pools yet.", "La tournée du lendemain n’a pas encore de piscines en attente.", "La ronda del día siguiente aún no tiene piscinas pendientes.", "Die Tour des nächsten Tages hat noch keine ausstehenden Pools."],
+  "assistHelpTitle": ["Ajudar outras rondas em trabalho", "Help with other rounds in progress", "Aider les autres tournées en cours", "Ayudar en otras rondas en curso", "Bei anderen laufenden Touren helfen"],
+  "assistTomorrowTitle": ["Comecar a ronda do proximo dia", "Start the next day’s round", "Commencer la tournée du lendemain", "Comenzar la ronda del día siguiente", "Die Tour des nächsten Tages beginnen"],
+  "assistTomorrowChip": ["Amanha", "Tomorrow", "Demain", "Mañana", "Morgen"],
+  "assistHelpChip": ["Ajudar colega", "Help a colleague", "Aider un collègue", "Ayudar a un compañero", "Einem Kollegen helfen"],
+  "assistOwnTomorrow": ["Ronda propria antecipada", "Own round brought forward", "Tournée personnelle avancée", "Ronda propia adelantada", "Eigene Tour vorgezogen"],
+  "assistColleagueRound": ["Ronda de {name}", "{name}’s round", "Tournée de {name}", "Ronda de {name}", "Tour von {name}"],
+  "assistTechnicianUnknown": ["tecnico por confirmar", "technician to be confirmed", "technicien à confirmer", "técnico por confirmar", "Techniker noch zu bestätigen"],
+  "assistLocationUnknown": ["local por confirmar", "location to be confirmed", "lieu à confirmer", "lugar por confirmar", "Ort noch zu bestätigen"],
+  "assistIncomplete": ["A resposta não confirma a ronda completa. Atualize antes de escolher outra visita.", "The response does not confirm the complete round. Refresh before choosing another visit.", "La réponse ne confirme pas la tournée complète. Actualisez avant de choisir une autre visite.", "La respuesta no confirma la ronda completa. Actualiza antes de elegir otra visita.", "Die Antwort bestätigt die vollständige Tour nicht. Aktualisieren Sie, bevor Sie einen anderen Besuch auswählen."],
+  "assistLoadFailed": ["Nao foi possivel carregar alternativas.", "Could not load alternatives.", "Impossible de charger les alternatives.", "No se pudieron cargar las alternativas.", "Alternativen konnten nicht geladen werden."],
+  "assistTomorrowOpened": ["Ronda de amanha aberta.", "Tomorrow’s round opened.", "Tournée de demain ouverte.", "Ronda de mañana abierta.", "Morgige Tour geöffnet."],
+  "assistHelpOpened": ["Visita de apoio aberta.", "Support visit opened.", "Visite d’aide ouverte.", "Visita de apoyo abierta.", "Unterstützungsbesuch geöffnet."],
   "accessTitle": ["Acesso e avisos", "Access and notices", "Accès et consignes", "Acceso y avisos", "Zugang und Hinweise"],
   "accessLoading": ["A carregar chave ou código desta piscina...", "Loading the key or code for this pool...", "Chargement de la clé ou du code de cette piscine…", "Cargando la llave o el código de esta piscina...", "Schlüssel oder Code für diesen Pool wird geladen…"],
   "accessSectionHint": ["chaves e codigos", "keys and codes", "clés et codes", "llaves y códigos", "Schlüssel und Codes"],
@@ -2791,6 +2810,7 @@
   let docsCompliance = null;
   let documentsLoaded = false;
   let assistOptions = { loading: false, loadedKey: "", otherToday: [], tomorrow: [], error: "" };
+  let assistErrorPresentation = null;
   let notifiedVisitNoticeKey = "";
   let activePoolFilter = "TODO";
   let opsSnapshot = { docsReady: false, done: 0, total: 0, pending: 0 };
@@ -5580,19 +5600,20 @@
 
   function visitLine(visit) {
     const location = visitLocation(visit);
-    const time = formatDate(visit.plannedDate || visit.date || visit.startAt);
-    return `${time} - ${visit.client?.name || "Cliente"} - ${location.address || visit.pool?.zone || "local por confirmar"}`;
+    const raw = visit.plannedDate || visit.date || visit.startAt;
+    const time = !raw || Number.isNaN(new Date(raw).getTime()) ? alertUi.value('accessNoDate') : formatDate(raw);
+    return alertUi.join([time, visit.client?.name || alertUi.value('sourceClient'), location.address || visit.pool?.zone || alertUi.value('assistLocationUnknown')], ' - ');
   }
 
-  function assistCardHtml(visit, source) {
+  function assistCardHtml(visit, source, leaf) {
     const isTomorrow = source === "tomorrow";
-    const techName = visit.technician?.name || visit.technicianName || "tecnico por confirmar";
+    const techName = visit.technician?.name || visit.technicianName || alertUi.value('assistTechnicianUnknown');
     return `
       <button class="assist-card" type="button" data-assist-visit="${esc(visit.id)}" data-assist-type="${esc(visit.visitType || 'REGULAR')}" data-assist-source="${esc(source)}">
-        <span class="chip">${isTomorrow ? "Amanha" : "Ajudar colega"}</span>
-        <b>${esc(visit.pool?.name || "Piscina")}</b>
-        <small>${esc(visitLine(visit))}</small>
-        <small>${isTomorrow ? "Ronda propria antecipada" : `Ronda de ${techName}`}</small>
+        ${leaf(alertUi.value(isTomorrow ? 'assistTomorrowChip' : 'assistHelpChip'), 'span', 'chip')}
+        ${leaf(visit.pool?.name || alertUi.value('sourcePool'), 'b')}
+        ${leaf(visitLine(visit), 'small')}
+        ${leaf(isTomorrow ? alertUi.value('assistOwnTomorrow') : alertUi.value('assistColleagueRound', { name: techName }), 'small')}
       </button>
     `;
   }
@@ -5605,24 +5626,27 @@
       return;
     }
 
+    alertUi.clearTree(panel); panel.setAttribute('data-cw-no-i18n', '');
+    const entries = [];
+    const leaf = (entry, tag = 'span', className = '') => { const id = entries.push(entry)-1; return `<${tag} data-assist-copy="${id}"${className ? ` class="${className}"` : ''}>${esc(alertUi.format(entry))}</${tag}>`; };
     panel.hidden = false;
     const other = assistOptions.otherToday || [];
     const tomorrow = assistOptions.tomorrow || [];
     const showOther = mode === "help" || mode === "overview";
     const showTomorrow = mode === "tomorrow" || mode === "overview";
-    const loading = assistOptions.loading ? '<div class="assist-empty">A procurar trabalho pendente...</div>' : "";
-    const error = assistOptions.error ? `<div class="assist-empty warn">${esc(assistOptions.error)}</div>` : "";
+    const loading = assistOptions.loading ? leaf(alertUi.value('assistLoading'), 'div', 'assist-empty') : "";
+    const error = assistOptions.error ? leaf(assistErrorPresentation ?? assistOptions.error, 'div', 'assist-empty warn') : "";
     const otherHtml = other.length
-      ? `<div class="assist-list">${other.slice(0, 8).map((visit) => assistCardHtml(visit, "otherToday")).join("")}</div>`
-      : '<div class="assist-empty">Nenhuma piscina pendente de colegas neste momento.</div>';
+      ? `<div class="assist-list">${other.slice(0, 8).map((visit) => assistCardHtml(visit, "otherToday", leaf)).join("")}</div>`
+      : leaf(alertUi.value('assistNoOther'), 'div', 'assist-empty');
     const tomorrowHtml = tomorrow.length
-      ? `<div class="assist-list">${tomorrow.slice(0, 8).map((visit) => assistCardHtml(visit, "tomorrow")).join("")}</div>`
-      : '<div class="assist-empty">A ronda do proximo dia ainda nao tem piscinas pendentes.</div>';
+      ? `<div class="assist-list">${tomorrow.slice(0, 8).map((visit) => assistCardHtml(visit, "tomorrow", leaf)).join("")}</div>`
+      : leaf(alertUi.value('assistNoTomorrow'), 'div', 'assist-empty');
 
     panel.innerHTML = `
       <div class="assist-head">
-        <b>Depois da ronda</b>
-        <span>${esc(`${other.length} colega(s) pendente(s) - ${tomorrow.length} para antecipar`)}</span>
+        ${leaf(alertUi.value('assistTitle'), 'b')}
+        ${leaf(alertUi.value('assistCount', { other: other.length, tomorrow: tomorrow.length }))}
       </div>
       <div class="assist-actions">
         <button type="button" data-assist-mode="help">Ajudar colegas</button>
@@ -5630,9 +5654,12 @@
       </div>
       ${loading}
       ${error}
-      ${showOther ? `<div class="assist-section"><h3>Ajudar outras rondas em trabalho</h3>${otherHtml}</div>` : ""}
-      ${showTomorrow ? `<div class="assist-section"><h3>Comecar a ronda do proximo dia</h3>${tomorrowHtml}</div>` : ""}
+      ${showOther ? `<div class="assist-section">${leaf(alertUi.value('assistHelpTitle'), 'h3')}${otherHtml}</div>` : ""}
+      ${showTomorrow ? `<div class="assist-section">${leaf(alertUi.value('assistTomorrowTitle'), 'h3')}${tomorrowHtml}</div>` : ""}
     `;
+    for (const node of panel.querySelectorAll('[data-assist-copy]')) alertUi.bind(node, entries[Number(node.dataset.assistCopy)]);
+    alertUi.bind(panel.querySelector('[data-assist-mode=help]'), alertUi.value('assistHelpAction'));
+    alertUi.bind(panel.querySelector('[data-assist-mode=tomorrow]'), alertUi.value('assistTomorrowAction'));
   }
 
   async function loadAssistOptions(force = false) {
@@ -5643,6 +5670,7 @@
       return;
     }
     assistOptions = { ...assistOptions, loading: true, loadedKey: key, error: "" };
+    assistErrorPresentation = null;
     renderAssistPanel();
 
     try {
@@ -5653,7 +5681,7 @@
         api(`/api/technician/today?${tomorrowQuery}`),
       ]);
 
-      for(const result of [todayResult, tomorrowResult])if(result.status==='fulfilled'&&(result.value.complete!==true||!Array.isArray(result.value.visits)||result.value.total!==result.value.visits.length))throw Error('A resposta não confirma a ronda completa. Atualize antes de escolher outra visita.');
+      for(const result of [todayResult, tomorrowResult])if(result.status==='fulfilled'&&(result.value.complete!==true||!Array.isArray(result.value.visits)||result.value.total!==result.value.visits.length))throw alertUi.error('A resposta não confirma a ronda completa. Atualize antes de escolher outra visita.', alertUi.value('assistIncomplete'));
       const todayVisits = todayResult.status === "fulfilled" ? pendingVisitsOnly(todayResult.value.visits) : [];
       const tomorrowVisits = tomorrowResult.status === "fulfilled" ? pendingVisitsOnly(tomorrowResult.value.visits) : [];
       const otherToday = todayVisits
@@ -5669,6 +5697,7 @@
       };
     } catch (error) {
       assistOptions = { ...assistOptions, loading: false, error: error.message || "Nao foi possivel carregar alternativas." };
+      assistErrorPresentation = alertUi.failure(error, alertUi.value('assistLoadFailed'));
     }
     renderAssistPanel();
   }
@@ -5689,7 +5718,7 @@
     loadCurrentDraft();
     render();
     switchFieldTab("hoje", true);
-    toast(source === "tomorrow" ? "Ronda de amanha aberta." : "Visita de apoio aberta.");
+    alertUi.notify(alertUi.value(source === 'tomorrow' ? 'assistTomorrowOpened' : 'assistHelpOpened'));
   }
 
   function showAssistMode(mode) {

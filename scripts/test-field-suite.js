@@ -23,6 +23,7 @@ const scripts=[
  'test-field-connection-languages.js',
  'test-field-map-navigation-languages.js',
  'test-field-access-languages.js',
+ 'test-field-assist-languages.js',
  'test-field-water-api.js','test-field-access-api.js','test-field-e2e.js',
  'test-fcs-sec-tech-auth.js','test-fcs-sec-tech-workday.js','test-fcs-technician-t1.js',
  'test-visit-os-operational.js','test-route-os-acceptance.js','test-customer-os-operational.js',
