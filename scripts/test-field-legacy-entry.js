@@ -50,5 +50,41 @@ let browser;
   const context=await browser.newContext(),page=await context.newPage();await context.route('**/*',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><a id="portalLink" href="/client-portal">Portal</a>'}));await page.goto(origin+'/client-wow'+query);await page.addScriptTag({content:source('client-wow.js')});assert.equal(await page.locator('#portalLink').getAttribute('href'),target);await context.close();
  }
  console.log('PASS client/splash fallback: login remains usable without JavaScript at 320px; old cached portal link strips arbitrary parameters and repeated/unknown languages');
+ // Observe the real transient HTML while only the original deferred guard is held.
+ const entryCopy={
+  pt:['Cristal Water · Entrada','A abrir a área correspondente à sessão.','Continuar para a entrada'],
+  en:['Cristal Water · Entry','Opening the area for your session.','Continue to sign in'],
+  fr:['Cristal Water · Accès','Ouverture de l’espace correspondant à votre session.','Continuer vers la connexion'],
+  es:['Cristal Water · Entrada','Abriendo el área correspondiente a su sesión.','Continuar al inicio de sesión'],
+  de:['Cristal Water · Zugang','Der Bereich für Ihre Sitzung wird geöffnet.','Weiter zur Anmeldung']
+ };
+ const entryQueries=[...Object.keys(entryCopy).map(language=>({query:'?lang='+language,language})),...['','?lang=','?lang=xx','?lang=DE','?lang=pt&lang=de','?lang=constructor','?lang=%3Cb%3Ede%3C%2Fb%3E'].map(query=>({query,language:'pt'}))];
+ let transientChecks=0;
+ for(const {query,language} of entryQueries)for(const width of [320,390,1440]){
+  const context=await browser.newContext({viewport:{width,height:900},serviceWorkers:'block'}),page=await context.newPage(),errors=[],apiRequests=[],destinations=[];page.setDefaultTimeout(6000);page.on('pageerror',error=>errors.push(error.message));
+  const credential=token({id:7,clientId:7,role:'CLIENT',exp:Math.floor(Date.now()/1000)+3600}),user=JSON.stringify({id:7,clientId:7,role:'CLIENT',name:'João'}),stored={...work,token:credential,cristalwater_jwt:credential,adminToken:credential,user,cristalwater_user:user};
+  await context.addInitScript(({origin,stored,drafts})=>{if(location.origin!==origin||location.pathname!=='/client-wow')return;for(const [key,value]of Object.entries(stored))localStorage.setItem(key,value);for(const [key,value]of Object.entries(drafts))sessionStorage.setItem(key,value);},{origin,stored,drafts});
+  let release;
+  await context.route('**/*',async route=>{
+   const url=new URL(route.request().url());if(url.origin!==origin)return route.abort();
+   if(url.pathname.startsWith('/api/'))apiRequests.push(url.pathname);
+   if(url.pathname==='/client-wow')return route.fulfill({contentType:'text/html',body:source('client-wow.html')});
+   if(url.pathname==='/cw-admin-legacy-entry.js'){await new Promise(resolve=>{release=resolve;});return route.fulfill({contentType:'application/javascript',body:source('cw-admin-legacy-entry.js')});}
+   if(url.pathname.endsWith('.css'))return route.fulfill({contentType:'text/css',body:source(url.pathname.slice(1))});
+   if(route.request().isNavigationRequest())destinations.push(url.pathname+url.search);
+   return route.fulfill({contentType:'text/html',body:'<!doctype html><p id="destination">Destination guard owns authentication</p>'});
+  });
+  const search=query+(query?'&':'?')+'clientId=999&token=PRIVATE&returnTo=https%3A%2F%2Fbad.test';
+  try{
+   await page.goto(origin+'/client-wow'+search,{waitUntil:'commit'});await page.waitForFunction(()=>document.readyState==='interactive');
+   assert.equal(await page.locator('html').getAttribute('lang'),language);assert.equal(await page.title(),entryCopy[language][0]);assert.equal(await page.locator('#legacyEntryStatus').textContent(),entryCopy[language][1]);assert.equal(await page.locator('#legacyEntryLink').textContent(),entryCopy[language][2]);
+   assert.equal(await page.locator('h1').textContent(),'Cristal Water');assert.equal(await page.locator('body').getAttribute('data-required-role'),'CLIENT');assert.equal(await page.locator('#legacyEntryLink').getAttribute('href'),'/login');
+   assert.equal(await page.locator('#legacyEntryStatus b,#legacyEntryLink b').count(),0);assert(await page.locator('main').evaluate(node=>node.scrollWidth<=node.clientWidth+1));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+   assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage))),stored);assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(sessionStorage))),drafts);assert.deepEqual(apiRequests,[]);assert.deepEqual(destinations,[]);
+   if(language==='de'&&width===320&&query==='?lang=de'){const folder=process.env.CW_LEGACY_ENTRY_CAPTURE||output;fs.mkdirSync(folder,{recursive:true});await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));const cdp=await context.newCDPSession(page),capture=await cdp.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});fs.writeFileSync(path.join(folder,'client-wow-de-320.png'),Buffer.from(capture.data,'base64'));await cdp.detach();}
+   assert.equal(typeof release,'function');release();release=null;const destination=R.destination(R.keys.map(key=>stored[key]||null),search);await page.waitForURL(origin+destination);assert.deepEqual(destinations,[destination]);assert.deepEqual(apiRequests,[]);assert.deepEqual(errors,[]);assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage))),stored);assert.deepEqual(await page.evaluate(()=>Object.fromEntries(Object.entries(sessionStorage))),drafts);transientChecks++;
+  }finally{release?.();await context.close();}
+ }
+ assert.equal(transientChecks,36);console.log('PASS client entry transient copy: 36 real HTML cases, 108 texts, five languages and seven absent/rejected queries at 320/390/1440; unchanged deferred guard, native canonical destination, credentials and draft bytes');
  console.log('PASS legacy entry: '+checked+' actual alias HTML cases, extension/slash variants, four roles and identity/expiry/storage refusal, one fixed same-origin destination, only supported language forwarded, no API calls or stored-byte changes; two actual client menus open the portal without self-loop, 320/390/1440');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{await browser?.close();});

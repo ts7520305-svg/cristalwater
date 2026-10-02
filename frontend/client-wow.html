@@ -11,9 +11,30 @@
 <body data-required-role="CLIENT">
   <main style="max-width:600px;margin:40px auto;padding:20px">
     <h1>Cristal Water</h1>
-    <p>A abrir a área correspondente à sessão.</p>
+    <p id="legacyEntryStatus">A abrir a área correspondente à sessão.</p>
     <noscript><p>Use a ligação de entrada para continuar sem JavaScript.</p></noscript>
     <a id="legacyEntryLink" href="/login">Continuar para a entrada</a>
   </main>
+  <script>
+  (function () {
+    'use strict';
+    const copy = {
+      pt: ['Cristal Water · Entrada', 'A abrir a área correspondente à sessão.', 'Continuar para a entrada'],
+      en: ['Cristal Water · Entry', 'Opening the area for your session.', 'Continue to sign in'],
+      fr: ['Cristal Water · Accès', 'Ouverture de l’espace correspondant à votre session.', 'Continuer vers la connexion'],
+      es: ['Cristal Water · Entrada', 'Abriendo el área correspondiente a su sesión.', 'Continuar al inicio de sesión'],
+      de: ['Cristal Water · Zugang', 'Der Bereich für Ihre Sitzung wird geöffnet.', 'Weiter zur Anmeldung']
+    };
+    const values = new URLSearchParams(location.search).getAll('lang');
+    const language = values.length === 1 && ['pt', 'en', 'fr', 'es', 'de'].includes(values[0]) ? values[0] : 'pt';
+    const nodes = [document.querySelector('title'), document.getElementById('legacyEntryStatus'), document.getElementById('legacyEntryLink')];
+    nodes.forEach(function (node, index) {
+      if (node && node.childNodes.length === 1 && node.firstChild.nodeType === 3 && node.firstChild.nodeValue === copy.pt[index]) {
+        node.firstChild.nodeValue = copy[language][index];
+      }
+    });
+    document.documentElement.lang = language;
+  }());
+  </script>
 </body>
 </html>
