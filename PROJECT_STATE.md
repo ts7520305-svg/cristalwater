@@ -20,7 +20,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## Tarefa em curso
 
-TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw:ctx:<pathname>` sem titular nem visita. O código existente confirma o risco de recuperar leituras/notas da conta ou visita anterior. A correção local usa a identidade já validada pelo guard da ficha e o ID de visita, só restaura depois da leitura autorizada e não adota o armazenamento antigo sem titular. Ficheiros, credenciais e formulários geridos continuam excluídos; snapshots inválidos preservados. Ainda não publicada nem aceite em CI nesta entrada.
+TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw:ctx:<pathname>` sem titular nem visita. O código existente confirma o risco de recuperar leituras/notas da conta ou visita anterior. A correção local usa a identidade já validada pelo guard da ficha e o ID de visita, só restaura depois da leitura autorizada e não adota o armazenamento antigo sem titular. Ficheiros, credenciais e formulários geridos continuam excluídos; snapshots inválidos não são adotados e os seus bytes são arquivados antes de guardar trabalho novo. Cache v304 e quatro expectativas de testes atualizados. Correção testada localmente, a publicar no commit desta entrada; CI integrado ainda pendente.
 
 ## Testes realizados nesta sessão
 
@@ -49,4 +49,6 @@ TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw
 
 ## PRÓXIMA TAREFA EXATA
 
-Finalizar TASK539: versionar cache do service worker e expectativas correspondentes, repetir gates finais, publicar correção e documentação na branch de trabalho com parent remoto conferido; verificar Actions. Depois adicionar ensaio reproduzível de reload com navegador à validação existente, conferir CI537/538/539 e prosseguir o inventário C06. Se uma Action falhar, diagnosticar o primeiro erro real antes de novas tarefas. Nunca fechar C06 por este único lote.
+TASK540: guardar o ensaio Chromium de reload como teste reproduzível no repositório e incluí-lo na validação browser existente; usar o script real com fixtures explicitamente identificadas e não alegar SQL/API. Conferir CI537/538/539 e depois prosseguir C06. A publicação TASK539 inclui 10 ficheiros: duas fontes, cache, quatro expectativas de cache, um teste e dois documentos. Publicar/checkar SHA remoto após cada commit.
+
+Registo anterior, resolvido nesta alteração — finalizar TASK539: versionar cache do service worker e expectativas correspondentes, repetir gates finais, publicar correção e documentação na branch de trabalho com parent remoto conferido; verificar Actions. Depois adicionar ensaio reproduzível de reload com navegador à validação existente, conferir CI537/538/539 e prosseguir o inventário C06. Se uma Action falhar, diagnosticar o primeiro erro real antes de novas tarefas. Nunca fechar C06 por este único lote.

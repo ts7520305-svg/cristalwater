@@ -38,3 +38,8 @@
 - Criados `PROJECT_STATE.md` e `BACKLOG.md` como checkpoint e índice do plano existente.
 - Arquitetura complementada com a estrutura atual e pipeline de validação.
 - Identificadas versões documentais divergentes e divergência entre branch padrão e branch de desenvolvimento; não foi atribuída prontidão de produção nem efetuado merge.
+
+## TASK539 — recuperação isolada da ficha técnica (2026-10-02)
+- Memória da ficha por principal validado e visita, restaurada só após carregamento autorizado; refresh conserva a edição atual.
+- Dados antigos sem titular não são adotados; bytes inválidos arquivados antes de guardar novos campos. Ficheiros, credenciais e formulários geridos excluídos.
+- Cache v304; 13 regressões novas e ensaio Chromium de reload aprovados localmente. Aceitação integrada/produção permanece pendente.

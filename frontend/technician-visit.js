@@ -780,11 +780,15 @@ const visitGuard = (() => {
   function current(captured){const now=session();if(now?.owner!==owner){check();return false;}return !!captured&&!blocked&&captured.owner===owner&&captured.generation===generation;}
   function canWrite(){return check()&&loaded;}
   function capture(){return canWrite()?{owner,generation}:null;}
-  function finishLoad(captured){if(!current(captured))return false;if(captured.restoreWork)restore();loaded=true;hasPrivateFields=true;return true;}
+  function finishLoad(captured){if(!current(captured))return false;if(captured.restoreWork)restore();loaded=true;hasPrivateFields=true;window.dispatchEvent(new Event('cw:visit-context-ready'));return true;}
   function finishBusy(captured){if(session()?.owner!==captured.owner||blocked){check();return;}setBusy(false);setFormEnabled(loaded);}
   owner=session()?.owner||null;
   window.addEventListener('cw:session-change',check);
   window.addEventListener('storage',event=>{if(event.key===null||['token','cristalwater_jwt','adminToken','user','cristalwater_user'].includes(event.key))check();});
+  window.CWVisitNavigationMemory=Object.freeze({scope(){
+    const id=Number(visitId);
+    return canWrite()&&Number.isSafeInteger(id)&&id>0?{owner,visitId:String(id)}:null;
+  }});
   return Object.freeze({startLoad,current,capture,finishLoad,finishBusy});
 })();
 
