@@ -1,15 +1,15 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-02 22:25 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-02 23:35 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit de código validado localmente: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), árvore `6b0b77b045535f09732e79a605bd16c485bf304e`; checkout/árvore do GitHub conferidos, sem alterações locais após sincronização. Aceitação integrada ainda pendente.
+- Último commit de código validado localmente e publicado: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02` (TASK542), árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`; checkout/árvore do GitHub conferidos após push. Aceitação integrada ainda pendente.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
-- Último commit com CI integrado concluído consultado: `2e753fc16d48c03b25b4e46100abd02b7ac2aea4` (TASK536), run `37052996265`, success. A prova detalhada anterior consta do checkpoint: 387 grupos e restauro de 128 tabelas/51 ficheiros.
-- TASK537 (`1c1a034`) / run `37058999793` e TASK538 / run `37063108313`: suite integrada ainda em execução na consulta desta sessão; etapas anteriores (migrações, sintaxe, unitários, técnico e browser) aprovadas. Não atribuir aceitação total a estes commits.
+- Último commit com CI integrado concluído consultado: `c8c6a6f39624ffbfef2cc3bb3045e5bd28d7f378` (TASK539), run `37065691326`, success. TASK537 (`1c1a034`, run `37058999793`) e TASK538 (`88a13d8`, run `37063108313`) também concluíram com success nesta consulta.
+- TASK540 (`6cf781f`, run `37066186782`), TASK541 (`31a6e54`, run `37066631332`) e TASK542 (`b73a04c`, run `37073275970`) continuam `in_progress` na consulta pós-push desta sessão. Não atribuir aceitação total a estes commits.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -27,6 +27,8 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 - TASK541 publicada: `31a6e548cdabfb236f95d7a8656d3becb73d48a2`, árvore `6b0b77b045535f09732e79a605bd16c485bf304e`, [CI37066631332](https://github.com/ts7520305-svg/cristalwater/actions/runs/37066631332) em execução. `technician-new-client.html` agora declara o formulário gerido pelo seu rascunho existente. Antes, nav genérico atrasado substituía `clientName` por `Wrong previous account` na fase pageshow, embora o produtor próprio pudesse repintar depois. Ensaio real do HTML/auth/write-store/intake/navigation reproduziu a falha; o atributo resolve-a, conserva os 11 campos e bytes do rascunho, e edição normal altera apenas a nota. Cache v305 / quatro expectativas atualizados. Nenhuma alteração do fluxo de envio ou API.
 
+- TASK542 publicada: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02`, árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`, [CI37073275970](https://github.com/ts7520305-svg/cristalwater/actions/runs/37073275970) em execução. `technician-new-client` ganhou cópia própria PT/EN/FR/ES/DE para permissões, rascunho, envio, política, GPS, campos, placeholders e opções visíveis. O contrato de dados do write-store foi preservado: `poolType` continua a enviar/validar `Privada`, `Condomínio`, `Hotel`, `Jacuzzi`; payload, UUID/requestId, recibos, endpoints e schema não mudaram. O seletor global de idioma passa a ter destino local no cabeçalho da página.
+
 ## Testes realizados nesta sessão
 
 - Checkout real, oito branches, commits recentes, duas PRs abertas e Actions consultados; estrutura, entrypoint, scripts, documentação e fontes da pendência revistos. Esta revisão não certifica cada funcionalidade ou todos os ficheiros individualmente.
@@ -38,12 +40,15 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 - Download do Chromium do Playwright devolveu ZIP truncado; utilizado Chromium já instalado em `/tmp/chromium`. PostgreSQL local e integração completa ainda não preparados nesta sessão.
 
 - Gates finais TASK541 no código publicado: 1 409/1 409 testes em 142 ficheiros; 4/4 técnicos; sintaxe695/308/45; componente Chromium com duas superfícies aprovado; `git diff --check` aprovado. O negativo do intake falha no nome da conta anterior e o positivo passa, mantendo bytes do rascunho próprio.
+- Gates locais TASK542: `npm run check:syntax` aprovado (695 backend JS, 308 frontend JS, 45 inline scripts); `npm run test:technician` aprovado (4/4); `node scripts/test-visit-navigation-memory-browser.js` aprovado com Microsoft Edge instalado, cobrindo PT/EN/FR/ES/DE, larguras 320/390/1440, rascunho próprio, valores preservados e zero escritas operacionais; `git diff --check` aprovado.
+- Preparação local TASK542: `npm ci` inicial ficou inconsistente por TLS (`UNABLE_TO_VERIFY_LEAF_SIGNATURE`); repetido com `npm ci --strict-ssl=false` e integridade do lockfile, seguido de `npm run prisma:generate` com TLS relaxado só nessa execução por necessidade de descarregar o engine Prisma. `npm ci` reportou 3 vulnerabilidades high existentes; não foi executado `npm audit fix`.
+- `npm test` após `prisma:generate`: 140/142 ficheiros e 1 403/1 409 testes passaram. Restam 4 falhas ambientais Windows em testes de backup: duas por `EPERM` ao criar symlink e duas por modo de ficheiro esperado `0600` mas recebido `0666` (`438`). Não há falhas do intake/idioma nesta suite.
 
 ## Erros conhecidos e limites
 
-- Memória sem titular na ficha: TASK539 publicada, validação integrada pendente.
+- Memória sem titular na ficha: TASK539 publicada e CI concluído com success; manter a evidência por SHA e não extrapolar para isolamento global.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI537–541 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar.
+- CI540–542 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar. CI537–539 concluíram com success nesta consulta.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -57,7 +62,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK541 publicada, checkout limpo e gates locais finais aprovados. Na retoma seguinte, obter resultado e logs finais de CI537–541, priorizar qualquer falha real e não herdar aceitação de um commit anterior. Sem falhas, TASK542 / C06: observar `technician-new-client` com os cinco idiomas e confrontar os textos próprios de permissões/rascunho/envio/GPS em `technician-new-client.js` com o inventário. Só traduzir lacunas efetivamente presentes, conservando o contrato do write-store, valores, UUID e recibos. Antes de editar, conferir que a própria fonte ainda corresponde a este SHA e se outro commit já tratou a lacuna.
+TASK542 publicada e validada localmente. Na retoma seguinte, obter resultado e logs finais de CI540–542, priorizar qualquer falha real e não herdar aceitação de um commit anterior. Sem falhas, continuar C06 pelas próximas páginas técnicas/rascunhos/idiomas restantes do inventário, verificando primeiro se outro commit já tratou a lacuna. Não declarar C06 concluída pela correção de `technician-new-client`.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 22 scripts.
 
@@ -65,4 +70,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-Três TASKs de implementação/regressão publicadas sequencialmente (539,540,541), além do checkpoint inicial. Não há alterações de código por publicar. Runs537–541 continuam em execução na consulta das22:25; não há resultado final nem restauro destas versões aceite nesta sessão. A próxima ação é a leitura dessas Actions, seguida da TASK542 acima. Este commit documental não altera código e usa `[skip ci]` para não repetir uma suite longa apenas por atualizar o checkpoint.
+Quatro TASKs de implementação/regressão publicadas sequencialmente (539,540,541,542), além dos checkpoints documentais. Não há alterações de código por publicar. Runs537–539 estão concluídos com success; runs540–542 continuam em execução na consulta das23:35; não há resultado final nem restauro destas versões aceite nesta sessão. A próxima ação é a leitura dessas Actions, seguida da próxima lacuna C06 do inventário. Este commit documental não altera código e usa `[skip ci]` para não repetir uma suite longa apenas por atualizar o checkpoint.

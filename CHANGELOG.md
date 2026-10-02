@@ -60,3 +60,7 @@
 - Localizados os textos próprios de `technician-new-client` em PT/EN/FR/ES/DE: permissões, rascunho, envio, políticas, GPS, campos, placeholders e opções visíveis.
 - Preservado o contrato do `CWFieldWriteStore`, UUID/requestId, recibos, payload e valores aceites de `poolType` (`Privada`, `Condomínio`, `Hotel`, `Jacuzzi`); só as etiquetas visíveis mudam por idioma.
 - Regressão browser do intake ampliada para cinco idiomas, três larguras e zero escritas operacionais, mantendo bytes do rascunho próprio e compatibilidade com a memória genérica atrasada.
+
+## Checkpoint após TASK542 (2026-10-02)
+- Registados commit/árvore/run da TASK542, Actions correntes, gates locais e a limitação ambiental do `npm test` em Windows no estado oficial.
+- Próxima ação: aguardar CI540–542; se não houver falhas, continuar C06 pelas próximas lacunas do inventário sem declarar C06 concluída.
