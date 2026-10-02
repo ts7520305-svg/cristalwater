@@ -35,7 +35,7 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
     Date.now=()=>now;const interval=window.setInterval;window.setInterval=(callback,delay,...args)=>[15000,30000,60000].includes(delay)?0:interval(callback,delay,...args);
     Object.defineProperty(navigator,'geolocation',{value:{watchPosition:()=>1,clearWatch(){}}});
   },{token,tech,origin:base,now});
-  const page=await context.newPage();page.setDefaultTimeout(10000);page.on('pageerror',error=>errors.push(error.message));
+  const page=await context.newPage();await page.clock.setFixedTime(now);page.setDefaultTimeout(10000);page.on('pageerror',error=>errors.push(error.message));
   page.on('request',request=>{const path=new URL(request.url()).pathname;if(path.startsWith('/api/'))requests.push({path,method:request.method(),body:request.postData(),auth:request.headers().authorization});});
   const settle=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   const locale=async language=>{await page.locator('#cwLanguageSelect').selectOption(language);await settle();};

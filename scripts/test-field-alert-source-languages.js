@@ -193,14 +193,16 @@ let browser,completed=false;
 const deadline=setTimeout(()=>{console.error('Alert source language scenario did not finish');process.exit(1);},105000);
 process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
 (async()=>{
+ // Keep the delayed visit on today's Lisbon business day, even just after midnight.
+ const fixtureTime=new Date();fixtureTime.setHours(12,0,0,0);const now=fixtureTime.getTime();
  const vehicle=await prisma.vehicle.create({data:{plate:'QA-SOURCE-'+Date.now(),active:true}});
  const tech=await prisma.technician.create({data:{name:'Sistema',active:true,vehicleId:vehicle.id}});
  const client=await prisma.client.create({data:{name:'Cliente',active:true}});
  const regularPool=await prisma.pool.create({data:{name:'Piscina',clientId:client.id,active:true}}),extraPool=await prisma.pool.create({data:{name:'Extra <b>{pool}</b>',clientId:client.id,active:true}});
- const max=await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]),id=Math.max(...max.map(x=>x._max.id||0))+1,planned=new Date(Date.now()-45*60000),common={id,clientId:client.id,technicianId:tech.id,status:'PLANNED'};
+ const max=await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]),id=Math.max(...max.map(x=>x._max.id||0))+1,planned=new Date(now-45*60000),common={id,clientId:client.id,technicianId:tech.id,status:'PLANNED'};
  await prisma.serviceVisit.create({data:{...common,poolId:regularPool.id,date:planned,plannedDate:planned}});await prisma.extraVisit.create({data:{...common,poolId:extraPool.id,scheduledAt:planned}});
  for(const table of ['ServiceVisit','ExtraVisit'])await prisma.$queryRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${table}"','id'),${id},true)`);
- const token=jwt.sign({id:tech.id,role:'TECHNICIAN'},getJwtSecret(),{expiresIn:'1h'});
+ const token=jwt.sign({id:tech.id,role:'TECHNICIAN',iat:Math.floor(now/1000)},getJwtSecret(),{expiresIn:'1h'});
  const initialDraft={v:2,owner:'TECH:'+tech.id,drafts:{['visit-REGULAR-'+id]:{values:{notes:'Literal <b>{who}</b>'},checks:{},pendingProblems:[{severity:'Urgente',visitId:id,message:'Original <b>{count}</b>',createdAt:planned.toISOString()},{severity:'URGENTE',visitId:id,message:'Segunda ocorrência',createdAt:planned.toISOString()},{severity:'Normal',visitId:id,message:'Not critical',createdAt:planned.toISOString()}]}}};
  browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
  const context=await browser.newContext({viewport:{width:390,height:900},timezoneId:'Europe/Lisbon'});await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
@@ -210,7 +212,7 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
   const interval=setInterval;window.setInterval=(fn,delay,...args)=>[15000,30000,60000].includes(delay)?0:interval(fn,delay,...args);
   Object.defineProperty(navigator,'geolocation',{value:{watchPosition:()=>1,clearWatch(){}}});
  },{token,tech,vehicle,initialDraft,origin:base});
- const page=await context.newPage(),errors=[],requests=[];page.setDefaultTimeout(9000);page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{const path=new URL(r.url()).pathname;if(path.startsWith('/api/'))requests.push({path,method:r.method(),body:r.postData(),authorization:r.headers().authorization});});
+ const page=await context.newPage(),errors=[],requests=[];await page.clock.setFixedTime(now);page.setDefaultTimeout(9000);page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{const path=new URL(r.url()).pathname;if(path.startsWith('/api/'))requests.push({path,method:r.method(),body:r.postData(),authorization:r.headers().authorization});});
  const locale=async lang=>{await page.locator('#cwLanguageSelect').selectOption(lang);await page.waitForFunction(lang=>document.documentElement.lang===lang,lang);};
  const settle=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  const text=(key,i,params={})=>words[key][i].replace(/\{(\w+)\}/g,(_,key)=>String(params[key]??''));
@@ -253,7 +255,7 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
  const unavailableDuration=['duracao indisponivel','duration unavailable','durée indisponible','duración no disponible','Dauer nicht verfügbar'];
  for(const fallback of [false,true]){
   const sample=JSON.parse(routeRaw),row=sample.visits.find(v=>v.id===id&&v.visitType==='REGULAR');
-  row.pool.equipment={pumpMode:'MANUAL',pumpManualAt:fallback?'not-a-date':new Date(Date.now()-65*60000).toISOString(),...(fallback?{}:{pumpManualBy:'pendente backend'})};if(fallback){row.pool.name='';delete row.pumpManualBy;delete row.manualBy;delete row.lastUpdatedBy;}
+  row.pool.equipment={pumpMode:'MANUAL',pumpManualAt:fallback?'not-a-date':new Date(now-65*60000).toISOString(),...(fallback?{}:{pumpManualBy:'pendente backend'})};if(fallback){row.pool.name='';delete row.pumpManualBy;delete row.manualBy;delete row.lastUpdatedBy;}
   await page.evaluate(({key,value})=>localStorage.setItem(key,value),{key:routeKey,value:JSON.stringify(sample)});await open();await instrument();await matrix({pool:row.pool.name,signal:{who:fallback?'':'pendente backend',pool:row.pool.name,duration:fallback?unavailableDuration:'1h 05m'}});
   const signalId=await page.locator('#interruptList [data-exception-category=PUMP_MANUAL]').getAttribute('data-exception-id');
   assert.equal(signalId,`pump-manual:visit-REGULAR-${id}:${row.pool.equipment.pumpManualAt}`);

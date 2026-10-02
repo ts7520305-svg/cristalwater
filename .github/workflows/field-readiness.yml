@@ -25,6 +25,8 @@ jobs:
           --health-cmd "pg_isready -U postgres -d cristalwater_qa"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      # Field browser fixtures use the Lisbon business day throughout the suite.
+      TZ: Europe/Lisbon
       NODE_ENV: test
       QA_MODE: 'true'
       QA_ENVIRONMENT_SAFE: 'true'
