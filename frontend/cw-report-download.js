@@ -93,7 +93,7 @@
           if (settingsResponse.status !== 200) throw Error('Não foi possível confirmar o idioma do cliente. Tente novamente.');
           const settings = await settingsResponse.json();
           if (!observe() || operation !== op) return;
-          if (settings?.ok !== true || settings.reportSettingsVersion !== 1 || settings.client?.id !== clientId || !['pt', 'en', 'fr', 'es'].includes(settings.preferredLanguage) || typeof settings.version !== 'string' || !/^report-settings-v1:[a-f0-9]{64}$/.test(settings.version)) throw Error('A resposta não confirma o idioma deste cliente.');
+          if (settings?.ok !== true || settings.reportSettingsVersion !== 1 || settings.client?.id !== clientId || !['pt', 'en', 'fr', 'es', 'de'].includes(settings.preferredLanguage) || typeof settings.version !== 'string' || !/^report-settings-v1:[a-f0-9]{64}$/.test(settings.version)) throw Error('A resposta não confirma o idioma deste cliente.');
           preferredLanguage = settings.preferredLanguage;
           url.searchParams.set('lang', preferredLanguage);
           url.searchParams.set('settingsVersion', settings.version);
@@ -132,7 +132,7 @@
         } else popup.location.href = op.objectUrl;
         op.loading = false; clearTimeout(op.timeout);
         op.expiry = setTimeout(() => { if (op.objectUrl) { URL.revokeObjectURL(op.objectUrl); op.objectUrl = null; } }, 60000);
-        state(attachment ? 'started' : 'opened', attachment ? 'Transferência iniciada.' : 'Relatório aberto numa nova janela.' + (preferredLanguage ? ' Idioma do cliente: ' + ({ pt: 'Português', en: 'English', fr: 'Français', es: 'Español' })[preferredLanguage] + '.' : ''));
+        state(attachment ? 'started' : 'opened', attachment ? 'Transferência iniciada.' : 'Relatório aberto numa nova janela.' + (preferredLanguage ? ' Idioma do cliente: ' + ({ pt: 'Português', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch' })[preferredLanguage] + '.' : ''));
       } catch (error) {
         if (op && operation !== op) return;
         if (op && !observe()) return;

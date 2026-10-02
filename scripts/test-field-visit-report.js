@@ -99,6 +99,7 @@ const pdfText = require('./lib/reportPdfText');
     en: ['Maintenance report','Water readings','Photograph unavailable','Yes','Not recorded'],
     fr: ['Rapport d’entretien','Paramètres de l’eau','Photo indisponible','Oui','Non enregistré'],
     es: ['Informe de mantenimiento','Parámetros del agua','Fotografía no disponible','Sí','No registrado'],
+    de: ['Wartungsbericht','Wasserwerte','Foto nicht verfügbar','Ja','Nicht erfasst'],
   };
   const allOn = Object.fromEntries(keys.map(key => [key, true]));
   await prisma.clientReportSetting.update({where:{clientId:client.id},data:allOn});
@@ -124,7 +125,7 @@ const pdfText = require('./lib/reportPdfText');
       assert.equal(absent.status,200);assert(absent.text.includes(expected[4]));
       const own=await call('?view=client&lang='+lang,clientToken,route);assert.equal(own.status,200);
       assert.equal((await call('?view=admin&lang='+lang,clientToken,route)).status,403);
-      for(const bad of ['','de','EN','en-GB','__proto__','constructor','en&lang=fr','en&lang[x]=fr'])assert.equal((await call('?lang='+bad,token,route)).status,400,bad);
+      for(const bad of ['','it','DE','de-DE','EN','en-GB','__proto__','constructor','en&lang=fr','en&lang[x]=fr'])assert.equal((await call('?lang='+bad,token,route)).status,400,bad);
     }
   }
   assert.deepEqual(await counts(),beforeLanguage);
@@ -155,7 +156,7 @@ const pdfText = require('./lib/reportPdfText');
     const choice=page.locator('#reportLanguage'),button=page.locator('#openClientReport'),state=kind=>page.waitForFunction(k=>document.getElementById('previewStatus').dataset.state===k,kind);
     assert.equal(await choice.inputValue(),'pt');
     for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await choice.evaluate(e=>e.getBoundingClientRect().right<=innerWidth&&e.getBoundingClientRect().left>=0));await page.screenshot({path:path.join(dir,'language-'+width+'.png'),fullPage:true});}
-    for(const lang of ['en','fr','es','pt']){
+    for(const lang of ['en','fr','es','de','pt']){
       await choice.selectOption(lang);await button.click();await state('opened');
       const content=Buffer.from(await page.evaluate(async()=>Array.from(new Uint8Array(await(await fetch(qaCreated.at(-1))).arrayBuffer()))));assert(pdfText(content).includes(languageExpected[lang][0]));
     }
@@ -170,6 +171,6 @@ const pdfText = require('./lib/reportPdfText');
     const extraPdf=Buffer.from(await page.evaluate(async()=>Array.from(new Uint8Array(await(await fetch(qaCreated.at(-1))).arrayBuffer()))));assert(pdfText(extraPdf).includes('Visite supplémentaire n°'+extra.id));
     await page.evaluate(()=>localStorage.setItem('user',JSON.stringify({id:999999,role:'ADMIN'})));await state('session');assert(await choice.isDisabled());assert(await button.isDisabled());assert.deepEqual(errors,[]);
   }finally{await browser.close();}
-  console.log('PASS PT/EN/FR/ES PDF and HTML, generated EXTRA notices, unchanged source text, private notes, strict language validation, responsive selector, response language identity and in-flight cancellation');
+  console.log('PASS PT/EN/FR/ES/DE PDF and HTML, generated EXTRA notices, unchanged source text, private notes, strict language validation, responsive selector, response language identity and in-flight cancellation');
   console.log('PDF_EVIDENCE ' + dir);
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => prisma.$disconnect());

@@ -36,7 +36,7 @@ function openAlertReport(reference) {
   const alert = filteredAlerts().find(row => row.id === reference), report = reportForAlert(alert);
   if (!report) return;
   const language = document.getElementById('alertReportLanguage')?.value;
-  if (!['preferred', 'pt', 'en', 'fr', 'es'].includes(language)) { alertReports.cancel('Escolha um idioma válido para o relatório.', 'error'); return; }
+  if (!['preferred', 'pt', 'en', 'fr', 'es', 'de'].includes(language)) { alertReports.cancel('Escolha um idioma válido para o relatório.', 'error'); return; }
   alertReportSelection = { language, reference, visitType: report.type, visitId: report.visitId, clientId: report.clientId };
   alertReports.open(`/api/report-visit/visit/${report.visitId}?${report.type === 'EXTRA' ? 'visitType=EXTRA&' : ''}view=admin&clientId=${report.clientId}${language === 'preferred' ? '' : '&lang=' + language}`,
     { type: 'application/pdf', ...(language === 'preferred' ? { clientPreference: report.clientId } : {}), headers: { ...(language === 'preferred' ? {} : { 'Content-Language': language }), 'X-CW-Report-Type': report.type === 'EXTRA' ? 'extra-visit-pdf' : 'visit-pdf', 'X-CW-Visit-Type': report.type, 'X-CW-Visit-Id': report.visitId,

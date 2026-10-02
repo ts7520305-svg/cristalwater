@@ -72,14 +72,14 @@ let browser;
   }
   const language=p.locator('#reportLanguage');assert.equal(await language.inputValue(),'pt');
   await p.locator('#monthRef').fill(month);
-  for(const [lang,title] of [['en','Monthly report'],['fr','Rapport mensuel'],['es','Informe mensual'],['pt','Relatório mensal']]){
+  for(const [lang,title] of [['en','Monthly report'],['fr','Rapport mensuel'],['es','Informe mensual'],['de','Monatsbericht'],['pt','Relatório mensal']]){
     await language.selectOption(lang);await button.click();await state(p,'opened');assert.equal(new URL(requests.at(-1).url).searchParams.get('lang'),lang);
     const content=await p.evaluate(async()=>(await fetch(qaPopups.at(-1).popup.location.href)).text());assert(content.includes('<html lang="'+lang+'">'));assert(content.includes(title+' - '+month));assert(content.includes(client.name));
   }
   const beforeLanguage=(await info(p)).created;
   await delayed(p,endpoint,()=>button.click(),async()=>{await language.selectOption('fr');await state(p,'idle');await language.selectOption('pt');});assert.equal((await info(p)).created,beforeLanguage);assert((await info(p)).closed);
   await language.evaluate(el=>{el.add(new Option('Invalid','EN'));el.value='EN';el.dispatchEvent(new Event('change',{bubbles:true}));});const invalidCount=requests.length;await button.click();await state(p,'error');assert.equal(requests.length,invalidCount);await language.selectOption('pt');
-  console.log('PASS monthly language selection PT/EN/FR/ES, exact response language, invalid selection without request and cancellation on A-B-A language change');
+  console.log('PASS monthly language selection PT/EN/FR/ES/DE, exact response language, invalid selection without request and cancellation on A-B-A language change');
   await p.locator('#monthRef').fill(month); await p.evaluate(() => window.qaTimeout = true);
   await delayed(p, endpoint, () => button.click(), async () => { await state(p, 'error'); assert.match(await p.locator('#status').textContent(), /demorou/); }); await p.evaluate(() => window.qaTimeout = false);
   await c.setOffline(true); await button.click(); await state(p, 'error'); await c.setOffline(false); const offlineCount = requests.length; await p.waitForTimeout(300); assert.equal(requests.length, offlineCount);

@@ -63,6 +63,7 @@ let browser, child;
     en: {title:'Monthly report',review:'To be reviewed',amount:'€195.00',open:'€128.00',cash:'€90.00',filtered:'€50.00',warning:'Receipt total needs review',document:'Document totals need review'},
     fr: {title:'Rapport mensuel',review:'À vérifier',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Total des encaissements à vérifier',document:'Totaux des documents à vérifier'},
     es: {title:'Informe mensual',review:'Por revisar',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Total de cobros por revisar',document:'Totales de documentos por revisar'},
+    de: {title:'Monatsbericht',review:'Zu prüfen',amount:'195,00 €',open:'128,00 €',cash:'90,00 €',filtered:'50,00 €',warning:'Summe der Zahlungseingänge zu prüfen',document:'Dokumentensummen zu prüfen'},
   };
   const evidence=require('node:path').join(process.cwd(),'reports/field-visual/monthly-language-'+stamp);require('node:fs').mkdirSync(evidence,{recursive:true});
   const originalNote='Saldo atual <script>window.injected=1</script> & "Por rever"';
@@ -96,11 +97,11 @@ let browser, child;
     }
   }
 
-  for(const value of ['', 'EN','en-GB','de','__proto__','constructor','en&lang=fr','en&lang[x]=fr']){
+  for(const value of ['', 'EN','en-GB','it','DE','de-DE','__proto__','constructor','en&lang=fr','en&lang[x]=fr']){
     const invalid=await fetch(base+'/api/reports/monthly-print?monthRef='+monthRef+'&lang='+value,{headers:{Authorization:'Bearer '+token}});assert.equal(invalid.status,400,value);assert.equal(invalid.headers.get('content-language'),null);
   }
   await prisma.client.update({where:{id:clients[0].id},data:{name:clients[0].name}});await prisma.payment.update({where:{id:payments[0].id},data:{notes:null}});
-  console.log('PASS monthly PT/EN/FR/ES preserve exact amounts, populations, filters, warnings, UTC boundaries, literal notes, no writes, role restrictions and strict language validation');
+  console.log('PASS monthly PT/EN/FR/ES/DE preserve exact amounts, populations, filters, warnings, UTC boundaries, literal notes, no writes, role restrictions and strict language validation');
   console.log('MONTHLY_LANGUAGE_EVIDENCE '+evidence);
   await call(true);assert.equal(await metric('client-count'),'4');assert.equal(await metric('document-count'),'6');assert.equal(await metric('document-amount'),'195,00 €');assert.equal(await metric('current-open'),'128,00 €');assert.equal(await metric('cash-amount'),'50,00 €');assert.equal(await metric('payment-count'),'4');
   assert.deepEqual(await ids('[data-payment-id]'),payments.slice(0,4).map(row=>row.id));assert(!(await ids('[data-document-id]')).includes(draft.id));

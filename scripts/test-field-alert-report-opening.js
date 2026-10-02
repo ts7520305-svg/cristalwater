@@ -9,7 +9,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  const admin=await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}}),user={id:admin.id,userId:admin.id,role:'ADMIN'},token=jwt.sign(user,getJwtSecret(),{expiresIn:'1h'});
  const client=await prisma.client.create({data:{name:'QA alert report '+Date.now()}}),other=await prisma.client.create({data:{name:'QA unrelated report'}});
  const preferenceKey=id=>'CLIENT_REPORT_LANGUAGE:'+id;
- const preferences=await Promise.all([[client.id,'fr'],[other.id,'es']].map(([id,value])=>prisma.systemSetting.create({data:{key:preferenceKey(id),value}})));
+ const preferences=await Promise.all([[client.id,'de'],[other.id,'es']].map(([id,value])=>prisma.systemSetting.create({data:{key:preferenceKey(id),value}})));
  const pool=await prisma.pool.create({data:{clientId:client.id,name:'QA report pool'}});
  const ids=await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]),id=Math.max(...ids.map(x=>x._max.id||0))+101;
  const visit=await prisma.serviceVisit.create({data:{id,clientId:client.id,poolId:pool.id,status:'DONE',alerts:'QA report opening',notes:'REGULAR_ORIGINAL_ONLY'}});
@@ -79,11 +79,11 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  assert(requests.every(r=>r.authorization==='Bearer '+token&&!r.url.includes(token)));
  await p.locator('#alertSearch').fill('no matching result');await state('idle');assert.equal(await p.evaluate(()=>qaPopups.at(-1).closed),true);assert.equal(await p.evaluate(()=>qaRevoked.length),2);await p.locator('#alertSearch').fill('');
  const language=p.locator('#alertReportLanguage');assert.equal(await language.inputValue(),'preferred');
- const titles={pt:'Relatório técnico completo',en:'Full technical report',fr:'Rapport technique complet',es:'Informe técnico completo'};
- for(const [target,lang,id] of [[button,'fr',client.id],[extraButton,'es',other.id]]){await target.click();await state('opened');assert.equal(new URL(requests.at(-1).url).searchParams.get('lang'),lang);assert.match(new URL(requests.at(-1).url).searchParams.get('settingsVersion'),/^report-settings-v1:[a-f0-9]{64}$/);assert(settingsRequests.at(-1).url.endsWith('/'+id));assert(pdfText(await opened()).includes(titles[lang]));assert.match(await p.locator('#alertReportStatus').textContent(),/Idioma do cliente:/);}
+ const titles={pt:'Relatório técnico completo',en:'Full technical report',fr:'Rapport technique complet',es:'Informe técnico completo',de:'Vollständiger technischer Bericht'};
+ for(const [target,lang,id] of [[button,'de',client.id],[extraButton,'es',other.id]]){await target.click();await state('opened');assert.equal(new URL(requests.at(-1).url).searchParams.get('lang'),lang);assert.match(new URL(requests.at(-1).url).searchParams.get('settingsVersion'),/^report-settings-v1:[a-f0-9]{64}$/);assert(settingsRequests.at(-1).url.endsWith('/'+id));assert(pdfText(await opened()).includes(titles[lang]));assert.match(await p.locator('#alertReportStatus').textContent(),/Idioma do cliente:/);assert((await p.locator('#alertReportStatus').textContent()).endsWith(lang==='de'?'Deutsch.':'Español.'));}
  assert(settingsRequests.every(r=>r.authorization==='Bearer '+token&&!r.url.includes(token)));
  const explicitStart=settingsRequests.length;
- for(const lang of ['en','fr','es','pt']){
+ for(const lang of ['en','fr','es','de','pt']){
   await language.selectOption(lang);
   for(const [target,type,marker] of [[button,'REGULAR','REGULAR_ORIGINAL_ONLY'],[extraButton,'EXTRA','EXTRA_EXECUTION_ONLY']]){
    await target.click();await state('opened');
@@ -104,7 +104,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  await language.selectOption('preferred');
  for(const width of [320,390,1440]){await p.setViewportSize({width,height:900});await language.scrollIntoViewIfNeeded();assert(await language.evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.height>=44;}));await p.locator('#alertReportLanguage').locator('xpath=..').screenshot({path:path.join(evidence,'language-'+width+'.png')});}
  const preferenceEndpoint='**/api/report-settings/*';
- for(const mutate of [s=>{s.client.id=other.id;},s=>{delete s.preferredLanguage;},s=>{s.preferredLanguage='de';},s=>{s.version='bad';}]){
+ for(const mutate of [s=>{s.client.id=other.id;},s=>{delete s.preferredLanguage;},s=>{s.preferredLanguage='it';},s=>{s.version='bad';}]){
   await p.route(preferenceEndpoint,async route=>{const response=await route.fetch(),s=await response.json();mutate(s);await route.fulfill({status:200,json:s});});const count=requests.length;await button.click();await state('error');assert.equal(requests.length,count);assert(await p.evaluate(()=>qaPopups.at(-1).closed));await p.unroute(preferenceEndpoint);
  }
  for(const status of [202,503]){await p.route(preferenceEndpoint,route=>route.fulfill({status,json:{ok:false}}));const count=requests.length;await button.click();await state('error');assert.equal(requests.length,count);await p.unroute(preferenceEndpoint);}
@@ -123,7 +123,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  }
  assert.deepEqual(await preferenceSnapshot(),beforePreferences);await language.selectOption('pt');
  console.log('PASS preferred alert language: per-client REGULAR/EXTRA values, verified language/version, no-read explicit override, Portuguese default, malformed/failed preference refusal, stale read re-open, no writes and cancellation during preference resolution');
- console.log('PASS alert REGULAR/EXTRA PT/EN/FR/ES, source notes retained, explicit request language, language-change cancellation including A-B-A and invalid selection refusal');
+ console.log('PASS alert REGULAR/EXTRA PT/EN/FR/ES/DE, source notes retained, explicit request language, language-change cancellation including A-B-A and invalid selection refusal');
  const endpoint='**/api/report-visit/visit/*';
  for(const mutation of [{headers:{'content-language':'en'}},{headers:{'content-language':''}},{headers:{'x-cw-client-id':String(other.id)}},{headers:{'x-cw-visit-type':'EXTRA'}},{headers:{'x-cw-report-type':'extra-visit-pdf'}},{headers:{'x-cw-visit-id':String(visit.id+1)}},{headers:{'x-cw-report-view':'client'}},{body:'%PDF-truncated'},{status:503}]){
   await p.route(endpoint,async route=>{const r=await route.fetch();await route.fulfill({response:r,...mutation,headers:{...r.headers(),...mutation.headers}});});

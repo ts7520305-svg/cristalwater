@@ -48,7 +48,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  const stable=async()=>({client:await prisma.client.findUnique({where:{id:c.id}}),pool:await prisma.pool.findUnique({where:{id:pool.id}}),regular:await prisma.serviceVisit.findUnique({where:{id:regular.id}}),extra:await prisma.extraVisit.findUnique({where:{id:extra.id}}),money:await Promise.all(['invoice','payment','monthlyReport','communicationLog'].map(model=>prisma[model].count()))});
  const stableBefore=await stable(),stateBefore=(await call(c.id)).body;
  const languageBody={requestId:randomUUID(),clientId:c.id,expectedVersion:stateBefore.version,setting:stateBefore.setting,preferredLanguage:'fr'};
- for(const bad of ['',null,true,1,{},[],['fr'],'FR','fr-FR','de','constructor','__proto__'])assert.equal((await call(c.id,{...languageBody,preferredLanguage:bad})).status,400,JSON.stringify(bad));
+ for(const bad of ['',null,true,1,{},[],['fr'],'FR','fr-FR','it','DE','de-DE','constructor','__proto__'])assert.equal((await call(c.id,{...languageBody,preferredLanguage:bad})).status,400,JSON.stringify(bad));
  const languageSnapshot=async()=>({state:(await call(c.id)).body,preference:await prisma.systemSetting.findUnique({where:{key}}),audits:await prisma.userAuditLog.count({where:{entity:'Client',entityId:String(c.id)}}),receipts:await prisma.fieldWriteRequest.count({where:{scope:'CLIENT_REPORT_SETTINGS',resourceId:c.id}})});
  const untouched=await languageSnapshot();
  for(const fault of ['setting','audit','receipt']){await one.fault(fault);assert.equal((await call(c.id,languageBody,token,one.origin)).status,503);await one.fault(null);assert.deepEqual(await languageSnapshot(),untouched,'Preference rolls back with '+fault);}
@@ -59,7 +59,7 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
  assert.deepEqual(await languageSnapshot(),guardedBefore);
  const pdfText=require('./lib/reportPdfText'),visual=path.join(__dirname,'../reports/field-visual/client-report-language-'+stamp);fs.mkdirSync(visual,{recursive:true});
  async function report(visit,type,format,query='',credential=token){const response=await fetch(`${base}/api/${format}/visit/${visit.id}?visitType=${type}&view=client&clientId=${c.id}${query}`,{headers:{Authorization:'Bearer '+credential}});const bytes=Buffer.from(await response.arrayBuffer());return{status:response.status,headers:response.headers,bytes,text:format==='report-visit'&&response.ok?pdfText(bytes):bytes.toString()};}
- for(const preferredLanguage of ['pt','en','fr','es']){
+ for(const preferredLanguage of ['pt','en','fr','es','de']){
   const prior=(await call(c.id)).body,reply=(await call(c.id,{...languageBody,requestId:randomUUID(),expectedVersion:prior.version,preferredLanguage})).body;assert(reply.applied);assert.deepEqual(reply.state.setting,prior.setting);
   const beforeReads=await languageSnapshot();
   for(const [visit,type] of [[regular,'REGULAR'],[extra,'EXTRA']])for(const format of ['reports','report-visit']){
@@ -71,12 +71,12 @@ const base=process.env.CW_BASE_URL||'http://127.0.0.1:3002';assert(['127.0.0.1',
   assert.deepEqual(await languageSnapshot(),beforeReads,'Opening reports must not save or change language');
  }
  for(const [visit,type] of [[regular,'REGULAR'],[extra,'EXTRA']]){
-  for(const credentials of [sign({id:c.id,clientId:c.id,role:'CLIENT'}),sign({id:tech.id,technicianId:tech.id,role:'TECHNICIAN'})]){const result=await report(visit,type,'reports','',credentials);assert.equal(result.status,200);assert.equal(result.headers.get('content-language'),'es');}
+  for(const credentials of [sign({id:c.id,clientId:c.id,role:'CLIENT'}),sign({id:tech.id,technicianId:tech.id,role:'TECHNICIAN'})]){const result=await report(visit,type,'reports','',credentials);assert.equal(result.status,200);assert.equal(result.headers.get('content-language'),'de');}
   assert.equal((await report(visit,type,'reports','',sign({id:b.id,clientId:b.id,role:'CLIENT'}))).status,403);
  }
- const currentLanguage=(await call(c.id)).body,legacyUpdate=(await call(c.id,{requestId:randomUUID(),clientId:c.id,expectedVersion:currentLanguage.version,setting:{...currentLanguage.setting,showAddress:false}})).body;assert(legacyUpdate.applied);assert.equal(legacyUpdate.state.preferredLanguage,'es');assert.deepEqual((await call(c.id,legacyBody)).body,legacyReply,'A pre-upgrade receipt remains byte-equivalent after later language edits');
+ const currentLanguage=(await call(c.id)).body,legacyUpdate=(await call(c.id,{requestId:randomUUID(),clientId:c.id,expectedVersion:currentLanguage.version,setting:{...currentLanguage.setting,showAddress:false}})).body;assert(legacyUpdate.applied);assert.equal(legacyUpdate.state.preferredLanguage,'de');assert.deepEqual((await call(c.id,legacyBody)).body,legacyReply,'A pre-upgrade receipt remains byte-equivalent after later language edits');
  const competing=(await call(c.id)).body,racers=await Promise.all(['pt','en'].map((preferredLanguage,index)=>call(c.id,{...languageBody,requestId:randomUUID(),expectedVersion:competing.version,setting:competing.setting,preferredLanguage},token,index?two.origin:one.origin)));assert.equal(racers.filter(r=>r.body.applied).length,1);assert.equal(racers.filter(r=>r.body.code==='REPORT_SETTINGS_STALE').length,1);
  const savedPreference=await prisma.systemSetting.findUniqueOrThrow({where:{key}});await prisma.systemSetting.update({where:{key},data:{value:'not-a-language'}});assert.equal((await call(c.id)).status,503);assert.equal((await report(regular,'REGULAR','reports','&lang=pt')).status,503);await prisma.systemSetting.update({where:{key},data:{value:savedPreference.value,updatedAt:savedPreference.updatedAt}});
  assert.deepEqual(await stable(),stableBefore);assert.equal((await call(b.id)).body.preferredLanguage,'pt');
- console.log('PASS client report language: strict PT/EN/FR/ES, legacy versions/requests/receipts, independent identity language, atomic rollback and audit, duplicate/racing writes, guarded generic settings, corrupt storage fail closed, regular/extra HTML/PDF inheritance and overrides, unchanged source data and finances');
+ console.log('PASS client report language: strict PT/EN/FR/ES/DE, legacy versions/requests/receipts, independent identity language, atomic rollback and audit, duplicate/racing writes, guarded generic settings, corrupt storage fail closed, regular/extra HTML/PDF inheritance and overrides, unchanged source data and finances');
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{for(const child of children)child.kill('SIGTERM');await prisma.$disconnect();});

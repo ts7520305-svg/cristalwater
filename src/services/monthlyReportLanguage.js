@@ -6,367 +6,428 @@ const messages = {
     "pt": "Relatório mensal",
     "en": "Monthly report",
     "fr": "Rapport mensuel",
-    "es": "Informe mensual"
+    "es": "Informe mensual",
+    "de": "Monatsbericht"
   },
   "print": {
     "pt": "Imprimir / Guardar PDF",
     "en": "Print / Save PDF",
     "fr": "Imprimer / Enregistrer le PDF",
-    "es": "Imprimir / Guardar PDF"
+    "es": "Imprimir / Guardar PDF",
+    "de": "Drucken / PDF speichern"
   },
   "review": {
     "pt": "Por rever",
     "en": "To be reviewed",
     "fr": "À vérifier",
-    "es": "Por revisar"
+    "es": "Por revisar",
+    "de": "Zu prüfen"
   },
   "notGiven": {
     "pt": "Não indicado",
     "en": "Not provided",
     "fr": "Non indiqué",
-    "es": "No indicado"
+    "es": "No indicado",
+    "de": "Nicht angegeben"
   },
   "notGivenF": {
     "pt": "Não indicada",
     "en": "Not provided",
     "fr": "Non indiquée",
-    "es": "No indicada"
+    "es": "No indicada",
+    "de": "Nicht angegeben"
   },
   "yes": {
     "pt": "Sim",
     "en": "Yes",
     "fr": "Oui",
-    "es": "Sí"
+    "es": "Sí",
+    "de": "Ja"
   },
   "no": {
     "pt": "Não",
     "en": "No",
     "fr": "Non",
-    "es": "No"
+    "es": "No",
+    "de": "Nein"
   },
   "clientPrefix": {
     "pt": "Cliente #",
     "en": "Client #",
     "fr": "Client n°",
-    "es": "Cliente n.º"
+    "es": "Cliente n.º",
+    "de": "Kunde Nr. "
   },
   "poolPrefix": {
     "pt": "Instalação #",
     "en": "Facility #",
     "fr": "Installation n°",
-    "es": "Instalación n.º"
+    "es": "Instalación n.º",
+    "de": "Anlage Nr. "
   },
   "documentPrefix": {
     "pt": "Documento #",
     "en": "Document #",
     "fr": "Document n°",
-    "es": "Documento n.º"
+    "es": "Documento n.º",
+    "de": "Dokument Nr. "
   },
   "registeredNumber": {
     "pt": "N.º registado:",
     "en": "Recorded no.:",
     "fr": "N° enregistré :",
-    "es": "N.º registrado:"
+    "es": "N.º registrado:",
+    "de": "Erfasste Nr.:"
   },
   "monthReference": {
     "pt": "Referência mensal:",
     "en": "Monthly reference:",
     "fr": "Référence mensuelle :",
-    "es": "Referencia mensual:"
+    "es": "Referencia mensual:",
+    "de": "Monatsreferenz:"
   },
   "recordedStatus": {
     "pt": "Estado registado:",
     "en": "Recorded status:",
     "fr": "État enregistré :",
-    "es": "Estado registrado:"
+    "es": "Estado registrado:",
+    "de": "Erfasster Status:"
   },
   "requiresInvoice": {
     "pt": "Requer fatura:",
     "en": "Invoice required:",
     "fr": "Facture requise :",
-    "es": "Requiere factura:"
+    "es": "Requiere factura:",
+    "de": "Rechnung erforderlich:"
   },
   "creditExcluded": {
     "pt": "Depósito de crédito - excluído dos totais documentais",
     "en": "Credit deposit - excluded from document totals",
     "fr": "Dépôt de crédit - exclu des totaux des documents",
-    "es": "Depósito de crédito - excluido de los totales de documentos"
+    "es": "Depósito de crédito - excluido de los totales de documentos",
+    "de": "Guthabeneinzahlung - aus den Dokumentensummen ausgeschlossen"
   },
   "statusExcluded": {
     "pt": "Excluído dos totais documentais pelo estado registado",
     "en": "Excluded from document totals due to recorded status",
     "fr": "Exclu des totaux des documents selon l’état enregistré",
-    "es": "Excluido de los totales de documentos por el estado registrado"
+    "es": "Excluido de los totales de documentos por el estado registrado",
+    "de": "Aufgrund des erfassten Status aus den Dokumentensummen ausgeschlossen"
   },
   "statusReview": {
     "pt": "Estado por rever - totais documentais indisponíveis",
     "en": "Status to be reviewed - document totals unavailable",
     "fr": "État à vérifier - totaux des documents indisponibles",
-    "es": "Estado por revisar - totales de documentos no disponibles"
+    "es": "Estado por revisar - totales de documentos no disponibles",
+    "de": "Status zu prüfen - Dokumentensummen nicht verfügbar"
   },
   "amountReview": {
     "pt": "Montantes por rever - totais documentais indisponíveis",
     "en": "Amounts to be reviewed - document totals unavailable",
     "fr": "Montants à vérifier - totaux des documents indisponibles",
-    "es": "Importes por revisar - totales de documentos no disponibles"
+    "es": "Importes por revisar - totales de documentos no disponibles",
+    "de": "Beträge zu prüfen - Dokumentensummen nicht verfügbar"
   },
   "included": {
     "pt": "Incluído nos totais documentais",
     "en": "Included in document totals",
     "fr": "Inclus dans les totaux des documents",
-    "es": "Incluido en los totales de documentos"
+    "es": "Incluido en los totales de documentos",
+    "de": "In den Dokumentensummen enthalten"
   },
   "notIncluded": {
     "pt": "Não incluído",
     "en": "Not included",
     "fr": "Non inclus",
-    "es": "No incluido"
+    "es": "No incluido",
+    "de": "Nicht enthalten"
   },
   "documentAmount": {
     "pt": "Valor do documento",
     "en": "Document amount",
     "fr": "Montant du document",
-    "es": "Importe del documento"
+    "es": "Importe del documento",
+    "de": "Dokumentbetrag"
   },
   "paidAmount": {
     "pt": "Liquidado registado",
     "en": "Recorded settled amount",
     "fr": "Montant réglé enregistré",
-    "es": "Importe liquidado registrado"
+    "es": "Importe liquidado registrado",
+    "de": "Erfasster beglichener Betrag"
   },
   "openAmount": {
     "pt": "Saldo atual",
     "en": "Current balance",
     "fr": "Solde actuel",
-    "es": "Saldo actual"
+    "es": "Saldo actual",
+    "de": "Aktueller Saldo"
   },
   "balanceNotice": {
     "pt": "O liquidado pode incluir crédito interno e pagamentos de outros meses. O saldo é o valor atual, não o saldo no fim do mês escolhido.",
     "en": "The settled amount may include internal credit and payments from other months. The balance is the current amount, not the balance at the end of the selected month.",
     "fr": "Le montant réglé peut inclure du crédit interne et des paiements d’autres mois. Le solde est le montant actuel, et non celui à la fin du mois choisi.",
-    "es": "El importe liquidado puede incluir crédito interno y pagos de otros meses. El saldo es el importe actual, no el saldo al cierre del mes elegido."
+    "es": "El importe liquidado puede incluir crédito interno y pagos de otros meses. El saldo es el importe actual, no el saldo al cierre del mes elegido.",
+    "de": "Der beglichene Betrag kann internes Guthaben und Zahlungen aus anderen Monaten enthalten. Der Saldo ist der aktuelle Betrag, nicht der Saldo am Ende des gewählten Monats."
   },
   "currentClient": {
     "pt": "Ficha atual do cliente #",
     "en": "Current client record #",
     "fr": "Fiche actuelle du client n°",
-    "es": "Ficha actual del cliente n.º"
+    "es": "Ficha actual del cliente n.º",
+    "de": "Aktueller Kundendatensatz Nr. "
   },
   "phone": {
     "pt": "Telefone:",
     "en": "Phone:",
     "fr": "Téléphone :",
-    "es": "Teléfono:"
+    "es": "Teléfono:",
+    "de": "Telefon:"
   },
   "email": {
     "pt": "Email:",
     "en": "Email:",
     "fr": "E-mail :",
-    "es": "Correo electrónico:"
+    "es": "Correo electrónico:",
+    "de": "E-Mail:"
   },
   "address": {
     "pt": "Morada:",
     "en": "Address:",
     "fr": "Adresse :",
-    "es": "Dirección:"
+    "es": "Dirección:",
+    "de": "Adresse:"
   },
   "currentPools": {
     "pt": "Instalações - registo atual",
     "en": "Facilities - current record",
     "fr": "Installations - fiche actuelle",
-    "es": "Instalaciones - registro actual"
+    "es": "Instalaciones - registro actual",
+    "de": "Anlagen - aktueller Datensatz"
   },
   "pool": {
     "pt": "Instalação",
     "en": "Facility",
     "fr": "Installation",
-    "es": "Instalación"
+    "es": "Instalación",
+    "de": "Anlage"
   },
   "zone": {
     "pt": "Zona",
     "en": "Area",
     "fr": "Zone",
-    "es": "Zona"
+    "es": "Zona",
+    "de": "Bereich"
   },
   "noPools": {
     "pt": "Sem instalações no registo atual.",
     "en": "No facilities in the current record.",
     "fr": "Aucune installation dans la fiche actuelle.",
-    "es": "Sin instalaciones en el registro actual."
+    "es": "Sin instalaciones en el registro actual.",
+    "de": "Keine Anlagen im aktuellen Datensatz."
   },
   "registryNotice": {
     "pt": "O cadastro atual não identifica, por si só, as instalações ou os serviços faturados neste mês.",
     "en": "The current client record alone does not identify the facilities or services billed this month.",
     "fr": "La fiche actuelle ne permet pas, à elle seule, d’identifier les installations ou les services facturés ce mois-ci.",
-    "es": "La ficha actual no identifica, por sí sola, las instalaciones o los servicios facturados este mes."
+    "es": "La ficha actual no identifica, por sí sola, las instalaciones o los servicios facturados este mes.",
+    "de": "Der aktuelle Kundendatensatz allein identifiziert nicht die Anlagen oder Leistungen, die in diesem Monat abgerechnet wurden."
   },
   "filterRequired": {
     "pt": "Filtro: apenas documentos marcados como «Requer fatura» e recebimentos associados a documentos com essa marca.",
     "en": "Filter: only documents marked “Invoice required” and receipts linked to documents with that flag.",
     "fr": "Filtre : uniquement les documents marqués « Facture requise » et les encaissements associés à ces documents.",
-    "es": "Filtro: solo documentos marcados como «Requiere factura» y cobros asociados a documentos con esa marca."
+    "es": "Filtro: solo documentos marcados como «Requiere factura» y cobros asociados a documentos con esa marca.",
+    "de": "Filter: nur Dokumente mit der Kennzeichnung „Rechnung erforderlich“ und Zahlungseingänge zu Dokumenten mit dieser Kennzeichnung."
   },
   "filterAll": {
     "pt": "Filtro: todos os documentos e recebimentos do período, segundo as fontes abaixo.",
     "en": "Filter: all documents and receipts for the period, according to the sources below.",
     "fr": "Filtre : tous les documents et encaissements de la période, selon les sources ci-dessous.",
-    "es": "Filtro: todos los documentos y cobros del período, según las fuentes indicadas a continuación."
+    "es": "Filtro: todos los documentos y cobros del período, según las fuentes indicadas a continuación.",
+    "de": "Filter: alle Dokumente und Zahlungseingänge des Zeitraums gemäß den unten angegebenen Quellen."
   },
   "generated": {
     "pt": "Consulta gerada em {date} UTC. Valores em EUR.",
     "en": "Report generated on {date} UTC. Amounts in EUR.",
     "fr": "Rapport généré le {date} UTC. Montants en EUR.",
-    "es": "Informe generado el {date} UTC. Importes en EUR."
+    "es": "Informe generado el {date} UTC. Importes en EUR.",
+    "de": "Bericht erstellt am {date} UTC. Beträge in EUR."
   },
   "clientCount": {
     "pt": "Clientes nos documentos do mês",
     "en": "Clients in this month’s documents",
     "fr": "Clients dans les documents du mois",
-    "es": "Clientes en los documentos del mes"
+    "es": "Clientes en los documentos del mes",
+    "de": "Kunden in den Dokumenten dieses Monats"
   },
   "documentCount": {
     "pt": "Documentos do mês",
     "en": "Documents for the month",
     "fr": "Documents du mois",
-    "es": "Documentos del mes"
+    "es": "Documentos del mes",
+    "de": "Dokumente des Monats"
   },
   "receivableAmount": {
     "pt": "Valor dos documentos cobráveis",
     "en": "Amount of receivable documents",
     "fr": "Montant des documents à encaisser",
-    "es": "Importe de los documentos cobrables"
+    "es": "Importe de los documentos cobrables",
+    "de": "Betrag der einzuziehenden Dokumente"
   },
   "currentOpen": {
     "pt": "Saldo atual desses documentos",
     "en": "Current balance of these documents",
     "fr": "Solde actuel de ces documents",
-    "es": "Saldo actual de estos documentos"
+    "es": "Saldo actual de estos documentos",
+    "de": "Aktueller Saldo dieser Dokumente"
   },
   "cashAmount": {
     "pt": "Recebimentos registados no mês",
     "en": "Receipts recorded this month",
     "fr": "Encaissements enregistrés ce mois-ci",
-    "es": "Cobros registrados en el mes"
+    "es": "Cobros registrados en el mes",
+    "de": "In diesem Monat erfasste Zahlungseingänge"
   },
   "paymentCount": {
     "pt": "Registos de recebimento",
     "en": "Receipt records",
     "fr": "Enregistrements d’encaissement",
-    "es": "Registros de cobro"
+    "es": "Registros de cobro",
+    "de": "Zahlungseingangsdatensätze"
   },
   "basisHeading": {
     "pt": "Como ler os valores",
     "en": "How to read the amounts",
     "fr": "Comment lire les montants",
-    "es": "Cómo interpretar los importes"
+    "es": "Cómo interpretar los importes",
+    "de": "Erläuterung der Beträge"
   },
   "documentBasis": {
     "pt": "Documentos: referência mensal guardada, incluindo os formatos históricos. {receivable} com estado de cobrança reconhecido; {excluded} excluídos; {unknown} com estado por rever; {invalid} com montantes por rever.",
     "en": "Documents: stored monthly reference, including historical formats. {receivable} with a recognized collection status; {excluded} excluded; {unknown} with status to be reviewed; {invalid} with amounts to be reviewed.",
     "fr": "Documents : référence mensuelle enregistrée, y compris les anciens formats. {receivable} avec un état de recouvrement reconnu ; {excluded} exclus ; {unknown} avec un état à vérifier ; {invalid} avec des montants à vérifier.",
-    "es": "Documentos: referencia mensual guardada, incluidos los formatos históricos. {receivable} con estado de cobro reconocido; {excluded} excluidos; {unknown} con estado por revisar; {invalid} con importes por revisar."
+    "es": "Documentos: referencia mensual guardada, incluidos los formatos históricos. {receivable} con estado de cobro reconocido; {excluded} excluidos; {unknown} con estado por revisar; {invalid} con importes por revisar.",
+    "de": "Dokumente: gespeicherte Monatsreferenz, einschließlich historischer Formate. {receivable} mit erkanntem Einzugsstatus; {excluded} ausgeschlossen; {unknown} mit zu prüfendem Status; {invalid} mit zu prüfenden Beträgen."
   },
   "currentBasis": {
     "pt": "O valor documental e o saldo usam os registos atuais. Não representam um fecho histórico. Rascunhos, documentos retirados da cobrança e depósitos de crédito não entram nesses totais.",
     "en": "Document amounts and balances use current records. They do not represent a historical closing balance. Drafts, documents removed from collection and credit deposits are excluded from these totals.",
     "fr": "Les montants des documents et les soldes utilisent les données actuelles. Ils ne représentent pas une clôture historique. Les brouillons, les documents retirés du recouvrement et les dépôts de crédit sont exclus de ces totaux.",
-    "es": "Los importes documentales y los saldos usan los registros actuales. No representan un cierre histórico. Los borradores, los documentos retirados del cobro y los depósitos de crédito quedan excluidos de estos totales."
+    "es": "Los importes documentales y los saldos usan los registros actuales. No representan un cierre histórico. Los borradores, los documentos retirados del cobro y los depósitos de crédito quedan excluidos de estos totales.",
+    "de": "Dokumentbeträge und Salden verwenden aktuelle Datensätze. Sie stellen keinen historischen Abschluss dar. Entwürfe, aus dem Einzug entfernte Dokumente und Guthabeneinzahlungen sind aus diesen Summen ausgeschlossen."
   },
   "cashBasis": {
     "pt": "Recebimentos: data registada entre {start} (incluída) e {end} (excluída), em UTC. Incluem recebimentos de documentos de outros meses e depósitos pagos. Aplicações e ajustes de crédito interno ficam excluídos.",
     "en": "Receipts: recorded date from {start} (inclusive) to {end} (exclusive), in UTC. Includes receipts for documents from other months and paid deposits. Internal credit applications and adjustments are excluded.",
     "fr": "Encaissements : date enregistrée entre {start} (incluse) et {end} (exclue), en UTC. Ils incluent les encaissements de documents d’autres mois et les dépôts payés. Les utilisations et ajustements de crédit interne sont exclus.",
-    "es": "Cobros: fecha registrada entre {start} (incluida) y {end} (excluida), en UTC. Incluyen cobros de documentos de otros meses y depósitos pagados. Se excluyen las aplicaciones y los ajustes de crédito interno."
+    "es": "Cobros: fecha registrada entre {start} (incluida) y {end} (excluida), en UTC. Incluyen cobros de documentos de otros meses y depósitos pagados. Se excluyen las aplicaciones y los ajustes de crédito interno.",
+    "de": "Zahlungseingänge: erfasstes Datum von {start} (einschließlich) bis {end} (ausschließlich), in UTC. Enthält Zahlungseingänge für Dokumente anderer Monate und bezahlte Einzahlungen. Verwendungen und Anpassungen von internem Guthaben sind ausgeschlossen."
   },
   "filterBasis": {
     "pt": "A marca «Requer fatura» é a do documento, não a preferência atual do cliente. No filtro ativo, a mesma marca rege os documentos e os recebimentos; o mês do documento não limita os recebimentos.",
     "en": "The “Invoice required” flag belongs to the document, not the client’s current preference. With the filter enabled, that same flag governs documents and receipts; the document month does not restrict receipts.",
     "fr": "La mention « Facture requise » est celle du document, et non la préférence actuelle du client. Lorsque le filtre est actif, cette même mention régit les documents et les encaissements ; le mois du document ne limite pas les encaissements.",
-    "es": "La marca «Requiere factura» es la del documento, no la preferencia actual del cliente. Con el filtro activo, la misma marca rige los documentos y los cobros; el mes del documento no limita los cobros."
+    "es": "La marca «Requiere factura» es la del documento, no la preferencia actual del cliente. Con el filtro activo, la misma marca rige los documentos y los cobros; el mes del documento no limita los cobros.",
+    "de": "Die Kennzeichnung „Rechnung erforderlich“ gehört zum Dokument, nicht zur aktuellen Kundenpräferenz. Bei aktivem Filter gilt dieselbe Kennzeichnung für Dokumente und Zahlungseingänge; der Dokumentmonat schränkt die Zahlungseingänge nicht ein."
   },
   "documentWarning": {
     "pt": "Totais documentais por rever. Existem estados ou montantes que não permitem apresentar um total confirmado, ou a soma excede o limite de cálculo. Os documentos válidos continuam identificados abaixo.",
     "en": "Document totals need review. Some statuses or amounts prevent a confirmed total, or the sum exceeds the calculation limit. Valid documents remain identified below.",
     "fr": "Totaux des documents à vérifier. Certains états ou montants empêchent de présenter un total confirmé, ou la somme dépasse la limite de calcul. Les documents valides restent identifiés ci-dessous.",
-    "es": "Totales de documentos por revisar. Existen estados o importes que impiden presentar un total confirmado, o la suma supera el límite de cálculo. Los documentos válidos siguen identificados a continuación."
+    "es": "Totales de documentos por revisar. Existen estados o importes que impiden presentar un total confirmado, o la suma supera el límite de cálculo. Los documentos válidos siguen identificados a continuación.",
+    "de": "Dokumentensummen zu prüfen. Einige Statuswerte oder Beträge verhindern eine bestätigte Gesamtsumme, oder die Summe überschreitet die Berechnungsgrenze. Gültige Dokumente bleiben unten aufgeführt."
   },
   "cashWarning": {
     "pt": "Total de recebimentos por rever. Existem montantes inválidos ou a soma excede o limite de cálculo. Não foi apresentado um total parcial como total do mês.",
     "en": "Receipt total needs review. Some amounts are invalid or the sum exceeds the calculation limit. No partial total has been presented as the total for the month.",
     "fr": "Total des encaissements à vérifier. Certains montants sont invalides ou la somme dépasse la limite de calcul. Aucun total partiel n’a été présenté comme le total du mois.",
-    "es": "Total de cobros por revisar. Existen importes no válidos o la suma supera el límite de cálculo. No se ha presentado un total parcial como total del mes."
+    "es": "Total de cobros por revisar. Existen importes no válidos o la suma supera el límite de cálculo. No se ha presentado un total parcial como total del mes.",
+    "de": "Summe der Zahlungseingänge zu prüfen. Einige Beträge sind ungültig, oder die Summe überschreitet die Berechnungsgrenze. Keine Teilsumme wurde als Monatssumme ausgegeben."
   },
   "emptyDocuments": {
     "pt": "Sem documentos para este mês e filtro.",
     "en": "No documents for this month and filter.",
     "fr": "Aucun document pour ce mois et ce filtre.",
-    "es": "Sin documentos para este mes y filtro."
+    "es": "Sin documentos para este mes y filtro.",
+    "de": "Keine Dokumente für diesen Monat und Filter."
   },
   "cashHeading": {
     "pt": "Recebimentos do mês",
     "en": "Receipts for the month",
     "fr": "Encaissements du mois",
-    "es": "Cobros del mes"
+    "es": "Cobros del mes",
+    "de": "Zahlungseingänge des Monats"
   },
   "cashNotice": {
     "pt": "Lista independente dos documentos acima, por data de recebimento (UTC). O estado atual de um documento não apaga um recebimento registado.",
     "en": "A list independent of the documents above, by receipt date (UTC). A document’s current status does not remove a recorded receipt.",
     "fr": "Liste indépendante des documents ci-dessus, selon la date d’encaissement (UTC). L’état actuel d’un document n’efface pas un encaissement enregistré.",
-    "es": "Lista independiente de los documentos anteriores, por fecha de cobro (UTC). El estado actual de un documento no elimina un cobro registrado."
+    "es": "Lista independiente de los documentos anteriores, por fecha de cobro (UTC). El estado actual de un documento no elimina un cobro registrado.",
+    "de": "Unabhängige Liste der obigen Dokumente nach Zahlungseingangsdatum (UTC). Der aktuelle Status eines Dokuments löscht keinen erfassten Zahlungseingang."
   },
   "cashTable": {
     "pt": "Tabela de recebimentos",
     "en": "Receipts table",
     "fr": "Tableau des encaissements",
-    "es": "Tabla de cobros"
+    "es": "Tabla de cobros",
+    "de": "Tabelle der Zahlungseingänge"
   },
   "date": {
     "pt": "Data (UTC)",
     "en": "Date (UTC)",
     "fr": "Date (UTC)",
-    "es": "Fecha (UTC)"
+    "es": "Fecha (UTC)",
+    "de": "Datum (UTC)"
   },
   "currentClientLabel": {
     "pt": "Cliente atual",
     "en": "Current client",
     "fr": "Client actuel",
-    "es": "Cliente actual"
+    "es": "Cliente actual",
+    "de": "Aktueller Kunde"
   },
   "document": {
     "pt": "Documento",
     "en": "Document",
     "fr": "Document",
-    "es": "Documento"
+    "es": "Documento",
+    "de": "Dokument"
   },
   "method": {
     "pt": "Método",
     "en": "Method",
     "fr": "Méthode",
-    "es": "Método"
+    "es": "Método",
+    "de": "Methode"
   },
   "amount": {
     "pt": "Valor",
     "en": "Amount",
     "fr": "Montant",
-    "es": "Importe"
+    "es": "Importe",
+    "de": "Betrag"
   },
   "paymentNotes": {
     "pt": "Notas do recebimento #",
     "en": "Receipt notes #",
     "fr": "Notes de l’encaissement n°",
-    "es": "Notas del cobro n.º"
+    "es": "Notas del cobro n.º",
+    "de": "Notizen zum Zahlungseingang Nr. "
   },
   "emptyPayments": {
     "pt": "Sem recebimentos registados para este mês e filtro.",
     "en": "No receipts recorded for this month and filter.",
     "fr": "Aucun encaissement enregistré pour ce mois et ce filtre.",
-    "es": "Sin cobros registrados para este mes y filtro."
+    "es": "Sin cobros registrados para este mes y filtro.",
+    "de": "Keine erfassten Zahlungseingänge für diesen Monat und Filter."
   },
   "closing": {
     "pt": "Contactos, nomes e instalações refletem a ficha atual do cliente. A leitura do relatório não altera documentos, pagamentos ou configurações.",
     "en": "Contact details, names and facilities reflect the client’s current record. Reading this report does not change documents, payments or settings.",
     "fr": "Les coordonnées, noms et installations reflètent la fiche actuelle du client. La consultation du rapport ne modifie ni les documents, ni les paiements, ni les paramètres.",
-    "es": "Los contactos, nombres e instalaciones reflejan la ficha actual del cliente. La consulta del informe no modifica documentos, pagos ni configuraciones."
+    "es": "Los contactos, nombres e instalaciones reflejan la ficha actual del cliente. La consulta del informe no modifica documentos, pagos ni configuraciones.",
+    "de": "Kontaktdaten, Namen und Anlagen entsprechen dem aktuellen Kundendatensatz. Das Lesen dieses Berichts verändert weder Dokumente noch Zahlungen oder Einstellungen."
   }
 };
 function presentation(rawLanguage) {

@@ -9,7 +9,7 @@
     state: (kind, message) => { status.dataset.state = kind; status.textContent = message; status.setAttribute('role', ['error', 'session'].includes(kind) ? 'alert' : 'status'); button.disabled = kind === 'loading' || kind === 'session'; if (kind === 'session') { month.disabled = true; filter.disabled = true; language.disabled = true; } },
   });
   function open() {
-    if (!/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(month.value) || !['true', 'false'].includes(filter.value) || !['pt', 'en', 'fr', 'es'].includes(language.value)) { reader.cancel('Indique um mês válido entre 2000 e 2199 e escolha o filtro e o idioma do relatório.', 'error'); return; }
+    if (!/^(20|21)\d{2}-(0[1-9]|1[0-2])$/.test(month.value) || !['true', 'false'].includes(filter.value) || !['pt', 'en', 'fr', 'es', 'de'].includes(language.value)) { reader.cancel('Indique um mês válido entre 2000 e 2199 e escolha o filtro e o idioma do relatório.', 'error'); return; }
     reader.open('/api/reports/monthly-print?monthRef=' + encodeURIComponent(month.value) + '&onlyRequiresInvoice=' + filter.value + '&lang=' + language.value,
       { type: 'text/html', headers: { 'Content-Language': language.value, 'X-CW-Report-Type': 'monthly-print', 'X-CW-Month-Ref': month.value, 'X-CW-Invoice-Filter': filter.value } });
   }

@@ -8,7 +8,7 @@
   const equal=(a,b)=>JSON.stringify(canonical(a))===JSON.stringify(canonical(b));
   const hash=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(canonical(value)))))).map(byte=>byte.toString(16).padStart(2,'0')).join('');
   const validFields=value=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===fields.length&&fields.every(key=>typeof value[key]==='boolean');
-  const languages={pt:'Português',en:'English',fr:'Français',es:'Español'},validLanguage=value=>typeof value==='string'&&Object.hasOwn(languages,value);
+  const languages={pt:'Português',en:'English',fr:'Français',es:'Español',de:'Deutsch'},validLanguage=value=>typeof value==='string'&&Object.hasOwn(languages,value);
   const savedLanguage=state=>state?.preferredLanguage??'pt',recordLanguage=record=>record.preferredLanguage??savedLanguage(record.base);
   const optionalLanguage=value=>!Object.hasOwn(value,'preferredLanguage')||validLanguage(value.preferredLanguage);
   const values=()=>Object.fromEntries(fields.map(key=>[key,el(key).checked]));
@@ -53,7 +53,7 @@
     const ready=!!view?.base&&!invalid&&!busy&&!view.pending&&!view.conflict&&!view.needsRead&&matches(view.base);
     const visit=el('visitId').value.trim(),validVisit=/^[1-9]\d{0,9}$/.test(visit)&&id(Number(visit));
     reviewOrigin.disabled=invalid||busy||previewBusy||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value);
-    el('openHistoryReport').disabled=el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es'].includes(el('reportLanguage').value)||previewBusy;
+    el('openHistoryReport').disabled=el('openClientReport').disabled=el('openAdminReport').disabled=!ready||!validVisit||!['REGULAR','EXTRA'].includes(el('visitType').value)||!['pt','en','fr','es','de'].includes(el('reportLanguage').value)||previewBusy;
     el('visitId').disabled=el('visitType').disabled=el('reportLanguage').disabled=invalid;
     el('previewNotice').textContent=ready?'A pré-visualização usa as opções guardadas deste cliente. A visita deve pertencer a este cliente.':'Carregue e confirme as opções guardadas. Guarde as alterações ou descarte o rascunho antes de pré-visualizar.';
   }
@@ -165,7 +165,7 @@
     if(!active()||busy||previewBusy||!view?.base||view.pending||view.conflict||view.needsRead||!matches(view.base))return;
     const visitId=el('visitId').value.trim();if(!/^[1-9]\d{0,9}$/.test(visitId)||!id(Number(visitId)))return;
     const visitType=el('visitType').value;if(!['REGULAR','EXTRA'].includes(visitType))return;
-    const lang=el('reportLanguage').value;if(!['pt','en','fr','es'].includes(lang))return;
+    const lang=el('reportLanguage').value;if(!['pt','en','fr','es','de'].includes(lang))return;
     preview.open('/api/report-visit/visit/'+visitId+'?'+(visitType==='EXTRA'?'visitType=EXTRA&':'')+(historicalReview?'history=review&':'')+'lang='+lang+'&view='+reportView+'&clientId='+view.id+'&settingsVersion='+encodeURIComponent(view.base.version),
       {type:'application/pdf',headers:{...(historicalReview?{'X-CW-Report-Origin':'historical-review'}:{}),'Content-Language':lang,'X-CW-Report-Type':visitType==='EXTRA'?'extra-visit-pdf':'visit-pdf','X-CW-Visit-Type':visitType,'X-CW-Visit-Id':visitId,'X-CW-Client-Id':String(view.id),'X-CW-Report-View':reportView,'X-CW-Settings-Version':view.base.version}});
   }
