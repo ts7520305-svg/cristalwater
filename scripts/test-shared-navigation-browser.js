@@ -7,6 +7,7 @@ const root = path.join(__dirname, '..'), baseline = process.env.CW_NAV_BASELINE_
 if (baseline && !/^[0-9a-f]{40}$/.test(baseline)) throw Error('Use a full commit SHA for historical navigation reproduction');
 const source = file => baseline ? execFileSync('git', ['show', baseline + ':frontend/' + file], { cwd: root, encoding: 'utf8' }) : fs.readFileSync(path.join(root, 'frontend', file), 'utf8');
 const visual = path.join(root, 'reports/field-visual', 'shared-navigation-' + Date.now());
+let mobileChecks = 0;
 const cases = [
   ['admin-vehicles', 'ADMIN'], ['help-center', 'ADMIN'], ['settings', 'ADMIN'],
   ['client-dashboard', 'CLIENT'], ['client-menu', 'CLIENT'],
@@ -58,6 +59,23 @@ const cases = [
         assert(heading.y >= topbar.y + topbar.height - 1 && heading.y < 450, name + '/' + width + ': title must follow the header: ' + JSON.stringify({ heading, topbar }));
         assert.equal(await page.locator('.cw-v2-shell-sidebar').isVisible(), width > 1200);
         assert.equal(await page.locator('.cw-v2-mobile-primary').isVisible(), width <= 900);
+        if (width <= 900) {
+          const mobile = page.locator('.cw-v2-mobile-primary');
+          assert.equal(await mobile.locator(':scope > a,:scope > button').count(), 5);
+          const originalLanguage = await page.locator('html').getAttribute('lang');
+          await mobile.evaluate(node => { window.qaPrimaryNodes = [...node.children]; window.qaPrimaryLeaves = qaPrimaryNodes.map(item => item.firstChild); window.qaPrimaryDestinations = qaPrimaryNodes.map(item => [item.getAttribute('href'),item.getAttribute('type'),item.hasAttribute('data-cw-open-drawer')]); });
+          for (const language of ['pt','en','fr','es','de']) {
+            await page.evaluate(language => { document.documentElement.lang = language; dispatchEvent(new CustomEvent('cw-language-change',{ detail: { language } })); }, language);
+            await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+            const geometry = await mobile.locator(':scope > a,:scope > button').evaluateAll(nodes => nodes.map(node => { const bounds = node.getBoundingClientRect(), range = document.createRange(); range.selectNodeContents(node); return { text: node.textContent,width: bounds.width,height: bounds.height,left: bounds.left,right: bounds.right,viewport: innerWidth,barLeft: node.parentElement.getBoundingClientRect().left,barRight: node.parentElement.getBoundingClientRect().right,lines: [...range.getClientRects()].map(rect => ({ left: rect.left,right: rect.right })) }; }));
+            for (const item of geometry) { assert(item.width >= 44 && item.height >= 44 && item.left >= 0 && item.right <= item.viewport && item.left >= item.barLeft && item.right <= item.barRight, name + '/' + width + ': touch target fits ' + JSON.stringify(item)); assert.equal(item.lines.length, 1, name + '/' + language + '/' + width + ': complete navigation label ' + item.text); assert(item.lines.every(rect => rect.left >= item.left && rect.right <= item.right), 'Navigation text stays inside its button: ' + item.text); }
+            assert(await mobile.evaluate(node => [...node.children].every((item,index) => item === qaPrimaryNodes[index] && item.firstChild === qaPrimaryLeaves[index] && JSON.stringify([item.getAttribute('href'),item.getAttribute('type'),item.hasAttribute('data-cw-open-drawer')]) === JSON.stringify(qaPrimaryDestinations[index]))));
+            assert.equal(await page.evaluate(() => localStorage.getItem('cwFieldOutbox:navigation')), 'preserve-work'); mobileChecks++;
+            if (width === 320 && ['pt','de'].includes(language)) await mobile.screenshot({ path: path.join(visual,name + '-' + language + '-mobile-320.png') });
+          }
+          await page.evaluate(language => { document.documentElement.lang = language; dispatchEvent(new CustomEvent('cw-language-change',{ detail: { language } })); }, originalLanguage);
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        }
         if (width > 1200) {
           assert.equal(await page.locator('.cw-v2-shell-sidebar').evaluate(node => getComputedStyle(node).position), 'fixed');
           assert(heading.x >= 280, name + ': content must sit next to the sidebar');
@@ -98,6 +116,7 @@ const cases = [
       console.log('PASS navigation ' + name + '/' + role + ': four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator');
       await context.close();
     }
+    console.log('PASS shared mobile navigation: ' + JSON.stringify({ mobileChecks,languages: 5,widths: [320,390],profiles: ['ADMIN','CLIENT','TECHNICIAN','TEAM_LEADER'],fiveWholeLabels: true,targetsAtLeast44px: true,nodesAndDestinationsAndWorkRetained: true,componentOnly: true }));
     console.log('Navigation visual evidence: ' + visual);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

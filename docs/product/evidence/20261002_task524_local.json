@@ -1,0 +1,169 @@
+{
+  "task": "TASK524",
+  "recordedAt": "2026-10-02T11:29:49.175224+00:00",
+  "baselineHead": "5213949c70b83d7bd3d843b3ffa4679fd8449469",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Shared generated mobile navigation uses full-label intrinsic column sizes, minimum 44px targets and whole words. At <=360px only gutters and horizontal bar padding narrow to retain the longest client label. No font reduction, relabelling or destination changes.",
+  "sourceFiles": {
+    "frontend/cw-shared-navigation.css": "c7c13999aa593973b38381bf60f5822369c00cbd12f3b2a0c7f4644e43f58742",
+    "frontend/sw.js": "e743ce6d32968f61d9b4ae285777a5264358624407619c6e9ced389fef82c85c",
+    "scripts/test-field-client-login-languages.js": "34112de80a8625ebd700e5556c9000746b6fec76946f11c38af2d877ce830118",
+    "scripts/test-field-client-portal-extras-languages.js": "80ac4234db386f40edea6394c9d4738743f29a74dcbfcfe13a232212f3806cf0",
+    "scripts/test-field-entry-login-languages.js": "364a27aaf6efbf19ebd2586b7e1d3f1845746044d8b3f7a7287f0b65b6a00e98",
+    "scripts/test-field-login-languages.js": "5c4dfe8f4c942b6f876eda2354e6e78fa365e61c24d247dbc4ea3611a6939f37",
+    "scripts/test-field-navigation-preferences.js": "eb9dd5b59eeebdd7bf24020abc8718047b4f20d4609aa8d76a38e9c016fc9b66",
+    "scripts/test-shared-navigation-browser.js": "aae3ae3860393b9238cf7c067accb7f4bbd556ff7f1dc9e445bcf317cafc212c"
+  },
+  "productScope": [
+    "frontend/cw-shared-navigation.css",
+    "frontend/sw.js (cache291→292)"
+  ],
+  "sourceTestEditsInverseVerified": true,
+  "allOldAssertionsDeadlinesAndContextsPreserved": true,
+  "cacheReferences": 10,
+  "positiveNativeGroups": [
+    {
+      "script": "test-field-client-portal-extras-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 46433,
+      "batch": "1790939849147",
+      "sourceSha256": "80ac4234db386f40edea6394c9d4738743f29a74dcbfcfe13a232212f3806cf0",
+      "logSha256": "794c14acecdf82dcb41b8e6c3939f034f59fb9583aac2df6d9c73653ef08a11c",
+      "log": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS healthy portal notifications {\"healthyNoticeCases\":75,\"languages\":5,\"widths\":[320,390,1440],\"spanishNativeResponseRendered\":true,\"explicitReadAttempts\":2,\"nativeSqlConfirmations\":1,\"pendingRequests\":2,\"originalNodesFocusAndGuardRetained\":true}\nPASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work\nPASS portal extras result {\"checks\":228,\"languageCases\":210,\"nativeRetry\":true,\"literalNativeNotification\":true,\"ownershipControls\":2,\"pendingRequests\":2,\"currentWorkerShellBytes\":true,\"actualPageContinuedOffline\":true,\"actualColdOfflineReload\":true,\"primaryFailureStates\":4,\"primaryRetry\":true}\nPASS actual portal quote presentation {\"quoteLanguageCases\":217,\"cachedQuotesJsBytesEqualSource\":true,\"coldOfflineQuoteErrors\":true,\"realLanguageSelector\":true,\"pureQuotePaintDoesNotReloadQuotes\":true}\nPASS legacy client chat language integration {\"languageCases\":15,\"ownershipCases\":20,\"widths\":[320,390,1440],\"languages\":5,\"nativeTextPosts\":2,\"nativeUpload\":1,\"nativeAuthenticatedDownloadBytes\":true,\"literalApiBodies\":5,\"literalAttachmentName\":true,\"retainedDraftNodesHandlers\":true,\"conversationReadsUnchanged\":true,\"retainedLanguageOnReload\":true,\"sqlRowsUnchanged\":true}\nPASS legacy client account language integration {\"languageCases\":15,\"textAssertions\":60,\"ownershipCases\":20,\"widths\":[320,390,1440],\"languages\":5,\"noAdministrativeApiOrControls\":true,\"realPortalNavigationWithSameClient\":true,\"storedWorkAndSqlUnchanged\":true,\"retainedLanguageOnReload\":true}\nPASS shared client navigation copy {\"navigationTextAssertions\":105,\"navigationOwnershipCases\":25,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesDestinationsRetained\":true,\"ownedSearchMetadataLocalized\":true,\"noAccountApiOrSqlChanges\":true}\nPASS portal extras fixtures removed and previous language setting restored\n"
+    },
+    {
+      "script": "test-field-navigation-preferences.js",
+      "code": 0,
+      "signal": null,
+      "ms": 19659,
+      "batch": "1790939849147",
+      "sourceSha256": "eb9dd5b59eeebdd7bf24020abc8718047b4f20d4609aa8d76a38e9c016fc9b66",
+      "logSha256": "bf33fb89ab292b4d5a8f447da76a8fffe3d7cb6c8072cb7d683213ebb658abac",
+      "log": "PASS navigation preferences: account-bound explicit choices, no default writes or reload, device/live and fixed palettes, three densities with 44px targets, five languages/three widths/contrast, real menu/index/help navigation, business styles and filters preserved, legacy keys/shortcut and work bytes preserved, two windows, storage throw/ignored writes, corrupt/wrong-owner bytes, bfcache, reset, offline save, account change/expiry; zero business writes\n"
+    },
+    {
+      "script": "test-field-report-settings-ui.js",
+      "code": 0,
+      "signal": null,
+      "ms": 27959,
+      "batch": "1790939849147",
+      "sourceSha256": "05a1308c50b70b3c93a2d4cb79f3e10358473fa6fc24cb4bd82a8e76dafb5e8c",
+      "logSha256": "2f9deb74bf66f8201a7858e81575e83e5564a3028f1af9e8c0b02e10e81971b8",
+      "log": "PASS settings UI: save requires confirmed read, invalid IDs cause no request, late client response discarded, actual defaults/saved choices without writes, literal long names, three widths and light/dark contrast\nPASS delayed older recovery scan cannot append duplicate rows after a newer scan\nPASS real committed response loss/reload, exact original receipt after a newer edit, forged/wrong-client/wrong-options/202 replies retained as pending, durable offline intent and explicit reconnect retry\nPASS browser lock blocks parallel send, separate-window drafts survive broadcasts, changed versions require review, merge preserves unedited current fields, reviewed request gets a new UUID, immutable refusal survives reload and BFCache revalidates\nPASS late read/write replies across account changes, original pending request preserved/recovered, bounded timeout, malformed/wrong-client/202/503 reads never enable writing\nPASS unavailable storage/locks, draft quota and corrupt recovery bytes block new writes without deleting evidence\nPASS language UI: language-only edit, unsent draft reload, lost reply/recovery after newer language, separate client draft, temporary opening override, preference A-B-A cancellation, reviewed language conflicts, unedited language preserves newer value, malformed language blocked\nPASS pre-upgrade pending body/hash/receipt and unsent draft recover without rewrites or loss; no page errors\n"
+    },
+    {
+      "script": "test-field-visual-flow.js",
+      "code": 0,
+      "signal": null,
+      "ms": 4915,
+      "batch": "1790940322212",
+      "sourceSha256": "3887f3770688dee461551e8847ab391a459fe8edea72f5c2da1f4d5d4b81db03",
+      "logSha256": "f64c7cd5f902f61888723d917ce8b01e5cc701fdc98153ff684753f6f6728fd6",
+      "log": "PASS visual real form, profile data, logout and protected return: TECHNICIAN\nPASS real client portal published quote, explicit approval and persisted repair status\nPASS visual real form, profile data, logout and protected return: CLIENT\nPASS visual real form, profile data, logout and protected return: ADMIN\nVisual evidence: /workspace/scratch/8113b715fd5d/cristalwater/reports/field-visual/1790940326330\n"
+    },
+    {
+      "script": "test-field-login-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 10306,
+      "batch": "1790940322212",
+      "sourceSha256": "5c4dfe8f4c942b6f876eda2354e6e78fa365e61c24d247dbc4ea3611a6939f37",
+      "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+      "log": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+    },
+    {
+      "script": "test-field-client-login-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 9046,
+      "batch": "1790940322212",
+      "sourceSha256": "34112de80a8625ebd700e5556c9000746b6fec76946f11c38af2d877ce830118",
+      "logSha256": "bf9c4b7314403deea48ce5d9a79680930c8d72677d088cbd03c0577f9147ffe5",
+      "log": "PASS client login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"notClient\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=501\",\"pendingRequests\":2}\nPASS client login ownership changed-text\nPASS client login ownership replaced-node\nPASS client login ownership changed-attributes\nPASS client login language result {\"checks\":148,\"languages\":5,\"widths\":[320,390,1440],\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS client login fixtures removed\n"
+    },
+    {
+      "script": "test-field-entry-login-languages.js",
+      "code": 0,
+      "signal": null,
+      "ms": 22959,
+      "batch": "1790940322212",
+      "sourceSha256": "364a27aaf6efbf19ebd2586b7e1d3f1845746044d8b3f7a7287f0b65b6a00e98",
+      "logSha256": "526303f658129ffd3fa889b5df8279289dfa8915918a026507ac09327dbe2912",
+      "log": "PASS general/admin login labels {\"kind\":\"login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"visible\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"hidden\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":184,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"login\",\"invalidAccountControls\":7,\"nativeLogins\":8,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":332,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"admin-login\",\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login result {\"checks\":332,\"pages\":[{\"kind\":\"login\",\"checks\":184,\"nativeLogins\":8,\"invalidAccountControls\":7,\"visibilityStates\":2},{\"kind\":\"admin-login\",\"checks\":148,\"nativeLogins\":2,\"invalidAccountControls\":7,\"visibilityStates\":0}]}\nPASS general/admin login fixtures removed and previous language settings restored\n"
+    }
+  ],
+  "positiveComponent": {
+    "script": "test-shared-navigation-browser.js",
+    "exitCode": 0,
+    "sourceSha256": "aae3ae3860393b9238cf7c067accb7f4bbd556ff7f1dc9e445bcf317cafc212c",
+    "logSha256": "41de80e20ef59a065770fb480de4f2b8c54468ccf8b21d8eb594a68c58bb38d6",
+    "log": "PASS navigation admin-vehicles/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation help-center/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation settings/ADMIN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation client-dashboard/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation client-menu/CLIENT: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-new-client/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-guide/TECHNICIAN: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS navigation technician-route/TEAM_LEADER: four widths, drawer focus, delayed binding, safe unique search, actual keyboard link and offline indicator\nPASS shared mobile navigation: {\"mobileChecks\":80,\"languages\":5,\"widths\":[320,390],\"profiles\":[\"ADMIN\",\"CLIENT\",\"TECHNICIAN\",\"TEAM_LEADER\"],\"fiveWholeLabels\":true,\"targetsAtLeast44px\":true,\"nodesAndDestinationsAndWorkRetained\":true,\"componentOnly\":true}\nNavigation visual evidence: /workspace/scratch/8113b715fd5d/cristalwater/reports/field-visual/shared-navigation-1790939848087\n",
+    "mobileCases": 80,
+    "labelsChecked": 400,
+    "componentOnly": true,
+    "businessAndAuthJourneysCoveredSeparately": true
+  },
+  "negativeCssOnly": {
+    "exitCode": 1,
+    "expectedFailure": true,
+    "scope": "Only the shared-navigation CSS read by the final unchanged component test is replaced by HEAD523 CSS. No final canonical test assertion or other frontend source replaced.",
+    "cssSha256": "7c927d43d6d77c99dd56e7f0d8ca89b8a199926de4be5cd8eb8d65bdf33c5da1",
+    "sameFinalTestSha256": "aae3ae3860393b9238cf7c067accb7f4bbd556ff7f1dc9e445bcf317cafc212c",
+    "logSha256": "36cf045192926c9e9a72a61076e050bd1804613c09871541a601dff5b7d70648",
+    "log": "AssertionError [ERR_ASSERTION]: admin-vehicles/pt/320: complete navigation label Clientes\n\n2 !== 1\n\n    at /workspace/scratch/8113b715fd5d/cristalwater/scripts/test-shared-navigation-browser.js:71:275\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:502:9) {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 2,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+  },
+  "checks": [
+    {
+      "name": "unit-task524-final.log",
+      "sha256": "ac6a307ebe1c7cb6e57ed9295b4acf8d6b27393a43396f4e50dc5b5423269d90",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run\n\n\n RUN  v4.1.11 /workspace/scratch/8113b715fd5d/cristalwater\n\n\n Test Files  141 passed (141)\n      Tests  1396 passed (1396)\n   Start at  12:19:21\n   Duration  6.87s (transform 2.17s, setup 0ms, import 6.70s, tests 12.22s, environment 15ms)\n\n"
+    },
+    {
+      "name": "syntax-task524-final.log",
+      "sha256": "843fbc8380ee237e72d97f39dac725cfe776f79fb078aaf5b1b1796d0ed15fd0",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 45 inline scripts.\n"
+    }
+  ],
+  "localRuntime": "Isolated PGlite/current Prisma schema and real Chromium153. Native PostgreSQL16/43 migrations and restore require own CI.",
+  "failedAttemptsNotAccepted": [
+    "Baseline CSS splits Clientes at PT/320; reproduced again using only historical CSS with the final test.",
+    "First intrinsic-column CSS keeps whole words but the Spanish client Menu ends at321.546875 in320px, under inherited Manrope. Strict viewport/44px checks retained. Narrow-screen gutter/padding adjustment resolves this without reducing text or touch targets.",
+    "Initial six native successes used the earlier CSS candidate; excluded from the final seven-group acceptance. Required groups rerun after the final narrow-screen adjustment."
+  ],
+  "diagnosticOnly": "A temporary metrics/visual capture bypasses only its copied mobile assertions to measure all language variants. It is not a canonical test or accepted pass. Final unchanged canonical test separately passes all80 strict cases.",
+  "visualReview": [
+    {
+      "path": "reports/field-visual/shared-navigation-1790939848087/admin-vehicles-pt-mobile-320.png",
+      "sha256": "a66150ee49a7823e7238364c4b450d18380098db50b4c2856d13d2c2db70e646",
+      "review": "All five words fully visible, separated targets; client Spanish capture covers the previously overflowing case."
+    },
+    {
+      "path": "reports/field-visual/shared-navigation-1790940079320/client-dashboard-es-mobile-320.png",
+      "sha256": "f488f80fdae55e6f24ace6c627571d0be6b72d997203ad1e958ff0435ff181be",
+      "review": "All five words fully visible, separated targets; client Spanish capture covers the previously overflowing case."
+    }
+  ],
+  "canonicalGates": {
+    "scripts/test-field-suite.js": "60c8f88efa0dcb83bcf5cf85223a2cf6249f32466c62dbe2c7e83998eb4cd150",
+    "scripts/lib/run-field-script.js": "b0db978f79425b3ed485d3143f3065d7247368b1b2b5a6ad66507cd97393c684",
+    ".github/workflows/field-readiness.yml": "41d0d02f9666316291a14e21146df56480f69c59330c7aab0334dc07be81d9d2"
+  },
+  "nativeAcceptance": {
+    "lastFullyAcceptedTask": "TASK519",
+    "lastFullyAcceptedRun": 36979860735,
+    "inProgressAtObservation": [
+      36995609889,
+      36998464664,
+      36999372973
+    ],
+    "task524": "Own exact head/tree, canonical386 and restore still required."
+  },
+  "remaining": [
+    "Other C08 screens/presentation remain open",
+    "C09 primary navigation has PT labels in other selected languages; next verify actual native source before localizing",
+    "C06 field/production acceptance remains open",
+    "C10 production date/time architecture remains open"
+  ],
+  "authorization": "Work branch only. No merge, deploy, production writes or external messages."
+}
