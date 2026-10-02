@@ -2,7 +2,9 @@ import {describe,it,expect} from 'vitest';
 import {createRequire} from 'node:module';
 import fs from 'node:fs';
 import vm from 'node:vm';
-const require=createRequire(import.meta.url),R=require('../frontend/cw-admin-catalogue'),source=fs.readFileSync('frontend/crystal-os-v2-nav.js','utf8'),context={window:{}};
+// The live navigation also registers its language listener while exporting the
+// catalogue. Supply those browser APIs without changing the catalogue checks.
+const require=createRequire(import.meta.url),R=require('../frontend/cw-admin-catalogue'),source=fs.readFileSync('frontend/crystal-os-v2-nav.js','utf8'),context={window:{addEventListener(){}},document:{documentElement:{lang:'pt'}},MutationObserver:class{observe(){}}};
 vm.runInNewContext(source.slice(source.indexOf('  const NAV ='),source.indexOf('  function flatLinks')),context);const navigation=context.window.CWAdminNavigation,rows=R.build(navigation);
 describe('administrative catalogue navigation',()=>{
  it('uses every live ADMIN shell entry and merges repeated links across areas',()=>{const paths=[...new Set(navigation.groups.flatMap(g=>g.links.map(l=>R.canonical(l[0]))))];expect(paths.every(p=>rows.some(r=>r.key===p))).toBe(true);expect(new Set(rows.map(r=>r.key)).size).toBe(rows.length);expect(rows.find(r=>r.key==='/admin-live-map').groups).toEqual(['1','4']);expect(Object.isFrozen(navigation.groups[0].links[0])).toBe(true);});

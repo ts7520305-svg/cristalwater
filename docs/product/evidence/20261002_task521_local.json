@@ -1,0 +1,26 @@
+{
+  "task": "TASK521",
+  "baseline": "e785b4993608c3cec65209edaa28fe2c00917c73",
+  "nativeFailure": {
+    "runId": 36990277428,
+    "jobId": 110784617705,
+    "suite": "tests/admin-catalogue.test.js",
+    "error": "TypeError: window.addEventListener is not a function",
+    "passedFiles": 140,
+    "passedTests": 1388,
+    "fieldSuite": "skipped",
+    "restore": "skipped"
+  },
+  "change": "Provide the browser bootstrap APIs used by live navigation to the catalogue VM fixture; preserve all eight catalogue tests and assertions.",
+  "local": {
+    "unitFiles": 141,
+    "unitTests": 1396,
+    "technicianTests": 4,
+    "unitLogSha256": "95f015d62f163b14958b485475cd35179cac7961b2739df5d5820288cfff8551",
+    "unitLog": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 test\n> vitest run\n\n\n RUN  v4.1.11 /workspace/scratch/8113b715fd5d/cristalwater\n\n\n Test Files  141 passed (141)\n      Tests  1396 passed (1396)\n   Start at  11:23:40\n   Duration  6.32s (transform 1.90s, setup 0ms, import 5.95s, tests 11.23s, environment 17ms)\n\n"
+  },
+  "limitations": [
+    "Native PostgreSQL 16 / 386 groups / restore not accepted for this revision yet."
+  ],
+  "nextTask": "TASK522: German visit and monthly printable reports."
+}

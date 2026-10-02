@@ -1,3 +1,11 @@
+## Retoma atual — 02/10/2026, TASK521 / correção da fixture do catálogo
+
+TASK520 publicada em e785b4993608c3cec65209edaa28fe2c00917c73. CI36990277428/job110784617705 falhou antes dos testes de navegador: tests/admin-catalogue.test.js executava o inicializador de idioma com window vazio, dando TypeError: window.addEventListener is not a function. 140 ficheiros/1388 testes passaram; o catálogo nem chegou a recolher os seus oito casos. Suite386 e restauro não executados nessa revisão.
+
+TASK521 fornece addEventListener, document.documentElement e MutationObserver à fixture isolada, conservando integralmente os oito casos do catálogo, a extração da navegação original e todas as asserções. Não altera produto, permissões, destinos, CSS, cache290, runner386 ou workflow105m. Validação local:141 ficheiros/1396 testes aprovados e quatro testes técnicos aprovados. A cópia rasa inicial não tinha o commit61fc1ca usado por um teste de regressão histórica; o histórico foi obtido e o teste original passou sem alteração. Última aceitação completa continuaTASK519; nova revisão exige CI/suite386/restauro próprios.
+
+ContinuarTASK522 com DE nos relatórios de visita e mensais, incluindo seletores e confirmação do idioma recebido; preservar texto histórico, preferências e recusas de sessão/identidade. C09/C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes deC32; contrato anual adiado. Sem merge/deploy/contactos externos. Entradas abaixo históricas.
+
 ## Retoma atual — 02/10/2026, TASK520 / navegação partilhada e CI519 aceite
 
 TASK519 publicada em ab2efe10c33e9d2b3d9a9e67afcbee7f9f1d16de/árvore93d4406b20c9870b37ed4d74f44e5be4b6db213f. TASK520 acrescenta três chaves/15 variantes privadas ao título/breadcrumb/ligação e pesquisa da conta e ao botão Pedidos da shellCLIENT. Ownership exige folha e metadados canónicos, recusando alterações/clones. Destinos, perfis, handlers, catálogo, medição do cabeçalho, APIs/storage mantidos. CSS efetiva reserva o espaço do seletor na conta e dá78px aos pedidos; cinco alvos móveis≥44×44px. Fixture pendente sincronizada com o evento do POST nativo, sem retry/assert removido. Cache289→290/runner386/105m iguais. Dez ficheiros/sete fontes/três produto. [Prova520](evidence/20261002_task520_local.json).
