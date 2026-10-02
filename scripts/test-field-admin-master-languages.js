@@ -105,7 +105,14 @@ async function inject(route) {
   client = await prisma.client.create({data:{name:'Atualizar',email:prefix+'@qa.test',notes:'Literal <img src=x onerror=alert(1)> Prioridades'}});
   pool = await prisma.pool.create({data:{name:'Críticos',clientId:client.id,active:true,zone:'Centro de comando',notes:'Literal dados <b>Idioma</b>'}});
   technician = await prisma.technician.create({data:{name:'Prioridades',active:true,notes:'PRIVATE_TECH_WORK'}});
-  visit = await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:technician.id,date:new Date(),plannedDate:new Date(),status:'PLANNED',notes:'Guardar <img src=x onerror=alert(1)>',reason:'Atualizar',internalNotes:'PRIVATE_INTERNAL_WORK'}});
+  // The real dashboard returns the first20 open visits by plannedDate.
+  // Place only our fixture before existing dates; never assume an empty suite DB.
+  const earliest = (await prisma.serviceVisit.aggregate({_min:{plannedDate:true}}))._min.plannedDate;
+  const fixtureDate = new Date(Math.min(Date.now(),earliest?.getTime() ?? Date.now()) - 1);
+  visit = await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:technician.id,date:new Date(),plannedDate:fixtureDate,status:'PLANNED',notes:'Guardar <img src=x onerror=alert(1)>',reason:'Atualizar',internalNotes:'PRIVATE_INTERNAL_WORK'}});
+  const fixtureResponse = await fetch(base+'/api/core/dashboard',{headers:{Authorization:'Bearer '+token}});assert.equal(fixtureResponse.status,200);
+  const fixtureDashboard = await fixtureResponse.json();assert.equal(fixtureDashboard.nextVisits[0].id,visit.id,'Own literal-data fixture must be present in the real bounded dashboard');
+  console.log('PRECONDITION command fixture '+JSON.stringify({nativeFirstVisitId:fixtureDashboard.nextVisits[0].id,fixtureVisitId:visit.id,nativeReturnedVisits:fixtureDashboard.nextVisits.length,beforeExistingDate:earliest?fixtureDate.getTime()<earliest.getTime():true}));
   history = await prisma.technicalHistory.create({data:{poolId:pool.id,type:'TECHNICAL_SHEET_CHANGE',message:'Não foi possível carregar os dados.',component:'Centro de comando',performedAt:new Date()}});
   const before = await counts(), records = await raw();
   const output = path.join(__dirname,'../reports/field-visual/admin-master-languages');await fs.mkdir(output,{recursive:true});
