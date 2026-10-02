@@ -278,6 +278,9 @@ const routeUi = (() => {
     if (!node || node.childNodes.length !== 1 || node.firstChild.nodeType !== Node.TEXT_NODE || node.textContent !== original) continue;
     node.dataset.cwNoI18n = ''; bind(node, value(key));
   }
+  const errorStyle = document.createElement('style');
+  errorStyle.textContent = 'main.route-shell #route > .empty[data-cw-state="error"]::before,main.route-shell #suggestions > .empty[data-cw-state="error"]::before{content:none;display:none;}';
+  document.head.appendChild(errorStyle);
   window.addEventListener('cw-language-change', paint);
   new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   function ownError(key, params) { const entry = value(key, params), error = new Error(text(entry, 'pt')); errors.set(error, entry); return error; }
