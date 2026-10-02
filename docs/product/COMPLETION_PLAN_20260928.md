@@ -1,3 +1,13 @@
+## Retoma atual — 02/10/2026, TASK523 / fixture integrada do catálogo
+
+TASK522 publicada em d63b8a368bd6d445d1a7e51363ca6e7454c7279c/árvore0de647256cc2b670c10df2d73517162a9dc432e3;23 ficheiros conferidos local/remote e árvore limpa. [CI522/36998464664](https://github.com/ts7520305-svg/cristalwater/actions/runs/36998464664) em execução. TASK521/36995609889 também continua em curso; última aceitação completa permaneceTASK519. Cada revisão exige386/head/árvore/restauro próprios.
+
+Antes da alteração móvel, a inspeção encontrou a mesma lacuna deTASK521 também em scripts/test-field-admin-catalogue.js. Reproduzida no head522:143ms/code1, TypeError: window.addEventListener is not a function na extração do catálogo; nenhum controlo subsequente pôde executar. TASK523 fornece addEventListener, document.documentElement.lang e MutationObserver à VM integrada. A inversão apenas da fixture/comentário recupera byte a byte o script anterior: todas as asserções, extração da navegação original, queries e prazos mantidos. Produto, CSS, cache291, backend/schema, runner386 e workflow105m iguais.
+
+Script final integrado aprovado26098ms/code0:68 módulos/67 destinos HTML/seis âncoras existentes/13 áreas, duas páginas/cinco idiomas/três larguras, pesquisa/teclado/offline/bfcache/expiração e oito guardas de perfil; zero chamadas de negócio e SQL igual. Oito unitários do catálogo e sintaxe695/308/45 aprovados. PGlite/Chromium153 local não substituem PostgreSQL16/restauro nativo. [Reprodução e provas523](evidence/20261002_task523_local.json).
+
+ContinuarTASK524 pelos restantes rótulos da barra móvel, após esta correção prioritária do gate integrado. Observar primeiro os rótulos reais; manter≥44×44, nós, destinos, foco, sessão e trabalho. Tratar qualquer outra falha nativa concluída antes de novas funcionalidades. C09/C06/C08/C10 abertas;32=26 por iniciar/uma em execução/cinco concluídas. Público durante desenvolvimento, privado antes deC32; contrato anual adiado. Sem merge/deploy/contactos externos. Entradas abaixo históricas.
+
 ## Retoma atual — 02/10/2026, TASK522 / relatórios em alemão
 
 TASK521 publicada em bf884fb8c1cc2603f6bf81604dcf6a681b60b572/árvore e7a98a93548df075b66983dce441ad00bb21b9c5. TASK522 acrescenta DE às 93 mensagens de visita e 61 mensais, locale de-DE, seletores de abertura/idioma preferido e leitor autenticado; a confirmação final mostra Deutsch. Os textos anteriores PT/EN/FR/ES e placeholders foram conferidos e permanecem iguais. Não traduz notas, nomes nem números registados, nem altera valores, permissões, API de escrita, schema ou lógica de cálculo. Cache290→291 com as dez referências existentes; runner386 e workflow105m intactos.

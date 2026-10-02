@@ -1,0 +1,70 @@
+{
+  "task": "TASK523",
+  "recordedAt": "2026-10-02T11:07:33.879282+00:00",
+  "baselineHead": "d63b8a368bd6d445d1a7e51363ca6e7454c7279c",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Integration catalogue VM supplies the same browser APIs as the TASK521 unit fixture. Product and canonical catalogue extraction unchanged.",
+  "originalSourceSha256": "742f7bcc2707235e4d2375987bdf801475e29b1be7bdb4d39eaa6df208bb3f5b",
+  "finalSourceSha256": "5a41ffc42b5de26cb2c1a15c09ae510ecd89ea91b58e069a977fbaf95d607523",
+  "originalAssertionsAndDeadlinesPreserved": true,
+  "inversePatchRestoresOriginalSourceExactly": true,
+  "results": [
+    {
+      "script": "test-field-admin-catalogue.js",
+      "code": 1,
+      "signal": null,
+      "ms": 143,
+      "batch": "1790939014775",
+      "logSha256": "d2a64031577698fbf3a8e4a1922ee01def3b806a6091f3e5c547035366c6c579",
+      "log": "evalmachine.<anonymous>:189\n    window.addEventListener('cw-language-change',paint);\n           ^\n\nTypeError: window.addEventListener is not a function\n    at evalmachine.<anonymous>:189:12\n    at evalmachine.<anonymous>:192:5\n    at Script.runInContext (node:vm:149:12)\n    at Script.runInNewContext (node:vm:154:17)\n    at Object.runInNewContext (node:vm:310:38)\n    at /workspace/scratch/8113b715fd5d/cristalwater/scripts/test-field-admin-catalogue.js:8:121\n",
+      "expectedFailure": true
+    },
+    {
+      "script": "test-field-admin-catalogue.js",
+      "code": 0,
+      "signal": null,
+      "ms": 26098,
+      "batch": "1790939076788",
+      "logSha256": "7ad29da76e5a9be834c2038ae98a0774c09e11f14d06f95f8971098815396ff3",
+      "log": "PASS catalogue: 68 modules from the live shell plus seven complementary entries, 13 areas, 67 HTML destinations and 6 existing anchors, unique keys, safe pool context/stock links, two real pages/five languages/three widths, accent and cross-language search, literal no-match, area filter, URL/reload/index switch, keyboard opening of actual daily summary, invalid URL/script failure/offline/bfcache/session expiry, 8 role-guard cases, zero menu API calls or writes and unchanged data\n",
+      "expectedFailure": false
+    }
+  ],
+  "checks": [
+    {
+      "name": "unit-task523-catalogue.log",
+      "logSha256": "bf19d545694e5d40f750b8511323871ecc9036a38dade8c35e3e5fb14eb71857",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n RUN  v4.1.11 /workspace/scratch/8113b715fd5d/cristalwater\n\n\n Test Files  1 passed (1)\n      Tests  8 passed (8)\n   Start at  12:04:37\n   Duration  197ms (transform 20ms, setup 0ms, import 35ms, tests 13ms, environment 0ms)\n\n"
+    },
+    {
+      "name": "syntax-task523-final.log",
+      "logSha256": "843fbc8380ee237e72d97f39dac725cfe776f79fb078aaf5b1b1796d0ed15fd0",
+      "log": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 45 inline scripts.\n"
+    }
+  ],
+  "coverage": {
+    "modules": 68,
+    "destinations": 67,
+    "existingAnchors": 6,
+    "languages": 5,
+    "widths": [
+      320,
+      390,
+      1440
+    ],
+    "roleGuardCases": 8,
+    "businessApiCalls": 0,
+    "businessWrites": 0,
+    "databaseRowsUnchanged": true
+  },
+  "localRuntime": "PGlite/Chromium153; no claim of native migrations or restore.",
+  "productAndSchemaUnchanged": true,
+  "nativeRunsPending": {
+    "task521": 36995609889,
+    "task522": 36998464664,
+    "bothRequireOwnAcceptance": true,
+    "task523": "Own CI386 and restore required after publication"
+  },
+  "lastFullAcceptance": "TASK519/run36979860735",
+  "authorization": "Work branch only; no merge/deploy/production writes/external messages."
+}
