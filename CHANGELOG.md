@@ -81,3 +81,7 @@
 ## TASK546 — erros nativos do write-store no intake (2026-10-03)
 - Intake conserva os descritores de erro do write-store e reutiliza o seu dicionário existente ao mudar de idioma; erros externos/persistidos continuam literais.
 - Regressão com bloqueio interno nativo do store confirma cinco idiomas, rascunho/requestId intactos, fila vazia e zero envios operacionais. Cache309 e expectativas existentes atualizados.
+
+## Checkpoint após TASK546 (2026-10-03)
+- Registados os quatro commits543–546, árvores e Actions; último código publicado `e3497a6`. CI540/541 e restauros aprovados; CI542–546 pendentes.
+- Documentados testes locais, limitações Windows, preflight23 e próxima547/C06-011. Sem merge ou deploy.

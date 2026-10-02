@@ -1,15 +1,15 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-03 00:17 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 00:20 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit de código validado localmente e publicado: `3e56fe32b97b92a1742f965deda3a32e7cab851a` (TASK545), árvore `e79b8eff6558da1d40cb76ae7c93e96c1619e872`; checkout/remote conferidos após push. Aceitação integrada ainda pendente.
+- Último commit de código validado localmente e publicado: `e3497a65789d8e962004f4f8633e603136030cde` (TASK546), árvore `2241293b6e37db93b5cea44b9feabef9f3ca0489`; SHA/árvore do GitHub conferidos após push. Aceitação integrada ainda pendente.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
 - Último commit com CI integrado concluído e log conferido: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), run `37066631332`, job `111035975340`, success. TASK540 (`6cf781f`, run `37066186782`, job `111034430127`) também success: cada log confirma SHA, 387 grupos distintos/code0 e restauro de 128 tabelas/51 ficheiros com linhas e hashes iguais. TASK537–539 continuam aceites nos runs registados anteriormente.
-- TASK542 (`b73a04c`, run `37073275970`), TASK543 (`bfe82be`, run `37074953256`, job `111062639350`) e TASK544 (`e5b2075`, run `37075670653`, job `111064906269`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`) passou migrações/sintaxe e está nos gates unitários/técnicos/browser na última consulta. Não transferir aceitação541 para542–546.
+- TASK542 (`b73a04c`, run `37073275970`), TASK543 (`bfe82be`, run `37074953256`, job `111062639350`), TASK544 (`e5b2075`, run `37075670653`, job `111064906269`) e TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. TASK546 (`e3497a6`, run `37077034871`, job `111069139406`) está na preparação Prisma na consulta das00:20; nenhuma falha reportada, sem atribuir sucesso a etapas pendentes. Não transferir aceitação541 para542–546.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -20,6 +20,17 @@ O inventário de código inclui backend Express/Prisma, Admin, Técnico e Client
 O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) regista C01–C05 concluídas: validação operacional anterior, probes de volume/consistência e inventário de idiomas. C06 está em execução; C07–C32 permanecem abertas. Preservar as evidências por commit. TASK535–538 tratam mapa, estados da rota, idioma da ficha e isolamento da ficha ativa após troca de conta. A recuperação após reload não ficou resolvida pela TASK538.
 
 ## Alterações publicadas / tarefa em curso
+
+Publicações desta retoma, todas na branch autorizada:
+
+| TASK | Commit | Árvore | Action |
+|---|---|---|---|
+| 543 | `bfe82be5c6cb5d339ebb986e75ff9f2853b0315a` | `3aba14d16f1b2b53c2408c026a58b9c89b0fc98a` | `37074953256` |
+| 544 | `e5b2075c7e0cbec01e459ad856158d54df318b7c` | `c8a5ee72a45b44d9bd8caa14aa8b27771555e37a` | `37075670653` |
+| 545 | `3e56fe32b97b92a1742f965deda3a32e7cab851a` | `e79b8eff6558da1d40cb76ae7c93e96c1619e872` | `37076553416` |
+| 546 | `e3497a65789d8e962004f4f8633e603136030cde` | `2241293b6e37db93b5cea44b9feabef9f3ca0489` | `37077034871` |
+
+As entradas abaixo conservam o estado histórico no momento da publicação; o estado corrente de CI é o da secção Versão e referências.
 
 - Checkpoint/documentação: commit `404e7145f19d68fa8b5331c4532814aed4825734`.
 - TASK539 publicada: `c8c6a6f39624ffbfef2cc3bb3045e5bd28d7f378`, árvore `b85d91258935fbc4e518176a33fc61b35d4d8748`; run `37065691326` em execução. Memória da ficha usa principal validado pelo guard e ID da visita, só restaura após leitura autorizada. Não adota snapshots sem dono; preserva bytes inválidos num arquivo antes de guardar novo trabalho. Ficheiros/credenciais excluídos, refresh mantém edição. Cache v304 e quatro expectativas atualizadas; 10 ficheiros. 1 409 unitários/142 ficheiros, quatro técnicos, sintaxe e diff-check passaram.
@@ -62,7 +73,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 - Memória sem titular na ficha: TASK539 publicada e CI concluído com success; manter a evidência por SHA e não extrapolar para isolamento global.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI540/541 success, com logs e restauro conferidos; CI542–545 pendentes. Validar também o run546 após publicação.
+- CI540/541 success, com logs e restauro conferidos; CI542–546 pendentes. Exigir resultado/log/restauro do SHA respetivo antes de aceitação integrada.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -76,7 +87,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-Publicar TASK546 validada localmente, registando SHA/árvore/run. Próxima TASK547 / C06-011: consultar conclusão e logs de CI542–546, corrigir qualquer falha real antes de aceitar. Sem falhas, observar `route-map` em PT/EN/FR/ES/DE e larguras320/390/1440, incluindo fallback sem fornecedor de mapa; confirmar os textos próprios ainda PT e traduzir apenas a página/modo route existente, preservando guard Admin, dia/técnico, coordenadas, lista/destinos, API e ausência de escritas de planeamento. Conferir primeiro se algum commit novo já tratou a lacuna. C06 permanece aberta.
+TASK547 / C06-011: consultar conclusão e logs de CI542–546, corrigir qualquer falha real antes de aceitar. Sem falhas, observar `route-map` em PT/EN/FR/ES/DE e larguras320/390/1440, incluindo fallback sem fornecedor de mapa; confirmar os textos próprios ainda PT e traduzir apenas a página/modo route existente, preservando guard Admin, dia/técnico, coordenadas, lista/destinos, API e ausência de escritas de planeamento. Conferir primeiro se algum commit novo já tratou a lacuna. C06 permanece aberta.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 23 scripts.
 
@@ -84,4 +95,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-TASK543/544/545 publicadas em `bfe82be`/`e5b2075`/`3e56fe3`; TASK546 preparada e validada localmente, commit/push por executar. CI540/541 e restauros conferidos; CI542–545 pendentes. Próxima547: conferir CI e observar route-map/C06-011. Preflight23 scripts, runner387 grupos intacto. Sem merge/deploy/mensagens a clientes.
+TASK543–546 implementadas, testadas e publicadas nos quatro commits acima. Nenhuma alteração de código por publicar. CI540/541 e restauros conferidos; CI542–546 pendentes. Próxima547: conferir CI e observar route-map/C06-011. Preflight23 scripts, runner387 grupos intacto. Checkpoint documental pós546 usa `[skip ci]`; os runs de código mantêm-se válidos nos respetivos SHAs. Sem merge/deploy/mensagens a clientes.
