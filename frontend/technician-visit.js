@@ -654,12 +654,28 @@ const visitUi = (() => {
     "HTTP-Fehler {status}"
   ]
 };
+  const guardCopy={
+  "accountChanged": [
+    "A conta mudou. Atualiza a ficha com a conta atual.",
+    "Account changed. Refresh the record using the current account.",
+    "Le compte a changé. Actualisez la fiche avec le compte actuel.",
+    "La cuenta ha cambiado. Actualiza la ficha con la cuenta actual.",
+    "Das Konto wurde gewechselt. Formular mit dem aktuellen Konto neu laden."
+  ],
+  "accountUnavailable": [
+    "A sessão já não permite esta visita. Volta a entrar com a conta original.",
+    "The session no longer permits this visit. Sign in again with the original account.",
+    "La session ne permet plus cette visite. Reconnectez-vous avec le compte initial.",
+    "La sesión ya no permite esta visita. Vuelve a entrar con la cuenta original.",
+    "Die Sitzung erlaubt diesen Besuch nicht mehr. Erneut mit dem ursprünglichen Konto anmelden."
+  ]
+};
   const entries=new WeakSet(),bindings=new Map(),attributes=new Map(),errors=new WeakMap();
   const value=(key,params={})=>{const entry=Object.freeze({key,params:Object.freeze({...params})});entries.add(entry);return entry;};
   function text(entry,language=document.documentElement.lang||'pt') {
     if(!entry||typeof entry!=='object'||!entries.has(entry))return String(entry??'');
     const index=Math.max(0,languages.indexOf(String(language).toLowerCase().split('-')[0]));
-    return copy[entry.key][index].replace(/\{(\w+)\}/g,(_,key)=>entry.parts?entry.parts.map(part=>text(part,language)).join(' · '):text(entry.params[key],language));
+    return (copy[entry.key]||guardCopy[entry.key])[index].replace(/\{(\w+)\}/g,(_,key)=>entry.parts?entry.parts.map(part=>text(part,language)).join(' · '):text(entry.params[key],language));
   }
   function clearTree(root){if(root)for(const node of bindings.keys())if(root.contains(node))bindings.delete(node);}
   function bind(node,entry){
@@ -713,6 +729,64 @@ const completeBtn = document.getElementById("completeBtn");
 const notDoneBtn = document.getElementById("notDoneBtn");
 const refreshBtn = document.getElementById("refreshBtn");
 const targetRanges = document.getElementById("targetRanges");
+
+// A late reply is tied to the requesting principal and the current read generation.
+const visitGuard = (() => {
+  const fields=['ph','chlorine','alkalinity','salt','temperature','orp','cleaned','brushed','notes','notDoneReason','photo'];
+  const work=new Map();let owner=null,generation=0,blocked=false,loaded=false,hasPrivateFields=false;
+  function session(){
+    try{
+      const credential=window.CristalAuth?.getToken?.()||localStorage.getItem('cristalwater_jwt')||localStorage.getItem('token')||'';
+      const user=window.CristalAuth?.parseUser?.()||JSON.parse(localStorage.getItem('cristalwater_user')||localStorage.getItem('user')||'{}');
+      const chunk=credential.split('.')[1];if(!chunk)return null;
+      const claims=JSON.parse(atob(chunk.replace(/-/g,'+').replace(/_/g,'/'))),role=String(claims.role||'').toUpperCase().trim();
+      const kind=String(claims.principalType||'').toUpperCase()==='USER'?'USER':'TECH';
+      const id=Number(kind==='USER'?(claims.userId||claims.id):claims.id),technicianId=Number(claims.technicianId||(kind==='TECH'?claims.id:0));
+      if(!['TECHNICIAN','TEAM_LEADER'].includes(role)||String(user.role||'').toUpperCase().trim()!==role||!Number.isInteger(id)||id<=0||!Number.isInteger(technicianId)||technicianId<=0||Number(user.id)!==Number(claims.id)||(kind==='USER'&&Number(user.userId||user.id)!==id)||!Number.isFinite(claims.exp)||claims.exp<=Date.now()/1000)return null;
+      if(user.technicianId&&Number(user.technicianId)!==technicianId)return null;
+      return {owner:role+':'+kind+':'+id+':TECH:'+technicianId};
+    }catch(_){return null;}
+  }
+  function remember(){
+    if(!owner||!hasPrivateFields||blocked)return;
+    work.set(owner,fields.map(id=>{const node=document.getElementById(id);return {id,value:node.type==='file'?Array.from(node.files):node.type==='checkbox'?node.checked:node.value};}));
+  }
+  function restore(){
+    const saved=work.get(owner);if(!saved)return;
+    for(const {id,value} of saved){const node=document.getElementById(id);if(node.type==='file'){const transfer=new DataTransfer();for(const file of value)transfer.items.add(file);node.files=transfer.files;visitUi.setText(photoMeta,value.length?visitUi.value('fileMeta',{name:value[0].name,size:Math.max(1,Math.round(value[0].size/1024))}):visitUi.value('noFile'));}else if(node.type==='checkbox')node.checked=value;else node.value=value;}
+  }
+  function clear(){
+    for(const id of fields){const node=document.getElementById(id);if(node.type==='checkbox')node.checked=false;else node.value='';}
+    for(const id of ['heroPool','heroClient'])visitUi.setText(document.getElementById(id),visitUi.value('toLoad'));
+    for(const id of ['heroAlerts','heroPhotos'])document.getElementById(id).textContent='0';
+    visitUi.setText(document.getElementById('visitHeroCopy'),visitUi.value('intro'));visitUi.setText(document.getElementById('visitTopMeta'),visitUi.value('topIntro'));
+    visitUi.setText(targetRanges,visitUi.value('targetsPending'));visitUi.setText(photoMeta,visitUi.value('noFile'));
+    visitUi.clearTree(infoBox);infoBox.innerHTML='<p class="visit-empty"></p>';
+    visitUi.clearTree(contextBox);contextBox.innerHTML='<div class="visit-meta-item"><span></span><strong></strong></div>';
+    visitUi.setText(contextBox.querySelector('span'),visitUi.value('contextError'));visitUi.setText(contextBox.querySelector('strong'),visitUi.value('contextUnavailable'));
+  }
+  function check(){
+    const now=session();if(now?.owner===owner&&!blocked)return true;
+    if(!blocked){remember();generation++;loaded=false;hasPrivateFields=false;blocked=true;clear();}
+    const entry=visitUi.value(now?'accountChanged':'accountUnavailable');visitUi.setText(infoBox.firstChild,entry);setStatus(entry,'error');setFormEnabled(false);refreshBtn.disabled=!now;
+    return false;
+  }
+  function startLoad(){
+    const now=session();if(!now){check();return null;}
+    const restoreWork=blocked||now.owner!==owner;
+    if(now.owner!==owner){check();owner=now.owner;hasPrivateFields=false;}
+    blocked=false;loaded=false;return {owner,generation:++generation,restoreWork};
+  }
+  function current(captured){const now=session();if(now?.owner!==owner){check();return false;}return !!captured&&!blocked&&captured.owner===owner&&captured.generation===generation;}
+  function canWrite(){return check()&&loaded;}
+  function capture(){return canWrite()?{owner,generation}:null;}
+  function finishLoad(captured){if(!current(captured))return false;if(captured.restoreWork)restore();loaded=true;hasPrivateFields=true;return true;}
+  function finishBusy(captured){if(session()?.owner!==captured.owner||blocked){check();return;}setBusy(false);setFormEnabled(loaded);}
+  owner=session()?.owner||null;
+  window.addEventListener('cw:session-change',check);
+  window.addEventListener('storage',event=>{if(event.key===null||['token','cristalwater_jwt','adminToken','user','cristalwater_user'].includes(event.key))check();});
+  return Object.freeze({startLoad,current,capture,finishLoad,finishBusy});
+})();
 
 function setStatus(message, tone = "") {
   if (!statusBox) return;
@@ -916,6 +990,7 @@ async function loadVisit() {
     return;
   }
 
+  const captured=visitGuard.startLoad();if(!captured)return;
   if (!visitId) {
     setStatus(visitUi.value("noSelection"), "error");
     setFormEnabled(false);
@@ -928,12 +1003,15 @@ async function loadVisit() {
 
   try {
     const data = await parseResponse(await fetch(`${API}/visits/${visitId}`));
+    if(!visitGuard.current(captured))return;
     const visit = data.visit;
-    if (!visit) throw visitUi.error(visitUi.value("visitUnavailable"));
+    if(!visit||Number(visit.id)!==Number(visitId))throw visitUi.error(visitUi.value("visitUnavailable"));
     renderVisit(visit, data.context || {});
+    if(!visitGuard.finishLoad(captured))return;
     setFormEnabled(true);
     setStatus(visitUi.value("ready"), "success");
   } catch (error) {
+    if(!visitGuard.current(captured))return;
     if(infoBox){visitUi.clearTree(infoBox);infoBox.innerHTML='<p class="visit-empty"></p>';visitUi.setText(infoBox.firstChild,visitUi.value("loadFailed"));}
     if(contextBox){visitUi.clearTree(contextBox);contextBox.innerHTML='<div class="visit-meta-item"><span></span><strong></strong></div>';visitUi.setText(contextBox.querySelector("span"),visitUi.value("contextError"));visitUi.setText(contextBox.querySelector("strong"),visitUi.value("contextUnavailable"));}
     setFormEnabled(false);
@@ -943,6 +1021,7 @@ async function loadVisit() {
 
 async function completeVisit() {
   if (!visitId) return;
+  const captured=visitGuard.capture();if(!captured)return;
   setBusy(true);
   setStatus(visitUi.value("completing"), "loading");
 
@@ -952,17 +1031,20 @@ async function completeVisit() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(getPayload()),
     }));
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.value("completed"), "success");
     await loadVisit();
   } catch (error) {
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.failure(error,"completeFallback"), "error");
   } finally {
-    setBusy(false);
+    visitGuard.finishBusy(captured);
   }
 }
 
 async function markNotDone() {
   if (!visitId) return;
+  const captured=visitGuard.capture();if(!captured)return;
   const reason = String(document.getElementById("notDoneReason")?.value || "").trim();
   if (!reason) {
     setStatus(visitUi.value("reasonMissing"), "warning");
@@ -978,17 +1060,20 @@ async function markNotDone() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notes: reason, internalNotes: reason }),
     }));
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.value("notDoneSuccess"), "success");
     await loadVisit();
   } catch (error) {
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.failure(error,"notDoneFallback"), "error");
   } finally {
-    setBusy(false);
+    visitGuard.finishBusy(captured);
   }
 }
 
 async function uploadPhoto() {
   if (!visitId) return;
+  const captured=visitGuard.capture();if(!captured)return;
   const file = photoInput?.files?.[0];
   if (!file) {
     setStatus(visitUi.value("fileMissing"), "warning");
@@ -1006,14 +1091,16 @@ async function uploadPhoto() {
       method: "POST",
       body: form,
     }));
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.value("uploaded"), "success");
     if (photoInput) photoInput.value = "";
     if(photoMeta)visitUi.setText(photoMeta,visitUi.value("uploadedHint"));
     await loadVisit();
   } catch (error) {
+    if(!visitGuard.current(captured))return;
     setStatus(visitUi.failure(error,"uploadFallback"), "error");
   } finally {
-    setBusy(false);
+    visitGuard.finishBusy(captured);
   }
 }
 
