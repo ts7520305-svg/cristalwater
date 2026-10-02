@@ -1,15 +1,15 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-03 00:12 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 00:17 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit de código validado localmente e publicado: `e5b2075c7e0cbec01e459ad856158d54df318b7c` (TASK544), árvore `c8a5ee72a45b44d9bd8caa14aa8b27771555e37a`; checkout/remote conferidos após push. Aceitação integrada ainda pendente.
+- Último commit de código validado localmente e publicado: `3e56fe32b97b92a1742f965deda3a32e7cab851a` (TASK545), árvore `e79b8eff6558da1d40cb76ae7c93e96c1619e872`; checkout/remote conferidos após push. Aceitação integrada ainda pendente.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
 - Último commit com CI integrado concluído e log conferido: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), run `37066631332`, job `111035975340`, success. TASK540 (`6cf781f`, run `37066186782`, job `111034430127`) também success: cada log confirma SHA, 387 grupos distintos/code0 e restauro de 128 tabelas/51 ficheiros com linhas e hashes iguais. TASK537–539 continuam aceites nos runs registados anteriormente.
-- TASK542 (`b73a04c`, run `37073275970`), TASK543 (`bfe82be`, run `37074953256`, job `111062639350`) e TASK544 (`e5b2075`, run `37075670653`, job `111064906269`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. Não transferir aceitação541 para542–545.
+- TASK542 (`b73a04c`, run `37073275970`), TASK543 (`bfe82be`, run `37074953256`, job `111062639350`) e TASK544 (`e5b2075`, run `37075670653`, job `111064906269`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`) passou migrações/sintaxe e está nos gates unitários/técnicos/browser na última consulta. Não transferir aceitação541 para542–546.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -30,6 +30,9 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 - TASK542 publicada: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02`, árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`, [CI37073275970](https://github.com/ts7520305-svg/cristalwater/actions/runs/37073275970) em execução. `technician-new-client` ganhou cópia própria PT/EN/FR/ES/DE para permissões, rascunho, envio, política, GPS, campos, placeholders e opções visíveis. O contrato de dados do write-store foi preservado: `poolType` continua a enviar/validar `Privada`, `Condomínio`, `Hotel`, `Jacuzzi`; payload, UUID/requestId, recibos, endpoints e schema não mudaram. O seletor global de idioma passa a ter destino local no cabeçalho da página.
 
 ## Testes realizados nesta sessão
+
+- TASK546 / C06-006: reprodução com intake543–545 e store nativo dá prefixoEN/causaPT após mudança de idioma. A fixture concede o lock do formulário mas recusa o lock interno do store; o erro lockBusy é produzido pelo store real, antes de criar pedido/UUID ou enviar. Intake passa a conservar `error.copy` de fieldWriteError e a usar `CWFieldWriteStore.message(code, language)` existente na pintura, incluindo erros de refresh; nenhum novo dicionário nem alteração do store/persistência.
+- Gates546: componente ficha/intake aprovado, incluindo causa nativa em cinco idiomas, erro literal preservado, rascunho/requestId intactos, fila vazia e zero escritas operacionais. Motor de idioma/browser offline/técnicos4/4 aprovados; sintaxe dos sete JS/diff-check aprovados. Unitários1403/2 skipped/4 falhas Windows idênticas. Preflight23/23 completo permanece evidência545; não foi repetido todo em546. Cache309 e quatro expectativas; runner387/workflow/backend/schema intactos.
 
 - TASK545 / C06-011/012: observação do chat no código544 falhou ao exigir ocultação síncrona no evento de sessão. Ligado `cw:session-change` à rotina `sync` existente; sem novo mecanismo de sessão, idiomas, rascunhos ou chat. Regressão com HTML/auth/scripts reais e HTTP QA confirma Técnico/Chefe/Admin, mesmo principal, troca de conta, mensagens/notificações/campo/fila limpos, duas leituras nativas abortadas e os bytes dos dois rascunhos/pedidos preservados. Reload com a nova conta lê apenas o seu rascunho/pedido. Zero escritas operacionais.
 - Preparação545: primeira verificação de abortos passou Técnico/Chefe mas observou cedo o Admin; passou a aguardar os dois eventos nativos requestfailed antes de libertar HTTP, com prazo10s. Não alterou assertions de privacidade nem comportamento do produto. Componente final passa nos três perfis.
@@ -59,7 +62,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 - Memória sem titular na ficha: TASK539 publicada e CI concluído com success; manter a evidência por SHA e não extrapolar para isolamento global.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI540/541 success, com logs e restauro conferidos; CI542–544 pendentes. Validar também o run545 após publicação.
+- CI540/541 success, com logs e restauro conferidos; CI542–545 pendentes. Validar também o run546 após publicação.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -73,12 +76,12 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-Publicar TASK545 validada localmente, registando SHA/árvore/run. Em seguida TASK546 / C06-006: reproduzir no intake a mudança de idioma após um erro próprio do write-store (bloqueio de coordenação local, sem envio de negócio), reutilizar os descritores `error.copy`/`CWFieldWriteStore.message` existentes se houver lacuna e preservar erros externos/persistidos literais, rascunho/requestId e fila. Não criar outro dicionário. CI542–545 têm prioridade perante falha real; C06 permanece aberta.
+Publicar TASK546 validada localmente, registando SHA/árvore/run. Próxima TASK547 / C06-011: consultar conclusão e logs de CI542–546, corrigir qualquer falha real antes de aceitar. Sem falhas, observar `route-map` em PT/EN/FR/ES/DE e larguras320/390/1440, incluindo fallback sem fornecedor de mapa; confirmar os textos próprios ainda PT e traduzir apenas a página/modo route existente, preservando guard Admin, dia/técnico, coordenadas, lista/destinos, API e ausência de escritas de planeamento. Conferir primeiro se algum commit novo já tratou a lacuna. C06 permanece aberta.
 
-Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 22 scripts.
+Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 23 scripts.
 
 Integração futura: os três commits exclusivos da branch padrão alteram apenas `docs/product/BILLING_AUTOMATION_SPEC.md` (477 linhas), uma especificação marcada como não implementada. Ler a versão completa antes de conciliar requisitos de cobranças, IA preditiva e integridade de medidas/relatórios; não assumir que estão implementados nem apagar os commits.
 
 ## Ponto exato de paragem desta sessão
 
-TASK543/544 publicadas em `bfe82be`/`e5b2075`, runs37074953256/37075670653 em suite; TASK545 preparada e validada localmente, commit/push por executar. CI540/541 e restauros conferidos; CI542–544 pendentes. Continuação autorizada segue546 após publicar545. Preflight agora23 scripts, runner387 grupos intacto. Sem merge/deploy/mensagens a clientes.
+TASK543/544/545 publicadas em `bfe82be`/`e5b2075`/`3e56fe3`; TASK546 preparada e validada localmente, commit/push por executar. CI540/541 e restauros conferidos; CI542–545 pendentes. Próxima547: conferir CI e observar route-map/C06-011. Preflight23 scripts, runner387 grupos intacto. Sem merge/deploy/mensagens a clientes.

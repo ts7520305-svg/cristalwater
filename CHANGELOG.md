@@ -77,3 +77,7 @@
 ## TASK545 — troca de conta na conversa da equipa (2026-10-03)
 - Chat usa imediatamente a invalidação existente ao receber o evento de sessão, limpando mensagens/notificações/campos e abortando leituras antigas.
 - Novo componente browser para Técnico/Chefe/Admin preserva rascunhos e pedidos das duas contas e não envia operações; adicionado depois dos22 gates existentes, com preflight23/23 aprovado. Cache20261003-v308; runner integrado387 intacto.
+
+## TASK546 — erros nativos do write-store no intake (2026-10-03)
+- Intake conserva os descritores de erro do write-store e reutiliza o seu dicionário existente ao mudar de idioma; erros externos/persistidos continuam literais.
+- Regressão com bloqueio interno nativo do store confirma cinco idiomas, rascunho/requestId intactos, fila vazia e zero envios operacionais. Cache309 e expectativas existentes atualizados.

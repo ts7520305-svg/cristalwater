@@ -84,15 +84,14 @@
     const value = params[name];
     return value && typeof value === 'object' ? formatCopy(value) : value ?? '';
   });
-  const formatCopy = value => value.literal ?? t(value.key, value.params);
-  const errorCopy = error => error?.intakeCopy || { literal: error.message || String(error) };
+  const formatCopy = value => value.key === 'fieldWriteError' ? store.message(value.params.code, currentLanguage()) : value.literal ?? t(value.key, value.params);
+  const errorCopy = error => error?.intakeCopy || (error?.copy?.key === 'fieldWriteError' ? error.copy : { literal: error.message || String(error) });
   const active = () => !closed && store?.same(captured);
   function problem(key, params = {}) { const error = Error(t(key, params)); error.intakeCopy = { key, params }; return error; }
   const requireActive = () => { if (!active()) throw problem('sessionChangedRecover'); };
   const values = value => Object.fromEntries(fields.map(k => [k, value[k]])), same = (a, b) => fields.every(k => a[k] === b[k]);
   function setStatus(key, params = {}) { statusState = { key, params }; paintStatus(); }
-  function setStatusLiteral(value) { statusState = { literal: value }; paintStatus(); }
-  function setError(error) { if (error?.intakeCopy) setStatus(error.intakeCopy.key, error.intakeCopy.params); else setStatusLiteral(error.message || String(error)); }
+  function setError(error) { statusState = errorCopy(error); paintStatus(); }
   function setPermission(key, params = {}) { permissionState = { key, params }; paintPermission(); }
   function setPolicy(key) { policyState = key; paintPolicy(); }
   function paintStaticCopy() {

@@ -160,6 +160,24 @@ async function main(){
   assert.equal(await page.locator('[name=latitude]').inputValue(),draft.latitude);
   assert.equal(await page.locator('[name=longitude]').inputValue(),draft.longitude);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
+  // The intake lock succeeds; the real write-store rejects its own busy lock.
+  await page.evaluate(()=>Object.defineProperty(navigator,'locks',{configurable:true,value:{request:async(name,options,callback)=>callback(name.startsWith('cw-field-write:')?null:{})}}));
+  await page.locator('[type=submit]').click();
+  await page.waitForFunction(()=>document.getElementById('result').textContent.includes('O envio está em utilização noutra janela.'));
+  const storeErrors={
+   en:'The form was not sent. The submission is in use in another window. Try confirming it again.',
+   fr:'La fiche n’a pas été envoyée. L’envoi est utilisé dans une autre fenêtre. Essayez de le confirmer à nouveau.',
+   es:'La ficha no se envió. El envío está en uso en otra ventana. Intente confirmarlo de nuevo.',
+   de:'Das Formular wurde nicht gesendet. Die Sendung wird in einem anderen Fenster verwendet. Versuchen Sie erneut, sie zu bestätigen.',
+   pt:'A ficha não foi enviada. O envio está em utilização noutra janela. Tente confirmar novamente.'
+  };
+  for(const [language,expected]of Object.entries(storeErrors)){
+   await page.evaluate(language=>CristalI18n.applyLanguage(language),language);
+   assert.equal(await page.locator('#result').textContent(),expected,'Native write-store error must follow the selected language');
+   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
+   assert.deepEqual(await page.evaluate(()=>CWFieldWriteStore.records('FIELD_CLIENT_INTAKE',CWFieldWriteStore.session(),true)),[]);
+   assert.equal(writes,0);
+  }
   assert.equal(writes,0);assert(reads>=8);assert.deepEqual(errors,[]);
   console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store drafts, five-language errors, immediate session/storage clearing while idle/busy and stale GPS rejection; QA fixtures only, zero writes');
  }finally{pending.splice(0).forEach(send=>send());navigationPending.splice(0).forEach(send=>send());await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
