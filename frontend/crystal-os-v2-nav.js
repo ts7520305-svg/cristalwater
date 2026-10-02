@@ -263,17 +263,25 @@
     }
   };
 
-  const clientNavigationCopy = (() => {
+  const navigationCopy = (() => {
     const languages = ['pt','en','fr','es','de'];
     const copy = {
       account: ['Conta e dados','Account and details','Compte et données','Cuenta y datos','Konto und Daten'],
       accountBreadcrumb: ['Cliente / Portal do cliente / Conta e dados','Client / Client portal / Account and details','Client / Portail client / Compte et données','Cliente / Portal del cliente / Cuenta y datos','Kunde / Kundenportal / Konto und Daten'],
       requests: ['Pedidos','Requests','Demandes','Solicitudes','Anfragen'],
+      home: ['Início','Home','Accueil','Inicio','Start'],
+      visits: ['Visitas','Visits','Visites','Visitas','Besuche'],
+      clients: ['Clientes','Clients','Clients','Clientes','Kunden'],
+      billing: ['Financeiro','Finance','Finances','Finanzas','Finanzen'],
+      route: ['Rota','Route','Tournée','Ruta','Route'],
+      visit: ['Visita','Visit','Visite','Visita','Besuch'],
+      pool: ['Piscina','Pool','Piscine','Piscina','Pool'],
+      payments: ['Pagamentos','Payments','Paiements','Pagos','Zahlungen'],
+      menu: ['Menu','Menu','Menu','Menú','Menü'],
     };
     const leaves = new Map();
     const text = key => copy[key][Math.max(0,languages.indexOf(document.documentElement.lang))];
-    function bind(node,key,search = false) {
-      const original = copy[key][0];
+    function bind(node,key,search = false,original = copy[key][0]) {
       if (!node || node.childNodes.length !== 1 || node.firstChild.nodeType !== Node.TEXT_NODE || node.firstChild.nodeValue !== original || (search && node.getAttribute('data-shell-search') !== original)) return;
       const rendered = text(key); node.dataset.cwNoI18n = ''; node.firstChild.nodeValue = rendered;
       if (search) node.setAttribute('data-shell-search',rendered);
@@ -339,7 +347,7 @@
       a.href = href;
       a.textContent = label;
       a.setAttribute('data-shell-search', label);
-      if (href === '/client' && label === 'Conta e dados') clientNavigationCopy.bind(a,'account',true);
+      if (href === '/client' && label === 'Conta e dados') navigationCopy.bind(a,'account',true);
       if (isActive(href)) a.classList.add('is-active');
       links.appendChild(a);
     });
@@ -385,8 +393,8 @@
     topWrap.appendChild(top);
     if (role === 'CLIENT' && pathname === '/client' && meta.title === 'Conta e dados') {
       topWrap.setAttribute('data-cw-client-account','');
-      clientNavigationCopy.bind(top.querySelector('.cw-v2-context-title'),'account');
-      clientNavigationCopy.bind(top.querySelector('[data-cw-breadcrumb]'),'accountBreadcrumb');
+      navigationCopy.bind(top.querySelector('.cw-v2-context-title'),'account');
+      navigationCopy.bind(top.querySelector('[data-cw-breadcrumb]'),'accountBreadcrumb');
     }
 
     const drawer = document.createElement('aside');
@@ -401,12 +409,20 @@
     const mobile = document.createElement('nav');
     mobile.className = 'cw-v2-mobile-primary';
     mobile.setAttribute('aria-label', 'Navegacao primaria mobile');
+    const primaryCopy = {
+      '/admin-master-control':'home','/technician-field-mode':'home',
+      '/admin-visits':'visits','/client-dashboard':'visits',
+      '/admin-clients':'clients','/billing-center':'billing',
+      '/technician-route':'route','/technician-visit':'visit',
+      '/client-portal':'pool','/client-payments':'payments',
+    };
     config.mobile.forEach(([href, label]) => {
       if (href === '#menu') {
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = label;
         button.setAttribute('data-cw-open-drawer', '');
+        navigationCopy.bind(button,'menu',false,label);
         mobile.appendChild(button);
         return;
       }
@@ -414,7 +430,8 @@
       a.href = href;
       a.textContent = label;
       if (isActive(href)) a.classList.add('is-active');
-      if (role === 'CLIENT' && href === '/client-menu' && label === 'Pedidos') clientNavigationCopy.bind(a,'requests');
+      if (role === 'CLIENT' && href === '/client-menu' && label === 'Pedidos') navigationCopy.bind(a,'requests');
+      else if (Object.hasOwn(primaryCopy,href)) navigationCopy.bind(a,primaryCopy[href],false,label);
       mobile.appendChild(a);
     });
 
@@ -422,7 +439,7 @@
     document.body.prepend(topWrap);
     document.body.appendChild(drawer);
     document.body.appendChild(mobile);
-    clientNavigationCopy.paint();
+    navigationCopy.paint();
 
     document.body.classList.add('cw-v2-shell-enabled');
     document.body.setAttribute('data-cw-role', role);
