@@ -80,7 +80,12 @@
   const normalizeLanguage = value => window.CristalI18n?.normalizeLanguage?.(value) || (languages.includes(String(value || '').toLowerCase().slice(0, 2)) ? String(value).toLowerCase().slice(0, 2) : 'pt');
   const currentLanguage = () => normalizeLanguage(window.CristalI18n?.readLanguage?.() || document.documentElement.lang || 'pt');
   const index = () => Math.max(0, languages.indexOf(currentLanguage()));
-  const t = (key, params = {}) => (copy[key]?.[index()] || copy[key]?.[0] || key).replace(/\{(\w+)\}/g, (_, name) => params[name] ?? '');
+  const t = (key, params = {}) => (copy[key]?.[index()] || copy[key]?.[0] || key).replace(/\{(\w+)\}/g, (_, name) => {
+    const value = params[name];
+    return value && typeof value === 'object' ? formatCopy(value) : value ?? '';
+  });
+  const formatCopy = value => value.literal ?? t(value.key, value.params);
+  const errorCopy = error => error?.intakeCopy || { literal: error.message || String(error) };
   const active = () => !closed && store?.same(captured);
   function problem(key, params = {}) { const error = Error(t(key, params)); error.intakeCopy = { key, params }; return error; }
   const requireActive = () => { if (!active()) throw problem('sessionChangedRecover'); };
@@ -96,7 +101,7 @@
     for (const node of document.querySelectorAll('[data-intake-placeholder]')) node.setAttribute('placeholder', t(node.dataset.intakePlaceholder));
     for (const node of document.querySelectorAll('[data-intake-option]')) node.textContent = t(node.dataset.intakeOption);
   }
-  function paintStatus() { if (!statusState) return; status.textContent = statusState.literal ?? t(statusState.key, statusState.params); }
+  function paintStatus() { if (!statusState) return; status.textContent = formatCopy(statusState); }
   function paintPermission() { if (permissionState) permission.textContent = t(permissionState.key, permissionState.params); }
   function paintPolicy() { const node = document.getElementById('intakePolicy'); if (node) node.textContent = t(policyState); }
   function repaintAll() { paintStaticCopy(); paintStatus(); paintPermission(); paintPolicy(); paintGps(); render(); lastLanguage = currentLanguage(); }
@@ -153,13 +158,13 @@
   function saveDraft() {
     if (busy || state || conflict || !ready) return;
     ++revision; ++gpsRevision; draft = { ...draft, ...Object.fromEntries(fields.map(k => [k, form.elements[k].value])) }; unsaved = true;
-    try { write(draft); setStatus('draftSaved'); } catch (e) { setStatus('saveDraftFailed', { error: e.message }); }
+    try { write(draft); setStatus('draftSaved'); } catch (e) { setStatus('saveDraftFailed', { error: errorCopy(e) }); }
     paintGps(); render();
   }
   function clearConfirmed() { write(blank()); state = null; show(draft); }
   async function send() {
     if (busy || conflict || !ready) return;
-    busy = true; render(); let error = '';
+    busy = true; render(); let error = null;
     try {
       requireActive();
       if (!navigator.locks?.request) throw problem('locksUnavailable');
@@ -170,11 +175,11 @@
         const value = state ? { ...draft, ...state.payload, requestId: state.requestId } : { ...draft, ...Object.fromEntries(fields.map(k => [k, form.elements[k].value])) };
         write(value); state = await store.prepare(scope, captured.technicianId, values(value), { label: value.clientName }, captured); write({ ...value, requestId: state.requestId }); await store.send(state.requestId, captured); state = await store.get(state.requestId, captured); clearConfirmed();
       });
-    } catch (e) { error = e.message; }
+    } catch (e) { error = errorCopy(e); }
     finally {
       busy = false;
       if (!error || state || !active()) await refresh(); else render();
-      if (error && active()) setStatus('sendError', { prefix: t(state?.response ? 'alreadyConfirmedPreserved' : state ? 'savedPending' : 'notSent'), error });
+      if (error && active()) setStatus('sendError', { prefix: { key: state?.response ? 'alreadyConfirmedPreserved' : state ? 'savedPending' : 'notSent' }, error });
     }
   }
   async function permissions() {

@@ -1,6 +1,6 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-02 23:35 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-02 23:53 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
@@ -8,8 +8,8 @@ Atualizado: 2026-10-02 23:35 (Europe/Lisbon). Este ficheiro é o checkpoint oper
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
 - Último commit de código validado localmente e publicado: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02` (TASK542), árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`; checkout/árvore do GitHub conferidos após push. Aceitação integrada ainda pendente.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
-- Último commit com CI integrado concluído consultado: `c8c6a6f39624ffbfef2cc3bb3045e5bd28d7f378` (TASK539), run `37065691326`, success. TASK537 (`1c1a034`, run `37058999793`) e TASK538 (`88a13d8`, run `37063108313`) também concluíram com success nesta consulta.
-- TASK540 (`6cf781f`, run `37066186782`), TASK541 (`31a6e54`, run `37066631332`) e TASK542 (`b73a04c`, run `37073275970`) continuam `in_progress` na consulta pós-push desta sessão. Não atribuir aceitação total a estes commits.
+- Último commit com CI integrado concluído e log conferido: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), run `37066631332`, job `111035975340`, success. TASK540 (`6cf781f`, run `37066186782`, job `111034430127`) também success: cada log confirma SHA, 387 grupos distintos/code0 e restauro de 128 tabelas/51 ficheiros com linhas e hashes iguais. TASK537–539 continuam aceites nos runs registados anteriormente.
+- TASK542 (`b73a04c`, run `37073275970`) continua `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suite integrada e restauro pendentes. Não transferir aceitação541 para542/543.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -31,6 +31,10 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## Testes realizados nesta sessão
 
+- Retoma TASK543: pasta/remote/branch/HEAD local e remoto `f2831da` conferidos, sem alterações preexistentes. CI540/541 concluídos e logs nativos lidos pelo conector GitHub; API pública de download de logs respondeu403, sem impedir a leitura autenticada pelo conector.
+- TASK543: reprodução browser no código542 confirma erro de envio ainda PT depois de selecionar EN. Primeira preparação usou uma expectativa PT incorreta e deu timeout; ajustada ao texto existente antes da reprodução válida. Correção conserva descritores dos erros próprios e prefixos até à pintura; erros externos continuam literais. Cache305→306 e quatro expectativas existentes atualizadas, sem mudar runner/387 grupos/22 preflights, contratos ou dados guardados.
+- Gates TASK543: componente real de ficha/intake com Edge passou (cinco idiomas, 320/390/1440, rascunhos, erro próprio, erro literal e zero escritas operacionais); `test-field-browser.js` e `test-language-browser.js` passaram; técnicos4/4; `npm test`1403 aprovados/2 skipped/4 falhas Windows já conhecidas de backup (symlink/mode), em142 ficheiros. Sintaxe completa695/308/45 e `node --check` dos sete JS alterados passaram; diff-check aprovado.
+
 - Checkout real, oito branches, commits recentes, duas PRs abertas e Actions consultados; estrutura, entrypoint, scripts, documentação e fontes da pendência revistos. Esta revisão não certifica cada funcionalidade ou todos os ficheiros individualmente.
 - Baseline: 1 395/1 396 testes passaram; um timeout de 5 s ao `git show` de fonte histórica num clone com blobs sob demanda. Repetição do ficheiro: 26/26, sem alterar prazo/asserts.
 - Após correção local: 1 409 testes / 142 ficheiros passaram; 13 regressões novas de recuperação, conta, visita, corrupção, ficheiros/credenciais, refresh e compatibilidade genérica.
@@ -48,7 +52,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 - Memória sem titular na ficha: TASK539 publicada e CI concluído com success; manter a evidência por SHA e não extrapolar para isolamento global.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI540–542 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar. CI537–539 concluíram com success nesta consulta.
+- CI540/541 success, com logs e restauro conferidos; CI542 pendente. Validar também o run da TASK543 após publicação.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -62,7 +66,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK542 publicada e validada localmente. Na retoma seguinte, obter resultado e logs finais de CI540–542, priorizar qualquer falha real e não herdar aceitação de um commit anterior. Sem falhas, continuar C06 pelas próximas páginas técnicas/rascunhos/idiomas restantes do inventário, verificando primeiro se outro commit já tratou a lacuna. Não declarar C06 concluída pela correção de `technician-new-client`.
+Publicar TASK543 validada localmente na branch autorizada, registando SHA/árvore/run. Em seguida TASK544: observar a troca de conta no formulário de intake já aberto, incluindo evento de sessão e atualização por outra janela, confirmar eliminação imediata dos campos da conta anterior e preservação dos bytes do rascunho; corrigir apenas uma falha demonstrada. CI542/543 têm prioridade se aparecer uma falha real. C06 permanece aberta; não atribuir ao intake a conclusão das restantes páginas do inventário.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 22 scripts.
 
@@ -70,4 +74,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-Quatro TASKs de implementação/regressão publicadas sequencialmente (539,540,541,542), além dos checkpoints documentais. Não há alterações de código por publicar. Runs537–539 estão concluídos com success; runs540–542 continuam em execução na consulta das23:35; não há resultado final nem restauro destas versões aceite nesta sessão. A próxima ação é a leitura dessas Actions, seguida da próxima lacuna C06 do inventário. Este commit documental não altera código e usa `[skip ci]` para não repetir uma suite longa apenas por atualizar o checkpoint.
+Checkpoint em trabalho: TASK543 preparada, testes focados/sintaxe/diff-check aprovados; commit/push ainda por executar. CI540/541 passaram nesta retoma e o restauro foi conferido nos seus logs. CI542 continua em execução. A continuação autorizada segue TASK544 após publicar543; nenhuma merge, deploy ou mensagem a clientes.

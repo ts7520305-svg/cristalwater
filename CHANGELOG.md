@@ -64,3 +64,8 @@
 ## Checkpoint após TASK542 (2026-10-02)
 - Registados commit/árvore/run da TASK542, Actions correntes, gates locais e a limitação ambiental do `npm test` em Windows no estado oficial.
 - Próxima ação: aguardar CI540–542; se não houver falhas, continuar C06 pelas próximas lacunas do inventário sem declarar C06 concluída.
+
+## TASK543 — repintura dos erros de intake (2026-10-02)
+- Corrigidos prefixos e erros próprios de envio/gravação que permaneciam no idioma anterior; textos literais externos e bytes do rascunho continuam preservados.
+- Regressão no browser reproduz o erro anterior e verifica cinco idiomas, erro literal e ausência de envios operacionais. Cache offline306 e expectativas existentes atualizados.
+- CI540/541 concluídos: cada execução confirmou387 grupos distintos e restauro128 tabelas/51 ficheiros. CI542 e aceitação integrada543 permanecem pendentes.

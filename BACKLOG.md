@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | Validação TASK540–542 | Ler resultado final de cada Action; corrigir falhas reais e conferir restauro por SHA. |
-| 2 | C06 | Prosseguir páginas técnicas/rascunhos/idiomas restantes do inventário; não repetir `technician-new-client` nem os lotes aprovados. |
+| 1 | Validação TASK542/543 | CI540/541 e restauros conferidos; obter conclusão/logs de542 e do run543 após publicação. |
+| 2 | C06 / TASK544 | Observar troca de conta no intake aberto e campos antigos, com eventos de sessão/storage; preservar rascunhos por titular e corrigir apenas falha demonstrada. |
 | 3 | Validação ambiental Windows | Distinguir as quatro falhas locais de backup (`symlink`/modo `0600`) de regressões reais antes de usar `npm test` como gate total nesta máquina. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -17,4 +17,4 @@ C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principa
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
 
-Atualização 02/10 às23:35: TASK542 publicada e testada localmente; textos próprios do intake em cinco idiomas sem alterar contrato do write-store. CI537–539 success; CI540–542 ainda em execução. Referências SHA/árvore/Actions e próxima ação exata em `PROJECT_STATE.md`.
+Atualização 02/10 às23:53: CI540/541 success, 387 grupos distintos e restauro128/51 conferidos por log/SHA. TASK543 corrige a repintura dos erros próprios do intake e atualiza cache306; preparação/testes em `PROJECT_STATE.md`. CI542 permanece em execução.

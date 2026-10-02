@@ -93,8 +93,36 @@ async function main(){
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),rawDraft);
   await page.locator('#intake-notes').fill('Edited owned intake');const edited=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),draftKey);assert.deepEqual(edited,{...draft,notes:'Edited owned intake'});
   const generic=await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)),intakeLegacy);assert(!Object.keys(generic.fields).some(id=>id.startsWith('intake')),'Managed intake excluded from generic saves');
+  // An unsupported lock API fails before preparing or sending an operational request.
+  await page.evaluate(()=>Object.defineProperty(navigator,'locks',{configurable:true,value:undefined}));
+  await page.locator('[type=submit]').click();
+  await page.waitForFunction(()=>document.getElementById('result').textContent.startsWith('A ficha não foi enviada.'));
+  const sendErrors={
+   en:'The form was not sent. This browser cannot coordinate submissions. Keep the form.',
+   fr:'La fiche n’a pas été envoyée. Ce navigateur ne permet pas de coordonner les envois. Conservez la fiche.',
+   es:'La ficha no se envió. Este navegador no permite coordinar los envíos. Conserve la ficha.',
+   de:'Das Formular wurde nicht gesendet. Dieser Browser kann Sendungen nicht koordinieren. Bewahren Sie das Formular auf.',
+   pt:'A ficha não foi enviada. Este navegador não permite coordenar os envios. Preserve a ficha.'
+  };
+  for(const [language,expected]of Object.entries(sendErrors)){
+   await page.evaluate(language=>CristalI18n.applyLanguage(language),language);
+   assert.equal(await page.locator('#result').textContent(),expected,'Send error must follow the selected language');
+   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
+   assert.equal(await page.locator('#intake-notes').inputValue(),edited.notes);
+   assert.equal(writes,0);
+  }
+  const literalError='QA literal: keep <original> & 123';
+  await page.evaluate(message=>Object.defineProperty(navigator,'locks',{configurable:true,value:{request:async()=>{throw Error(message);}}}),literalError);
+  await page.locator('[type=submit]').click();
+  await page.waitForFunction(message=>document.getElementById('result').textContent.includes(message),literalError);
+  for(const [language,prefix]of [['en','The form was not sent.'],['de','Das Formular wurde nicht gesendet.'],['pt','A ficha não foi enviada.']]){
+   await page.evaluate(language=>CristalI18n.applyLanguage(language),language);
+   assert.equal(await page.locator('#result').textContent(),prefix+' '+literalError);
+   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
+   assert.equal(writes,0);
+  }
   assert.equal(writes,0);assert(reads>=8);assert.deepEqual(errors,[]);
-  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store draft recovery and editing with delayed generic restore; QA API fixtures only, zero writes');
+  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store draft recovery, editing and five-language send errors with literal errors preserved; QA API fixtures only, zero writes');
  }finally{pending.splice(0).forEach(send=>send());navigationPending.splice(0).forEach(send=>send());await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
