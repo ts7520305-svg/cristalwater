@@ -22,7 +22,9 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 - Checkpoint/documentação: commit `404e7145f19d68fa8b5331c4532814aed4825734`.
 - TASK539 publicada: `c8c6a6f39624ffbfef2cc3bb3045e5bd28d7f378`, árvore `b85d91258935fbc4e518176a33fc61b35d4d8748`; run `37065691326` em execução. Memória da ficha usa principal validado pelo guard e ID da visita, só restaura após leitura autorizada. Não adota snapshots sem dono; preserva bytes inválidos num arquivo antes de guardar novo trabalho. Ficheiros/credenciais excluídos, refresh mantém edição. Cache v304 e quatro expectativas atualizadas; 10 ficheiros. 1 409 unitários/142 ficheiros, quatro técnicos, sintaxe e diff-check passaram.
-- TASK540 em validação local: ensaio reproduzível com HTML real, `cw-auth`, guard, ficha e script de navegação; GETs/identidades são fixtures QA explícitas. Incluído no preflight browser existente (22 scripts em vez de 21). Não modifica backend/schema nem runner de 387 grupos.
+- TASK540 publicada: `6cf781fd296091fb06fa755b1902e472e1b2818c`, árvore `08ff3a41627257e229870223c5380f7d1276caed`, run `37066186782` em execução. ensaio reproduzível com HTML real, `cw-auth`, guard, ficha e script de navegação; GETs/identidades são fixtures QA explícitas. Incluído no preflight browser existente (22 scripts em vez de 21). Não modifica backend/schema nem runner de 387 grupos.
+
+- TASK541 em validação local: `technician-new-client.html` agora declara o formulário gerido pelo seu rascunho existente. Antes, nav genérico atrasado substituía `clientName` por `Wrong previous account` na fase pageshow, embora o produtor próprio pudesse repintar depois. Ensaio real do HTML/auth/write-store/intake/navigation reproduziu a falha; o atributo resolve-a, conserva os 11 campos e bytes do rascunho, e edição normal altera apenas a nota. Cache v305 / quatro expectativas atualizados. Nenhuma alteração do fluxo de envio ou API.
 
 ## Testes realizados nesta sessão
 
@@ -31,14 +33,14 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 - Após correção local: 1 409 testes / 142 ficheiros passaram; 13 regressões novas de recuperação, conta, visita, corrupção, ficheiros/credenciais, refresh e compatibilidade genérica.
 - Técnico: 4/4. Sintaxe: 695 JS backend, 308 JS frontend, 45 scripts inline. `git diff --check` aprovado.
 - Chromium 153, componente inicial com o script real de navegação: reload, prontidão atrasada, duas contas, duas visitas, checkbox, refresh e bytes antigos passaram. A prontidão/identidade do componente é uma fixture; não alegar aceitação SQL/API deste ensaio.
-- TASK540: HTML/formulário e scripts reais de auth/guard/ficha/navegação com GETs QA assinados; reload retido, PIN/USER com mesmo ID, duas visitas, refresh, GET403, ficheiro excluído, snapshots antigos intactos e zero escritas passaram. Fonte antiga da navegação faz o ensaio falhar na recuperação prematura. A preparação inicial apontou para porta3002; configurada a origem de API QA sem alterar produto.
+- TASK540/541: HTML/formulário e scripts reais de auth/guard/ficha/navegação com GETs QA assinados; reload retido, PIN/USER com mesmo ID, duas visitas, refresh, GET403, ficheiro excluído, snapshots antigos da visita intactos e zero escritas passaram. A extensão541 confirma também rascunho nativo de intake e captura o estado após memória genérica antes de nova pintura. Fonte antiga da navegação faz o ensaio falhar na recuperação prematura. A preparação inicial apontou para porta3002; configurada a origem de API QA sem alterar produto.
 - Download do Chromium do Playwright devolveu ZIP truncado; utilizado Chromium já instalado em `/tmp/chromium`. PostgreSQL local e integração completa ainda não preparados nesta sessão.
 
 ## Erros conhecidos e limites
 
 - Memória sem titular na ficha: TASK539 publicada, validação integrada pendente.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI537/538 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar.
+- CI537–540 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -52,6 +54,8 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-Finalizar/publicar TASK540, conferir SHA/árvore e Actions537–540. Se houver falha, ler o job e corrigir a primeira causa reproduzível. Depois continuar C06 pelo inventário `docs/product/LANGUAGE_INVENTORY_20260928.md` e checkpoint histórico, começando pela memória genérica das outras páginas técnicas que ainda não tem titular; verificar cada produtor/formulário gerido antes de alterar. Não declarar isolamento global por esta ficha.
+Publicar/conferir TASK541 após gates finais e atualizar este checkpoint com SHA/árvore/Action exatos. Na retoma seguinte, obter resultado e logs finais de CI537–541, priorizar qualquer falha real e não herdar aceitação de um commit anterior. Sem falhas, TASK542 / C06: observar `technician-new-client` com os cinco idiomas e confrontar os textos próprios de permissões/rascunho/envio/GPS em `technician-new-client.js` com o inventário. Só traduzir lacunas efetivamente presentes, conservando o contrato do write-store, valores, UUID e recibos. Antes de editar, conferir que a própria fonte ainda corresponde a este SHA e se outro commit já tratou a lacuna.
+
+Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 22 scripts.
 
 Integração futura: os três commits exclusivos da branch padrão alteram apenas `docs/product/BILLING_AUTOMATION_SPEC.md` (477 linhas), uma especificação marcada como não implementada. Ler a versão completa antes de conciliar requisitos de cobranças, IA preditiva e integridade de medidas/relatórios; não assumir que estão implementados nem apagar os commits.

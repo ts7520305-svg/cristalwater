@@ -47,3 +47,7 @@
 ## TASK540 — regressão browser reproduzível (2026-10-02)
 - Adicionado ensaio da recuperação por conta/visita com HTML e scripts reais; respostas de API são fixtures QA explícitas, sem alegar validação SQL.
 - Reload atrasado, troca PIN/USER, refresh, outra visita, recusa GET, exclusão de ficheiros e preservação de bytes verificados. Incluído nos gates browser existentes; código antigo falha no mesmo ensaio.
+
+## TASK541 — proteger o rascunho próprio de novo cliente (2026-10-02)
+- Formulário de intake marcado como gerido pelo mecanismo existente por conta; a memória genérica deixa de copiar ou sobrescrever os seus campos.
+- Reprodução browser com scripts reais capta o nome da conta antiga antes da repintura; após correção preserva 11 campos, rascunho original e edição normal, sem envio de negócio. Cache v305 e expectativas correspondentes atualizadas.

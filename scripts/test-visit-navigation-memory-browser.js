@@ -8,13 +8,16 @@ const sources=new Set(['/cw-auth.js','/technician-auth-guard.js','/technician-vi
 // Keep the native form and scripts under test; avoid unrelated navigation/help/SW
 // initialization in this component fixture. No application source is rewritten.
 const html=source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,tag=>sources.has(tag.match(/src="([^"]+)"/)?.[1])?tag:'');
+const intakeSources=new Set([...sources].filter(value=>value!=='/technician-visit.js').concat(['/cw-field-write-store.js','/technician-new-client.js']));
+const intakeHtml=fs.readFileSync(path.join(root,'technician-new-client.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,tag=>intakeSources.has(tag.match(/src="([^"]+)"/)?.[1])?tag:'');
 const actorA={id:12,role:'TECHNICIAN',technicianId:12,principalType:'TECH'},actorB={id:12,userId:12,role:'TECHNICIAN',technicianId:13,principalType:'USER'};
 const tokenA=jwt.sign(actorA,secret,{expiresIn:'1h'}),tokenB=jwt.sign(actorB,secret,{expiresIn:'1h'});
-let held=false,pending=[],reads=0,writes=0;
+let held=false,pending=[],navigationHeld=false,navigationPending=[],reads=0,writes=0;
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://qa.local');
  if(url.pathname.startsWith('/api/')){
   if(req.method!=='GET'){writes++;res.writeHead(405);return res.end('{}');}
+  if(url.pathname==='/api/technician-intake/settings'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({ok:true,techniciansCanCreateClientsPools:true,requireAdminReview:true,poolsActiveByDefault:false}));}
   const match=url.pathname.match(/^\/api\/visits\/(\d+)$/);if(!match){res.writeHead(404);return res.end('{}');}
   const send=()=>{if(res.destroyed)return;let actor;try{actor=jwt.verify(String(req.headers.authorization||'').replace(/^Bearer /,''),secret);}catch(_){res.writeHead(403);return res.end('{"error":"QA denied"}');}
    reads++;res.setHeader('Content-Type','application/json');const id=Number(match[1]);if(id===9){res.writeHead(403);return res.end('{"error":"QA denied visit"}');}
@@ -22,8 +25,10 @@ const server=http.createServer((req,res)=>{
   if(held)pending.push(send);else send();return;
  }
  if(url.pathname==='/technician-visit'){res.setHeader('Content-Type','text/html');return res.end(html);}
+ if(url.pathname==='/technician-new-client'){res.setHeader('Content-Type','text/html');return res.end(intakeHtml);}
+ if(url.pathname==='/sw.js'){res.writeHead(404);return res.end('');}
  const file=path.resolve(root,'.'+url.pathname);if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404);return res.end('');}
- res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'application/octet-stream');res.end(fs.readFileSync(file));
+ res.setHeader('Content-Type',file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':'application/octet-stream');const sendFile=()=>{if(!res.destroyed)res.end(fs.readFileSync(file));};if(navigationHeld&&url.pathname==='/ui/core/navigation-context.js')navigationPending.push(sendFile);else sendFile();
 });
 async function main(){
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));let browser;
@@ -43,8 +48,21 @@ async function main(){
   await page.evaluate(({token,actor})=>{CristalAuth.persistSession(token,actor);window.dispatchEvent(new Event('cw:session-change'));},{token:tokenA,actor:actorA});await page.locator('#refreshBtn').click();await ready();assert.equal(await page.locator('#notes').inputValue(),'latest A7');
   await page.goto(base+'/technician-visit?visit=8');await ready();assert.equal(await page.locator('#notes').inputValue(),'server 12/8');await page.locator('#notes').fill('private A8');await page.goto(base+'/technician-visit?visit=7');await ready();assert.equal(await page.locator('#notes').inputValue(),'latest A7');
   await page.goto(base+'/technician-visit?visit=9');await page.waitForFunction(()=>document.getElementById('statusBox').dataset.tone==='error');assert.equal(await page.locator('#notes').inputValue(),'');assert.equal(await page.locator('#notes').isDisabled(),true);
-  assert.equal(await page.evaluate(legacy=>sessionStorage.getItem(legacy),legacy),old);assert.equal(writes,0);assert(reads>=8);assert.deepEqual(errors,[]);
-  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; QA API fixtures only, zero writes');
- }finally{pending.splice(0).forEach(send=>send());await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
+  assert.equal(await page.evaluate(legacy=>sessionStorage.getItem(legacy),legacy),old);
+  const draft={v:1,owner:'TECH:12',clientName:'Owned QA client',phone:'+351 900000000',email:'qa@example.test',address:'Owned address',zone:'Lagos',poolName:'Owned pool',poolType:'Privada',volumeM3:'75',latitude:'37.1',longitude:'-8.6',notes:'Owned intake note',requestId:null};
+  const draftKey='cwFieldIntakeDraft:TECH:12',rawDraft=JSON.stringify(draft),intakeLegacy='cw:ctx:/technician-new-client';
+  await page.evaluate(({draftKey,rawDraft,intakeLegacy})=>{localStorage.setItem(draftKey,rawDraft);sessionStorage.setItem(intakeLegacy,JSON.stringify({fields:{'intake-clientName':'Wrong previous account','intake-notes':'Wrong old note','intake-phone':'Wrong phone'}}));},{draftKey,rawDraft,intakeLegacy});
+  navigationHeld=true;await page.goto(base+'/technician-new-client',{waitUntil:'commit'});
+  await page.waitForFunction(()=>document.getElementById('intake-clientName')?.value==='Owned QA client'&&document.getElementById('result')?.textContent.includes('Rascunho desta conta'));
+  await page.evaluate(()=>window.addEventListener('pageshow',()=>{window.qaIntakeAfterGeneric=Object.fromEntries(Array.from(document.getElementById('form').elements).filter(node=>node.name).map(node=>[node.name,node.value]));},{once:true}));
+  navigationHeld=false;navigationPending.splice(0).forEach(send=>send());await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction(()=>window.qaIntakeAfterGeneric);const afterGeneric=await page.evaluate(()=>window.qaIntakeAfterGeneric);
+  for(const [name,value]of Object.entries(draft)){if(['v','owner','requestId'].includes(name))continue;assert.equal(afterGeneric[name],value,'Delayed generic restore must preserve owned intake '+name);assert.equal(await page.locator('[name="'+name+'"]').inputValue(),value,'Generic restore must preserve owned intake '+name);}
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),rawDraft);
+  await page.locator('#intake-notes').fill('Edited owned intake');const edited=await page.evaluate(key=>JSON.parse(localStorage.getItem(key)),draftKey);assert.deepEqual(edited,{...draft,notes:'Edited owned intake'});
+  const generic=await page.evaluate(key=>JSON.parse(sessionStorage.getItem(key)),intakeLegacy);assert(!Object.keys(generic.fields).some(id=>id.startsWith('intake')),'Managed intake excluded from generic saves');
+  assert.equal(writes,0);assert(reads>=8);assert.deepEqual(errors,[]);
+  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store draft recovery and editing with delayed generic restore; QA API fixtures only, zero writes');
+ }finally{pending.splice(0).forEach(send=>send());navigationPending.splice(0).forEach(send=>send());await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
