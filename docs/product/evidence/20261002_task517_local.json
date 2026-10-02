@@ -1,0 +1,3578 @@
+{
+  "task": 517,
+  "checkedAt": "2026-10-02T07:07:08.528531+00:00",
+  "parent": "fc5ef9f5de09f865ede1177ac046bef03be79f75",
+  "branch": "work/field-readiness-20260915-simulation",
+  "scope": "Integrate the existing real five-language selector on the legacy CLIENT conversation. Repaint only owned UI copy; retain API bodies, stored attachment names, draft identity, recovery and authenticated attachment targets.",
+  "audit": {
+    "task": 517,
+    "parent": "fc5ef9f5de09f865ede1177ac046bef03be79f75",
+    "sourceFiles": [
+      "frontend/client_chat.html",
+      "frontend/client_chat.js",
+      "frontend/sw.js",
+      "scripts/test-field-login-languages.js",
+      "scripts/test-field-client-login-languages.js",
+      "scripts/test-field-entry-login-languages.js",
+      "scripts/test-field-client-portal-extras-languages.js",
+      "scripts/test-field-client-chat-recovery-ui.js"
+    ],
+    "productFiles": 3,
+    "protectedSources": [
+      "frontend/cw-client-chat-send.js",
+      "frontend/cw-auth-download.js",
+      "frontend/client-auth-guard.js",
+      "frontend/cw-auth.js",
+      "frontend/cw-i18n.js",
+      "frontend/client-wow.html",
+      "frontend/client-wow.js",
+      "scripts/test-field-suite.js",
+      "src/services/clientChatHistoryService.js",
+      "src/routes/clientMessageRoutes.js",
+      "src/business/chat/ClientMessageBusiness.js",
+      "prisma/schema.prisma",
+      ".github/workflows/field-readiness.yml"
+    ],
+    "originalHtmlRecoveredByOnlyRemovingTranslatorAndButtonSizing": true,
+    "originalJsRecoveredByOnlyRemovingPrivateCopyAndFivePresentationLines": true,
+    "privateCopyTouchesApiStorageNavigationOrTimers": false,
+    "allOriginalPortalQaBytesRecoveredByRemovingOnlyNewCasesCleanupAndCacheReferences": true,
+    "originalRecoveryQaBytesRecoveredByReplacingOnlyNativeLanguageSelection": true,
+    "recoveryTimeoutMs": 10000,
+    "portalDeadlineMs": 150000,
+    "negativeOnlyLiteralBodyAndFilenameMarkersRemoved": true,
+    "negativeQaAndOtherSourcesByteIdentical": true,
+    "cacheBefore": 287,
+    "cacheAfter": 288,
+    "cacheReferenceCounts": {
+      "frontend/sw.js": 1,
+      "scripts/test-field-login-languages.js": 3,
+      "scripts/test-field-client-login-languages.js": 2,
+      "scripts/test-field-entry-login-languages.js": 2,
+      "scripts/test-field-client-portal-extras-languages.js": 2
+    },
+    "newCopyKeys": 5,
+    "newCopyVariants": 25,
+    "existingHistoryVariantsReused": 5,
+    "sources": {
+      "frontend/client_chat.html": "cb12cf07d58d7160c8dce2ff7af45dbbad8bff594d4ef61b0e1bf51a0d5faf73",
+      "frontend/client_chat.js": "2ce1cff370fb858397cb327fe3721ae9e3e46e1565b0ab5502033c5228ea2282",
+      "frontend/sw.js": "7fc84cf976278fef772ebd9a2a4c4b45f642a34fea8cf5f38f9765d832602093",
+      "scripts/test-field-login-languages.js": "fe47c42b8db0a7e5c33cd2bd063a66b439de51769866b34be81a7385eedcbfa9",
+      "scripts/test-field-client-login-languages.js": "815b94463c6b59a9c183c0f5a0b14cba47df82d9b02027e69f2d80308a0b8039",
+      "scripts/test-field-entry-login-languages.js": "4265c0eb105e1dfd8a0a6743a6b09008c96231baa3034b9ef49820272a8ce9dd",
+      "scripts/test-field-client-portal-extras-languages.js": "aa0310df5c3696113593c21a544d88cb5d73747f36678f938c937a0d3e61ed3c",
+      "scripts/test-field-client-chat-recovery-ui.js": "d2941e9892a79c4c0414b6c980dcfa6548f830917f5bc6859feecee484ce04f3",
+      "frontend/cw-client-chat-send.js": "8885b92224ac5adff7069bf08cba839c332bf15a45627d2034907c113df885e2",
+      "frontend/cw-auth-download.js": "09a7620ebb9c9b9094b60a8d3a8a03f28bfd9e4885794badc4466fa8a3ea8071",
+      "frontend/client-auth-guard.js": "34e6d617857e6dc7a95272b8eacde502cb245c63e5b26d872baa658254747936",
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/cw-i18n.js": "4649a836f3ac48331db8222d22d64be8e1e5156fc2c1e74121a28483689bb935",
+      "frontend/client-wow.html": "2d8fe2631133a2839fd424f9ae8ad4a7149a68304f8df3455c6d425868ee533a",
+      "frontend/client-wow.js": "763852db10b0e1e9dd77f060cf32074465159c56948bc7df9e11233c3483055a",
+      "scripts/test-field-suite.js": "60c8f88efa0dcb83bcf5cf85223a2cf6249f32466c62dbe2c7e83998eb4cd150",
+      "src/services/clientChatHistoryService.js": "e90c8425af91ff6d6951f4d7f7d3d043cf4cf5442a92aae869ddbae76fbe7dac",
+      "src/routes/clientMessageRoutes.js": "ac7d7ee50c29a1e808a59a822dea41f0c1c8fb5f2d3f099c6144927a3ae87451",
+      "src/business/chat/ClientMessageBusiness.js": "614d66764dcb9171ab2d4adfc33d367115227662d40796bc41b0ffc07e42976a",
+      "prisma/schema.prisma": "8846715eb9449b35ad64b4b07de74620d6bbd92da0691d4bc9a798fd299e4e8b",
+      ".github/workflows/field-readiness.yml": "41d0d02f9666316291a14e21146df56480f69c59330c7aab0334dc07be81d9d2"
+    }
+  },
+  "local": {
+    "browserGroups": 8,
+    "positive": {
+      "label": "regress517-exact-final",
+      "timezone": "Europe/Lisbon",
+      "instant": "natural",
+      "offset": null,
+      "controlled": false,
+      "results": [
+        {
+          "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 197,
+          "logBytes": 46,
+          "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+          "decodedLog": "PASS isolated administrator fixture available\n"
+        },
+        {
+          "script": "scripts/test-field-client-portal-extras-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 38163,
+          "logBytes": 3628,
+          "logSha256": "840a40b0fd25be9309c49fa9103bb2d6b3023a970dddb202a1a2e8f373186589",
+          "decodedLog": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS healthy portal notifications {\"healthyNoticeCases\":75,\"languages\":5,\"widths\":[320,390,1440],\"spanishNativeResponseRendered\":true,\"explicitReadAttempts\":2,\"nativeSqlConfirmations\":1,\"pendingRequests\":2,\"originalNodesFocusAndGuardRetained\":true}\nPASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work\nPASS portal extras result {\"checks\":228,\"languageCases\":210,\"nativeRetry\":true,\"literalNativeNotification\":true,\"ownershipControls\":2,\"pendingRequests\":2,\"currentWorkerShellBytes\":true,\"actualPageContinuedOffline\":true,\"actualColdOfflineReload\":true,\"primaryFailureStates\":4,\"primaryRetry\":true}\nPASS actual portal quote presentation {\"quoteLanguageCases\":217,\"cachedQuotesJsBytesEqualSource\":true,\"coldOfflineQuoteErrors\":true,\"realLanguageSelector\":true,\"pureQuotePaintDoesNotReloadQuotes\":true}\nPASS legacy client chat language integration {\"languageCases\":15,\"ownershipCases\":20,\"widths\":[320,390,1440],\"languages\":5,\"nativeTextPosts\":2,\"nativeUpload\":1,\"nativeAuthenticatedDownloadBytes\":true,\"literalApiBodies\":5,\"literalAttachmentName\":true,\"retainedDraftNodesHandlers\":true,\"conversationReadsUnchanged\":true,\"retainedLanguageOnReload\":true,\"sqlRowsUnchanged\":true}\nPASS portal extras fixtures removed and previous language setting restored\n"
+        },
+        {
+          "script": "scripts/test-field-client-chat-recovery-ui.js",
+          "code": 0,
+          "signal": null,
+          "ms": 10949,
+          "logBytes": 896,
+          "logSha256": "ac0904c435491c17ef2ebb37219d1babeba5e7c7a08688091c956b1d44167347",
+          "decodedLog": "PASS legacy: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS legacy: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\nPASS portal: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS portal: complete file survives reload and lost response, unicode filename, exact original download and no duplicate\nPASS portal: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\nPASS admin: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS admin: complete file survives reload and lost response, unicode filename, exact original download and no duplicate\nPASS admin: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\n"
+        },
+        {
+          "script": "scripts/test-field-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 10201,
+          "logBytes": 2458,
+          "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+          "decodedLog": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+        },
+        {
+          "script": "scripts/test-field-client-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 9111,
+          "logBytes": 1967,
+          "logSha256": "bf9c4b7314403deea48ce5d9a79680930c8d72677d088cbd03c0577f9147ffe5",
+          "decodedLog": "PASS client login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"notClient\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=501\",\"pendingRequests\":2}\nPASS client login ownership changed-text\nPASS client login ownership replaced-node\nPASS client login ownership changed-attributes\nPASS client login language result {\"checks\":148,\"languages\":5,\"widths\":[320,390,1440],\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS client login fixtures removed\n"
+        },
+        {
+          "script": "scripts/test-field-entry-login-languages.js",
+          "code": 0,
+          "signal": null,
+          "ms": 22998,
+          "logBytes": 6343,
+          "logSha256": "526303f658129ffd3fa889b5df8279289dfa8915918a026507ac09327dbe2912",
+          "decodedLog": "PASS general/admin login labels {\"kind\":\"login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"visible\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"hidden\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":184,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"login\",\"invalidAccountControls\":7,\"nativeLogins\":8,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":332,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"admin-login\",\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login result {\"checks\":332,\"pages\":[{\"kind\":\"login\",\"checks\":184,\"nativeLogins\":8,\"invalidAccountControls\":7,\"visibilityStates\":2},{\"kind\":\"admin-login\",\"checks\":148,\"nativeLogins\":2,\"invalidAccountControls\":7,\"visibilityStates\":0}]}\nPASS general/admin login fixtures removed and previous language settings restored\n"
+        },
+        {
+          "script": "scripts/test-field-visual-flow.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4855,
+          "logBytes": 406,
+          "logSha256": "64ae561cbf21b6fa61d00a8681391f1d3c9d5ad909ae13e4f0e0cd170a18b659",
+          "decodedLog": "PASS visual real form, profile data, logout and protected return: TECHNICIAN\nPASS real client portal published quote, explicit approval and persisted repair status\nPASS visual real form, profile data, logout and protected return: CLIENT\nPASS visual real form, profile data, logout and protected return: ADMIN\nVisual evidence: /workspace/scratch/1c4fa52fd046/cristalwater/reports/field-visual/1790924528440\n"
+        },
+        {
+          "script": "scripts/test-field-client-chat-history-ui.js",
+          "code": 0,
+          "signal": null,
+          "ms": 4438,
+          "logBytes": 488,
+          "logSha256": "d5759f9c51c7e9ff6dc777f8e675c465d59fde8d7518ba6f765c601317aa06b5",
+          "decodedLog": "PASS legacy: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS portal: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS admin: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\n"
+        },
+        {
+          "script": "scripts/test-field-client-chat-privacy.js",
+          "code": 0,
+          "signal": null,
+          "ms": 1085,
+          "logBytes": 211,
+          "logSha256": "2588e5651a0304319c3103e9a7ccb82f55e19c356cab835c461e217f759af5bc",
+          "decodedLog": "{\"leaderRestStatus\":403,\"leaderPrivateEvents\":0}\nPASS client conversations remain private to their owner and administration across REST aliases and authenticated Socket.IO; field staff keep internal chat access\n"
+        }
+      ]
+    },
+    "negative": {
+      "label": "negative517-final",
+      "timezone": "Europe/Lisbon",
+      "instant": "natural",
+      "offset": null,
+      "controlled": false,
+      "results": [
+        {
+          "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+          "code": 0,
+          "signal": null,
+          "ms": 212,
+          "logBytes": 46,
+          "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+          "decodedLog": "PASS isolated administrator fixture available\n"
+        },
+        {
+          "script": "scripts/test-field-client-portal-extras-languages.js",
+          "code": 1,
+          "signal": null,
+          "ms": 37600,
+          "logBytes": 3796,
+          "logSha256": "5f2b2e6bed5d618d65bb19443120f4dc131e5b569f2e364d042e8c4543b504c5",
+          "decodedLog": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS healthy portal notifications {\"healthyNoticeCases\":75,\"languages\":5,\"widths\":[320,390,1440],\"spanishNativeResponseRendered\":true,\"explicitReadAttempts\":2,\"nativeSqlConfirmations\":1,\"pendingRequests\":2,\"originalNodesFocusAndGuardRetained\":true}\nPASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work\nPASS portal extras result {\"checks\":228,\"languageCases\":210,\"nativeRetry\":true,\"literalNativeNotification\":true,\"ownershipControls\":2,\"pendingRequests\":2,\"currentWorkerShellBytes\":true,\"actualPageContinuedOffline\":true,\"actualColdOfflineReload\":true,\"primaryFailureStates\":4,\"primaryRetry\":true}\nPASS actual portal quote presentation {\"quoteLanguageCases\":217,\"cachedQuotesJsBytesEqualSource\":true,\"coldOfflineQuoteErrors\":true,\"realLanguageSelector\":true,\"pureQuotePaintDoesNotReloadQuotes\":true}\nAssertionError [ERR_ASSERTION]: The API message body must remain literal in en\n+ actual - expected\n\n+ 'Refresh'\n- 'Atualizar'\n\n    at legacyChatLanguages (/workspace/scratch/1c4fa52fd046/qa-runtime/negative517/scripts/test-field-client-portal-extras-languages.js:60:46)\n    at async /workspace/scratch/1c4fa52fd046/qa-runtime/negative517/scripts/test-field-client-portal-extras-languages.js:480:3 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 'Refresh',\n  expected: 'Atualizar',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\nPASS portal extras fixtures removed and previous language setting restored\n"
+        },
+        {
+          "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/focused-chat517.cjs",
+          "code": 1,
+          "signal": null,
+          "ms": 1424,
+          "logBytes": 453,
+          "logSha256": "79fe1029cd7343eeadcbcde1e86c96d381966bffc3f64218ed002031d3499479",
+          "decodedLog": "AssertionError [ERR_ASSERTION]: The API message body must remain literal in en\n+ actual - expected\n\n+ 'Refresh'\n- 'Atualizar'\n\n    at legacyChatLanguages (/workspace/scratch/1c4fa52fd046/qa-runtime/focused-chat517.cjs:66:46)\n    at async /workspace/scratch/1c4fa52fd046/qa-runtime/focused-chat517.cjs:101:2 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 'Refresh',\n  expected: 'Atualizar',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+        }
+      ]
+    },
+    "beforeIntegrationPreview": {
+      "task": 517,
+      "parent": "fc5ef9f5de09f865ede1177ac046bef03be79f75",
+      "nativeMessagesPosted": 2,
+      "nativeSelectorPresent": false,
+      "sharedTranslatorIntegrationPreview": true,
+      "actualLanguageSelector": true,
+      "unchangedSqlRows": true,
+      "observed": [
+        {
+          "width": 320,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 320,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Refresh",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 320,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualiser",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 320,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualizar",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 320,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Aktualisieren",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 390,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Refresh",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 390,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualiser",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 390,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualizar",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 390,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Aktualisieren",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 1440,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Refresh",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 1440,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualiser",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 1440,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Actualizar",
+            "Mensagem"
+          ],
+          "literal": false
+        },
+        {
+          "width": 1440,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Aktualisieren",
+            "Mensagem"
+          ],
+          "literal": false
+        }
+      ],
+      "nonLiteralCases": 12
+    },
+    "afterNativePageProbe": {
+      "task": 517,
+      "parent": "fc5ef9f5de09f865ede1177ac046bef03be79f75",
+      "nativeMessagesPosted": 2,
+      "nativeSelectorPresent": true,
+      "sharedTranslatorIntegrationPreview": false,
+      "actualLanguageSelector": true,
+      "unchangedSqlRows": true,
+      "observed": [
+        {
+          "width": 320,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 320,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 320,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 320,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 320,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 390,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "pt",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "en",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "fr",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "es",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        },
+        {
+          "width": 1440,
+          "language": "de",
+          "original": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "displayed": [
+            "Atualizar",
+            "Mensagem"
+          ],
+          "literal": true
+        }
+      ],
+      "nonLiteralCases": 0
+    },
+    "newCopyKeys": 5,
+    "newCopyVariants": 25,
+    "existingHistoryVariants": 5,
+    "nativeLanguageWidthCases": 15,
+    "ownershipControls": 20,
+    "storedLanguageAndDraftOnReload": true,
+    "nativeApi": {
+      "textPosts": 2,
+      "uploads": 1,
+      "authenticatedDownloadBytesEqual": true,
+      "sqlRowsUnchanged": 5
+    },
+    "syntax": {
+      "backend": 695,
+      "frontend": 308,
+      "inline": 45,
+      "code": 0,
+      "logSha256": "843fbc8380ee237e72d97f39dac725cfe776f79fb078aaf5b1b1796d0ed15fd0",
+      "decodedLog": "npm warn Unknown env config \"http-proxy\". This will stop working in the next major version of npm.\n\n> cristalwater-backend@22.6.7 check:syntax\n> node scripts/check-syntax.js\n\n✅ Syntax OK: 695 backend JS files, 308 frontend JS files and 45 inline scripts.\n"
+    },
+    "de320VisualReviewed": true,
+    "de320ScreenshotSha256": "8ca7cf5d297b29fb217f6524cd1fb0909b3c9b344c141797e252a426d6fa7c45",
+    "initialAttemptsAndFailures": [
+      {
+        "label": "regress517-first",
+        "timezone": "Europe/Lisbon",
+        "instant": "natural",
+        "offset": null,
+        "controlled": false,
+        "results": [
+          {
+            "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+            "code": 0,
+            "signal": null,
+            "ms": 198,
+            "logBytes": 46,
+            "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+            "decodedLog": "PASS isolated administrator fixture available\n"
+          },
+          {
+            "script": "scripts/test-field-client-portal-extras-languages.js",
+            "code": 0,
+            "signal": null,
+            "ms": 36279,
+            "logBytes": 3596,
+            "logSha256": "914a2b988665c95f0990e89c31538f4927419deb2fe73ad0d30f0c62aff4ee69",
+            "decodedLog": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS healthy portal notifications {\"healthyNoticeCases\":75,\"languages\":5,\"widths\":[320,390,1440],\"spanishNativeResponseRendered\":true,\"explicitReadAttempts\":2,\"nativeSqlConfirmations\":1,\"pendingRequests\":2,\"originalNodesFocusAndGuardRetained\":true}\nPASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work\nPASS portal extras result {\"checks\":228,\"languageCases\":210,\"nativeRetry\":true,\"literalNativeNotification\":true,\"ownershipControls\":2,\"pendingRequests\":2,\"currentWorkerShellBytes\":true,\"actualPageContinuedOffline\":true,\"actualColdOfflineReload\":true,\"primaryFailureStates\":4,\"primaryRetry\":true}\nPASS actual portal quote presentation {\"quoteLanguageCases\":217,\"cachedQuotesJsBytesEqualSource\":true,\"coldOfflineQuoteErrors\":true,\"realLanguageSelector\":true,\"pureQuotePaintDoesNotReloadQuotes\":true}\nPASS legacy client chat language integration {\"languageCases\":15,\"ownershipCases\":20,\"widths\":[320,390,1440],\"languages\":5,\"nativeTextPosts\":2,\"nativeUpload\":1,\"nativeAuthenticatedDownloadBytes\":true,\"literalApiBodies\":5,\"literalAttachmentName\":true,\"retainedDraftNodesHandlers\":true,\"conversationReadsUnchanged\":true,\"sqlRowsUnchanged\":true}\nPASS portal extras fixtures removed and previous language setting restored\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-history-ui.js",
+            "code": 0,
+            "signal": null,
+            "ms": 4315,
+            "logBytes": 488,
+            "logSha256": "d5759f9c51c7e9ff6dc777f8e675c465d59fde8d7518ba6f765c601317aa06b5",
+            "decodedLog": "PASS legacy: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS portal: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS admin: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-recovery-ui.js",
+            "code": 1,
+            "signal": null,
+            "ms": 13402,
+            "logBytes": 308,
+            "logSha256": "0aceab7604343e44eb71a0c10d27539e319fee1ae60940647616755a80a6f069",
+            "decodedLog": "PASS legacy: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\npage.waitForFunction: Timeout 10000ms exceeded.\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-chat-recovery-ui.js:107:20 {\n  log: [],\n  name: 'TimeoutError'\n}\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-privacy.js",
+            "code": 0,
+            "signal": null,
+            "ms": 1192,
+            "logBytes": 211,
+            "logSha256": "2588e5651a0304319c3103e9a7ccb82f55e19c356cab835c461e217f759af5bc",
+            "decodedLog": "{\"leaderRestStatus\":403,\"leaderPrivateEvents\":0}\nPASS client conversations remain private to their owner and administration across REST aliases and authenticated Socket.IO; field staff keep internal chat access\n"
+          },
+          {
+            "script": "scripts/test-field-login-languages.js",
+            "code": 0,
+            "signal": null,
+            "ms": 10773,
+            "logBytes": 2458,
+            "logSha256": "ba73922b8f96350ca3625e79bf514b622132d40c61b5a18bafee62de624c9ca0",
+            "decodedLog": "PASS technician login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS technician login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"pinAndNodesPreserved\":true,\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TECHNICIAN\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS native technician PIN login {\"role\":\"TEAM_LEADER\",\"exactTrimmedPin\":true,\"literalName\":true,\"redirect\":\"/technician-field-mode\",\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"anonymous\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"same authenticated session\",\"retained\":true,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"renewed while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"logged out while request pending\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"credential read failure\",\"retained\":false,\"cancelled\":false,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS connection toast boundary {\"name\":\"cancelled anonymous read\",\"retained\":false,\"cancelled\":true,\"originalErrorPreserved\":true,\"pendingRequests\":2}\nPASS technician login language result {\"checks\":110,\"connectionControls\":6,\"languages\":5,\"widths\":[320,390,1440],\"nativeRoles\":[\"TECHNICIAN\",\"TEAM_LEADER\"],\"enterSerialized\":true,\"serverMessagesLiteral\":true,\"typedPendingRequests\":2,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\n"
+          },
+          {
+            "script": "scripts/test-field-client-login-languages.js",
+            "code": 0,
+            "signal": null,
+            "ms": 9704,
+            "logBytes": 1967,
+            "logSha256": "bf9c4b7314403deea48ce5d9a79680930c8d72677d088cbd03c0577f9147ffe5",
+            "decodedLog": "PASS client login labels {\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"notClient\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS client login labels {\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native client login {\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=501\",\"pendingRequests\":2}\nPASS client login ownership changed-text\nPASS client login ownership replaced-node\nPASS client login ownership changed-attributes\nPASS client login language result {\"checks\":148,\"languages\":5,\"widths\":[320,390,1440],\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS client login fixtures removed\n"
+          },
+          {
+            "script": "scripts/test-field-entry-login-languages.js",
+            "code": 0,
+            "signal": null,
+            "ms": 23838,
+            "logBytes": 6343,
+            "logSha256": "526303f658129ffd3fa889b5df8279289dfa8915918a026507ac09327dbe2912",
+            "decodedLog": "PASS general/admin login labels {\"kind\":\"login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/client-portal\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"CLIENT\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/invoice-document?id=502\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TECHNICIAN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"login\",\"role\":\"TEAM_LEADER\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/technician\",\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"visible\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"login\",\"state\":\"hidden\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":184,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"login\",\"invalidAccountControls\":7,\"nativeLogins\":8,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"initial\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"required\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"pending\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"invalid\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"literal\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"notAllowed\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS general/admin login labels {\"kind\":\"admin-login\",\"state\":\"connection\",\"widths\":[320,390,1440],\"languages\":5,\"emailPasswordNodesAndFocusPreserved\":true,\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS native general/admin login {\"kind\":\"admin-login\",\"role\":\"ADMIN\",\"exactTrimmedEmail\":true,\"exactPasswordIncludingSpaces\":true,\"literalName\":true,\"redirect\":\"/admin-menu\",\"pendingRequests\":2}\nPASS general/admin login ownership changed-text\nPASS general/admin login ownership replaced-node\nPASS general/admin login ownership changed-attributes\nPASS general/admin login language result {\"checks\":332,\"languages\":5,\"widths\":[320,390,1440],\"kind\":\"admin-login\",\"invalidAccountControls\":7,\"nativeLogins\":2,\"enterSerialized\":true,\"exactPassword\":true,\"literalServerErrors\":true,\"typedPendingRequests\":2,\"ownershipControls\":3,\"actualCachedShellOffline\":true,\"noOperationalWrites\":true}\nPASS general/admin login result {\"checks\":332,\"pages\":[{\"kind\":\"login\",\"checks\":184,\"nativeLogins\":8,\"invalidAccountControls\":7,\"visibilityStates\":2},{\"kind\":\"admin-login\",\"checks\":148,\"nativeLogins\":2,\"invalidAccountControls\":7,\"visibilityStates\":0}]}\nPASS general/admin login fixtures removed and previous language settings restored\n"
+          },
+          {
+            "script": "scripts/test-field-visual.js",
+            "code": 1,
+            "signal": null,
+            "ms": 60,
+            "logBytes": 788,
+            "logSha256": "0b10ea299e8349430cb5f08aca992e63b72326dc088ac493a5d1a3f2828e8b31",
+            "decodedLog": "node:internal/modules/cjs/loader:1520\n  throw err;\n  ^\n\nError: Cannot find module '/workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-visual.js'\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1517:15)\n    at wrapResolveFilename (node:internal/modules/cjs/loader:1071:27)\n    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1095:10)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1122:12)\n    at Module._load (node:internal/modules/cjs/loader:1294:5)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)\n    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)\n    at node:internal/main/run_main_module:33:47 {\n  code: 'MODULE_NOT_FOUND',\n  requireStack: []\n}\n\nNode.js v24.19.0\n"
+          }
+        ]
+      },
+      {
+        "label": "regress517-recovery-final",
+        "timezone": "Europe/Lisbon",
+        "instant": "natural",
+        "offset": null,
+        "controlled": false,
+        "results": [
+          {
+            "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+            "code": 0,
+            "signal": null,
+            "ms": 204,
+            "logBytes": 46,
+            "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+            "decodedLog": "PASS isolated administrator fixture available\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-recovery-ui.js",
+            "code": 1,
+            "signal": null,
+            "ms": 959,
+            "logBytes": 311,
+            "logSha256": "d319310669fbbad015c09b98ded9a29cfd1854c59a69897e46469f3ad9acb8d7",
+            "decodedLog": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n2 !== 1\n\n    at /workspace/scratch/1c4fa52fd046/cristalwater/scripts/test-field-client-chat-recovery-ui.js:44:93 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 2,\n  expected: 1,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n"
+          },
+          {
+            "script": "scripts/test-field-visual-flow.js",
+            "code": 0,
+            "signal": null,
+            "ms": 4262,
+            "logBytes": 406,
+            "logSha256": "55bc59e2bf5a7a56bf07bfbaeb0a82f08ffe7f12deadde1b7b1d345fb2956e3d",
+            "decodedLog": "PASS visual real form, profile data, logout and protected return: TECHNICIAN\nPASS real client portal published quote, explicit approval and persisted repair status\nPASS visual real form, profile data, logout and protected return: CLIENT\nPASS visual real form, profile data, logout and protected return: ADMIN\nVisual evidence: /workspace/scratch/1c4fa52fd046/cristalwater/reports/field-visual/1790924170456\n"
+          }
+        ]
+      },
+      {
+        "label": "regress517-final",
+        "timezone": "Europe/Lisbon",
+        "instant": "natural",
+        "offset": null,
+        "controlled": false,
+        "results": [
+          {
+            "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+            "code": 0,
+            "signal": null,
+            "ms": 204,
+            "logBytes": 46,
+            "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+            "decodedLog": "PASS isolated administrator fixture available\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-recovery-ui.js",
+            "code": 0,
+            "signal": null,
+            "ms": 11253,
+            "logBytes": 896,
+            "logSha256": "ac0904c435491c17ef2ebb37219d1babeba5e7c7a08688091c956b1d44167347",
+            "decodedLog": "PASS legacy: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS legacy: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\nPASS portal: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS portal: complete file survives reload and lost response, unicode filename, exact original download and no duplicate\nPASS portal: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\nPASS admin: draft, immutable pending send, double click, lost/wrong/queued acknowledgements, reload and exact retry\nPASS admin: complete file survives reload and lost response, unicode filename, exact original download and no duplicate\nPASS admin: offline, quota, failed/stale reads, account change and original recovery; mobile/desktop\n"
+          },
+          {
+            "script": "scripts/test-field-client-portal-extras-languages.js",
+            "code": 0,
+            "signal": null,
+            "ms": 37742,
+            "logBytes": 3596,
+            "logSha256": "914a2b988665c95f0990e89c31538f4927419deb2fe73ad0d30f0c62aff4ee69",
+            "decodedLog": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS healthy portal notifications {\"healthyNoticeCases\":75,\"languages\":5,\"widths\":[320,390,1440],\"spanishNativeResponseRendered\":true,\"explicitReadAttempts\":2,\"nativeSqlConfirmations\":1,\"pendingRequests\":2,\"originalNodesFocusAndGuardRetained\":true}\nPASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work\nPASS portal extras result {\"checks\":228,\"languageCases\":210,\"nativeRetry\":true,\"literalNativeNotification\":true,\"ownershipControls\":2,\"pendingRequests\":2,\"currentWorkerShellBytes\":true,\"actualPageContinuedOffline\":true,\"actualColdOfflineReload\":true,\"primaryFailureStates\":4,\"primaryRetry\":true}\nPASS actual portal quote presentation {\"quoteLanguageCases\":217,\"cachedQuotesJsBytesEqualSource\":true,\"coldOfflineQuoteErrors\":true,\"realLanguageSelector\":true,\"pureQuotePaintDoesNotReloadQuotes\":true}\nPASS legacy client chat language integration {\"languageCases\":15,\"ownershipCases\":20,\"widths\":[320,390,1440],\"languages\":5,\"nativeTextPosts\":2,\"nativeUpload\":1,\"nativeAuthenticatedDownloadBytes\":true,\"literalApiBodies\":5,\"literalAttachmentName\":true,\"retainedDraftNodesHandlers\":true,\"conversationReadsUnchanged\":true,\"sqlRowsUnchanged\":true}\nPASS portal extras fixtures removed and previous language setting restored\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-history-ui.js",
+            "code": 0,
+            "signal": null,
+            "ms": 4472,
+            "logBytes": 488,
+            "logSha256": "d5759f9c51c7e9ff6dc777f8e675c465d59fde8d7518ba6f765c601317aa06b5",
+            "decodedLog": "PASS legacy: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS portal: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\nPASS admin: imported conversation, unconfirmed author in five languages, literal text, no inferred attachment access, private ownership and mobile/desktop layout\n"
+          },
+          {
+            "script": "scripts/test-field-client-chat-privacy.js",
+            "code": 0,
+            "signal": null,
+            "ms": 1107,
+            "logBytes": 211,
+            "logSha256": "2588e5651a0304319c3103e9a7ccb82f55e19c356cab835c461e217f759af5bc",
+            "decodedLog": "{\"leaderRestStatus\":403,\"leaderPrivateEvents\":0}\nPASS client conversations remain private to their owner and administration across REST aliases and authenticated Socket.IO; field staff keep internal chat access\n"
+          },
+          {
+            "script": "scripts/test-field-visual-flow.js",
+            "code": 0,
+            "signal": null,
+            "ms": 4273,
+            "logBytes": 406,
+            "logSha256": "fae86011e442a49cba953a152ddb1fc9044b640fc177a0111ebd7f1f92076efe",
+            "decodedLog": "PASS visual real form, profile data, logout and protected return: TECHNICIAN\nPASS real client portal published quote, explicit approval and persisted repair status\nPASS visual real form, profile data, logout and protected return: CLIENT\nPASS visual real form, profile data, logout and protected return: ADMIN\nVisual evidence: /workspace/scratch/1c4fa52fd046/cristalwater/reports/field-visual/1790924357271\n"
+          }
+        ]
+      },
+      {
+        "label": "negative517-literal",
+        "timezone": "Europe/Lisbon",
+        "instant": "natural",
+        "offset": null,
+        "controlled": false,
+        "results": [
+          {
+            "script": "/workspace/scratch/1c4fa52fd046/qa-runtime/seed-admin476.cjs",
+            "code": 0,
+            "signal": null,
+            "ms": 195,
+            "logBytes": 46,
+            "logSha256": "df8f9c932734107b949fd22b48fef53f1460b8c7552a9c0a3385098b8a7dbd43",
+            "decodedLog": "PASS isolated administrator fixture available\n"
+          },
+          {
+            "script": "scripts/test-field-client-portal-extras-languages.js",
+            "code": 1,
+            "signal": null,
+            "ms": 33719,
+            "logBytes": 2968,
+            "logSha256": "0867879035e512dc0abd7425b0e4b34b51cb3ef4707a5cf6de8552e6ec9d4b4a",
+            "decodedLog": "PASS pure portal extras repaint: original focused composer and selection preserved without a core reload\nPASS portal accessible attributes {\"accessibleLabelCases\":300,\"accessibleOwnershipControls\":15,\"labels\":10,\"languages\":5,\"widths\":[320,390,1440],\"privatePaintRetainsSearchFocusValueSelectionAndNodes\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"pendingRequests\":2}\nPASS portal sidebar {\"sidebarTextCases\":60,\"sidebarMetadataCases\":30,\"sidebarOwnershipControls\":30,\"leaves\":2,\"dictionaryVariants\":10,\"languages\":5,\"widths\":[320,390,1440],\"originalNodesAndTextLeavesRetained\":true,\"privatePaintRetainsDraftFocusSelectionAndDisabledState\":true,\"noPrivatePaintReadsOrWrites\":true,\"originalSelectorPrimaryBusyGuardRetained\":true,\"canonicalHashNavigation\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"notification-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"permissions-503\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-invalid-ok\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS portal extras labels {\"name\":\"both-malformed\",\"widths\":[320,390,1440],\"languages\":5,\"originalLabelsFocusDraftsAndPendingPreserved\":true,\"pendingRequests\":2}\nPASS cold portal extras {\"name\":\"offline-cache-reload\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"503\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"ok-false\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nPASS cold portal extras {\"name\":\"malformed\",\"languages\":5,\"widths\":[320,390,1440],\"pureAndActualSelectorCases\":30,\"originalBusyGuard\":true,\"exactPendingRequests\":2}\nAssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n1 !== 0\n\n    at healthyLabels (/workspace/scratch/1c4fa52fd046/qa-runtime/negative517/scripts/test-field-client-portal-extras-languages.js:441:17)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:502:9)\n    at async /workspace/scratch/1c4fa52fd046/qa-runtime/negative517/scripts/test-field-client-portal-extras-languages.js:467:197 {\n  generatedMessage: true,\n  code: 'ERR_ASSERTION',\n  actual: 1,\n  expected: 0,\n  operator: 'strictEqual',\n  diff: 'simple'\n}\nPASS portal extras fixtures removed and previous language setting restored\n"
+          }
+        ]
+      }
+    ],
+    "failureNotes": [
+      "First recovery run reached the unchanged legacy language assertion and timed out: the old fixture set document language while the translator read the saved user language. Replace only that fixture action with the real selector; retain all assertions and 10000ms timeout.",
+      "An initial scratch command named a nonexistent visual script. It is not a product or acceptance result; the canonical test-field-visual-flow.js passes in the final batch.",
+      "A later isolated recovery run imported a prior legacy fixture for client1, producing 2!=1. Exact original JSON bytes were saved, fresh-database input was isolated, the final recovery passed, and original source bytes were restored and verified. No production/data-source change is committed.",
+      "The first negative run failed an existing healthy-notice control before the new test. It is not counted as the targeted negative. The final full negative passes all original portal controls and fails on the first English literal-body assertion; the independent extraction of the same new test fails there too."
+    ],
+    "legacyInput": {
+      "originalHash": "d21e6fb0a5cf1db5d086562ccd977f1c4aac18499765f862e6a237832d98a806",
+      "originalRestoredExactly": true
+    }
+  },
+  "lastCompleteNativeAccepted": {
+    "task": 511,
+    "accepted": true,
+    "status": "completed",
+    "conclusion": "success",
+    "code": "f94c3dc27b34941baa68d5421dab3550900e91fd",
+    "tree": "7c559fb9adcc3d6e48d6850ab02eab91366b3456",
+    "run": 36933045659,
+    "job": 110606763770,
+    "groups": 386,
+    "distinctGroups": 386,
+    "allCodeZero": true,
+    "headAndCheckoutAndTreeConfirmed": true,
+    "actualOrderExactlyMatched": true,
+    "sourceSha256": {
+      "scripts/test-field-visual-flow.js": "3887f3770688dee461551e8847ab391a459fe8edea72f5c2da1f4d5d4b81db03",
+      "frontend/client-portal.js": "2f6e290abf025f6a7df02f523915447898fca362e3efc78ab214ee87c02af43f",
+      "frontend/client-portal.html": "ad70503a30c740f460ac0ff2f85b4dd45e15e0433eccc842f3c18d2902a1ff8a",
+      "frontend/client-quotes.js": "982db1074a9b2a9fdbfd34d72aa79c83d1ea08aefa913c7bd409d3e03068b854",
+      "frontend/sw.js": "8b18efa425de295de6341ec1167472a57267796b8893b9f70d817a2c2a3e7e81",
+      "frontend/cw-auth.js": "dac8e429e4f14dd2af7c9cd17639fd798c1b723bacee472bff8b3af688da4406",
+      "frontend/client-auth-guard.js": "34e6d617857e6dc7a95272b8eacde502cb245c63e5b26d872baa658254747936",
+      "frontend/technician-login.js": "cd42e2be09a99cbf76629c1530e0f2a591d1d6e482ccc68f53f0cf55488af95e",
+      "frontend/client-login.js": "f53b3b0a7978b6163ac97b1124d33bce3084b7e02df481d46da0cc6f0023bb43",
+      "frontend/login.js": "c453bba4955cd162eb6cc71a52d7e83bd291af2a8822cc365182d54be4e1ca43",
+      "scripts/test-client-quotes-browser.js": "80933d752fba7ba1c3c2d29b3dd5c24a102c065455eab72158bb652b8421dfa5",
+      "scripts/test-client-notifications-browser.js": "3daff47adf3f52fcf274eba5febb1e312132005d758e4af7be03e76de54c2e4a",
+      "scripts/test-field-client-portal-extras-languages.js": "14e5ec1eae6cce7bd165ab96348ac989ed6e122b17118743e7861286647944e3",
+      "scripts/test-field-client-documents-ui.js": "d235410c7eb5fce3781dd97401130e93fb74721e7d5368e1428e516c83eae548",
+      "scripts/test-field-suite.js": "60c8f88efa0dcb83bcf5cf85223a2cf6249f32466c62dbe2c7e83998eb4cd150",
+      ".github/workflows/field-readiness.yml": "9ed8da9f9557f72b6bf08141109a3cc91ffb45754102c06ee6074c0e1ca3db05",
+      "tests/client-portal-context.test.js": "162777c53e55b6079cc58ca5671cb32f338d816b7d92b7f1364cbc02ea09120f",
+      "src/services/languagePreferenceService.js": "1b8bcfa0bd4e2b6179423986e90e696653aa58123b46556d2d9e50101f332490",
+      "src/routes/clientAuthRoutes.js": "33c046e4434137005a464a28844206bacd970f99f5d7d65ce009d4a89c6fe361",
+      "prisma/schema.prisma": "8846715eb9449b35ad64b4b07de74620d6bbd92da0691d4bc9a798fd299e4e8b",
+      "package.json": "caadb7c297f5f7c9415d0d28dadc1e214d39d2cc2feb6a7870afccbe8199a0c3"
+    },
+    "postgres": "16.15",
+    "additiveMigrations": 43,
+    "unitTests": 1396,
+    "unitFiles": 141,
+    "technicianTests": 4,
+    "syntax": [
+      695,
+      308,
+      44
+    ],
+    "restoreTables": 128,
+    "restoreFiles": 51,
+    "rowsAndHashesEqual": true,
+    "restoreLog": "2026-10-01T23:31:05.6156297Z PASS restored 128 tables and 51 uploaded files; database rows and file hashes match",
+    "logSha256": "f0fb38f84cca09641ed950bd011bdd9596258d1ddaa2040cbc3c118b925ec217",
+    "selectedResults": [
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 38027
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 64322
+      },
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14588
+      },
+      {
+        "script": "test-field-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10626
+      },
+      {
+        "script": "test-field-client-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8936
+      },
+      {
+        "script": "test-field-entry-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21703
+      },
+      {
+        "script": "test-field-bottom-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3977
+      },
+      {
+        "script": "test-field-agenda-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 88556
+      }
+    ],
+    "results": [
+      {
+        "script": "test-field-visual-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5759
+      },
+      {
+        "script": "test-field-reminder-delete.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11350
+      },
+      {
+        "script": "test-field-crm-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9034
+      },
+      {
+        "script": "test-field-language-reload.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4868
+      },
+      {
+        "script": "test-field-day-review-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6449
+      },
+      {
+        "script": "test-field-review-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10788
+      },
+      {
+        "script": "test-field-review-impediment-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8542
+      },
+      {
+        "script": "test-field-review-equipment-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10090
+      },
+      {
+        "script": "test-field-review-problem-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21040
+      },
+      {
+        "script": "test-field-problem-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10016
+      },
+      {
+        "script": "test-field-impediment-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23202
+      },
+      {
+        "script": "test-field-equipment-form-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25857
+      },
+      {
+        "script": "test-field-handover-receipt-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5033
+      },
+      {
+        "script": "test-field-chemical-preparation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4605
+      },
+      {
+        "script": "test-field-intake-review-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6237
+      },
+      {
+        "script": "test-field-recovery-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6959
+      },
+      {
+        "script": "test-field-photo-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6203
+      },
+      {
+        "script": "test-field-photo-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16412
+      },
+      {
+        "script": "test-field-legacy-photo-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4515
+      },
+      {
+        "script": "test-field-legacy-queue-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5034
+      },
+      {
+        "script": "test-field-gps-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6266
+      },
+      {
+        "script": "test-field-gps-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18096
+      },
+      {
+        "script": "test-field-pump-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22921
+      },
+      {
+        "script": "test-field-reminder-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13694
+      },
+      {
+        "script": "test-field-water-panel-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22871
+      },
+      {
+        "script": "test-field-water-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26948
+      },
+      {
+        "script": "test-field-alert-board-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23067
+      },
+      {
+        "script": "test-field-alert-source-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 34061
+      },
+      {
+        "script": "test-field-dashboard-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 38027
+      },
+      {
+        "script": "test-field-current-visit-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 67903
+      },
+      {
+        "script": "test-field-current-visit-time-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 64322
+      },
+      {
+        "script": "test-field-round-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27179
+      },
+      {
+        "script": "test-field-round-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23730
+      },
+      {
+        "script": "test-field-visit-shell-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 42546
+      },
+      {
+        "script": "test-field-visit-actions-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 47932
+      },
+      {
+        "script": "test-field-visit-feedback-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12419
+      },
+      {
+        "script": "test-field-visit-completion-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9158
+      },
+      {
+        "script": "test-field-visit-validation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19959
+      },
+      {
+        "script": "test-field-crew-status-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16617
+      },
+      {
+        "script": "test-field-document-center-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19662
+      },
+      {
+        "script": "test-field-document-transition-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14588
+      },
+      {
+        "script": "test-field-document-body-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12467
+      },
+      {
+        "script": "test-field-document-toolbar-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9046
+      },
+      {
+        "script": "test-field-correction-summary-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12167
+      },
+      {
+        "script": "test-field-download-error-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14928
+      },
+      {
+        "script": "test-field-push-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16427
+      },
+      {
+        "script": "test-field-auth-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7491
+      },
+      {
+        "script": "test-field-route-session-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23250
+      },
+      {
+        "script": "test-field-route-cache-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24640
+      },
+      {
+        "script": "test-field-sync-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2224
+      },
+      {
+        "script": "test-field-write-store-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2475
+      },
+      {
+        "script": "test-field-legacy-page-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5418
+      },
+      {
+        "script": "test-field-route-load-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27592
+      },
+      {
+        "script": "test-field-connection-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24896
+      },
+      {
+        "script": "test-field-map-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29771
+      },
+      {
+        "script": "test-field-access-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25641
+      },
+      {
+        "script": "test-field-assist-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31004
+      },
+      {
+        "script": "test-field-proposal-list-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28045
+      },
+      {
+        "script": "test-field-module-fallback-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 45573
+      },
+      {
+        "script": "test-field-profile-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25950
+      },
+      {
+        "script": "test-field-history-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35335
+      },
+      {
+        "script": "test-field-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10626
+      },
+      {
+        "script": "test-field-client-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8936
+      },
+      {
+        "script": "test-field-entry-login-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21703
+      },
+      {
+        "script": "test-field-bottom-navigation-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3977
+      },
+      {
+        "script": "test-field-water-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8954
+      },
+      {
+        "script": "test-field-access-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1000
+      },
+      {
+        "script": "test-field-e2e.js",
+        "code": 0,
+        "signal": null,
+        "ms": 32712
+      },
+      {
+        "script": "test-fcs-sec-tech-auth.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1913
+      },
+      {
+        "script": "test-fcs-sec-tech-workday.js",
+        "code": 0,
+        "signal": null,
+        "ms": 735
+      },
+      {
+        "script": "test-fcs-technician-t1.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1115
+      },
+      {
+        "script": "test-visit-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 623
+      },
+      {
+        "script": "test-route-os-acceptance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12007
+      },
+      {
+        "script": "test-customer-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 381
+      },
+      {
+        "script": "test-administration-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1225
+      },
+      {
+        "script": "test-finance-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 550
+      },
+      {
+        "script": "test-equipment-stock-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2930
+      },
+      {
+        "script": "test-repair-os-operational.js",
+        "code": 0,
+        "signal": null,
+        "ms": 390
+      },
+      {
+        "script": "test-system-interconnections.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8878
+      },
+      {
+        "script": "test-real-month-flow-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11072
+      },
+      {
+        "script": "test-field-preflight.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3410
+      },
+      {
+        "script": "test-field-backup.js",
+        "code": 0,
+        "signal": null,
+        "ms": 586
+      },
+      {
+        "script": "test-production-runtime-health.js",
+        "code": 0,
+        "signal": null,
+        "ms": 113
+      },
+      {
+        "script": "test-field-gps-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 380
+      },
+      {
+        "script": "test-field-two-year-api.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18073
+      },
+      {
+        "script": "test-field-billing-automation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 263
+      },
+      {
+        "script": "test-field-commercial-quotes.js",
+        "code": 0,
+        "signal": null,
+        "ms": 494
+      },
+      {
+        "script": "test-field-client-rates.js",
+        "code": 0,
+        "signal": null,
+        "ms": 729
+      },
+      {
+        "script": "test-field-retention.js",
+        "code": 0,
+        "signal": null,
+        "ms": 274
+      },
+      {
+        "script": "test-field-quote-portal.js",
+        "code": 0,
+        "signal": null,
+        "ms": 847
+      },
+      {
+        "script": "test-field-resilience.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1526
+      },
+      {
+        "script": "test-field-equipment-maintenance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 427
+      },
+      {
+        "script": "test-field-equipment-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7272
+      },
+      {
+        "script": "test-field-equipment-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 705
+      },
+      {
+        "script": "test-field-chemical-options.js",
+        "code": 0,
+        "signal": null,
+        "ms": 397
+      },
+      {
+        "script": "test-field-inventory-count-flow.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3591
+      },
+      {
+        "script": "test-field-visit-briefing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4472
+      },
+      {
+        "script": "test-field-service-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3982
+      },
+      {
+        "script": "test-field-reminder-lifecycle.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19448
+      },
+      {
+        "script": "test-field-alert-visibility.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4270
+      },
+      {
+        "script": "test-field-alert-resolution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9300
+      },
+      {
+        "script": "test-field-alert-billing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14911
+      },
+      {
+        "script": "test-field-draft-payments.js",
+        "code": 0,
+        "signal": null,
+        "ms": 696
+      },
+      {
+        "script": "test-field-draft-visibility.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5450
+      },
+      {
+        "script": "test-invoice-draft-classification-browser.js",
+        "code": 0,
+        "signal": null,
+        "ms": 659
+      },
+      {
+        "script": "test-field-payment-retry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1192
+      },
+      {
+        "script": "test-field-payment-retry-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6866
+      },
+      {
+        "script": "test-field-client-receipts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 900
+      },
+      {
+        "script": "test-field-client-receipts-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9279
+      },
+      {
+        "script": "test-field-credit-allocation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1071
+      },
+      {
+        "script": "test-field-monthly-credit.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1142
+      },
+      {
+        "script": "test-field-surplus-ledger.js",
+        "code": 0,
+        "signal": null,
+        "ms": 407
+      },
+      {
+        "script": "test-field-alert-states.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5384
+      },
+      {
+        "script": "test-field-credit-adjustment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8140
+      },
+      {
+        "script": "test-field-monthly-rates.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1541
+      },
+      {
+        "script": "test-field-invoice-regeneration.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2114
+      },
+      {
+        "script": "test-field-invoice-page-generation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2725
+      },
+      {
+        "script": "test-field-repair-monthly-once.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1553
+      },
+      {
+        "script": "test-field-repair-invoice-atomic.js",
+        "code": 0,
+        "signal": null,
+        "ms": 890
+      },
+      {
+        "script": "test-field-contract-activation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 781
+      },
+      {
+        "script": "test-field-contract-activation-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5874
+      },
+      {
+        "script": "test-field-invoice-cancellation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 669
+      },
+      {
+        "script": "test-field-invoice-credit-note.js",
+        "code": 0,
+        "signal": null,
+        "ms": 580
+      },
+      {
+        "script": "test-field-repair-payment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 750
+      },
+      {
+        "script": "test-field-cash-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1183
+      },
+      {
+        "script": "test-field-invoice-issue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 625
+      },
+      {
+        "script": "test-field-invoice-delivery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 376
+      },
+      {
+        "script": "test-field-invoice-pdf-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1940
+      },
+      {
+        "script": "test-field-financial-document-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 749
+      },
+      {
+        "script": "test-field-authenticated-document-opening.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3344
+      },
+      {
+        "script": "test-field-daily-service-log.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4616
+      },
+      {
+        "script": "test-field-company-closures.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7529
+      },
+      {
+        "script": "test-field-client-closures.js",
+        "code": 0,
+        "signal": null,
+        "ms": 587
+      },
+      {
+        "script": "test-field-client-closures-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8687
+      },
+      {
+        "script": "test-field-company-closure-edit.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6777
+      },
+      {
+        "script": "test-field-payment-ledger.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31465
+      },
+      {
+        "script": "test-field-pool-calculator-state.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35130
+      },
+      {
+        "script": "test-field-pool-calculator-writes.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1896
+      },
+      {
+        "script": "test-field-pool-calculator-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15854
+      },
+      {
+        "script": "test-field-pool-calculator-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22873
+      },
+      {
+        "script": "test-field-pool-calculator-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14866
+      },
+      {
+        "script": "test-field-extra-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 34409
+      },
+      {
+        "script": "test-field-legacy-entry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36514
+      },
+      {
+        "script": "test-field-client-technical-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35700
+      },
+      {
+        "script": "test-field-collection-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28922
+      },
+      {
+        "script": "test-field-email-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31926
+      },
+      {
+        "script": "test-field-live-map.js",
+        "code": 0,
+        "signal": null,
+        "ms": 34481
+      },
+      {
+        "script": "test-field-payment-policy-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29658
+      },
+      {
+        "script": "test-field-admin-day.js",
+        "code": 0,
+        "signal": null,
+        "ms": 35514
+      },
+      {
+        "script": "test-field-security-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33901
+      },
+      {
+        "script": "test-field-admin-catalogue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26211
+      },
+      {
+        "script": "test-field-admin-onboarding.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1731
+      },
+      {
+        "script": "test-field-admin-onboarding-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21717
+      },
+      {
+        "script": "test-field-navigation-preferences.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20134
+      },
+      {
+        "script": "test-field-supplier-hub.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1468
+      },
+      {
+        "script": "test-field-supplier-hub-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29592
+      },
+      {
+        "script": "test-field-technician-management.js",
+        "code": 0,
+        "signal": null,
+        "ms": 48529
+      },
+      {
+        "script": "test-field-technician-management-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 32941
+      },
+      {
+        "script": "test-field-fleet-management.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1642
+      },
+      {
+        "script": "test-field-fleet-management-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36557
+      },
+      {
+        "script": "test-field-vehicle-consumption.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3545
+      },
+      {
+        "script": "test-field-vehicle-consumption-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22558
+      },
+      {
+        "script": "test-field-transport-guide-create.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6514
+      },
+      {
+        "script": "test-field-transport-guide-create-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22063
+      },
+      {
+        "script": "test-field-transport-guide-items.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6507
+      },
+      {
+        "script": "test-field-transport-guide-items-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 22111
+      },
+      {
+        "script": "test-field-transport-guide-manage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5526
+      },
+      {
+        "script": "test-field-transport-guide-manage-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23260
+      },
+      {
+        "script": "test-field-work-guide-close.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4797
+      },
+      {
+        "script": "test-field-work-guide-close-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27347
+      },
+      {
+        "script": "test-field-vehicle-maintenance.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6411
+      },
+      {
+        "script": "test-field-vehicle-maintenance-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27893
+      },
+      {
+        "script": "test-field-vehicle-assignment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6187
+      },
+      {
+        "script": "test-field-vehicle-assignment-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26011
+      },
+      {
+        "script": "test-field-vehicle-stock-preset.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6608
+      },
+      {
+        "script": "test-field-vehicle-stock-preset-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25484
+      },
+      {
+        "script": "test-field-operational-risk-rules.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6119
+      },
+      {
+        "script": "test-field-operational-risk-rules-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24952
+      },
+      {
+        "script": "test-field-operational-risk-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8590
+      },
+      {
+        "script": "test-field-incident-center.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8975
+      },
+      {
+        "script": "test-field-operational-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16117
+      },
+      {
+        "script": "test-field-ai-zone-grouping.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2019
+      },
+      {
+        "script": "test-field-admin-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15346
+      },
+      {
+        "script": "test-field-legacy-dashboard.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18189
+      },
+      {
+        "script": "test-field-dashboard-metrics.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1037
+      },
+      {
+        "script": "test-field-summary-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29606
+      },
+      {
+        "script": "test-field-inventory-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15068
+      },
+      {
+        "script": "test-field-product-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 90521
+      },
+      {
+        "script": "test-field-agenda-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 88556
+      },
+      {
+        "script": "test-field-guide-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 32948
+      },
+      {
+        "script": "test-field-report-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17728
+      },
+      {
+        "script": "test-field-pdf-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10176
+      },
+      {
+        "script": "test-field-attachment-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9556
+      },
+      {
+        "script": "test-field-photo-evidence-volume.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9396
+      },
+      {
+        "script": "test-field-technician-guide-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21271
+      },
+      {
+        "script": "test-field-document-summary-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26401
+      },
+      {
+        "script": "test-field-materials-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17568
+      },
+      {
+        "script": "test-field-guide-read-scope.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4271
+      },
+      {
+        "script": "test-field-guide-read-scope-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15767
+      },
+      {
+        "script": "test-field-fleet-history.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3206
+      },
+      {
+        "script": "test-field-fleet-history-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25002
+      },
+      {
+        "script": "test-field-work-guide-start.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8230
+      },
+      {
+        "script": "test-field-work-guide-start-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26351
+      },
+      {
+        "script": "test-field-transport-guide-documents.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7245
+      },
+      {
+        "script": "test-field-transport-guide-documents-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 23666
+      },
+      {
+        "script": "test-field-financial-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2900
+      },
+      {
+        "script": "test-field-invoice-document.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4867
+      },
+      {
+        "script": "test-field-legacy-alert-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 390
+      },
+      {
+        "script": "test-field-invoice-chat.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2538
+      },
+      {
+        "script": "test-field-chat-identity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 316
+      },
+      {
+        "script": "test-field-invoice-outbound.js",
+        "code": 0,
+        "signal": null,
+        "ms": 454
+      },
+      {
+        "script": "test-field-cash-methods.js",
+        "code": 0,
+        "signal": null,
+        "ms": 382
+      },
+      {
+        "script": "test-field-account-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 975
+      },
+      {
+        "script": "test-field-legacy-admin-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 650
+      },
+      {
+        "script": "test-field-resource-chat.js",
+        "code": 0,
+        "signal": null,
+        "ms": 592
+      },
+      {
+        "script": "test-field-internal-profile-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 434
+      },
+      {
+        "script": "test-field-route-privacy.js",
+        "code": 0,
+        "signal": null,
+        "ms": 318
+      },
+      {
+        "script": "test-field-manual-invoice-reminder.js",
+        "code": 0,
+        "signal": null,
+        "ms": 517
+      },
+      {
+        "script": "test-field-client-chat-privacy.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1136
+      },
+      {
+        "script": "test-field-chat-attachments.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4310
+      },
+      {
+        "script": "test-field-internal-chat-durability.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1797
+      },
+      {
+        "script": "test-field-internal-chat-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5478
+      },
+      {
+        "script": "test-field-notification-confirmation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8829
+      },
+      {
+        "script": "test-field-client-chat-retry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 398
+      },
+      {
+        "script": "test-field-client-chat-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13792
+      },
+      {
+        "script": "test-field-client-chat-consolidation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2111
+      },
+      {
+        "script": "test-field-client-chat-history-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5357
+      },
+      {
+        "script": "test-field-client-portal-requests.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1981
+      },
+      {
+        "script": "test-field-client-portal-requests-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8404
+      },
+      {
+        "script": "test-field-client-portal-extras-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25326
+      },
+      {
+        "script": "test-field-client-edit-preservation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1842
+      },
+      {
+        "script": "test-field-pool-edit-atomicity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 890
+      },
+      {
+        "script": "test-field-client-edit-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4056
+      },
+      {
+        "script": "test-field-client-edit-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 31888
+      },
+      {
+        "script": "test-field-pool-edit-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1933
+      },
+      {
+        "script": "test-field-pool-edit-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 24469
+      },
+      {
+        "script": "test-field-technical-sheet-atomicity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2605
+      },
+      {
+        "script": "test-field-technical-sheet-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1497
+      },
+      {
+        "script": "test-field-technical-sheet-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21151
+      },
+      {
+        "script": "test-field-technical-proposals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4758
+      },
+      {
+        "script": "test-field-proposal-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1897
+      },
+      {
+        "script": "test-field-proposal-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20040
+      },
+      {
+        "script": "test-field-gps-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8878
+      },
+      {
+        "script": "test-field-write-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2228
+      },
+      {
+        "script": "test-field-write-recovery-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10760
+      },
+      {
+        "script": "test-field-internal-alert.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1585
+      },
+      {
+        "script": "test-field-internal-alert-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8710
+      },
+      {
+        "script": "test-field-internal-alert-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12286
+      },
+      {
+        "script": "test-field-stock-requests.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1760
+      },
+      {
+        "script": "test-field-stock-requests-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15406
+      },
+      {
+        "script": "test-field-stock-request-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17248
+      },
+      {
+        "script": "test-field-problem-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1474
+      },
+      {
+        "script": "test-field-problem-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20663
+      },
+      {
+        "script": "test-field-client-intake.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2024
+      },
+      {
+        "script": "test-field-client-intake-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10836
+      },
+      {
+        "script": "test-field-admin-monthly-reports.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4108
+      },
+      {
+        "script": "test-field-admin-monthly-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8432
+      },
+      {
+        "script": "test-field-monthly-print-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1376
+      },
+      {
+        "script": "test-field-monthly-print.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2345
+      },
+      {
+        "script": "test-field-monthly-print-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1007
+      },
+      {
+        "script": "test-field-report-settings.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2443
+      },
+      {
+        "script": "test-field-report-settings-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25433
+      },
+      {
+        "script": "test-field-visit-report.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7090
+      },
+      {
+        "script": "test-field-report-opening-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9949
+      },
+      {
+        "script": "test-field-report-history-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4729
+      },
+      {
+        "script": "test-field-route-preview.js",
+        "code": 0,
+        "signal": null,
+        "ms": 324
+      },
+      {
+        "script": "test-field-route-preview-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3834
+      },
+      {
+        "script": "test-field-route-preview-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 14507
+      },
+      {
+        "script": "test-field-legacy-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3499
+      },
+      {
+        "script": "test-field-legacy-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7504
+      },
+      {
+        "script": "test-field-legacy-draft-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26899
+      },
+      {
+        "script": "test-field-modern-route-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4971
+      },
+      {
+        "script": "test-field-workday-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4754
+      },
+      {
+        "script": "test-field-workday-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7143
+      },
+      {
+        "script": "test-field-visit-types.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6482
+      },
+      {
+        "script": "test-field-extra-execution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5140
+      },
+      {
+        "script": "test-field-extra-reminders.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16166
+      },
+      {
+        "script": "test-field-extra-correction.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8578
+      },
+      {
+        "script": "test-field-extra-equipment.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5697
+      },
+      {
+        "script": "test-field-extra-incomplete.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12748
+      },
+      {
+        "script": "test-field-modern-visit-drafts.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19919
+      },
+      {
+        "script": "test-field-draft-navigation-memory.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2391
+      },
+      {
+        "script": "test-field-modern-visit-draft-languages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 18081
+      },
+      {
+        "script": "test-field-team-leader-entry.js",
+        "code": 0,
+        "signal": null,
+        "ms": 41030
+      },
+      {
+        "script": "test-field-complete-daily-route.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17078
+      },
+      {
+        "script": "test-field-document-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5970
+      },
+      {
+        "script": "test-field-guide-pdf.js",
+        "code": 0,
+        "signal": null,
+        "ms": 955
+      },
+      {
+        "script": "test-field-alert-source.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6303
+      },
+      {
+        "script": "test-field-key-scope.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2772
+      },
+      {
+        "script": "test-field-operational-pages.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9524
+      },
+      {
+        "script": "test-field-admin-map-recovery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5423
+      },
+      {
+        "script": "test-field-geographic-areas.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3604
+      },
+      {
+        "script": "test-field-multi-map.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5177
+      },
+      {
+        "script": "test-field-operational-values.js",
+        "code": 0,
+        "signal": null,
+        "ms": 539
+      },
+      {
+        "script": "test-field-operational-values-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6063
+      },
+      {
+        "script": "test-field-planned-work.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3518
+      },
+      {
+        "script": "test-field-client-services.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5306
+      },
+      {
+        "script": "test-field-client-services-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12483
+      },
+      {
+        "script": "test-field-client-service-pricing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7842
+      },
+      {
+        "script": "test-field-alert-report-opening.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30942
+      },
+      {
+        "script": "test-field-visit-report-photos.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2212
+      },
+      {
+        "script": "test-field-extra-report.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4147
+      },
+      {
+        "script": "test-field-maintenance-billing.js",
+        "code": 0,
+        "signal": null,
+        "ms": 17961
+      },
+      {
+        "script": "test-field-client-monthly-report-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 857
+      },
+      {
+        "script": "test-field-client-monthly-generation.js",
+        "code": 0,
+        "signal": null,
+        "ms": 985
+      },
+      {
+        "script": "test-field-client-monthly-reports-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16045
+      },
+      {
+        "script": "test-field-client-documents-access.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1723
+      },
+      {
+        "script": "test-field-client-documents-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 21498
+      },
+      {
+        "script": "test-field-external-invoice-registration.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5844
+      },
+      {
+        "script": "test-field-external-reference-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7065
+      },
+      {
+        "script": "test-field-external-invoice-summary.js",
+        "code": 0,
+        "signal": null,
+        "ms": 29755
+      },
+      {
+        "script": "test-field-monthly-email-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4227
+      },
+      {
+        "script": "test-field-monthly-email-delivery.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2172
+      },
+      {
+        "script": "test-field-monthly-email-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10192
+      },
+      {
+        "script": "test-field-monthly-email-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1748
+      },
+      {
+        "script": "test-field-monthly-email-review-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4594
+      },
+      {
+        "script": "test-field-credit-note-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30089
+      },
+      {
+        "script": "test-field-credit-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36394
+      },
+      {
+        "script": "test-field-credit-revenue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 25560
+      },
+      {
+        "script": "test-field-financial-ai.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10279
+      },
+      {
+        "script": "test-field-financial-ai-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 28989
+      },
+      {
+        "script": "test-field-execution-values.js",
+        "code": 0,
+        "signal": null,
+        "ms": 20329
+      },
+      {
+        "script": "test-field-execution-values-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27358
+      },
+      {
+        "script": "test-field-company-expenses.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2565
+      },
+      {
+        "script": "test-field-company-expenses-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7729
+      },
+      {
+        "script": "test-field-expense-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3126
+      },
+      {
+        "script": "test-field-expense-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10063
+      },
+      {
+        "script": "test-field-repair-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7142
+      },
+      {
+        "script": "test-field-repair-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11733
+      },
+      {
+        "script": "test-field-repair-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3515
+      },
+      {
+        "script": "test-field-repair-materials-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11848
+      },
+      {
+        "script": "test-field-repair-work.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2463
+      },
+      {
+        "script": "test-field-repair-work-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6186
+      },
+      {
+        "script": "test-field-repair-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4615
+      },
+      {
+        "script": "test-field-repair-labor-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13519
+      },
+      {
+        "script": "test-field-labor-composition.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5790
+      },
+      {
+        "script": "test-field-labor-composition-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5659
+      },
+      {
+        "script": "test-field-cost-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9375
+      },
+      {
+        "script": "test-field-cost-period-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10007
+      },
+      {
+        "script": "test-field-maintenance-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7712
+      },
+      {
+        "script": "test-field-maintenance-costs-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 10309
+      },
+      {
+        "script": "test-field-labor-distribution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 3610
+      },
+      {
+        "script": "test-field-labor-distribution-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9759
+      },
+      {
+        "script": "test-field-labor-components.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5730
+      },
+      {
+        "script": "test-field-labor-components-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4936
+      },
+      {
+        "script": "test-field-work-time-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2532
+      },
+      {
+        "script": "test-field-expense-valuations.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4321
+      },
+      {
+        "script": "test-field-expense-valuations-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12044
+      },
+      {
+        "script": "test-field-financial-cost-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13353
+      },
+      {
+        "script": "test-field-composed-cost-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 30158
+      },
+      {
+        "script": "test-field-equipment-work-time.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2861
+      },
+      {
+        "script": "test-field-maintenance-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 13585
+      },
+      {
+        "script": "test-field-maintenance-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11052
+      },
+      {
+        "script": "test-field-equipment-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 2942
+      },
+      {
+        "script": "test-field-equipment-material-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7414
+      },
+      {
+        "script": "test-field-reminder-resources.js",
+        "code": 0,
+        "signal": null,
+        "ms": 5824
+      },
+      {
+        "script": "test-field-reminder-labor.js",
+        "code": 0,
+        "signal": null,
+        "ms": 15944
+      },
+      {
+        "script": "test-field-reminder-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11930
+      },
+      {
+        "script": "test-field-reminder-partial-returns.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8303
+      },
+      {
+        "script": "test-field-reminder-visits.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7670
+      },
+      {
+        "script": "test-field-reminder-visit-resources.js",
+        "code": 0,
+        "signal": null,
+        "ms": 9268
+      },
+      {
+        "script": "test-field-reminder-visit-costs.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19945
+      },
+      {
+        "script": "test-field-reminder-visit-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 16690
+      },
+      {
+        "script": "test-field-reminder-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7118
+      },
+      {
+        "script": "test-field-equipment-intervals.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7871
+      },
+      {
+        "script": "test-field-equipment-time-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6946
+      },
+      {
+        "script": "test-field-maintenance-share-period.js",
+        "code": 0,
+        "signal": null,
+        "ms": 19546
+      },
+      {
+        "script": "test-field-equipment-history-review.js",
+        "code": 0,
+        "signal": null,
+        "ms": 4555
+      },
+      {
+        "script": "test-field-equipment-history-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6713
+      },
+      {
+        "script": "test-field-equipment-history-time.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8461
+      },
+      {
+        "script": "test-field-financial-revenue-coverage.js",
+        "code": 0,
+        "signal": null,
+        "ms": 33270
+      },
+      {
+        "script": "test-field-monthly-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8253
+      },
+      {
+        "script": "test-field-monthly-revenue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 11979
+      },
+      {
+        "script": "test-field-maintenance-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 36090
+      },
+      {
+        "script": "test-field-repair-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 42136
+      },
+      {
+        "script": "test-field-repair-execution.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1503
+      },
+      {
+        "script": "test-field-repair-execution-revenue.js",
+        "code": 0,
+        "signal": null,
+        "ms": 27862
+      },
+      {
+        "script": "test-field-repair-execution-command.js",
+        "code": 0,
+        "signal": null,
+        "ms": 996
+      },
+      {
+        "script": "test-field-repair-no-materials.js",
+        "code": 0,
+        "signal": null,
+        "ms": 809
+      },
+      {
+        "script": "test-field-repair-execution-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 7744
+      },
+      {
+        "script": "test-field-visit-report-origin.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8328
+      },
+      {
+        "script": "test-field-product-identity.js",
+        "code": 0,
+        "signal": null,
+        "ms": 1094
+      },
+      {
+        "script": "test-field-product-identity-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 8049
+      },
+      {
+        "script": "test-field-legacy-products.js",
+        "code": 0,
+        "signal": null,
+        "ms": 6918
+      },
+      {
+        "script": "test-field-product-catalogue-ui.js",
+        "code": 0,
+        "signal": null,
+        "ms": 12744
+      },
+      {
+        "script": "test-field-extra-products.js",
+        "code": 0,
+        "signal": null,
+        "ms": 26799
+      }
+    ]
+  },
+  "pendingNative515And516": {
+    "runs": [
+      {
+        "id": 36973073397,
+        "head": "fc5ef9f5de09f865ede1177ac046bef03be79f75",
+        "tree": "9e28511ad5accd7af23aa3f5049be02cbdb86e13",
+        "event": "push",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 36972605592,
+        "head": "be2dc0f8271458576de0081d3d0bdffb3f61df1f",
+        "tree": "5c21926213825892e715e14f8b7d219daaa4ef38",
+        "event": "push",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 36945781165,
+        "head": "f3a3edeb2e1dcefebcabddffa292956617db8f2e",
+        "tree": "bd3a91585711a32b7ead58b8590d162c6037b776",
+        "event": "push",
+        "status": "completed",
+        "conclusion": "failure"
+      }
+    ],
+    "jobs515": {
+      "jobs": [
+        {
+          "id": 110729563175,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36972605592,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "jobs516": {
+      "jobs": [
+        {
+          "id": 110730977229,
+          "name": "field",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_id": 36973073397,
+          "logs_url": null,
+          "steps": [
+            {
+              "name": "Set up job",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 1
+            },
+            {
+              "name": "Initialize containers",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 2
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 3
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 4
+            },
+            {
+              "name": "Run npm ci",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 5
+            },
+            {
+              "name": "Run npx prisma validate && npx prisma generate",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 6
+            },
+            {
+              "name": "Verify additive upgrade from the previous schema",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 7
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 8
+            },
+            {
+              "name": "Run npm run check:syntax",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 9
+            },
+            {
+              "name": "Run npm test && npm run test:technician && npm run test:field-browser",
+              "status": "completed",
+              "conclusion": "success",
+              "number": 10
+            },
+            {
+              "name": "Run node scripts/test-field-suite.js",
+              "status": "in_progress",
+              "conclusion": null,
+              "number": 11
+            },
+            {
+              "name": "Restore database and uploaded files in isolated QA",
+              "status": "pending",
+              "conclusion": null,
+              "number": 12
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 13
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 14
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 26
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "status": "pending",
+              "conclusion": null,
+              "number": 27
+            },
+            {
+              "name": "Stop containers",
+              "status": "pending",
+              "conclusion": null,
+              "number": 28
+            }
+          ]
+        }
+      ]
+    },
+    "checkedAt": "2026-10-02T07:04:49.123Z"
+  },
+  "native517": {
+    "status": "not yet published at proof generation",
+    "requires": "own exact head/tree, all386 groups and native PostgreSQL16 restore gate"
+  },
+  "cache": 288,
+  "runner": 386,
+  "ciJobBudgetMinutes": 105,
+  "batchFileCount": 10,
+  "productFileCount": 3,
+  "documentation": "Checkpoint and this proof updated; the previous plan entries remain historical to keep the batch at ten files. Reconcile the plan in the next batch.",
+  "progress": {
+    "total": 32,
+    "done": 5,
+    "inProgress": 1,
+    "notStarted": 26,
+    "C09Closed": false,
+    "C06Closed": false,
+    "C08Closed": false,
+    "C10Closed": false
+  },
+  "nextTask": 518,
+  "nextScope": "Reconcile the completion plan with this checkpoint, prioritize any completed native CI failure, then inspect remaining client-language gaps."
+}

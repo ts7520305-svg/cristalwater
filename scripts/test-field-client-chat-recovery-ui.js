@@ -102,7 +102,7 @@ let browser;
     await page.screenshot({ path: path.join(evidence, `${mode}-desktop.png`), fullPage: true });
     if (mode === 'legacy') {
       for (const language of ['en','fr','es','de','pt']) {
-        await page.evaluate(language => { localStorage.setItem('cw_language',language); document.documentElement.lang = language; }, language);
+        await page.locator('#cwLanguageSelect').selectOption(language);
         const expected = { en:'Message saved in the conversation.', fr:'Message enregistré dans la conversation.', es:'Mensaje guardado en la conversación.', de:'Nachricht im Gespräch gespeichert.', pt:'Mensagem guardada na conversa.' }[language];
         await page.waitForFunction(expected => document.querySelector('#clientChatSendStatus').textContent === expected, expected);
       }

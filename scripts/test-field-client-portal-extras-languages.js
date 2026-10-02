@@ -19,6 +19,73 @@ async function quotePresentation(page, index) {
 }
 const deadline = setTimeout(() => { console.error('Client portal extras language QA deadline'); process.exit(1); }, 150000);
 let browser, client, notice, originalLanguage, complete = false, checks = 0;
+const legacyChatUploads = [];
+async function legacyChatLanguages(context, token) {
+  const headers = { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+  for (const text of ['Atualizar', 'Enviar <b>{literal}</b>']) {
+    const response = await fetch(base + '/api/client-messages', { method: 'POST', headers, body: JSON.stringify({ clientId: client.id, text }) });
+    assert.equal(response.status, 200); assert.equal((await response.json()).ok, true);
+  }
+  const bytes = Buffer.from('Native client attachment language QA\n'), form = new FormData();
+  form.append('clientId', String(client.id)); form.append('fileName', 'Atualizar'); form.append('file', new Blob([bytes]), 'Atualizar');
+  const uploaded = await fetch(base + '/api/client-messages/upload', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: form });
+  assert.equal(uploaded.status, 200); const upload = await uploaded.json(); assert.equal(upload.ok, true);
+  const filePath = path.join(require('../src/config/uploadPath').resolveUploadBaseDir(), 'documents/client-chat', path.basename(upload.message.fileUrl));
+  legacyChatUploads.push(filePath); assert.deepEqual(await fs.readFile(filePath), bytes);
+  const fallback = await prisma.clientMessage.create({ data: { clientId: client.id, senderType: 'ADMIN', text: 'Attachment without a stored name', fileUrl: upload.message.fileUrl, fileName: null, messageType: 'FILE' } });
+  const history = await prisma.clientMessage.create({ data: { clientId: client.id, senderType: 'LEGACY', text: 'Mensagem <b>{literalHistory}</b>', fileUrl: '/uploads/documents/guessed-private.pdf' } });
+  const before = await prisma.clientMessage.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }); await prisma.$disconnect();
+  const ctx = await context(), page = await ctx.newPage(), errors = [], requests = []; page.setDefaultTimeout(10000);
+  page.on('pageerror', error => errors.push(error.message)); page.on('request', request => { const url = new URL(request.url()); if (url.pathname.startsWith('/api/')) requests.push({ path: url.pathname, method: request.method() }); });
+  const titles = ['Cristal Water - Mensagens do Cliente', 'Cristal Water - Client messages', 'Cristal Water - Messages du client', 'Cristal Water - Mensajes del cliente', 'Cristal Water - Kundennachrichten'];
+  const headings = ['Conversa com a administração', 'Conversation with the office', 'Conversation avec l’administration', 'Conversación con la administración', 'Gespräch mit der Verwaltung'];
+  const messageLabels = ['Mensagem', 'Message', 'Message', 'Mensaje', 'Nachricht'];
+  const attachments = ['Abrir anexo', 'Open attachment', 'Ouvrir la pièce jointe', 'Abrir adjunto', 'Anhang öffnen'];
+  const historyLabels = ['Mensagem antiga · autor não confirmado', 'Earlier message · author unconfirmed', 'Ancien message · auteur non confirmé', 'Mensaje anterior · autor sin confirmar', 'Frühere Nachricht · Verfasser unbestätigt'];
+  const row = id => page.locator('#messages .msg[data-message-id="' + id + '"]');
+  try {
+    await page.goto(base + '/client_chat?lang=pt', { waitUntil: 'networkidle' }); await page.locator('#cwLanguageSelect').waitFor(); await row(history.id).waitFor();
+    await page.waitForFunction(() => !document.getElementById('text').disabled);
+    assert.equal(await row(history.id).locator('a').count(), 0, 'Imported messages cannot infer access to an attachment');
+    await page.locator('#text').fill('Draft <b>{languageDraft}</b>'); await page.evaluate(() => document.getElementById('text').setSelectionRange(2, 8));
+    await page.evaluate(() => { window.qaLegacyNodes = [...document.querySelectorAll('title, .header h1, #text, #messages .msg > div, #messages .msg > a, #messages .msg > strong')]; window.qaLegacyLeaves = qaLegacyNodes.map(node => node.firstChild); window.qaLegacyHandlers = [document.getElementById('sendBtn').onclick, document.querySelector('.header button').onclick]; });
+    const state = () => page.evaluate(() => ({ token: localStorage.getItem('token'), credential: localStorage.getItem('cristalwater_jwt'), value: document.getElementById('text').value, disabled: document.getElementById('text').disabled, sendDisabled: document.getElementById('sendBtn').disabled, selection: [document.getElementById('text').selectionStart, document.getElementById('text').selectionEnd], drafts: Object.fromEntries(Object.keys(sessionStorage).filter(key => key.startsWith('cwClientChatDraft:')).map(key => [key, sessionStorage.getItem(key)])) }));
+    const initial = await state(), reads = requests.filter(request => request.path === '/api/chat/client/' + client.id).length; let languageCases = 0;
+    for (const width of [320, 390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const [index, language] of languages.entries()) {
+        await page.locator('#cwLanguageSelect').selectOption(language); await settle(page);
+        assert.equal(await page.title(), titles[index]); assert.equal(await page.locator('.header h1').textContent(), headings[index]); assert.equal(await page.locator('#text').getAttribute('aria-label'), messageLabels[index]);
+        assert.equal(await row(fallback.id).locator('a').textContent(), attachments[index]); assert.equal(await row(history.id).locator('strong').textContent(), historyLabels[index]);
+        for (const message of before) assert.equal(await row(message.id).locator('div').textContent(), message.text || message.message || '', 'The API message body must remain literal in ' + language);
+        assert.equal(await row(upload.message.id).locator('a').textContent(), 'Atualizar', 'The stored attachment name must remain literal');
+        assert.equal(await row(upload.message.id).locator('a').getAttribute('href'), '/api/client-messages/attachments/' + upload.message.id); assert.equal(await row(upload.message.id).locator('a').getAttribute('data-auth-download'), '');
+        assert.equal(await page.locator('#messages b, #messages img').count(), 0); assert.deepEqual(await state(), initial);
+        assert.equal(requests.filter(request => request.path === '/api/chat/client/' + client.id).length, reads, 'Changing language must not reload the conversation');
+        assert.equal(requests.filter(request => request.method !== 'GET' && request.path !== '/api/settings/language/me').length, 0, 'Changing language must not send or mark messages read');
+        assert(await page.evaluate(() => qaLegacyNodes.every((node, index) => node.isConnected && node.firstChild === qaLegacyLeaves[index]) && document.getElementById('sendBtn').onclick === qaLegacyHandlers[0] && document.querySelector('.header button').onclick === qaLegacyHandlers[1]));
+        assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        for (const selector of ['#sendBtn', '.header button']) { const rect = await page.locator(selector).boundingBox(); assert(rect.x >= 0 && rect.x + rect.width <= width && rect.height >= 44); assert(await page.locator(selector).evaluate(node => { const range = document.createRange(); range.selectNodeContents(node); const bounds = node.getBoundingClientRect(); return [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right); }), 'The complete button label must fit in ' + language); }
+        languageCases++;
+      }
+    }
+    await page.reload({ waitUntil: 'networkidle' }); await page.waitForFunction(() => document.title === 'Cristal Water - Kundennachrichten');
+    assert.equal(await page.locator('.header h1').textContent(), headings[4]); assert.equal(await page.locator('#text').getAttribute('aria-label'), messageLabels[4]); assert.equal(await page.locator('#text').inputValue(), initial.value);
+    assert.equal(await row(fallback.id).locator('a').textContent(), attachments[4]); assert.equal(await row(history.id).locator('strong').textContent(), historyLabels[4]);
+    for (const message of before) assert.equal(await row(message.id).locator('div').textContent(), message.text || message.message || '');
+    assert.equal(await row(upload.message.id).locator('a').textContent(), 'Atualizar');
+    await page.setViewportSize({ width: 320, height: 900 }); await capture(page, 'legacy-chat-de-320', '.header');
+    await page.evaluate(() => { document.querySelector('title').firstChild.nodeValue = 'Foreign title <b>{literal}</b>'; document.querySelector('.header h1').append(document.createElement('span')); document.getElementById('text').removeAttribute('aria-label'); const original = document.querySelector('#messages .msg > a'); const clone = original.cloneNode(true); clone.id = 'qaForeignChatLink'; document.body.append(clone); });
+    const foreign = await page.locator('#qaForeignChatLink').textContent(), heading = await page.locator('.header h1').innerHTML(); let ownershipCases = 0;
+    for (const language of languages) {
+      await page.locator('#cwLanguageSelect').selectOption(language); await settle(page);
+      assert.equal(await page.title(), 'Foreign title <b>{literal}</b>'); assert.equal(await page.locator('.header h1').innerHTML(), heading); assert.equal(await page.locator('#text').getAttribute('aria-label'), null); assert.equal(await page.locator('#qaForeignChatLink').textContent(), foreign); ownershipCases += 4;
+    }
+    const response = await fetch(base + '/api/client-messages/attachments/' + upload.message.id, { headers: { Authorization: 'Bearer ' + token } }); assert.equal(response.status, 200); assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes);
+    assert.deepEqual(await prisma.clientMessage.findMany({ where: { clientId: client.id }, orderBy: { id: 'asc' } }), before); await prisma.$disconnect(); assert.deepEqual(errors, []);
+    console.log('PASS legacy client chat language integration ' + JSON.stringify({ languageCases, ownershipCases, widths: [320, 390, 1440], languages: 5, nativeTextPosts: 2, nativeUpload: 1, nativeAuthenticatedDownloadBytes: true, literalApiBodies: before.length, literalAttachmentName: true, retainedDraftNodesHandlers: true, conversationReadsUnchanged: true, retainedLanguageOnReload: true, sqlRowsUnchanged: true }));
+  } finally { await ctx.close(); }
+}
 process.on('exit', code => { if (!code && !complete) process.exitCode = 1; });
 const settle = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 const pending = page => page.evaluate(() => new Promise((resolve, reject) => {
@@ -274,8 +341,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v287')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v287')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v288')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v288')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
@@ -409,9 +476,11 @@ async function database() {
   console.log('PASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work'); await offline.close();
   assert.deepEqual(await database(), finalDatabaseExpected);
   console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true }));
-  console.log('PASS actual portal quote presentation ' + JSON.stringify({ quoteLanguageCases, cachedQuotesJsBytesEqualSource: true, coldOfflineQuoteErrors: true, realLanguageSelector: true, pureQuotePaintDoesNotReloadQuotes: true })); complete = true;
+  console.log('PASS actual portal quote presentation ' + JSON.stringify({ quoteLanguageCases, cachedQuotesJsBytesEqualSource: true, coldOfflineQuoteErrors: true, realLanguageSelector: true, pureQuotePaintDoesNotReloadQuotes: true }));
+  await legacyChatLanguages(context, token); complete = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   clearTimeout(deadline); await browser?.close(); await prisma.$disconnect();
   if (client) { if (notice) await prisma.notification.delete({ where: { id: notice.id } }); await prisma.clientMessage.deleteMany({ where: { clientId: client.id } }); const key = 'LANGUAGE:CLIENT:' + client.id; await prisma.systemSetting.deleteMany({ where: { key } }); if (originalLanguage) await prisma.systemSetting.create({ data: originalLanguage }); await prisma.client.delete({ where: { id: client.id } }); assert.equal(await prisma.client.count({ where: { id: client.id } }), 0); assert.deepEqual(await prisma.systemSetting.findUnique({ where: { key } }), originalLanguage); console.log('PASS portal extras fixtures removed and previous language setting restored'); }
+  for (const file of legacyChatUploads) await fs.rm(file, { force: true });
   await prisma.$disconnect();
 });
