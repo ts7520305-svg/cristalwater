@@ -8,45 +8,46 @@
   <title>Cristal Water · Novo Cliente em Campo</title>
   <link rel="stylesheet" href="/ui/foundation.css">
   <style>
-    *{box-sizing:border-box}html,body{overflow-x:hidden}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#07111f;color:#e8f7ff}header{position:sticky;top:0;background:rgba(7,17,31,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(56,189,248,.28);padding:16px;z-index:2}h1{font-size:22px;margin:0}p{color:#9fb2c7;line-height:1.45}.wrap{padding-bottom:110px!important;max-width:880px;margin:auto;padding:16px}.card{background:linear-gradient(180deg,rgba(18,34,58,.92),rgba(10,22,39,.98));border:1px solid rgba(56,189,248,.22);border-radius:22px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.32)}[hidden]{display:none!important}#result,#permissionBox{background:#fff4d6!important;color:#654600!important;border-color:#c69a38!important}#result,.notice{overflow-wrap:anywhere}label{display:block;margin:12px 0 6px;font-weight:800}input,textarea,select{width:100%;border:1px solid rgba(148,163,184,.35);background:#0b1627;color:#e8f7ff;border-radius:14px;padding:13px;font-size:16px}textarea{min-height:90px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a.btn{border:0;border-radius:14px;padding:14px 16px;font-weight:900;cursor:pointer;text-decoration:none}.primary{background:#22c55e;color:#052e16}.secondary{background:#1f2937;color:#e8f7ff;border:1px solid rgba(255,255,255,.15)}.danger{background:#ef4444;color:white}.notice{padding:12px;border-radius:16px;margin:12px 0;background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.32);color:#fde68a}.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.32);color:#bbf7d0}.hidden{display:none}@media(max-width:720px){.grid{grid-template-columns:1fr}button,a.btn{width:100%;text-align:center}.wrap{padding:10px}.card{border-radius:18px}}
+    *{box-sizing:border-box}html,body{overflow-x:hidden}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#07111f;color:#e8f7ff}header{position:sticky;top:0;background:rgba(7,17,31,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(56,189,248,.28);padding:16px;z-index:2}h1{font-size:22px;margin:0}p{color:#9fb2c7;line-height:1.45}.cw-global-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:10px}.wrap{padding-bottom:110px!important;max-width:880px;margin:auto;padding:16px}.card{background:linear-gradient(180deg,rgba(18,34,58,.92),rgba(10,22,39,.98));border:1px solid rgba(56,189,248,.22);border-radius:22px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.32)}[hidden]{display:none!important}#result,#permissionBox{background:#fff4d6!important;color:#654600!important;border-color:#c69a38!important}#result,.notice{overflow-wrap:anywhere}label{display:block;margin:12px 0 6px;font-weight:800}input,textarea,select{width:100%;border:1px solid rgba(148,163,184,.35);background:#0b1627;color:#e8f7ff;border-radius:14px;padding:13px;font-size:16px}textarea{min-height:90px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}button,a.btn{border:0;border-radius:14px;padding:14px 16px;font-weight:900;cursor:pointer;text-decoration:none}.primary{background:#22c55e;color:#052e16}.secondary{background:#1f2937;color:#e8f7ff;border:1px solid rgba(255,255,255,.15)}.danger{background:#ef4444;color:white}.notice{padding:12px;border-radius:16px;margin:12px 0;background:rgba(234,179,8,.12);border:1px solid rgba(234,179,8,.32);color:#fde68a}.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.32);color:#bbf7d0}.hidden{display:none}@media(max-width:720px){.grid{grid-template-columns:1fr}button,a.btn{width:100%;text-align:center}.wrap{padding:10px}.card{border-radius:18px}}
   </style>
   <script src="/cw-auth.js"></script>
   <script src="/technician-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-cw-role="TECHNICIAN">
-  <header><h1>➕ Novo cliente/piscina em campo</h1><p>Ficha provisória criada pelo técnico. Conserve a ficha e confirme o registo antes de preparar a ronda.</p></header>
+  <header><h1 data-intake-copy="pageTitle" data-cw-no-i18n>➕ Novo cliente/piscina em campo</h1><p data-intake-copy="pageIntro" data-cw-no-i18n>Ficha provisória criada pelo técnico. Conserve a ficha e confirme o registo antes de preparar a ronda.</p><div class="cw-global-actions"></div></header>
   <main class="wrap">
     <div class="actions" style="margin-top:0;margin-bottom:10px;">
-      <a class="btn secondary" href="/technician-field-mode">Voltar à ronda</a>
+      <a class="btn secondary" href="/technician-field-mode" data-intake-copy="backToRoute" data-cw-no-i18n>Voltar à ronda</a>
     </div>
-    <section id="permissionBox" class="notice">A verificar permissões...</section>
-    <button type="button" class="secondary" id="intakeCheckPermission">Atualizar permissão</button>
+    <section id="permissionBox" class="notice" data-intake-copy="checkingPermissions" data-cw-no-i18n>A verificar permissões...</section>
+    <button type="button" class="secondary" id="intakeCheckPermission" data-intake-copy="refreshPermission" data-cw-no-i18n>Atualizar permissão</button>
     <form id="form" class="card" data-cw-state-managed="manual" data-cw-form-memory="managed">
-      <h2>Dados mínimos do cliente</h2>
+      <h2 data-intake-copy="customerSection" data-cw-no-i18n>Dados mínimos do cliente</h2>
       <div class="grid">
-        <div><label for="intake-clientName">Nome do cliente *</label><input id="intake-clientName" name="clientName" required placeholder="Ex: Villa Silva"></div>
-        <div><label for="intake-phone">Telefone</label><input id="intake-phone" name="phone" placeholder="+351 ..."></div>
-        <div><label for="intake-email">Email</label><input id="intake-email" name="email" type="email" placeholder="cliente@email.com"></div>
-        <div><label for="intake-zone">Zona</label><input id="intake-zone" name="zone" placeholder="Lagos, Aljezur, Portimão..."></div>
+        <div><label for="intake-clientName" data-intake-copy="clientName" data-cw-no-i18n>Nome do cliente *</label><input id="intake-clientName" name="clientName" required placeholder="Ex: Villa Silva" data-intake-placeholder="clientNamePlaceholder" data-cw-no-i18n></div>
+        <div><label for="intake-phone" data-intake-copy="phone" data-cw-no-i18n>Telefone</label><input id="intake-phone" name="phone" placeholder="+351 ..."></div>
+        <div><label for="intake-email" data-intake-copy="email" data-cw-no-i18n>Email</label><input id="intake-email" name="email" type="email" placeholder="cliente@email.com" data-intake-placeholder="emailPlaceholder" data-cw-no-i18n></div>
+        <div><label for="intake-zone" data-intake-copy="zone" data-cw-no-i18n>Zona</label><input id="intake-zone" name="zone" placeholder="Lagos, Aljezur, Portimão..." data-intake-placeholder="zonePlaceholder" data-cw-no-i18n></div>
       </div>
-      <label for="intake-address">Morada</label><input id="intake-address" name="address" placeholder="Morada ou ponto de referência">
-      <h2>Piscina</h2>
+      <label for="intake-address" data-intake-copy="address" data-cw-no-i18n>Morada</label><input id="intake-address" name="address" placeholder="Morada ou ponto de referência" data-intake-placeholder="addressPlaceholder" data-cw-no-i18n>
+      <h2 data-intake-copy="poolSection" data-cw-no-i18n>Piscina</h2>
       <div class="grid">
-        <div><label for="intake-poolName">Nome da piscina</label><input id="intake-poolName" name="poolName" placeholder="Piscina principal"></div>
-        <div><label for="intake-poolType">Tipo</label><select id="intake-poolType" name="poolType"><option value="">Selecionar</option><option>Privada</option><option>Condomínio</option><option>Hotel</option><option>Jacuzzi</option></select></div>
-        <div><label for="intake-volumeM3">Volume m³</label><input id="intake-volumeM3" name="volumeM3" type="text" inputmode="decimal" placeholder="ex: 75"></div>
-        <div><label>GPS</label><button type="button" class="secondary" id="gpsBtn">📍 Usar localização atual</button></div>
+        <div><label for="intake-poolName" data-intake-copy="poolName" data-cw-no-i18n>Nome da piscina</label><input id="intake-poolName" name="poolName" placeholder="Piscina principal" data-intake-placeholder="poolNamePlaceholder" data-cw-no-i18n></div>
+        <div><label for="intake-poolType" data-intake-copy="poolType" data-cw-no-i18n>Tipo</label><select id="intake-poolType" name="poolType"><option value="" data-intake-option="poolTypeSelect">Selecionar</option><option value="Privada" data-intake-option="poolTypePrivate">Privada</option><option value="Condomínio" data-intake-option="poolTypeCondo">Condomínio</option><option value="Hotel" data-intake-option="poolTypeHotel">Hotel</option><option value="Jacuzzi" data-intake-option="poolTypeJacuzzi">Jacuzzi</option></select></div>
+        <div><label for="intake-volumeM3" data-intake-copy="volume" data-cw-no-i18n>Volume m³</label><input id="intake-volumeM3" name="volumeM3" type="text" inputmode="decimal" placeholder="ex: 75" data-intake-placeholder="volumePlaceholder" data-cw-no-i18n></div>
+        <div><label data-intake-copy="gpsLabel" data-cw-no-i18n>GPS</label><button type="button" class="secondary" id="gpsBtn" data-intake-copy="gpsButton" data-cw-no-i18n>📍 Usar localização atual</button></div>
       </div>
-      <div class="grid"><div><label for="intakeLatitude">Latitude</label><input id="intakeLatitude" name="latitude" inputmode="decimal"></div><div><label for="intakeLongitude">Longitude</label><input id="intakeLongitude" name="longitude" inputmode="decimal"></div></div><p id="gpsState" role="status">Sem localização indicada.</p>
-      <label for="intake-notes">Notas rápidas</label><textarea id="intake-notes" name="notes" placeholder="Acesso, estado da piscina, problemas, fotos a tirar, pedido do cliente..."></textarea>
-      <div class="actions"><button class="primary" type="submit">Guardar ficha provisória</button><a class="btn secondary" href="/technician-field-mode">Voltar à ronda</a></div>
-      <p id="intakePolicy">O estado da ficha depende da configuração verificada pelo servidor. A gravação não agenda visitas.</p>
+      <div class="grid"><div><label for="intakeLatitude" data-intake-copy="latitude" data-cw-no-i18n>Latitude</label><input id="intakeLatitude" name="latitude" inputmode="decimal"></div><div><label for="intakeLongitude" data-intake-copy="longitude" data-cw-no-i18n>Longitude</label><input id="intakeLongitude" name="longitude" inputmode="decimal"></div></div><p id="gpsState" role="status" data-intake-copy="gpsEmpty" data-cw-no-i18n>Sem localização indicada.</p>
+      <label for="intake-notes" data-intake-copy="notes" data-cw-no-i18n>Notas rápidas</label><textarea id="intake-notes" name="notes" placeholder="Acesso, estado da piscina, problemas, fotos a tirar, pedido do cliente..." data-intake-placeholder="notesPlaceholder" data-cw-no-i18n></textarea>
+      <div class="actions"><button class="primary" type="submit" data-intake-copy="submit" data-cw-no-i18n>Guardar ficha provisória</button><a class="btn secondary" href="/technician-field-mode" data-intake-copy="backToRoute" data-cw-no-i18n>Voltar à ronda</a></div>
+      <p id="intakePolicy" data-intake-copy="policyDefault" data-cw-no-i18n>O estado da ficha depende da configuração verificada pelo servidor. A gravação não agenda visitas.</p>
     </form>
-    <section id="result" class="notice" role="status" aria-live="polite"></section><button id="intakeRetry" type="button" class="primary" hidden>Confirmar ficha guardada</button>
+    <section id="result" class="notice" role="status" aria-live="polite" data-cw-no-i18n></section><button id="intakeRetry" type="button" class="primary" hidden data-intake-copy="retryConfirm" data-cw-no-i18n>Confirmar ficha guardada</button>
   </main>
   <script src="/cw-ui-feedback.js"></script>
   <script src="/cw-field-write-store.js"></script>
+  <script src="/cw-i18n.js"></script>
   <script src="/technician-new-client.js"></script>
   <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>

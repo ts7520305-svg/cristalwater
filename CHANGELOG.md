@@ -55,3 +55,8 @@
 ## Checkpoint após TASK541 (2026-10-02)
 - Confirmados os commits remotos539–541 e checkout limpo; registados testes locais finais, Actions pendentes e próxima tarefa542 no estado oficial.
 - Checkpoint anterior conservado integralmente como arquivo; o estado oficial da raiz identifica explicitamente as entradas anteriores como históricas.
+
+## TASK542 — idiomas do intake de cliente em campo (2026-10-02)
+- Localizados os textos próprios de `technician-new-client` em PT/EN/FR/ES/DE: permissões, rascunho, envio, políticas, GPS, campos, placeholders e opções visíveis.
+- Preservado o contrato do `CWFieldWriteStore`, UUID/requestId, recibos, payload e valores aceites de `poolType` (`Privada`, `Condomínio`, `Hotel`, `Jacuzzi`); só as etiquetas visíveis mudam por idioma.
+- Regressão browser do intake ampliada para cinco idiomas, três larguras e zero escritas operacionais, mantendo bytes do rascunho próprio e compatibilidade com a memória genérica atrasada.

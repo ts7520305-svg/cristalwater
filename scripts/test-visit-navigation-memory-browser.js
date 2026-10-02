@@ -8,7 +8,7 @@ const sources=new Set(['/cw-auth.js','/technician-auth-guard.js','/technician-vi
 // Keep the native form and scripts under test; avoid unrelated navigation/help/SW
 // initialization in this component fixture. No application source is rewritten.
 const html=source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,tag=>sources.has(tag.match(/src="([^"]+)"/)?.[1])?tag:'');
-const intakeSources=new Set([...sources].filter(value=>value!=='/technician-visit.js').concat(['/cw-field-write-store.js','/technician-new-client.js']));
+const intakeSources=new Set([...sources].filter(value=>value!=='/technician-visit.js').concat(['/cw-field-write-store.js','/cw-i18n.js','/technician-new-client.js']));
 const intakeHtml=fs.readFileSync(path.join(root,'technician-new-client.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,tag=>intakeSources.has(tag.match(/src="([^"]+)"/)?.[1])?tag:'');
 const actorA={id:12,role:'TECHNICIAN',technicianId:12,principalType:'TECH'},actorB={id:12,userId:12,role:'TECHNICIAN',technicianId:13,principalType:'USER'};
 const tokenA=jwt.sign(actorA,secret,{expiresIn:'1h'}),tokenB=jwt.sign(actorB,secret,{expiresIn:'1h'});
@@ -16,6 +16,10 @@ let held=false,pending=[],navigationHeld=false,navigationPending=[],reads=0,writ
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://qa.local');
  if(url.pathname.startsWith('/api/')){
+  if(url.pathname==='/api/settings/language/me'){
+   res.setHeader('Content-Type','application/json');
+   return res.end(JSON.stringify({ok:true,language:'pt'}));
+  }
   if(req.method!=='GET'){writes++;res.writeHead(405);return res.end('{}');}
   if(url.pathname==='/api/technician-intake/settings'){res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({ok:true,techniciansCanCreateClientsPools:true,requireAdminReview:true,poolsActiveByDefault:false}));}
   const match=url.pathname.match(/^\/api\/visits\/(\d+)$/);if(!match){res.writeHead(404);return res.end('{}');}
@@ -54,6 +58,34 @@ async function main(){
   await page.evaluate(({draftKey,rawDraft,intakeLegacy})=>{localStorage.setItem(draftKey,rawDraft);sessionStorage.setItem(intakeLegacy,JSON.stringify({fields:{'intake-clientName':'Wrong previous account','intake-notes':'Wrong old note','intake-phone':'Wrong phone'}}));},{draftKey,rawDraft,intakeLegacy});
   navigationHeld=true;await page.goto(base+'/technician-new-client',{waitUntil:'commit'});
   await page.waitForFunction(()=>document.getElementById('intake-clientName')?.value==='Owned QA client'&&document.getElementById('result')?.textContent.includes('Rascunho desta conta'));
+  const intakeCopies={
+   en:{title:'➕ New client/pool in the field',result:'Draft for this account; not sent yet.',permission:'Registration allowed; forms require office review.',policy:'The form stays pending review. Saving does not confirm a scheduled visit.',gps:'Coordinates: 37.1, -8.6',submit:'Save provisional form',retry:'Confirm saved form',gpsButton:'📍 Use current location',name:'Client name *',placeholder:'E.g. Villa Silva',poolPrivate:'Private'},
+   fr:{title:'➕ Nouveau client / piscine sur le terrain',result:'Brouillon de ce compte ; pas encore envoyé.',permission:'Inscription autorisée ; les fiches nécessitent une vérification du bureau.',policy:'La fiche reste en attente de vérification. L’enregistrement ne confirme pas de visite planifiée.',gps:'Coordonnées : 37.1, -8.6',submit:'Enregistrer la fiche provisoire',retry:'Confirmer la fiche enregistrée',gpsButton:'📍 Utiliser la position actuelle',name:'Nom du client *',placeholder:'Ex. : Villa Silva',poolPrivate:'Privée'},
+   es:{title:'➕ Nuevo cliente/piscina en campo',result:'Borrador de esta cuenta; aún no enviado.',permission:'Registro permitido; las fichas requieren revisión de la oficina.',policy:'La ficha queda pendiente de revisión. Guardar no confirma una visita agendada.',gps:'Coordenadas: 37.1, -8.6',submit:'Guardar ficha provisional',retry:'Confirmar ficha guardada',gpsButton:'📍 Usar ubicación actual',name:'Nombre del cliente *',placeholder:'Ej.: Villa Silva',poolPrivate:'Privada'},
+   de:{title:'➕ Neuer Kunde/Pool vor Ort',result:'Entwurf dieses Kontos; noch nicht gesendet.',permission:'Registrierung erlaubt; Formulare erfordern Prüfung durch das Büro.',policy:'Das Formular bleibt zur Prüfung offen. Speichern bestätigt keinen geplanten Besuch.',gps:'Koordinaten: 37.1, -8.6',submit:'Vorläufiges Formular speichern',retry:'Gespeichertes Formular bestätigen',gpsButton:'📍 Aktuellen Standort verwenden',name:'Kundenname *',placeholder:'z. B. Villa Silva',poolPrivate:'Privat'},
+   pt:{title:'➕ Novo cliente/piscina em campo',result:'Rascunho desta conta; ainda não enviado.',permission:'Cadastro permitido; as fichas requerem revisão do escritório.',policy:'A ficha fica pendente de revisão. A gravação não confirma visita agendada.',gps:'Coordenadas: 37.1, -8.6',submit:'Guardar ficha provisória',retry:'Confirmar ficha guardada',gpsButton:'📍 Usar localização atual',name:'Nome do cliente *',placeholder:'Ex: Villa Silva',poolPrivate:'Privada'}
+  };
+  for(const width of [320,390,1440]){
+   await page.setViewportSize({width,height:900});
+   for(const [language,expected] of Object.entries(intakeCopies)){
+    await page.evaluate(language=>CristalI18n.applyLanguage(language),language);
+    await page.waitForFunction(expected=>document.querySelector('h1')?.textContent===expected.title&&document.getElementById('result')?.textContent.includes(expected.result)&&document.getElementById('permissionBox')?.textContent.includes(expected.permission),expected);
+    assert.equal(await page.locator('#intakePolicy').textContent(),expected.policy);
+    assert.equal(await page.locator('#gpsState').textContent(),expected.gps);
+    assert.equal(await page.locator('[type=submit]').textContent(),expected.submit);
+    assert.equal(await page.locator('#intakeRetry').textContent(),expected.retry);
+    assert.equal(await page.locator('#gpsBtn').textContent(),expected.gpsButton);
+    assert.equal(await page.locator('label[for="intake-clientName"]').textContent(),expected.name);
+    assert.equal(await page.locator('#intake-clientName').getAttribute('placeholder'),expected.placeholder);
+    assert.equal(await page.locator('#intake-poolType option[value="Privada"]').textContent(),expected.poolPrivate);
+    assert.equal(await page.locator('#intake-poolType').evaluate(node=>Array.from(node.options).map(option=>option.value).join('|')),'|Privada|Condomínio|Hotel|Jacuzzi');
+    assert.equal(await page.locator('[name=clientName]').inputValue(),draft.clientName);
+    assert.equal(await page.locator('[name=poolType]').inputValue(),draft.poolType);
+    assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),rawDraft);
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    assert.equal(writes,0);
+   }
+  }
   await page.evaluate(()=>window.addEventListener('pageshow',()=>{window.qaIntakeAfterGeneric=Object.fromEntries(Array.from(document.getElementById('form').elements).filter(node=>node.name).map(node=>[node.name,node.value]));},{once:true}));
   navigationHeld=false;navigationPending.splice(0).forEach(send=>send());await page.waitForLoadState('domcontentloaded');
   await page.waitForFunction(()=>window.qaIntakeAfterGeneric);const afterGeneric=await page.evaluate(()=>window.qaIntakeAfterGeneric);
