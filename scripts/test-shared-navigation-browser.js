@@ -8,6 +8,22 @@ if (baseline && !/^[0-9a-f]{40}$/.test(baseline)) throw Error('Use a full commit
 const source = file => baseline ? execFileSync('git', ['show', baseline + ':frontend/' + file], { cwd: root, encoding: 'utf8' }) : fs.readFileSync(path.join(root, 'frontend', file), 'utf8');
 const visual = path.join(root, 'reports/field-visual', 'shared-navigation-' + Date.now());
 let mobileChecks = 0, mobileOwnershipChecks = 0;
+let headerChecks = 0, headerOwnershipChecks = 0, emptySearchChecks = 0;
+const languages = ['pt','en','fr','es','de'];
+const roleLabels = {ADMIN:['Administrador','Administrator','Administrateur','Administrador','Administrator'],TECHNICIAN:['Técnico','Technician','Technicien','Técnico','Techniker'],CLIENT:['Cliente','Client','Client','Cliente','Kunde']};
+const headerLabels = {
+  'admin-vehicles': [['Técnicos e equipa','Technicians and team','Techniciens et équipe','Técnicos y equipo','Techniker und Team'],['Viaturas','Vehicles','Véhicules','Vehículos','Fahrzeuge']],
+  'help-center': [['Ajuda','Help','Aide','Ayuda','Hilfe'],['Centro de ajuda','Help centre','Centre d’aide','Centro de ayuda','Hilfezentrum']],
+  settings: [['Configurações','Settings','Paramètres','Configuración','Einstellungen'],['Configurações','Settings','Paramètres','Configuración','Einstellungen']],
+  'client-dashboard': [['Portal do cliente','Client portal','Portail client','Portal del cliente','Kundenportal'],['Próximas e últimas visitas','Upcoming and recent visits','Visites à venir et récentes','Próximas y últimas visitas','Bevorstehende und letzte Besuche']],
+  'client-menu': [['Portal do cliente','Client portal','Portail client','Portal del cliente','Kundenportal'],['Pedidos e orçamentos','Requests and quotes','Demandes et devis','Solicitudes y presupuestos','Anfragen und Angebote']],
+  'technician-new-client': [['Técnico em campo','Field technician','Technicien sur le terrain','Técnico de campo','Techniker vor Ort'],['Novo cliente em campo','New client in the field','Nouveau client sur le terrain','Nuevo cliente en campo','Neuer Kunde vor Ort']],
+  'technician-guide': [['Técnico em campo','Field technician','Technicien sur le terrain','Técnico de campo','Techniker vor Ort'],['Guias e logística','Guides and logistics','Bordereaux et logistique','Guías y logística','Begleitpapiere und Logistik']],
+  'technician-route': [['Técnico em campo','Field technician','Technicien sur le terrain','Técnico de campo','Techniker vor Ort'],['Sequência da rota','Route sequence','Ordre de la tournée','Secuencia de la ruta','Routenfolge']],
+};
+const searchLabels = ['Pesquisar','Search','Rechercher','Buscar','Suchen'],searchAria = ['Pesquisar no menu','Search the menu','Rechercher dans le menu','Buscar en el menú','Im Menü suchen'];
+const fullMenuLabels = ['Menu completo','Full menu','Menu complet','Menú completo','Vollständiges Menü'],closeLabels = ['Fechar','Close','Fermer','Cerrar','Schließen'];
+const emptyLabels = ['Sem resultados','No results','Aucun résultat','Sin resultados','Keine Ergebnisse'];
 const primaryLabels = {
   ADMIN: {pt:['Início','Visitas','Clientes','Financeiro','Menu'],en:['Home','Visits','Clients','Finance','Menu'],fr:['Accueil','Visites','Clients','Finances','Menu'],es:['Inicio','Visitas','Clientes','Finanzas','Menú'],de:['Start','Besuche','Kunden','Finanzen','Menü']},
   TECHNICIAN: {pt:['Início','Rota','Visita','GPS','Menu'],en:['Home','Route','Visit','GPS','Menu'],fr:['Accueil','Tournée','Visite','GPS','Menu'],es:['Inicio','Ruta','Visita','GPS','Menú'],de:['Start','Route','Besuch','GPS','Menü']},
@@ -56,6 +72,7 @@ const cases = [
         console.log('REPRODUCED historical navigation: ' + JSON.stringify({ name, position, headingY: heading.y, searchResults: 0 }));
         await context.close(); continue;
       }
+      await page.evaluate(() => { window.qaHeaderNodes=[...document.querySelectorAll('.cw-v2-context-kicker,.cw-v2-context-title,[data-cw-breadcrumb],.cw-v2-shell-topbar [data-cw-open-drawer],.cw-v2-drawer-title')];window.qaHeaderLeaves=qaHeaderNodes.map(node=>node.firstChild);window.qaSearchNode=document.querySelector('[data-cw-search-input]'); });
       for (const width of [320, 390, 1024, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         await page.evaluate(() => scrollTo(0, 0));
@@ -64,6 +81,25 @@ const cases = [
         assert(heading.y >= topbar.y + topbar.height - 1 && heading.y < 450, name + '/' + width + ': title must follow the header: ' + JSON.stringify({ heading, topbar }));
         assert.equal(await page.locator('.cw-v2-shell-sidebar').isVisible(), width > 1200);
         assert.equal(await page.locator('.cw-v2-mobile-primary').isVisible(), width <= 900);
+        const headerInput = page.locator('[data-cw-search-input]');
+        await headerInput.fill('Literal Á<{unchanged}>'); await headerInput.evaluate(node=>{node.focus();node.setSelectionRange(2,7);});
+        for (const language of ['en','fr','es','de','pt']) {
+          await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);
+          await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+          const index=languages.indexOf(language),[areas,titles]=headerLabels[name];
+          assert.equal(await page.locator('.cw-v2-context-kicker').textContent(),areas[index],name+'/'+language+'/'+width+': header area');
+          assert.equal(await page.locator('.cw-v2-context-title').textContent(),titles[index],name+'/'+language+'/'+width+': header title');
+          assert.equal(await page.locator('[data-cw-breadcrumb]').textContent(),[roleLabels[expectedRole][index],areas[index],titles[index]].join(' / '));
+          assert.equal(await headerInput.getAttribute('placeholder'),searchLabels[index]);assert.equal(await headerInput.getAttribute('aria-label'),searchAria[index]);
+          assert.equal(await page.locator('.cw-v2-shell-topbar [data-cw-open-drawer]').textContent(),primaryLabels[expectedRole][language][4]);
+          assert.equal(await page.locator('.cw-v2-drawer-title').textContent(),primaryLabels[expectedRole][language][4]);
+          assert.equal(await page.locator('.cw-v2-drawer-panel').getAttribute('aria-label'),fullMenuLabels[index]);assert.equal(await page.locator('[data-cw-close-drawer]').getAttribute('aria-label'),closeLabels[index]);
+          assert(await page.evaluate(()=>qaHeaderNodes.every((node,index)=>node.firstChild===qaHeaderLeaves[index])&&qaSearchNode===document.querySelector('[data-cw-search-input]')&&document.activeElement===qaSearchNode&&qaSearchNode.value==='Literal Á<{unchanged}>'&&qaSearchNode.selectionStart===2&&qaSearchNode.selectionEnd===7));
+          assert(await page.locator('.cw-v2-shell-topbar').evaluate(node=>{const bounds=node.getBoundingClientRect();return bounds.left>=0&&bounds.right<=innerWidth&&parseFloat(getComputedStyle(document.body).paddingTop)>=bounds.height;}));
+          assert.equal(await page.evaluate(()=>localStorage.getItem('cwFieldOutbox:navigation')),'preserve-work');headerChecks++;
+          if(width===320&&language==='de')await page.screenshot({path:path.join(visual,name+'-de-header-320.png')});
+        }
+        await headerInput.fill('');
         if (width <= 900) {
           const mobile = page.locator('.cw-v2-mobile-primary');
           assert.equal(await mobile.locator(':scope > a,:scope > button').count(), 5);
@@ -99,6 +135,24 @@ const cases = [
         assert.equal(await trigger.evaluate(node => node === document.activeElement), true);
         if ([320, 1440].includes(width)) await page.screenshot({ path: path.join(visual, name + '-' + width + '.png') });
       }
+      // Text and accessible attributes have separate private ownership; neither may reclaim foreign mutations or clones.
+      await page.evaluate(()=>{
+        const [area,title,breadcrumb,menu,drawerTitle]=qaHeaderNodes,input=qaSearchNode,dialog=document.querySelector('.cw-v2-drawer-panel');
+        area.firstChild.nodeValue='Foreign header <b>{literal}</b>';title.append(document.createElement('span'));breadcrumb.replaceChild(document.createTextNode(breadcrumb.firstChild.nodeValue),breadcrumb.firstChild);
+        const menuClone=menu.cloneNode(true),inputClone=input.cloneNode(true),drawerClone=drawerTitle.cloneNode(true);document.body.append(menuClone,inputClone,drawerClone);
+        input.setAttribute('placeholder','Foreign search <b>{literal}</b>');dialog.setAttribute('aria-label','Foreign dialog {literal}');
+        window.qaForeignHeader=[area,title,breadcrumb,menuClone,drawerClone];window.qaForeignHeaderHtml=qaForeignHeader.map(node=>node.innerHTML);
+        window.qaForeignInput=inputClone;window.qaForeignInputHtml=inputClone.outerHTML;
+      });
+      for(const language of languages){
+        await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        assert(await page.evaluate(()=>qaForeignHeader.every((node,index)=>node.innerHTML===qaForeignHeaderHtml[index])&&qaForeignInput.outerHTML===qaForeignInputHtml));
+        assert.equal(await page.locator('.cw-v2-shell-topbar [data-cw-search-input]').getAttribute('placeholder'),'Foreign search <b>{literal}</b>');assert.equal(await page.locator('.cw-v2-drawer-panel').getAttribute('aria-label'),'Foreign dialog {literal}');
+        assert.equal(await page.locator('.cw-v2-shell-topbar [data-cw-search-input]').getAttribute('aria-label'),searchAria[languages.indexOf(language)]);assert.equal(await page.locator('[data-cw-close-drawer]').getAttribute('aria-label'),closeLabels[languages.indexOf(language)]);
+        assert.equal(await page.locator('.cw-v2-shell-topbar [data-cw-open-drawer]').textContent(),primaryLabels[expectedRole][language][4]);headerOwnershipChecks+=8;
+      }
+      await page.evaluate(()=>{for(const node of qaForeignHeader.slice(3))node.remove();qaForeignInput.remove();});
       // The painter owns only its original text leaves; foreign changes and clones stay literal.
       await page.evaluate(() => { const nodes=[...document.querySelector('.cw-v2-mobile-primary').children],clone=nodes[0].cloneNode(true);clone.id='qaPrimaryClone';document.body.appendChild(clone);nodes[0].firstChild.nodeValue='Foreign navigation <b>{literal}</b>';nodes[1].append(document.createElement('span'));nodes[2].replaceChild(document.createTextNode(nodes[2].firstChild.nodeValue),nodes[2].firstChild);window.qaForeignPrimary=[nodes[0],nodes[1],nodes[2],clone];window.qaForeignPrimaryHtml=qaForeignPrimary.map(node=>node.innerHTML); });
       for (const language of ['pt','en','fr','es','de']) {
@@ -115,6 +169,16 @@ const cases = [
       await input.press('ArrowDown'); assert.equal(await results.locator('a').first().evaluate(node => node === document.activeElement), true);
       await page.keyboard.press('Escape'); assert.equal(await results.isVisible(), false); assert.equal(await input.evaluate(node => node === document.activeElement), true);
       await input.fill('no-such-menu-item'); assert.equal(await results.locator('a').count(), 0); assert(await results.locator('[role=status]').isVisible());
+      await results.locator('[role=status]').evaluate(node=>{window.qaEmptyNode=node;window.qaEmptyLeaf=node.firstChild;window.qaEmptyParent=node.parentElement;});
+      for(const language of ['en','fr','es','de','pt']){
+        await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        assert.equal(await results.locator('[role=status]').textContent(),emptyLabels[languages.indexOf(language)]);
+        assert(await page.evaluate(()=>qaEmptyNode.firstChild===qaEmptyLeaf&&qaEmptyNode.parentElement===qaEmptyParent&&document.querySelector('[data-cw-search-input]').value==='no-such-menu-item'&&document.activeElement===document.querySelector('[data-cw-search-input]')));emptySearchChecks++;
+      }
+      await page.evaluate(()=>{const clone=qaEmptyNode.cloneNode(true);document.body.appendChild(clone);qaEmptyNode.firstChild.nodeValue='Foreign result <b>{literal}</b>';window.qaEmptyClone=clone;window.qaEmptyCloneText=clone.textContent;});
+      for(const language of languages){await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert.equal(await results.locator('[role=status]').textContent(),'Foreign result <b>{literal}</b>');assert(await page.evaluate(()=>qaEmptyClone.textContent===qaEmptyCloneText));emptySearchChecks+=2;}
+      await page.evaluate(()=>{document.documentElement.lang='pt';dispatchEvent(new CustomEvent('cw-language-change',{detail:{language:'pt'}}));});
       await page.evaluate(() => {
         for (const href of ['/safe-destination', '//external.invalid', 'javascript:void(0)']) {
           const a = document.createElement('a'); a.href = href; a.setAttribute('data-shell-search', '<img src=x onerror=alert(1)> menu-probe'); document.body.appendChild(a);
@@ -133,6 +197,7 @@ const cases = [
       await context.close();
     }
     console.log('PASS shared mobile navigation: ' + JSON.stringify({ mobileChecks,mobileOwnershipChecks,languages: 5,widths: [320,390],profiles: ['ADMIN','CLIENT','TECHNICIAN','TEAM_LEADER'],fiveWholeLabels: true,targetsAtLeast44px: true,nodesAndDestinationsAndWorkRetained: true,componentOnly: true }));
+    console.log('PASS shared header and search: '+JSON.stringify({headerChecks,headerOwnershipChecks,emptySearchChecks,languages:5,widths:[320,390,1024,1440],ownedLeavesAndAttributes:true,focusSelectionValueNodesAndWorkRetained:true,componentOnly:true}));
     console.log('Navigation visual evidence: ' + visual);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

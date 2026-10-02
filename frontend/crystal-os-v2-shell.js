@@ -5,6 +5,26 @@
   let searchInput, searchResults, drawerTrigger;
   const boundSearchInputs = new WeakSet();
 
+  const emptySearchCopy = (() => {
+    const languages = ['pt','en','fr','es','de'];
+    const copy = ['Sem resultados','No results','Aucun résultat','Sin resultados','Keine Ergebnisse'];
+    const leaves = new Map();
+    const text = () => copy[Math.max(0,languages.indexOf(document.documentElement.lang))];
+    function create() {
+      const node = document.createElement('p'); node.setAttribute('role','status'); node.dataset.cwNoI18n = '';
+      const rendered = text(); node.textContent = rendered; leaves.set(node,{textNode:node.firstChild,rendered}); return node;
+    }
+    function paint() {
+      for (const [node,leaf] of leaves) {
+        if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered) { leaves.delete(node); continue; }
+        const rendered = text(); if (rendered !== leaf.rendered) leaf.textNode.nodeValue = rendered; leaf.rendered = rendered;
+      }
+    }
+    window.addEventListener('cw-language-change',paint);
+    new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+    return {create};
+  })();
+
   function loadStateAdapter() {
     if (window.CWV2StateAdapter?.start) {
       window.CWV2StateAdapter.start();
@@ -525,7 +545,7 @@
       searchResults.appendChild(link);
     }
     if (!matches.length) {
-      const empty = document.createElement('p'); empty.setAttribute('role', 'status'); empty.textContent = 'Sem resultados'; searchResults.appendChild(empty);
+      searchResults.appendChild(emptySearchCopy.create());
     }
     searchResults.style.display = 'block';
   }

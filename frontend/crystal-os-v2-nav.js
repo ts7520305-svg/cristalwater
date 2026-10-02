@@ -278,8 +278,169 @@
       pool: ['Piscina','Pool','Piscine','Piscina','Pool'],
       payments: ['Pagamentos','Payments','Paiements','Pagos','Zahlungen'],
       menu: ['Menu','Menu','Menu','Menú','Menü'],
+      search: ['Pesquisar','Search','Rechercher','Buscar','Suchen'],
+      searchLabel: ['Pesquisar no menu','Search the menu','Rechercher dans le menu','Buscar en el menú','Im Menü suchen'],
+      fullMenu: ['Menu completo','Full menu','Menu complet','Menú completo','Vollständiges Menü'],
+      close: ['Fechar','Close','Fermer','Cerrar','Schließen'],
     };
+    // Only labels from our static page/navigation definitions may own header leaves.
+    // The catalogue, page content and any labels supplied by users stay separate.
+    const contextCopy = {
+      'Administrador':['Administrador','Administrator','Administrateur','Administrador','Administrator'],
+      'Tecnico':['Técnico','Technician','Technicien','Técnico','Techniker'],
+      'Cliente':['Cliente','Client','Client','Cliente','Kunde'],
+      'Administração':['Administração','Administration','Administration','Administración','Verwaltung'],
+      'Visao geral':['Visão geral','Overview','Vue d’ensemble','Vista general','Übersicht'],
+      'Operacao':['Operação','Operations','Opérations','Operaciones','Betrieb'],
+      'Operação':['Operação','Operations','Opérations','Operaciones','Betrieb'],
+      'Financeiro':['Financeiro','Finance','Finances','Finanzas','Finanzen'],
+      'Clientes':['Clientes','Clients','Clients','Clientes','Kunden'],
+      'Piscinas':['Piscinas','Pools','Piscines','Piscinas','Pools'],
+      'Tecnicos e equipa':['Técnicos e equipa','Technicians and team','Techniciens et équipe','Técnicos y equipo','Techniker und Team'],
+      'Comercial':['Comercial','Sales','Commercial','Comercial','Vertrieb'],
+      'Faturacao e financeiro':['Faturação e financeiro','Billing and finance','Facturation et finances','Facturación y finanzas','Abrechnung und Finanzen'],
+      'Gestao':['Gestão','Management','Gestion','Gestión','Verwaltung'],
+      'Stock e produtos':['Stock e produtos','Stock and products','Stock et produits','Stock y productos','Lager und Produkte'],
+      'Comunicacao':['Comunicação','Communication','Communication','Comunicación','Kommunikation'],
+      'Relatorios e estatisticas':['Relatórios e estatísticas','Reports and statistics','Rapports et statistiques','Informes y estadísticas','Berichte und Statistiken'],
+      'Configuracoes':['Configurações','Settings','Paramètres','Configuración','Einstellungen'],
+      'Ajuda':['Ajuda','Help','Aide','Ayuda','Hilfe'],
+      'Tecnico em campo':['Técnico em campo','Field technician','Technicien sur le terrain','Técnico de campo','Techniker vor Ort'],
+      'Técnico em campo':['Técnico em campo','Field technician','Technicien sur le terrain','Técnico de campo','Techniker vor Ort'],
+      'Portal do cliente':['Portal do cliente','Client portal','Portail client','Portal del cliente','Kundenportal'],
+      'Equipamentos':['Equipamentos','Equipment','Équipements','Equipos','Ausrüstung'],
+      'Obras e logistica':['Obras e logística','Works and logistics','Travaux et logistique','Obras y logística','Arbeiten und Logistik'],
+      'Hoje':['Hoje','Today','Aujourd’hui','Hoy','Heute'],
+      'Logistica':['Logística','Logistics','Logistique','Logística','Logistik'],
+      'Conta':['Conta','Account','Compte','Cuenta','Konto'],
+      'Menu de módulos':['Menu de módulos','Module menu','Menu des modules','Menú de módulos','Modulmenü'],
+      'Índice de módulos':['Índice de módulos','Module index','Index des modules','Índice de módulos','Modulverzeichnis'],
+      'Centro de operacoes':['Centro de operações','Operations centre','Centre des opérations','Centro de operaciones','Betriebszentrale'],
+      'Dashboard administrativo':['Dashboard administrativo','Admin dashboard','Tableau de bord administratif','Panel administrativo','Verwaltungsübersicht'],
+      'Resumo do dia':['Resumo do dia','Daily summary','Résumé du jour','Resumen del día','Tagesübersicht'],
+      'Gestao de visitas':['Gestão de visitas','Visit management','Gestion des visites','Gestión de visitas','Besuchsverwaltung'],
+      'Rotas e rondas':['Rotas e rondas','Routes and rounds','Itinéraires et tournées','Rutas y rondas','Routen und Rundgänge'],
+      'Mapa operacional':['Mapa operacional','Operations map','Carte opérationnelle','Mapa operativo','Betriebskarte'],
+      'Atividade e valores por técnico':['Atividade e valores por técnico','Activity and amounts by technician','Activité et montants par technicien','Actividad e importes por técnico','Aktivität und Beträge je Techniker'],
+      'Alertas financeiros':['Alertas financeiros','Financial alerts','Alertes financières','Alertas financieras','Finanzwarnungen'],
+      'Visitas por técnico':['Visitas por técnico','Visits by technician','Visites par technicien','Visitas por técnico','Besuche je Techniker'],
+      'Trabalho planeado':['Trabalho planeado','Planned work','Travail planifié','Trabajo planificado','Geplante Arbeiten'],
+      'Áreas geográficas':['Áreas geográficas','Geographical areas','Zones géographiques','Zonas geográficas','Geografische Gebiete'],
+      'Sugestão de rota':['Sugestão de rota','Suggested route','Itinéraire suggéré','Ruta sugerida','Routenvorschlag'],
+      'Lista de clientes':['Lista de clientes','Client list','Liste des clients','Lista de clientes','Kundenliste'],
+      'Lista de piscinas':['Lista de piscinas','Pool list','Liste des piscines','Lista de piscinas','Poolliste'],
+      'Ficha tecnica':['Ficha técnica','Technical sheet','Fiche technique','Ficha técnica','Technisches Datenblatt'],
+      'Equipa tecnica':['Equipa técnica','Technical team','Équipe technique','Equipo técnico','Technisches Team'],
+      'Viaturas':['Viaturas','Vehicles','Véhicules','Vehículos','Fahrzeuge'],
+      'CRM e oportunidades':['CRM e oportunidades','CRM and opportunities','CRM et opportunités','CRM y oportunidades','CRM und Chancen'],
+      'Gestão com IA':['Gestão com IA','AI management','Gestion avec l’IA','Gestión con IA','Verwaltung mit KI'],
+      'Reduções por serviço':['Reduções por serviço','Service reductions','Réductions par service','Reducciones por servicio','Ermäßigungen je Leistung'],
+      'Repartição de mensalidades':['Repartição de mensalidades','Monthly fee allocation','Répartition des mensualités','Reparto de mensualidades','Aufteilung der Monatsgebühren'],
+      'Execução de reparações':['Execução de reparações','Repair execution','Exécution des réparations','Ejecución de reparaciones','Durchführung von Reparaturen'],
+      'Tempos de reparação':['Tempos de reparação','Repair times','Temps de réparation','Tiempos de reparación','Reparaturzeiten'],
+      'Revisão de emails':['Revisão de emails','Email review','Révision des emails','Revisión de correos','E-Mail-Prüfung'],
+      'Bases compostas de trabalho':['Bases compostas de trabalho','Composite labour bases','Bases de travail composées','Bases de trabajo compuestas','Zusammengesetzte Arbeitsgrundlagen'],
+      'Materiais de equipamento':['Materiais de equipamento','Equipment materials','Matériaux des équipements','Materiales de equipos','Ausrüstungsmaterialien'],
+      'Tempos de equipamento':['Tempos de equipamento','Equipment times','Temps des équipements','Tiempos de equipos','Ausrüstungszeiten'],
+      'Origem histórica do equipamento':['Origem histórica do equipamento','Equipment history source','Origine historique des équipements','Origen histórico del equipo','Herkunft der Gerätehistorie'],
+      'Recursos do lembrete':['Recursos do lembrete','Reminder resources','Ressources du rappel','Recursos del recordatorio','Erinnerungsressourcen'],
+      'Materiais do lembrete':['Materiais do lembrete','Reminder materials','Matériaux du rappel','Materiales del recordatorio','Erinnerungsmaterialien'],
+      'Visita do lembrete':['Visita do lembrete','Reminder visit','Visite du rappel','Visita del recordatorio','Erinnerungsbesuch'],
+      'Despesas e contas a pagar':['Despesas e contas a pagar','Expenses and payables','Dépenses et comptes à payer','Gastos y cuentas por pagar','Ausgaben und Verbindlichkeiten'],
+      'Visao financeira':['Visão financeira','Financial overview','Vue financière','Vista financiera','Finanzübersicht'],
+      'Centro de cobrancas':['Centro de cobranças','Collections centre','Centre de recouvrement','Centro de cobros','Zahlungseinzug'],
+      'Faturas':['Faturas','Invoices','Factures','Facturas','Rechnungen'],
+      'Pagamentos':['Pagamentos','Payments','Paiements','Pagos','Zahlungen'],
+      'Stock e movimentos':['Stock e movimentos','Stock and movements','Stock et mouvements','Stock y movimientos','Lager und Bewegungen'],
+      'Fornecedores':['Fornecedores','Suppliers','Fournisseurs','Proveedores','Lieferanten'],
+      'Contas correntes':['Contas correntes','Account balances','Comptes courants','Cuentas corrientes','Kontosalden'],
+      'Logs de email':['Logs de email','Email logs','Journaux d’emails','Registros de correo','E-Mail-Protokolle'],
+      'Comunicacoes':['Comunicações','Communications','Communications','Comunicaciones','Mitteilungen'],
+      'Conversas com clientes':['Conversas com clientes','Client conversations','Conversations avec les clients','Conversaciones con clientes','Kundengespräche'],
+      'Conversa da equipa':['Conversa da equipa','Team conversation','Conversation de l’équipe','Conversación del equipo','Teamgespräch'],
+      'Relatorios':['Relatórios','Reports','Rapports','Informes','Berichte'],
+      'Centro de relatorios':['Centro de relatórios','Report centre','Centre de rapports','Centro de informes','Berichtszentrale'],
+      'Centro de ajuda':['Centro de ajuda','Help centre','Centre d’aide','Centro de ayuda','Hilfezentrum'],
+      'Permissoes e seguranca':['Permissões e segurança','Permissions and security','Autorisations et sécurité','Permisos y seguridad','Berechtigungen und Sicherheit'],
+      'Rota do dia':['Rota do dia','Today’s route','Tournée du jour','Ruta del día','Tagesroute'],
+      'Novo cliente em campo':['Novo cliente em campo','New client in the field','Nouveau client sur le terrain','Nuevo cliente en campo','Neuer Kunde vor Ort'],
+      'Sequencia da rota':['Sequência da rota','Route sequence','Ordre de la tournée','Secuencia de la ruta','Routenfolge'],
+      'Execucao da visita':['Execução da visita','Visit execution','Exécution de la visite','Ejecución de la visita','Durchführung des Besuchs'],
+      'Navegacao GPS':['Navegação GPS','GPS navigation','Navigation GPS','Navegación GPS','GPS-Navigation'],
+      'Guias e logistica':['Guias e logística','Guides and logistics','Bordereaux et logistique','Guías y logística','Begleitpapiere und Logistik'],
+      'Estado da piscina':['Estado da piscina','Pool status','État de la piscine','Estado de la piscina','Poolzustand'],
+      'Proximas e ultimas visitas':['Próximas e últimas visitas','Upcoming and recent visits','Visites à venir et récentes','Próximas y últimas visitas','Bevorstehende und letzte Besuche'],
+      'Historico tecnico':['Histórico técnico','Technical history','Historique technique','Historial técnico','Technische Historie'],
+      'Pagamentos e faturas':['Pagamentos e faturas','Payments and invoices','Paiements et factures','Pagos y facturas','Zahlungen und Rechnungen'],
+      'Mensagens e notificacoes':['Mensagens e notificações','Messages and notifications','Messages et notifications','Mensajes y notificaciones','Nachrichten und Benachrichtigungen'],
+      'Pedidos e orcamentos':['Pedidos e orçamentos','Requests and quotes','Demandes et devis','Solicitudes y presupuestos','Anfragen und Angebote'],
+      'Indicadores principais':['Indicadores principais','Key indicators','Indicateurs principaux','Indicadores principales','Wichtige Kennzahlen'],
+      'Alertas operacionais':['Alertas operacionais','Operational alerts','Alertes opérationnelles','Alertas operativas','Betriebswarnungen'],
+      'Estado geral do sistema':['Estado geral do sistema','System overview','État général du système','Estado general del sistema','Systemübersicht'],
+      'Visitas':['Visitas','Visits','Visites','Visitas','Besuche'],
+      'Painel de visitas':['Painel de visitas','Visit dashboard','Tableau des visites','Panel de visitas','Besuchsübersicht'],
+      'Mapa e localizacao':['Mapa e localização','Map and location','Carte et localisation','Mapa y ubicación','Karte und Standort'],
+      'Ocorrencias':['Ocorrências','Incidents','Incidents','Incidencias','Vorfälle'],
+      'Historico operacional':['Histórico operacional','Operational history','Historique opérationnel','Historial operativo','Betriebshistorie'],
+      'Lista e pesquisa':['Lista e pesquisa','List and search','Liste et recherche','Lista y búsqueda','Liste und Suche'],
+      'Preferencias e comunicacao':['Preferências e comunicação','Preferences and communication','Préférences et communication','Preferencias y comunicación','Einstellungen und Kommunikation'],
+      'Pedidos e oportunidades':['Pedidos e oportunidades','Requests and opportunities','Demandes et opportunités','Solicitudes y oportunidades','Anfragen und Chancen'],
+      'Historico de comunicacoes':['Histórico de comunicações','Communication history','Historique des communications','Historial de comunicaciones','Kommunikationshistorie'],
+      'Ficha tecnica e equipamentos':['Ficha técnica e equipamentos','Technical sheet and equipment','Fiche technique et équipements','Ficha técnica y equipos','Technisches Datenblatt und Ausrüstung'],
+      'Analise da agua':['Análise da água','Water analysis','Analyse de l’eau','Análisis del agua','Wasseranalyse'],
+      'Chaves e acessos':['Chaves e acessos','Keys and access','Clés et accès','Llaves y accesos','Schlüssel und Zugänge'],
+      'Localizacao':['Localização','Location','Localisation','Ubicación','Standort'],
+      'Tecnicos':['Técnicos','Technicians','Techniciens','Técnicos','Techniker'],
+      'Guias de obra':['Guias de obra','Work guides','Bordereaux de travaux','Guías de obra','Arbeitsbegleitpapiere'],
+      'Guias de transporte':['Guias de transporte','Transport guides','Bordereaux de transport','Guías de transporte','Transportbegleitpapiere'],
+      'Localizacao em campo':['Localização em campo','Field location','Localisation sur le terrain','Ubicación en campo','Standort vor Ort'],
+      'CRM comercial':['CRM comercial','Sales CRM','CRM commercial','CRM comercial','Vertriebs-CRM'],
+      'Entrada guiada':['Entrada guiada','Guided setup','Configuration guidée','Configuración guiada','Geführte Einrichtung'],
+      'Reparacoes':['Reparações','Repairs','Réparations','Reparaciones','Reparaturen'],
+      'Férias e encerramentos':['Férias e encerramentos','Holidays and closures','Vacances et fermetures','Vacaciones y cierres','Urlaub und Schließungen'],
+      'Resumo financeiro':['Resumo financeiro','Financial summary','Résumé financier','Resumen financiero','Finanzzusammenfassung'],
+      'Centro de cobranca':['Centro de cobrança','Collections centre','Centre de recouvrement','Centro de cobros','Zahlungseinzug'],
+      'Conta corrente':['Conta corrente','Account balance','Compte courant','Cuenta corriente','Kontosaldo'],
+      'Historico':['Histórico','History','Historique','Historial','Historie'],
+      'Pendencias':['Pendências','Pending items','Éléments en attente','Pendientes','Offene Punkte'],
+      'Parametros financeiros':['Parâmetros financeiros','Financial settings','Paramètres financiers','Parámetros financieros','Finanzeinstellungen'],
+      'Stock geral':['Stock geral','General stock','Stock général','Stock general','Gesamtbestand'],
+      'Produtos e categorias':['Produtos e categorias','Products and categories','Produits et catégories','Productos y categorías','Produkte und Kategorien'],
+      'Movimentos':['Movimentos','Movements','Mouvements','Movimientos','Bewegungen'],
+      'Equipamentos por piscina':['Equipamentos por piscina','Equipment by pool','Équipements par piscine','Equipos por piscina','Ausrüstung je Pool'],
+      'Manutencoes e avarias':['Manutenções e avarias','Maintenance and faults','Entretien et pannes','Mantenimiento y averías','Wartung und Störungen'],
+      'Alertas tecnicos':['Alertas técnicos','Technical alerts','Alertes techniques','Alertas técnicas','Technische Warnungen'],
+      'Guias e assinaturas':['Guias e assinaturas','Guides and signatures','Bordereaux et signatures','Guías y firmas','Begleitpapiere und Unterschriften'],
+      'Frota':['Frota','Fleet','Flotte','Flota','Fuhrpark'],
+      'Notificacoes':['Notificações','Notifications','Notifications','Notificaciones','Benachrichtigungen'],
+      'Avisos de manutencao':['Avisos de manutenção','Maintenance reminders','Rappels d’entretien','Avisos de mantenimiento','Wartungserinnerungen'],
+      'Historico email':['Histórico email','Email history','Historique des emails','Historial de correo','E-Mail-Historie'],
+      'Relatorios operacionais':['Relatórios operacionais','Operational reports','Rapports opérationnels','Informes operativos','Betriebsberichte'],
+      'Centro de exportacao':['Centro de exportação','Export centre','Centre d’exportation','Centro de exportación','Exportzentrale'],
+      'Configuracao de relatorios':['Configuração de relatórios','Report settings','Paramètres des rapports','Configuración de informes','Berichtseinstellungen'],
+      'Metricas':['Métricas','Metrics','Indicateurs','Métricas','Kennzahlen'],
+      'Ranking de produtividade':['Ranking de produtividade','Productivity ranking','Classement de productivité','Clasificación de productividad','Produktivitätsrangliste'],
+      'Configuracoes gerais':['Configurações gerais','General settings','Paramètres généraux','Configuración general','Allgemeine Einstellungen'],
+      'Utilizadores e permissoes':['Utilizadores e permissões','Users and permissions','Utilisateurs et autorisations','Usuarios y permisos','Benutzer und Berechtigungen'],
+      'Preferências de navegação':['Preferências de navegação','Navigation preferences','Préférences de navigation','Preferencias de navegación','Menüeinstellungen'],
+      'Proxima piscina':['Próxima piscina','Next pool','Prochaine piscine','Próxima piscina','Nächster Pool'],
+      'Iniciar / concluir visita':['Iniciar / concluir visita','Start / complete visit','Commencer / terminer la visite','Iniciar / finalizar visita','Besuch starten / abschließen'],
+      'Offline e sincronizacao':['Offline e sincronização','Offline and sync','Hors ligne et synchronisation','Sin conexión y sincronización','Offline und Synchronisierung'],
+      'Guia de trabalho':['Guia de trabalho','Work guide','Bordereau de travail','Guía de trabajo','Arbeitsbegleitpapier'],
+      'Guia de transporte':['Guia de transporte','Transport guide','Bordereau de transport','Guía de transporte','Transportbegleitpapier'],
+      'Viatura e stock':['Viatura e stock','Vehicle and stock','Véhicule et stock','Vehículo y stock','Fahrzeug und Lager'],
+      'Posicao GPS':['Posição GPS','GPS position','Position GPS','Posición GPS','GPS-Position'],
+      'Historico recente':['Histórico recente','Recent history','Historique récent','Historial reciente','Letzte Vorgänge'],
+      'Perfil':['Perfil','Profile','Profil','Perfil','Profil'],
+      'Ultima e proxima visita':['Última e próxima visita','Last and next visit','Dernière et prochaine visite','Última y próxima visita','Letzter und nächster Besuch'],
+      'Relatorios e fotografias':['Relatórios e fotografias','Reports and photos','Rapports et photos','Informes y fotografías','Berichte und Fotos'],
+      'Conta e dados':['Conta e dados','Account and details','Compte et données','Cuenta y datos','Konto und Daten'],
+      'Chat':['Chat','Chat','Chat','Chat','Chat'],
+      'Detalhe tecnico':['Detalhe técnico','Technical details','Détails techniques','Detalles técnicos','Technische Details'],
+    };
+    for (const [source,variants] of Object.entries(contextCopy)) copy['context:'+source] = variants;
     const leaves = new Map();
+    const attributes = new Map();
     const text = key => copy[key][Math.max(0,languages.indexOf(document.documentElement.lang))];
     function bind(node,key,search = false,original = copy[key][0]) {
       if (!node || node.childNodes.length !== 1 || node.firstChild.nodeType !== Node.TEXT_NODE || node.firstChild.nodeValue !== original || (search && node.getAttribute('data-shell-search') !== original)) return;
@@ -287,15 +448,40 @@
       if (search) node.setAttribute('data-shell-search',rendered);
       leaves.set(node,{key,search,textNode:node.firstChild,rendered});
     }
+    function bindAttribute(node,attribute,key) {
+      if (!node || node.getAttribute(attribute) !== copy[key][0]) return;
+      const rendered = text(key); node.dataset.cwNoI18n = ''; node.setAttribute(attribute,rendered);
+      if (!attributes.has(node)) attributes.set(node,new Map());
+      attributes.get(node).set(attribute,{key,rendered});
+    }
+    function bindContext(top,meta,roleLabel) {
+      for (const [selector,source] of [['.cw-v2-context-kicker',meta.area],['.cw-v2-context-title',meta.title]]) {
+        if (Object.hasOwn(contextCopy,source)) bind(top.querySelector(selector),'context:'+source,false,source);
+      }
+      // Keep the existing account breadcrumb's independent ownership/variants.
+      if (roleLabel === 'Cliente' && meta.title === 'Conta e dados') return;
+      const sources = [roleLabel,meta.area,meta.title];
+      if (!sources.every(source => Object.hasOwn(contextCopy,source))) return;
+      copy.contextBreadcrumb = languages.map((_,index) => sources.map(source => contextCopy[source][index]).join(' / '));
+      bind(top.querySelector('[data-cw-breadcrumb]'),'contextBreadcrumb',false,sources.join(' / '));
+    }
     function paint() {
       for (const [node,leaf] of leaves) {
         if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered || (leaf.search && node.getAttribute('data-shell-search') !== leaf.rendered)) { leaves.delete(node); continue; }
         const rendered = text(leaf.key); if (rendered !== leaf.rendered) { leaf.textNode.nodeValue = rendered; if (leaf.search) node.setAttribute('data-shell-search',rendered); } leaf.rendered = rendered;
       }
+      for (const [node,owned] of attributes) {
+        if (!node.isConnected) { attributes.delete(node); continue; }
+        for (const [attribute,leaf] of owned) {
+          if (node.getAttribute(attribute) !== leaf.rendered) { owned.delete(attribute); continue; }
+          const rendered = text(leaf.key); if (rendered !== leaf.rendered) node.setAttribute(attribute,rendered); leaf.rendered = rendered;
+        }
+        if (!owned.size) attributes.delete(node);
+      }
     }
     window.addEventListener('cw-language-change',paint);
     new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-    return {bind,paint};
+    return {bind,bindAttribute,bindContext,paint};
   })();
 
   // Read-only catalogue of the same destinations used by the live ADMIN shell.
@@ -391,6 +577,11 @@
     top.className = 'cw-v2-topbar';
     top.innerHTML = '<div class="cw-v2-context"><div class="cw-v2-context-kicker">' + meta.area + '</div><div class="cw-v2-context-title">' + meta.title + '</div><div class="cw-v2-breadcrumb" data-cw-breadcrumb>' + config.title + ' / ' + meta.area + ' / ' + meta.title + '</div></div><div class="cw-v2-search"><input type="search" placeholder="Pesquisar" aria-label="Pesquisar no menu" data-cw-search-input><span class="icon">⌕</span><div class="cw-v2-search-results" data-cw-search-results></div></div><div class="cw-v2-top-actions"><span class="cw-v2-pill success" data-offline-indicator>Online</span><button type="button" class="cw-v2-pill" data-cw-open-drawer>Menu</button></div>';
     topWrap.appendChild(top);
+    const knownContext = Object.hasOwn(PAGE_META,pathname) || config.groups.some(group => group.links.some(([href]) => isActive(href)));
+    if (knownContext) navigationCopy.bindContext(top,meta,config.title);
+    navigationCopy.bindAttribute(top.querySelector('[data-cw-search-input]'),'placeholder','search');
+    navigationCopy.bindAttribute(top.querySelector('[data-cw-search-input]'),'aria-label','searchLabel');
+    navigationCopy.bind(top.querySelector('[data-cw-open-drawer]'),'menu');
     if (role === 'CLIENT' && pathname === '/client' && meta.title === 'Conta e dados') {
       topWrap.setAttribute('data-cw-client-account','');
       navigationCopy.bind(top.querySelector('.cw-v2-context-title'),'account');
@@ -402,6 +593,9 @@
     drawer.setAttribute('data-cw-drawer', '');
     drawer.setAttribute('aria-hidden', 'true');
     drawer.innerHTML = '<div class="cw-v2-drawer-backdrop" data-cw-drawer-backdrop></div><div class="cw-v2-drawer-panel" role="dialog" aria-modal="true" aria-label="Menu completo"><div class="cw-v2-drawer-head"><div class="cw-v2-drawer-title">Menu</div><button class="cw-v2-drawer-close" data-cw-close-drawer type="button" aria-label="Fechar">X</button></div><nav class="cw-v2-nav-groups" data-cw-drawer-groups></nav></div>';
+    navigationCopy.bind(drawer.querySelector('.cw-v2-drawer-title'),'menu');
+    navigationCopy.bindAttribute(drawer.querySelector('[role="dialog"]'),'aria-label','fullMenu');
+    navigationCopy.bindAttribute(drawer.querySelector('[data-cw-close-drawer]'),'aria-label','close');
 
     const drawerGroups = drawer.querySelector('[data-cw-drawer-groups]');
     config.groups.forEach((group) => drawerGroups.appendChild(createGroup(group)));
