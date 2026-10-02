@@ -30,6 +30,16 @@ async function sharedEmptyProvider(page, index) {
 
 const deadline = setTimeout(() => { console.error('History language scenario incomplete'); process.exit(1); }, 110000);
 process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
+// Await the resolved cache predicate in Node; a Promise itself is truthy.
+async function waitForCache(page, predicate, expected) {
+  const started=Date.now();let actual;
+  do {
+    actual=await page.evaluate(predicate,expected);
+    if (actual === true) return;
+    await new Promise(resolve=>setTimeout(resolve,50));
+  } while (Date.now()-started < 10000);
+  assert.equal(actual,true,'Exact cached application files must be ready within 10000ms');
+}
 (async () => {
   const now = Date.now(), parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(now));
   const day = ['year','month','day'].map(name => parts.find(part => part.type === name).value).join('-'), scheduledAt = new Date(day + 'T12:00:00.000Z');
@@ -224,7 +234,10 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.evaluate(source => { for (const key of ['user','cristalwater_user']) localStorage.setItem(key,JSON.stringify(source)); },source);await openHistory('native');
   await page.evaluate(() => navigator.serviceWorker.ready);await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const sharedEmptyCss = await fs.readFile('frontend/ui/components/empty-state.css','utf8');
-  await page.waitForFunction(async expected => { const cache = await caches.open([...await caches.keys()].find(key => key.startsWith('cristalwater-field-'))),css = await cache.match('/ui/components/empty-state.css');return !!await cache.match('/technician-history') && !!await cache.match('/technician-history.js') && !!css && await css.text() === expected; },sharedEmptyCss);
+  const routeWorker=await fs.readFile('frontend/sw.js','utf8'),routeCacheDeclarations=[...routeWorker.matchAll(/^const CACHE = '(cristalwater-field-[0-9]{8}-v[0-9]+)';$/gm)];
+  assert.equal(routeCacheDeclarations.length,1,'One exact application cache declaration is required');
+  const routeCacheVersion=routeCacheDeclarations[0][1];
+  await waitForCache(page,async expected => { const cache = await caches.open(expected.version),css = await cache.match('/ui/components/empty-state.css');return !!await cache.match('/technician-history') && !!await cache.match('/technician-history.js') && !!css && await css.text() === expected.css; },{css:sharedEmptyCss,version:routeCacheVersion});
   const beforeOffline = await raw(),dbOffline = await database();await context.setOffline(true);
   await matrix({ name: 'real-in-memory-history-offline' });
   await page.reload({ waitUntil: 'domcontentloaded' });await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
@@ -349,7 +362,9 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await openRoute(); await routeMatrix();
   assert.deepEqual(await pending(),originalPending); assert.deepEqual(await page.evaluate(() => ['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key => localStorage.getItem(key))),routeTokens);
   const routeSource=await fs.readFile('frontend/technician-route.js','utf8'),routeShell=await fs.readFile('frontend/technician-route.html','utf8');
-  await page.waitForFunction(async expected=>{const cache=await caches.open('cristalwater-field-20261002-v299'),script=await cache.match('/technician-route.js'),shell=await cache.match('/technician-route');return !!shell && await shell.text()===expected.shell && !!await cache.match('/cw-i18n.js') && !!script && await script.text()===expected.script;},{script:routeSource,shell:routeShell});
+  console.log('PRECONDITION declared route cache ' + JSON.stringify(await page.evaluate(async expected=>{const cache=await caches.open(expected.version),script=await cache.match('/technician-route.js'),plain=await cache.match('/technician-route'),shell=await cache.match('/technician-route',{ignoreSearch:true});return {version:expected.version,routeUrls:(await cache.keys()).map(request=>new URL(request.url).pathname+new URL(request.url).search).filter(url=>url.startsWith('/technician-route')),plainShellPresent:!!plain,navigationShellPresent:!!shell,exactScript:!!script && await script.text()===expected.script,exactShell:!!shell && await shell.text()===expected.shell};},{script:routeSource,shell:routeShell,version:routeCacheVersion})));
+  // Use the same ignoreSearch rule as the worker for navigation; scripts stay exact.
+  await waitForCache(page,async expected=>{const cache=await caches.open(expected.version),script=await cache.match('/technician-route.js'),shell=await cache.match('/technician-route',{ignoreSearch:true});return !!shell && await shell.text()===expected.shell && !!await cache.match('/cw-i18n.js') && !!script && await script.text()===expected.script;},{script:routeSource,shell:routeShell,version:routeCacheVersion});
   // Repainting a real cached page offline cannot invent a route cache or send work.
   await context.setOffline(true); await routeMatrix({ name:'real-in-memory-route-offline' });
   await page.reload({ waitUntil:'domcontentloaded' }); await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
@@ -380,7 +395,7 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.evaluate(() => { document.title='Foreign route title <b>{literal}</b>'; document.querySelector('.route-title').textContent='Foreign heading'; document.getElementById('refreshBtn').firstChild.nodeValue='Refresh leaf replaced'; const original=document.querySelector('main > section h2');original.replaceChildren(document.createTextNode('Original replaced leaf')); const clone=document.querySelector('.route-title').cloneNode(true);clone.id='qaRouteClone';clone.textContent='Stale clone';document.querySelector('main').appendChild(clone); });
   await routeMatrix({ ownership:true,widths:[320] });
   assert.deepEqual(await pending(),originalPending); assert.deepEqual(await page.evaluate(()=>['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key=>localStorage.getItem(key))),routeTokens); assert.deepEqual(errors,[]); routeClosing=true; await page.unroute(endpoint,routeHandler);
-  console.log('PASS legacy route language result ' + JSON.stringify({ routeCases,routeOwnershipChecks,ownedEntries:33,languages:5,widths:[320,390,1440],nativeRouteIds:sourceRows.visits.map(v=>[v.visitType,v.id]),nativeSuggestions:sourceRows.visits.filter(v=>Boolean(v.pool?.zone||v.client?.zone)).slice(0,4).length,actualQueryLanguage:true,actualSelector:true,explicitRefreshes:2,originalDatePrecedenceFormatAndInvalidDateLiteral:true,originalNodesFocusBusyGuardRetained:true,literalNamesLocationsZonesAndServerErrors:true,exactFinalRouteJsInCache299AndRealColdOffline:true,targets44AndRowsFit:true,typedPending:2,noOperationalWrites:true }));
+  console.log('PASS legacy route language result ' + JSON.stringify({ routeCases,routeOwnershipChecks,ownedEntries:33,languages:5,widths:[320,390,1440],nativeRouteIds:sourceRows.visits.map(v=>[v.visitType,v.id]),nativeSuggestions:sourceRows.visits.filter(v=>Boolean(v.pool?.zone||v.client?.zone)).slice(0,4).length,actualQueryLanguage:true,actualSelector:true,explicitRefreshes:2,originalDatePrecedenceFormatAndInvalidDateLiteral:true,originalNodesFocusBusyGuardRetained:true,literalNamesLocationsZonesAndServerErrors:true,exactFinalRouteJsAndShellInDeclaredCacheAndRealColdOffline:true,cacheVersion:routeCacheVersion,targets44AndRowsFit:true,typedPending:2,noOperationalWrites:true }));
   assert.deepEqual(errors,[]);assert(requests.filter(request => !['GET','HEAD'].includes(request.method)).every(request => request.path === '/api/settings/language/me' && request.method === 'PUT'));await context.close();
   const leaderContext = await makeContext(leaderToken,{ id: leader.id,role: 'TEAM_LEADER',name: leader.name }),leaderPage = await leaderContext.newPage(),leaderErrors = [],leaderRequests = [];
   leaderPage.on('pageerror',error => leaderErrors.push(error.message));leaderPage.on('request',request => { const path = new URL(request.url()).pathname;if (path.startsWith('/api/')) leaderRequests.push({ path,method: request.method(),body: request.postData(),auth: request.headers().authorization }); });
