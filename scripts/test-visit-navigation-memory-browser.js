@@ -121,8 +121,47 @@ async function main(){
    assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
    assert.equal(writes,0);
   }
+  const draftB={...draft,owner:'USER:12:TECH:13',clientName:'Other account draft'},draftKeyB='cwFieldIntakeDraft:USER:12:TECH:13',rawDraftB=JSON.stringify(draftB);
+  await page.evaluate(({draftKeyB,rawDraftB})=>localStorage.setItem(draftKeyB,rawDraftB),{draftKeyB,rawDraftB});
+  const switchIntake=async event=>page.evaluate(({token,actor,event})=>{
+   CristalAuth.persistSession(token,actor);
+   window.dispatchEvent(event==='storage'?new StorageEvent('storage',{key:'cristalwater_jwt',newValue:token}):new Event('cw:session-change'));
+   const fields=Array.from(document.getElementById('form').elements).filter(node=>node.name);
+   return {fields:Object.fromEntries(fields.map(node=>[node.name,node.value])),locked:fields.every(node=>node.tagName==='SELECT'?node.disabled:node.readOnly),disabled:document.querySelector('[type=submit]').disabled,gpsDisabled:document.getElementById('gpsBtn').disabled};
+  },{token:tokenB,actor:actorB,event});
+  const assertIntakeCleared=async snapshot=>{
+   assert(Object.values(snapshot.fields).every(value=>value===''),'Account change must clear private intake fields synchronously');
+   assert(snapshot.locked&&snapshot.disabled&&snapshot.gpsDisabled,'Account change must immediately lock intake fields and actions');
+   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
+   assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKeyB),rawDraftB);
+   assert.equal(writes,0);
+  };
+  const restoreIntake=async()=>{
+   await page.evaluate(({token,actor})=>{CristalAuth.persistSession(token,actor);window.dispatchEvent(new Event('cw:session-change'));},{token:tokenA,actor:actorA});
+   await page.waitForFunction(note=>document.getElementById('intake-notes').value===note&&!document.querySelector('[type=submit]').disabled,edited.notes);
+  };
+  await assertIntakeCleared(await switchIntake('session'));
+  await restoreIntake();
+  // Retained local locks make each session event arrive while send is busy.
+  for(const event of ['session','storage']){
+   await page.evaluate(()=>{window.qaIntakeLockWaiting=false;Object.defineProperty(navigator,'locks',{configurable:true,value:{request:()=>new Promise(resolve=>{window.qaIntakeLockWaiting=true;window.qaReleaseIntakeLock=resolve;})}});});
+   await page.locator('[type=submit]').click();await page.waitForFunction(()=>window.qaIntakeLockWaiting);
+   await assertIntakeCleared(await switchIntake(event));
+   await page.evaluate(()=>window.qaReleaseIntakeLock());
+   await page.waitForFunction(()=>document.getElementById('result').textContent.startsWith('A sessão mudou.'));
+   await restoreIntake();
+  }
+  // The old GPS callback cannot edit a recovered draft after leaving and returning.
+  await page.evaluate(()=>Object.defineProperty(navigator,'geolocation',{configurable:true,value:{getCurrentPosition:success=>{window.qaLateIntakeGps=success;}}}));
+  await page.locator('#gpsBtn').click();
+  await assertIntakeCleared(await switchIntake('session'));
+  await restoreIntake();
+  await page.evaluate(()=>window.qaLateIntakeGps({coords:{latitude:40,longitude:10}}));
+  assert.equal(await page.locator('[name=latitude]').inputValue(),draft.latitude);
+  assert.equal(await page.locator('[name=longitude]').inputValue(),draft.longitude);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),JSON.stringify(edited));
   assert.equal(writes,0);assert(reads>=8);assert.deepEqual(errors,[]);
-  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store draft recovery, editing and five-language send errors with literal errors preserved; QA API fixtures only, zero writes');
+  console.log('PASS visit navigation browser component: native HTML/auth/guard/visit/navigation, delayed reload, PIN/USER accounts, visit isolation, refresh, denied GET, file exclusion, legacy bytes; native intake/write-store drafts, five-language errors, immediate session/storage clearing while idle/busy and stale GPS rejection; QA fixtures only, zero writes');
  }finally{pending.splice(0).forEach(send=>send());navigationPending.splice(0).forEach(send=>send());await browser?.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

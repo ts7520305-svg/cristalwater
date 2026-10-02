@@ -133,9 +133,9 @@
     observed = raw; draft = value; unsaved = false;
   }
   async function refresh() {
+    if (!active()) { ++revision; ++gpsRevision; show(blank()); draft = blank(); state = null; ready = false; setStatus('sessionChanged'); render(); return; }
     if (busy) return;
     const generation = ++revision;
-    if (!active()) { show(blank()); draft = blank(); state = null; ready = false; setStatus('sessionChanged'); render(); return; }
     try {
       const saved = read(), rows = await store.records(scope, captured, true);
       if (!active() || revision !== generation || busy) return;
@@ -202,7 +202,7 @@
     if (!navigator.geolocation) { setStatus('gpsUnavailable'); return; }
     navigator.geolocation.getCurrentPosition(position => { if (!active() || state || busy || generation !== gpsRevision) return; form.elements.latitude.value = String(position.coords.latitude); form.elements.longitude.value = String(position.coords.longitude); saveDraft(); }, () => { if (active() && generation === gpsRevision) setStatus('gpsFailed'); }, { timeout: 10000, maximumAge: 0 });
   });
-  window.addEventListener('storage', event => { if (event.key === key && event.newValue !== observed && !busy) { conflict = true; setStatus('changedOtherWindow'); render(); } if (!active()) refresh(); }); window.addEventListener('cw:field-write-change', refresh); window.addEventListener('pagehide', () => { closed = true; ++revision; ++gpsRevision; }); window.addEventListener('pageshow', () => { closed = false; refresh(); permissions(); }); window.addEventListener('cw-language-change', repaintAll);
+  window.addEventListener('storage', event => { if (event.key === key && event.newValue !== observed && !busy) { conflict = true; setStatus('changedOtherWindow'); render(); } if (!active()) refresh(); }); window.addEventListener('cw:session-change', refresh); window.addEventListener('cw:field-write-change', refresh); window.addEventListener('pagehide', () => { closed = true; ++revision; ++gpsRevision; }); window.addEventListener('pageshow', () => { closed = false; refresh(); permissions(); }); window.addEventListener('cw-language-change', repaintAll);
   new MutationObserver(() => { const language = currentLanguage(); if (language !== lastLanguage) repaintAll(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
   setInterval(() => { if (!active()) refresh(); }, 1000);
   repaintAll(); render(); refresh(); permissions(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

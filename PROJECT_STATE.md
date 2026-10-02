@@ -1,15 +1,15 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-02 23:53 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 00:02 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit de código validado localmente e publicado: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02` (TASK542), árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`; checkout/árvore do GitHub conferidos após push. Aceitação integrada ainda pendente.
+- Último commit de código validado localmente e publicado: `bfe82be5c6cb5d339ebb986e75ff9f2853b0315a` (TASK543), árvore `3aba14d16f1b2b53c2408c026a58b9c89b0fc98a`; checkout/remote conferidos após push. Aceitação integrada ainda pendente.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
 - Último commit com CI integrado concluído e log conferido: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), run `37066631332`, job `111035975340`, success. TASK540 (`6cf781f`, run `37066186782`, job `111034430127`) também success: cada log confirma SHA, 387 grupos distintos/code0 e restauro de 128 tabelas/51 ficheiros com linhas e hashes iguais. TASK537–539 continuam aceites nos runs registados anteriormente.
-- TASK542 (`b73a04c`, run `37073275970`) continua `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suite integrada e restauro pendentes. Não transferir aceitação541 para542/543.
+- TASK542 (`b73a04c`, run `37073275970`) e TASK543 (`bfe82be`, run `37074953256`, job `111062639350`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. Não transferir aceitação541 para542/543/544.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -30,6 +30,9 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 - TASK542 publicada: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02`, árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`, [CI37073275970](https://github.com/ts7520305-svg/cristalwater/actions/runs/37073275970) em execução. `technician-new-client` ganhou cópia própria PT/EN/FR/ES/DE para permissões, rascunho, envio, política, GPS, campos, placeholders e opções visíveis. O contrato de dados do write-store foi preservado: `poolType` continua a enviar/validar `Privada`, `Condomínio`, `Hotel`, `Jacuzzi`; payload, UUID/requestId, recibos, endpoints e schema não mudaram. O seletor global de idioma passa a ter destino local no cabeçalho da página.
 
 ## Testes realizados nesta sessão
+
+- TASK544: o componente no código543 falhou na asserção síncrona de campos vazios após `cw:session-change`. Intake agora reage a esse evento e processa invalidação antes do guard de busy; aumenta as gerações de leitura/GPS. Os dois rascunhos ficam intactos e só a conta original recupera os seus campos. Cache306→307; APIs, schema, payload/UUID/recibos e store inalterados.
+- Gates544: componente Edge passou limpeza síncrona idle/busy, eventos sessão/storage e callback GPS retido após sair/regressar; mantém cinco idiomas e zero escritas operacionais. Primeira extensão GPS usou IDs inexistentes e deu timeout; corrigida para os names nativos sem alterar assertions/prazo. Browser offline, entrada/Admin/Técnico/Cliente e componente de sessão passaram; técnicos4/4; `node --check` dos sete JS/diff-check passaram. `npm test`:1403 aprovados/2 skipped/4 falhas ambientais Windows idênticas. Sintaxe completa695/308/45 permanece evidência543; não foi repetida em544, que não altera backend.
 
 - Retoma TASK543: pasta/remote/branch/HEAD local e remoto `f2831da` conferidos, sem alterações preexistentes. CI540/541 concluídos e logs nativos lidos pelo conector GitHub; API pública de download de logs respondeu403, sem impedir a leitura autenticada pelo conector.
 - TASK543: reprodução browser no código542 confirma erro de envio ainda PT depois de selecionar EN. Primeira preparação usou uma expectativa PT incorreta e deu timeout; ajustada ao texto existente antes da reprodução válida. Correção conserva descritores dos erros próprios e prefixos até à pintura; erros externos continuam literais. Cache305→306 e quatro expectativas existentes atualizadas, sem mudar runner/387 grupos/22 preflights, contratos ou dados guardados.
@@ -66,7 +69,7 @@ O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) reg
 
 ## PRÓXIMA TAREFA EXATA
 
-Publicar TASK543 validada localmente na branch autorizada, registando SHA/árvore/run. Em seguida TASK544: observar a troca de conta no formulário de intake já aberto, incluindo evento de sessão e atualização por outra janela, confirmar eliminação imediata dos campos da conta anterior e preservação dos bytes do rascunho; corrigir apenas uma falha demonstrada. CI542/543 têm prioridade se aparecer uma falha real. C06 permanece aberta; não atribuir ao intake a conclusão das restantes páginas do inventário.
+Publicar TASK544 validada localmente, registando SHA/árvore/run. Em seguida TASK545 / C06-011/012: observar a troca de conta na conversa da equipa (`technician-chat`), verificar se o evento `cw:session-change` limpa imediatamente mensagens/notificações/campos e cancela leituras tardias, preservando rascunhos/pedidos por titular. A página já tem idioma e rascunho próprios e não carrega memória genérica; não duplicar esses mecanismos. Corrigir apenas falha demonstrada. CI542–544 têm prioridade perante falha real; C06 permanece aberta.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 22 scripts.
 
@@ -74,4 +77,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-Checkpoint em trabalho: TASK543 preparada, testes focados/sintaxe/diff-check aprovados; commit/push ainda por executar. CI540/541 passaram nesta retoma e o restauro foi conferido nos seus logs. CI542 continua em execução. A continuação autorizada segue TASK544 após publicar543; nenhuma merge, deploy ou mensagem a clientes.
+TASK543 publicada em `bfe82be`, run `37074953256` em suite; TASK544 preparada e validada localmente, commit/push por executar. CI540/541 e restauros conferidos; CI542 pendente. Continuação autorizada segue545 após publicar544. Sem merge/deploy/mensagens a clientes.

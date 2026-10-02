@@ -69,3 +69,7 @@
 - Corrigidos prefixos e erros próprios de envio/gravação que permaneciam no idioma anterior; textos literais externos e bytes do rascunho continuam preservados.
 - Regressão no browser reproduz o erro anterior e verifica cinco idiomas, erro literal e ausência de envios operacionais. Cache offline306 e expectativas existentes atualizados.
 - CI540/541 concluídos: cada execução confirmou387 grupos distintos e restauro128 tabelas/51 ficheiros. CI542 e aceitação integrada543 permanecem pendentes.
+
+## TASK544 — troca de conta no intake aberto (2026-10-03)
+- Evento de sessão limpa e bloqueia imediatamente os campos da conta anterior, incluindo quando o envio local está ocupado; gerações de leitura/GPS invalidadas antes de recuperar a conta original.
+- Regressão de sessão/storage/GPS retido conserva os dois rascunhos e não envia operações. Componentes de entrada dos três perfis, sessão e offline aprovados; cache307 e expectativas existentes atualizados.
