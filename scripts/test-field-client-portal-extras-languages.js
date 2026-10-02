@@ -86,6 +86,44 @@ async function legacyChatLanguages(context, token) {
     console.log('PASS legacy client chat language integration ' + JSON.stringify({ languageCases, ownershipCases, widths: [320, 390, 1440], languages: 5, nativeTextPosts: 2, nativeUpload: 1, nativeAuthenticatedDownloadBytes: true, literalApiBodies: before.length, literalAttachmentName: true, retainedDraftNodesHandlers: true, conversationReadsUnchanged: true, retainedLanguageOnReload: true, sqlRowsUnchanged: true }));
   } finally { await ctx.close(); }
 }
+async function legacyAccountLanguages(context, token) {
+  const ctx = await context(), page = await ctx.newPage(), errors = [], requests = []; page.setDefaultTimeout(10000);
+  page.on('pageerror', error => errors.push(error.message)); page.on('request', request => { const url = new URL(request.url()); if (url.pathname.startsWith('/api/')) requests.push({ path: url.pathname, method: request.method() }); });
+  const titles = ['Cristal Water - Conta do Cliente','Cristal Water - Client account','Cristal Water - Compte client','Cristal Water - Cuenta del cliente','Cristal Water - Kundenkonto'];
+  const headings = ['Conta do cliente','Client account','Compte client','Cuenta del cliente','Kundenkonto'];
+  const intros = ['Consulte os seus serviços, mensagens e documentos no portal do cliente.','View your services, messages and documents in the client portal.','Consultez vos services, messages et documents dans le portail client.','Consulte sus servicios, mensajes y documentos en el portal del cliente.','Sehen Sie Ihre Leistungen, Nachrichten und Dokumente im Kundenportal ein.'];
+  const portals = ['Abrir portal do cliente','Open client portal','Ouvrir le portail client','Abrir portal del cliente','Kundenportal öffnen'];
+  const before = await database();
+  try {
+    await page.goto(base + '/client', { waitUntil: 'networkidle' }); await page.locator('#cwLanguageSelect').waitFor();
+    assert.equal(await page.locator('#clientAccountPortal').getAttribute('href'), '/client-portal');
+    assert.equal(await page.locator('#list, [onclick]').count(), 0, 'The CLIENT account must not expose administrative client or invoice controls');
+    await page.evaluate(() => { localStorage.setItem('cwFieldAccount519', '{original-unattributed-work'); sessionStorage.setItem('cwPortalAccount519', 'original draft'); window.qaAccountNodes = [...document.querySelectorAll('title,#clientAccountTitle,#clientAccountIntro,#clientAccountPortal')]; window.qaAccountLeaves = qaAccountNodes.map(node => node.firstChild); });
+    const savedWork = await work(page); let languageCases = 0;
+    for (const width of [320,390,1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const [index,language] of languages.entries()) {
+        await page.locator('#cwLanguageSelect').selectOption(language); await settle(page);
+        assert.equal(await page.title(), titles[index]); assert.equal(await page.locator('#clientAccountTitle').textContent(), headings[index]); assert.equal(await page.locator('#clientAccountIntro').textContent(), intros[index]); assert.equal(await page.locator('#clientAccountPortal').textContent(), portals[index]);
+        assert.equal(await page.locator('#clientAccountPortal').getAttribute('href'), '/client-portal'); assert.equal(await page.evaluate(() => localStorage.getItem('token')), token); assert.equal(await page.evaluate(() => localStorage.getItem('cristalwater_jwt')), token); assert.deepEqual(await work(page), savedWork);
+        assert(await page.evaluate(() => qaAccountNodes.every((node,index) => node.isConnected && node.firstChild === qaAccountLeaves[index]))); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        const rect = await page.locator('#clientAccountPortal').boundingBox(); assert(rect.x >= 0 && rect.x + rect.width <= width && rect.height >= 44);
+        assert(await page.locator('#clientAccountPortal').evaluate(node => { const range = document.createRange(); range.selectNodeContents(node); const bounds = node.getBoundingClientRect(); return [...range.getClientRects()].every(rect => rect.left >= bounds.left && rect.right <= bounds.right); })); languageCases++;
+      }
+    }
+    await page.reload({ waitUntil: 'networkidle' }); await page.waitForFunction(() => document.title === 'Cristal Water - Kundenkonto'); assert.equal(await page.locator('#clientAccountTitle').textContent(), headings[4]); assert.deepEqual(await work(page), savedWork);
+    await page.setViewportSize({ width: 320, height: 900 }); await capture(page, 'legacy-account-de-320', '.client-account');
+    assert(requests.every(request => request.path === '/api/settings/language/me'), 'The account launch page must not read administrative clients, generate invoices or invoke business APIs');
+    await page.locator('#clientAccountPortal').click(); await page.waitForURL(base + '/client-portal'); await page.waitForFunction(() => loadedClientId === clientId); assert.equal(await page.evaluate(() => clientId), client.id);
+    assert.equal(await page.evaluate(() => localStorage.getItem('cristalwater_jwt')), token); assert.deepEqual(await database(), before);
+    await page.goBack({ waitUntil: 'networkidle' }); await page.locator('#clientAccountPortal').waitFor();
+    await page.evaluate(() => { document.querySelector('title').firstChild.nodeValue = 'Foreign account title'; document.getElementById('clientAccountTitle').firstChild.nodeValue = 'Foreign account heading <b>{literal}</b>'; document.getElementById('clientAccountIntro').append(document.createElement('span')); const clone = document.getElementById('clientAccountPortal').cloneNode(true); clone.id = 'qaForeignAccountLink'; document.querySelector('.client-account').append(clone); });
+    const intro = await page.locator('#clientAccountIntro').innerHTML(), foreign = await page.locator('#qaForeignAccountLink').textContent(); let ownershipCases = 0;
+    for (const language of languages) { await page.locator('#cwLanguageSelect').selectOption(language); await settle(page); assert.equal(await page.title(), 'Foreign account title'); assert.equal(await page.locator('#clientAccountTitle').textContent(), 'Foreign account heading <b>{literal}</b>'); assert.equal(await page.locator('#clientAccountIntro').innerHTML(), intro); assert.equal(await page.locator('#qaForeignAccountLink').textContent(), foreign); ownershipCases += 4; }
+    assert.deepEqual(errors, []); assert.deepEqual(await database(), before);
+    console.log('PASS legacy client account language integration ' + JSON.stringify({ languageCases, textAssertions: 60, ownershipCases, widths: [320,390,1440], languages: 5, noAdministrativeApiOrControls: true, realPortalNavigationWithSameClient: true, storedWorkAndSqlUnchanged: true, retainedLanguageOnReload: true }));
+  } finally { await ctx.close(); }
+}
 process.on('exit', code => { if (!code && !complete) process.exitCode = 1; });
 const settle = page => page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 const pending = page => page.evaluate(() => new Promise((resolve, reject) => {
@@ -341,8 +379,8 @@ async function database() {
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
   for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v288')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v288')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v289')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v289')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
@@ -477,7 +515,7 @@ async function database() {
   assert.deepEqual(await database(), finalDatabaseExpected);
   console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true }));
   console.log('PASS actual portal quote presentation ' + JSON.stringify({ quoteLanguageCases, cachedQuotesJsBytesEqualSource: true, coldOfflineQuoteErrors: true, realLanguageSelector: true, pureQuotePaintDoesNotReloadQuotes: true }));
-  await legacyChatLanguages(context, token); complete = true;
+  await legacyChatLanguages(context, token); await legacyAccountLanguages(context, token); complete = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => {
   clearTimeout(deadline); await browser?.close(); await prisma.$disconnect();
   if (client) { if (notice) await prisma.notification.delete({ where: { id: notice.id } }); await prisma.clientMessage.deleteMany({ where: { clientId: client.id } }); const key = 'LANGUAGE:CLIENT:' + client.id; await prisma.systemSetting.deleteMany({ where: { key } }); if (originalLanguage) await prisma.systemSetting.create({ data: originalLanguage }); await prisma.client.delete({ where: { id: client.id } }); assert.equal(await prisma.client.count({ where: { id: client.id } }), 0); assert.deepEqual(await prisma.systemSetting.findUnique({ where: { key } }), originalLanguage); console.log('PASS portal extras fixtures removed and previous language setting restored'); }

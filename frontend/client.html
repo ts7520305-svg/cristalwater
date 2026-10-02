@@ -4,12 +4,14 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#050b16">
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cristal Water - Conta do Cliente</title>
 
 <style>
 body { font-family: Arial; background:#f4f6f8; padding:20px; }
 .card { background:white; padding:15px; margin-bottom:10px; border-radius:10px; }
 button { padding:8px 12px; margin-top:5px; cursor:pointer; }
+.client-account{max-width:720px;margin:20px auto;overflow-wrap:anywhere}.client-account a{display:inline-flex;align-items:center;min-height:44px;padding:12px 18px;border-radius:8px;background:#2563eb;color:#fff;text-decoration:none;max-width:100%}body{min-width:0}button{min-height:44px}
 </style>
 <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
@@ -17,7 +19,6 @@ button { padding:8px 12px; margin-top:5px; cursor:pointer; }
 <link rel="stylesheet" href="css/crystal-v25.css">
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
-  <link rel="stylesheet" href="/cw-block2-shell.css">
   <script src="/client-auth-guard.js"></script>
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
@@ -28,71 +29,38 @@ button { padding:8px 12px; margin-top:5px; cursor:pointer; }
   <button type="button" data-cw-back data-cw-fallback="/client-menu">Voltar</button>
 </div>
 
-<h1>Clientes</h1>
-
-<div id="list"></div>
+<main class="card client-account">
+  <h1 id="clientAccountTitle" data-cw-no-i18n>Conta do cliente</h1>
+  <p id="clientAccountIntro" data-cw-no-i18n>Consulte os seus serviços, mensagens e documentos no portal do cliente.</p>
+  <a id="clientAccountPortal" href="/client-portal" data-cw-no-i18n>Abrir portal do cliente</a>
+</main>
 
 <script>
-const API = "/api";
-
-async function load() {
-  const res = await fetch(API + "/clients");
-  const raw = await res.json();
-  const data = Array.isArray(raw) ? raw : [];
-
-  const container = document.getElementById("list");
-  if (!container) return;
-  container.innerHTML = "";
-
-  if (!data.length) {
-    container.innerHTML = '<div class="card">Sem clientes disponíveis.</div>';
-    return;
+(() => {
+  'use strict';
+  const languages = ['pt','en','fr','es','de'];
+  const copy = [
+    ['Cristal Water - Conta do Cliente','Cristal Water - Client account','Cristal Water - Compte client','Cristal Water - Cuenta del cliente','Cristal Water - Kundenkonto'],
+    ['Conta do cliente','Client account','Compte client','Cuenta del cliente','Kundenkonto'],
+    ['Consulte os seus serviços, mensagens e documentos no portal do cliente.','View your services, messages and documents in the client portal.','Consultez vos services, messages et documents dans le portail client.','Consulte sus servicios, mensajes y documentos en el portal del cliente.','Sehen Sie Ihre Leistungen, Nachrichten und Dokumente im Kundenportal ein.'],
+    ['Abrir portal do cliente','Open client portal','Ouvrir le portail client','Abrir portal del cliente','Kundenportal öffnen'],
+  ];
+  const nodes = [document.querySelector('title'),document.getElementById('clientAccountTitle'),document.getElementById('clientAccountIntro'),document.getElementById('clientAccountPortal')];
+  const leaves = new Map();
+  nodes.forEach((node,index) => { if (node && node.childNodes.length === 1 && node.firstChild.nodeType === Node.TEXT_NODE && node.firstChild.nodeValue === copy[index][0]) { node.dataset.cwNoI18n = ''; leaves.set(node,{index,textNode:node.firstChild,rendered:copy[index][0]}); } });
+  function paint() {
+    const language = Math.max(0,languages.indexOf(document.documentElement.lang));
+    for (const [node,leaf] of leaves) {
+      if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered) { leaves.delete(node); continue; }
+      const rendered = copy[leaf.index][language]; if (rendered !== leaf.rendered) leaf.textNode.nodeValue = rendered; leaf.rendered = rendered;
+    }
   }
-
-  data.forEach(c => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <b>${c.name}</b><br/>
-      Zona: ${c.zone || "-"}<br/>
-      Fatura: ${c.requiresInvoice ? "SIM" : "NÃO"}<br/>
-
-      <button onclick="toggle(${c.id}, ${c.requiresInvoice})">
-        ${c.requiresInvoice ? "Remover faturação" : "Marcar para faturar"}
-      </button>
-
-      <button onclick="createInvoice(${c.id})">
-        Criar cobrança
-      </button>
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-async function toggle(id, current) {
-  await fetch(API + "/clients/" + id, {
-    method: "PUT",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      requiresInvoice: !current
-    })
-  });
-
-  load();
-}
-
-async function createInvoice(id) {
-  await fetch(API + "/invoices/generate-for-client/" + id, {
-    method: "POST"
-  });
-
-  alert("Cobrança criada");
-}
-
-load();
+  window.addEventListener('cw-language-change',paint);
+  new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  paint();
+})();
 </script>
+<script src="/cw-i18n.js"></script>
 
 <script src="/cristal-help-data.js"></script>
 <script src="/cristal-assist.js"></script>
@@ -100,7 +68,6 @@ load();
 <script src="/ui/core/navigation-context.js"></script>
   <script src="/crystal-os-v2-shell.js"></script>
   <script src="/crystal-os-v2-nav.js"></script>
-<script src="/cw-block2-shell.js"></script>
   <script defer src="/ui/design-system.js"></script>
 </body>
 </html>
