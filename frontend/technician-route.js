@@ -218,6 +218,20 @@ const routeUi = (() => {
     "Échec HTTP {status}",
     "Error HTTP {status}",
     "HTTP-Fehler {status}"
+  ],
+  "routeUnavailable": [
+    "Não foi possível carregar a rota. Atualize para tentar novamente.",
+    "Could not load the route. Refresh to try again.",
+    "Impossible de charger l’itinéraire. Actualisez pour réessayer.",
+    "No se pudo cargar la ruta. Actualiza para volver a intentarlo.",
+    "Route konnte nicht geladen werden. Aktualisieren Sie, um es erneut zu versuchen."
+  ],
+  "suggestionsUnavailable": [
+    "Não foi possível carregar as sugestões.",
+    "Could not load suggestions.",
+    "Impossible de charger les suggestions.",
+    "No se pudieron cargar las sugerencias.",
+    "Hinweise konnten nicht geladen werden."
   ]
 };
   const entries = new WeakSet(), bindings = new Map(), errors = new WeakMap();
@@ -338,18 +352,18 @@ async function parseResponse(response) {
   return data;
 }
 
-function renderEmpty(box, entry) {
+function renderEmpty(box, entry, state = 'empty') {
   if (!box) return;
-  box.innerHTML = '<div class="empty" role="status" aria-live="polite" data-cw-state="empty">' + escapeHtml(routeUi.text(entry)) + '</div>';
+  box.innerHTML = '<div class="empty" role="status" aria-live="polite" data-cw-state="' + state + '">' + escapeHtml(routeUi.text(entry)) + '</div>';
   routeUi.bind(box.firstElementChild, entry);
 }
 
-function renderRoute(visits) {
+function renderRoute(visits, unavailable = false) {
   if (!routeBox) return;
   routeUi.clearTree(routeBox);
   if (!Array.isArray(visits) || visits.length === 0) {
-    const entry = routeUi.value('emptyRoute');
-    renderEmpty(routeBox, entry);
+    const entry = routeUi.value(unavailable ? 'routeUnavailable' : 'emptyRoute');
+    renderEmpty(routeBox, entry, unavailable ? 'error' : 'empty');
     return;
   }
   const rows = visits.map((visit, order) => {
@@ -374,12 +388,12 @@ function renderRoute(visits) {
   });
 }
 
-function renderSuggestions(visits) {
+function renderSuggestions(visits, unavailable = false) {
   if (!suggestionsBox) return;
   routeUi.clearTree(suggestionsBox);
   if (!Array.isArray(visits) || visits.length === 0) {
-    const entry = routeUi.value('emptySuggestions');
-    renderEmpty(suggestionsBox, entry);
+    const entry = routeUi.value(unavailable ? 'suggestionsUnavailable' : 'emptySuggestions');
+    renderEmpty(suggestionsBox, entry, unavailable ? 'error' : 'empty');
     return;
   }
   const rows = visits.filter(visit => Boolean(visit.pool?.zone || visit.client?.zone)).slice(0, 4).map(visit => ({
@@ -408,7 +422,7 @@ async function loadRoute() {
   const technicianId = Number(userData().technicianId || userData().id || 0);
   if (!technicianId) {
     setStatus(routeUi.value('missingTech'), "error");
-    if (routeBox) { const entry = routeUi.value('missingSession'); routeUi.clearTree(routeBox); renderEmpty(routeBox, entry); }
+    if (routeBox) { const entry = routeUi.value('missingSession'); routeUi.clearTree(routeBox); renderEmpty(routeBox, entry, 'error'); }
     return;
   }
 
@@ -433,8 +447,8 @@ async function loadRoute() {
       setStatus(routeUi.value('noStops'), "warning");
     }
   } catch (error) {
-    renderRoute([]);
-    renderSuggestions([]);
+    renderRoute([], true);
+    renderSuggestions([], true);
     setStatus(routeUi.fromError(error), "error");
   } finally {
     if (refreshBtn) refreshBtn.disabled = false;
