@@ -263,6 +263,33 @@
     }
   };
 
+  const clientNavigationCopy = (() => {
+    const languages = ['pt','en','fr','es','de'];
+    const copy = {
+      account: ['Conta e dados','Account and details','Compte et données','Cuenta y datos','Konto und Daten'],
+      accountBreadcrumb: ['Cliente / Portal do cliente / Conta e dados','Client / Client portal / Account and details','Client / Portail client / Compte et données','Cliente / Portal del cliente / Cuenta y datos','Kunde / Kundenportal / Konto und Daten'],
+      requests: ['Pedidos','Requests','Demandes','Solicitudes','Anfragen'],
+    };
+    const leaves = new Map();
+    const text = key => copy[key][Math.max(0,languages.indexOf(document.documentElement.lang))];
+    function bind(node,key,search = false) {
+      const original = copy[key][0];
+      if (!node || node.childNodes.length !== 1 || node.firstChild.nodeType !== Node.TEXT_NODE || node.firstChild.nodeValue !== original || (search && node.getAttribute('data-shell-search') !== original)) return;
+      const rendered = text(key); node.dataset.cwNoI18n = ''; node.firstChild.nodeValue = rendered;
+      if (search) node.setAttribute('data-shell-search',rendered);
+      leaves.set(node,{key,search,textNode:node.firstChild,rendered});
+    }
+    function paint() {
+      for (const [node,leaf] of leaves) {
+        if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered || (leaf.search && node.getAttribute('data-shell-search') !== leaf.rendered)) { leaves.delete(node); continue; }
+        const rendered = text(leaf.key); if (rendered !== leaf.rendered) { leaf.textNode.nodeValue = rendered; if (leaf.search) node.setAttribute('data-shell-search',rendered); } leaf.rendered = rendered;
+      }
+    }
+    window.addEventListener('cw-language-change',paint);
+    new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+    return {bind,paint};
+  })();
+
   // Read-only catalogue of the same destinations used by the live ADMIN shell.
   // Menu/index pages consume this instead of maintaining another sidebar list.
   window.CWAdminNavigation = Object.freeze({version:1,groups:Object.freeze(NAV.ADMIN.groups.map((group,index)=>Object.freeze({id:String(index),label:group.label,links:Object.freeze(group.links.map(link=>Object.freeze([...link])))})))});
@@ -312,6 +339,7 @@
       a.href = href;
       a.textContent = label;
       a.setAttribute('data-shell-search', label);
+      if (href === '/client' && label === 'Conta e dados') clientNavigationCopy.bind(a,'account',true);
       if (isActive(href)) a.classList.add('is-active');
       links.appendChild(a);
     });
@@ -355,6 +383,11 @@
     top.className = 'cw-v2-topbar';
     top.innerHTML = '<div class="cw-v2-context"><div class="cw-v2-context-kicker">' + meta.area + '</div><div class="cw-v2-context-title">' + meta.title + '</div><div class="cw-v2-breadcrumb" data-cw-breadcrumb>' + config.title + ' / ' + meta.area + ' / ' + meta.title + '</div></div><div class="cw-v2-search"><input type="search" placeholder="Pesquisar" aria-label="Pesquisar no menu" data-cw-search-input><span class="icon">⌕</span><div class="cw-v2-search-results" data-cw-search-results></div></div><div class="cw-v2-top-actions"><span class="cw-v2-pill success" data-offline-indicator>Online</span><button type="button" class="cw-v2-pill" data-cw-open-drawer>Menu</button></div>';
     topWrap.appendChild(top);
+    if (role === 'CLIENT' && pathname === '/client' && meta.title === 'Conta e dados') {
+      topWrap.setAttribute('data-cw-client-account','');
+      clientNavigationCopy.bind(top.querySelector('.cw-v2-context-title'),'account');
+      clientNavigationCopy.bind(top.querySelector('[data-cw-breadcrumb]'),'accountBreadcrumb');
+    }
 
     const drawer = document.createElement('aside');
     drawer.className = 'cw-v2-drawer';
@@ -381,6 +414,7 @@
       a.href = href;
       a.textContent = label;
       if (isActive(href)) a.classList.add('is-active');
+      if (role === 'CLIENT' && href === '/client-menu' && label === 'Pedidos') clientNavigationCopy.bind(a,'requests');
       mobile.appendChild(a);
     });
 
@@ -388,6 +422,7 @@
     document.body.prepend(topWrap);
     document.body.appendChild(drawer);
     document.body.appendChild(mobile);
+    clientNavigationCopy.paint();
 
     document.body.classList.add('cw-v2-shell-enabled');
     document.body.setAttribute('data-cw-role', role);
