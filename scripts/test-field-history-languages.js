@@ -107,9 +107,9 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   const originalPending = await pending(); assert.equal(originalPending.length,2); assert.deepEqual(originalPending.map(row => row.scope).sort(),['EXTRA_VISIT_COMPLETION','VISIT_COMPLETION']);
   assert(originalPending.every(row => row.resourceId === id && row.owner === 'TECH:' + tech.id && row.payloadHash.length === 64 && !row.response)); assert.notEqual(originalPending[0].requestId,originalPending[1].requestId);
 
-  await prisma.pool.update({ where: { id: pools[0].id },data: { name: 'Piscina' } });
+  await prisma.pool.update({ where: { id: pools[0].id },data: { name: 'Piscina', zone: 'Zona' } });
   await prisma.pool.update({ where: { id: pools[1].id },data: { name: 'Extra history source <b>{date}</b> ' + 'x'.repeat(90) } });
-  await prisma.client.update({ where: { id: client.id },data: { name: 'Cliente' } });
+  await prisma.client.update({ where: { id: client.id },data: { name: 'Cliente', zone: 'Zona' } });
   await prisma.serviceVisit.update({ where: { id },data: { status: 'DONE',endAt: new Date(now) } });
   await prisma.extraVisit.update({ where: { id },data: { status: 'DONE',endAt: new Date(now - 1000) } });
   const ended = await prisma.serviceVisit.create({ data: { clientId: client.id,poolId: pools[0].id,technicianId: tech.id,status: 'PLANNED',date: scheduledAt,plannedDate: scheduledAt,endAt: new Date(now - 2000) } });
@@ -232,6 +232,151 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   assert.deepEqual(await raw(),beforeOffline);assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),dbOffline);
   for (const type of ['REGULAR','EXTRA']) { await openField(type);assert.deepEqual(await page.evaluate(ids => ids.map(id => { const node = document.getElementById(id);return [id,node.value,node.checked]; }),fieldIds),visitFields[type]);assert.equal(await page.evaluate(() => CWFieldDaySnapshot().confirmedAt),null); }
   assert.deepEqual(await pending(),originalPending);const draftKey = 'cwFieldVisitDrafts:v2:TECH:' + tech.id;assert.equal((await raw())[draftKey],historyEntryStorage[draftKey]);
+  // The legacy route shares the original authenticated fixtures and typed outbox.
+  // Keep history assertions/timers intact; only explicit GET fault profiles below
+  // replace native responses. The healthy response and scoped IDs remain real.
+  // Leave the write-capable field page while still offline, so reconnecting
+  // cannot start its normal queued-work sender before the read-only phase.
+  await page.goto(base + '/technician-history',{ waitUntil:'domcontentloaded' });
+  await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
+  await context.setOffline(false); profile = 'native';
+  const routeWords = {"title": ["Cristal Water - Rota Tecnica", "Cristal Water - Technician Route", "Cristal Water - Itinéraire du technicien", "Cristal Water - Ruta del técnico", "Cristal Water - Technikerroute"], "shift": ["Turno tecnico", "Technician shift", "Service du technicien", "Turno del técnico", "Technikerschicht"], "heading": ["Rota do Dia", "Today’s Route", "Itinéraire du jour", "Ruta del día", "Tagesroute"], "intro": ["Consulte a sequência de piscinas planeadas para hoje.", "View the sequence of pools planned for today.", "Consultez la liste des piscines prévues pour aujourd’hui.", "Consulta la secuencia de piscinas previstas para hoy.", "Sehen Sie die Reihenfolge der heute geplanten Pools."], "back": ["Voltar", "Back", "Retour", "Volver", "Zurück"], "refresh": ["Atualizar rota", "Refresh route", "Actualiser l’itinéraire", "Actualizar ruta", "Route aktualisieren"], "field": ["Modo campo", "Field mode", "Mode terrain", "Modo de campo", "Außendienst"], "planned": ["Piscinas planeadas", "Planned pools", "Piscines prévues", "Piscinas previstas", "Geplante Pools"], "suggestions": ["Sugestoes", "Suggestions", "Suggestions", "Sugerencias", "Hinweise"], "preparing": ["A preparar rota tecnica.", "Preparing technician route.", "Préparation de l’itinéraire du technicien.", "Preparando la ruta del técnico.", "Technikerroute wird vorbereitet."], "emptyRoute": ["Sem rota planeada para hoje.", "No route planned for today.", "Aucun itinéraire prévu pour aujourd’hui.", "No hay ruta prevista para hoy.", "Für heute ist keine Route geplant."], "client": ["Cliente {id}", "Client {id}", "Client {id}", "Cliente {id}", "Kunde {id}"], "unnamedPool": ["Piscina sem nome", "Unnamed pool", "Piscine sans nom", "Piscina sin nombre", "Unbenannter Pool"], "location": ["Local por confirmar", "Location to confirm", "Lieu à confirmer", "Ubicación por confirmar", "Ort noch zu bestätigen"], "noTime": ["Sem hora", "No time", "Sans heure", "Sin hora", "Keine Uhrzeit"], "stop": ["Paragem {number}", "Stop {number}", "Étape {number}", "Parada {number}", "Stopp {number}"], "locationTime": ["{location} · {time}", "{location} · {time}", "{location} · {time}", "{location} · {time}", "{location} · {time}"], "emptySuggestions": ["Sem sugestoes para mostrar.", "No suggestions to show.", "Aucune suggestion à afficher.", "No hay sugerencias para mostrar.", "Keine Hinweise verfügbar."], "pool": ["Piscina", "Pool", "Piscine", "Piscina", "Pool"], "zone": ["Zona {zone}", "Zone {zone}", "Zone {zone}", "Zona {zone}", "Gebiet {zone}"], "zoneUnset": ["Zona por definir", "Zone to define", "Zone à définir", "Zona por definir", "Gebiet noch festzulegen"], "traffic": ["Verificar transito e acessos antes de sair.", "Check traffic and access before leaving.", "Vérifiez la circulation et les accès avant de partir.", "Comprueba el tráfico y los accesos antes de salir.", "Prüfen Sie Verkehr und Zufahrt vor der Abfahrt."], "noSuggestions": ["Sem dados suficientes para sugestoes automáticas.", "Not enough data for automatic suggestions.", "Données insuffisantes pour proposer des suggestions automatiques.", "No hay datos suficientes para sugerencias automáticas.", "Nicht genügend Daten für automatische Hinweise."], "missingTech": ["Sessao tecnica sem tecnico associado.", "No technician is associated with this session.", "Aucun technicien n’est associé à cette session.", "No hay ningún técnico asociado a esta sesión.", "Dieser Sitzung ist kein Techniker zugeordnet."], "missingSession": ["Nao foi possivel determinar o tecnico da sessao.", "Could not identify the session’s technician.", "Impossible d’identifier le technicien de la session.", "No se pudo identificar al técnico de la sesión.", "Der Techniker dieser Sitzung konnte nicht ermittelt werden."], "loading": ["A carregar rota do dia.", "Loading today’s route.", "Chargement de l’itinéraire du jour.", "Cargando la ruta del día.", "Tagesroute wird geladen."], "incomplete": ["A resposta não confirma a rota completa. Atualize antes de navegar.", "The response does not confirm the complete route. Refresh before navigating.", "La réponse ne confirme pas l’itinéraire complet. Actualisez avant de naviguer.", "La respuesta no confirma la ruta completa. Actualiza antes de navegar.", "Die Antwort bestätigt keine vollständige Route. Aktualisieren Sie vor der Navigation."], "loaded": ["Rota carregada com {count} paragem(ns).", "Route loaded with {count} stop(s).", "Itinéraire chargé avec {count} étape(s).", "Ruta cargada con {count} parada(s).", "Route mit {count} Stopp(s) geladen."], "noStops": ["Sem paragens para hoje.", "No stops for today.", "Aucune étape pour aujourd’hui.", "No hay paradas para hoy.", "Keine Stopps für heute."], "failed": ["Falha ao carregar rota.", "Failed to load route.", "Échec du chargement de l’itinéraire.", "Error al cargar la ruta.", "Route konnte nicht geladen werden."], "http": ["Falha HTTP {status}", "HTTP failure {status}", "Échec HTTP {status}", "Error HTTP {status}", "HTTP-Fehler {status}"]}, routeTokens = await page.evaluate(() => ['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key => localStorage.getItem(key)));
+  let routeFault = 'native', routeRelease, routeHeld = 0, routeClosing = false, routeCases = 0, routeOwnershipChecks = 0;
+  const routePayload = () => {
+    const json = structuredClone(sourceRows);
+    if (routeFault === 'empty') { json.visits = []; json.total = 0; }
+    if (routeFault === 'incomplete') json.complete = false;
+    if (routeFault === 'total-mismatch') json.total++;
+    if (routeFault === 'visits-not-array') json.visits = {};
+    if (routeFault === 'fallbacks') {
+      Object.assign(json.visits[0], { pool: null, client: null, plannedDate: null, startAt: null, date: null });
+      Object.assign(json.visits[1], { pool: { name: 'Piscina', zone: 'Zona', location: 'Local por confirmar' }, client: { name: 'Cliente' }, plannedDate: 'invalid-date' });
+    }
+    if (routeFault === 'no-zones') for (const visit of json.visits) { if (visit.pool) visit.pool.zone = null; if (visit.client) visit.client.zone = null; }
+    return json;
+  };
+  const routeHandler = async route => {
+    try {
+      if (routeFault === 'native') return await route.continue();
+      if (routeFault === 'loading') { routeHeld++; await new Promise(resolve => { routeRelease = resolve; }); return await route.continue(); }
+      if (routeFault === 'http') return await route.fulfill({ status: 503, json: {} });
+      if (routeFault === 'server-identical') return await route.fulfill({ status: 503, json: { error: routeWords.incomplete[0] } });
+      if (routeFault === 'server-detail') return await route.fulfill({ status:503,json:{ message:'Source route failure <b>{count}</b>' } });
+      return await route.fulfill({ status: 200, json: routePayload() });
+    } catch (error) { if (!routeClosing) throw error; }
+  };
+  await page.route(endpoint, routeHandler);
+  const routeText = (key, index, params = {}) => routeWords[key][index].replace(/\{(\w+)\}/g, (_, key) => String(params[key]));
+  const routeSession = () => page.evaluate(() => ({ tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)), actors:['user','cristalwater_user'].map(key=>{const actor=JSON.parse(localStorage.getItem(key));delete actor.language;return actor;}) }));
+  async function openRoute(fault = 'native') {
+    routeFault = fault; routeRelease = null;
+    await page.goto(base + '/technician-route?lang=de', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => window.CristalI18n && document.getElementById('cwLanguageSelect'));
+    if (fault === 'loading') await page.waitForFunction(() => document.getElementById('refreshBtn').disabled);
+    else { await page.waitForFunction(() => !document.getElementById('refreshBtn').disabled); await page.waitForLoadState('networkidle'); }
+    await settle();
+  }
+  async function routeMatrix({ name = routeFault, status = 'loaded', rawStatus, tone = '', rows = routeFault === 'fallbacks' ? routePayload().visits : sourceRows.visits, widths = [320,390,1440], empty = false, missing = false, busy = false, ownership = false } = {}) {
+    const before = { raw: await raw(), pending: await pending(), db: await database(), tokens: await routeSession() }, first = requests.length;
+    await page.evaluate(() => {
+      window.qaRouteNodes = [...document.querySelectorAll('main.route-shell,main.route-shell *,title')]; window.qaRouteLeaves = qaRouteNodes.map(node => node.firstChild);
+      window.qaRouteCalls = {};
+      for (const name of ['loadRoute','renderRoute','renderSuggestions','renderEmpty','parseResponse','userData','setStatus']) { const original = window[name]; window[name] = (...args) => { qaRouteCalls[name] = (qaRouteCalls[name] || 0) + 1; return original(...args); }; }
+      document.getElementById('refreshBtn').focus();
+    });
+    for (const width of widths) { await page.setViewportSize({ width, height: 1400 }); for (const [index, language] of languages.entries()) {
+      const focus = await page.evaluate(() => document.activeElement.id);
+      await page.evaluate(language => CristalI18n.applyLanguage(language), language); await settle();
+      assert.equal(await page.title(), ownership ? 'Foreign route title <b>{literal}</b>' : routeWords.title[index]);
+      assert.equal(await page.locator('.route-header .route-title').textContent(), ownership ? 'Foreign heading' : routeWords.heading[index]);
+      assert.equal(await page.locator('#refreshBtn').textContent(), ownership ? 'Refresh leaf replaced' : routeWords.refresh[index]);
+      assert.equal(await page.locator('#refreshBtn').isDisabled(), busy);
+      for (const [selector, key] of [['.route-header .route-muted:first-of-type','shift'], ['.route-header .route-muted:nth-of-type(2)','intro'], ['.route-actions [data-cw-back]','back'], ['.route-actions a[href="/technician-field-mode"]','field'], ['main > section:nth-of-type(1) h2','planned'], ['main > section:nth-of-type(2) h2','suggestions']]) {
+        if (ownership && key === 'planned') { assert.equal(await page.locator(selector).textContent(), 'Original replaced leaf'); continue; }
+        assert.equal(await page.locator(selector).textContent(), routeWords[key][index]);
+      }
+      assert.equal(await page.locator('#statusBox').textContent(), rawStatus ?? routeText(status,index,{ count: rows.length, status: 503 }));
+      assert.equal((await page.locator('#statusBox').getAttribute('data-tone')) || '', tone);
+      assert.equal(await page.locator('#statusBox').getAttribute('role'),tone === 'error' ? 'alert' : 'status');
+      assert.equal(await page.locator('#statusBox').getAttribute('aria-live'),tone === 'error' ? 'assertive' : 'polite');
+      if (empty || missing) {
+        assert.equal(await page.locator('#route .empty').textContent(), routeWords[missing ? 'missingSession' : 'emptyRoute'][index]);
+        assert.equal(await page.locator('#route .empty').getAttribute('data-cw-state'),'empty');
+        assert.equal(await page.locator('#route .empty').getAttribute('role'),'status');
+        if (!missing) assert.equal(await page.locator('#suggestions .empty').textContent(), routeWords.emptySuggestions[index]);
+      } else if (!busy) {
+        assert.equal(await page.locator('#route > .route-item').count(), rows.length);
+        for (const [order, visit] of rows.entries()) {
+          const article = page.locator('#route > .route-item').nth(order), when = visit.plannedDate || visit.startAt || visit.date;
+          assert.equal(await article.locator('small').nth(0).textContent(), routeText('stop',index,{ number: order + 1 }));
+          assert.equal(await article.locator('b').textContent(), visit.pool?.name || routeWords.unnamedPool[index]);
+          assert.equal(await article.locator('small').nth(1).textContent(), visit.client?.name || routeText('client',index,{ id: visit.clientId || '-' }));
+          const formatted = when ? new Date(when).toLocaleString('pt-PT',{ dateStyle: 'short', timeStyle: 'short' }) : routeWords.noTime[index];
+          assert.equal(await article.locator('small').nth(2).textContent(), (visit.pool?.location || visit.pool?.address || routeWords.location[index]) + ' · ' + formatted);
+          assert.equal(await article.locator('b b,img').count(),0);
+        }
+        const suggestions = rows.filter(visit => Boolean(visit.pool?.zone || visit.client?.zone)).slice(0,4);
+        assert.equal(await page.locator('#suggestions > .route-item').count(),suggestions.length);
+        for (const [order, visit] of suggestions.entries()) {
+          const article = page.locator('#suggestions > .route-item').nth(order);
+          assert.equal(await article.locator('b').textContent(),visit.pool?.name || routeWords.pool[index]);
+          assert.equal(await article.locator('small').nth(0).textContent(),routeText('zone',index,{ zone: visit.pool?.zone || visit.client?.zone }));
+          assert.equal(await article.locator('small').nth(1).textContent(),routeWords.traffic[index]);
+        }
+        if (!suggestions.length) assert.equal(await page.locator('#suggestions .empty').textContent(),routeWords.noSuggestions[index]);
+      }
+      assert.equal(await page.evaluate(() => document.activeElement.id),focus);
+      assert(await page.evaluate(() => qaRouteNodes.every((node,index) => node.isConnected && node.firstChild === qaRouteLeaves[index]) && Object.keys(qaRouteCalls).length === 0));
+      assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      assert(await page.locator('.route-actions > button,.route-actions > a').evaluateAll(nodes => nodes.every(node => { const box=node.getBoundingClientRect();return box.height>=44 && box.width>=44 && box.left>=0 && box.right<=innerWidth; })));
+      for (const selector of ['.route-card','#statusBox','#route .route-item','#suggestions .route-item']) {
+        const overflow=await page.locator(selector).evaluateAll(nodes=>nodes.map((node,index)=>({index,scroll:node.scrollWidth,client:node.clientWidth})).filter(node=>node.scroll>node.client+1));
+        if (overflow.length && process.env.CW_HISTORY_CAPTURE) await page.locator('main').screenshot({path:process.env.CW_HISTORY_CAPTURE+'/legacy-route-overflow-'+name+'-'+language+'-'+width+'.png'});
+        assert.deepEqual(overflow,[],selector+' '+language+' '+width);
+      }
+      assert.deepEqual(await raw(),before.raw); assert.deepEqual(await pending(),before.pending); assert.deepEqual(await database(),before.db);
+      assert.deepEqual(await routeSession(),before.tokens);
+      assert.deepEqual(await page.evaluate(() => ['user','cristalwater_user'].map(key=>JSON.parse(localStorage.getItem(key)).language)),[language,language]);
+      for (const request of requests.slice(first)) { assert.equal(request.path,'/api/settings/language/me'); assert.equal(request.method,'PUT'); assert.equal(request.auth,'Bearer ' + token); }
+      // The real selector changes locale without calling any route producer.
+      await page.locator('#cwLanguageSelect').selectOption(language); await settle();
+      assert(await page.evaluate(() => Object.keys(qaRouteCalls).length === 0)); routeCases++;
+      if (ownership) { assert.equal(await page.locator('#qaRouteClone').textContent(),'Stale clone'); routeOwnershipChecks += 5; }
+      if (process.env.CW_HISTORY_CAPTURE && !ownership && language === 'de' && [320,1440].includes(width) && ['native','empty','incomplete','loading'].includes(name)) await page.locator('main').screenshot({ path:process.env.CW_HISTORY_CAPTURE+'/legacy-route-'+name+'-de-'+width+'.png' });
+    } }
+    console.log('PASS legacy route languages ' + JSON.stringify({ name,routeCases,routeOwnershipChecks,rows:rows.length,pending:2,noOperationalWrites:true }));
+  }
+  await openRoute(); await routeMatrix();
+  assert.deepEqual(await pending(),originalPending); assert.deepEqual(await page.evaluate(() => ['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key => localStorage.getItem(key))),routeTokens);
+  const routeSource=await fs.readFile('frontend/technician-route.js','utf8'),routeShell=await fs.readFile('frontend/technician-route.html','utf8');
+  await page.waitForFunction(async expected=>{const cache=await caches.open('cristalwater-field-20261002-v298'),script=await cache.match('/technician-route.js'),shell=await cache.match('/technician-route');return !!shell && await shell.text()===expected.shell && !!await cache.match('/cw-i18n.js') && !!script && await script.text()===expected.script;},{script:routeSource,shell:routeShell});
+  // Repainting a real cached page offline cannot invent a route cache or send work.
+  await context.setOffline(true); await routeMatrix({ name:'real-in-memory-route-offline' });
+  await page.reload({ waitUntil:'domcontentloaded' }); await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
+  const routeOfflineError = await page.locator('#statusBox').textContent(); assert.equal(routeOfflineError,'Failed to fetch');
+  await routeMatrix({ name:'real-cached-shell-without-invented-route-cache',rawStatus:routeOfflineError,tone:'error',rows:[],empty:true,widths:[320] });
+  await context.setOffline(false);
+  await openRoute('server-detail'); await routeMatrix({ name:'literal-server-error-detail',rawStatus:'Source route failure <b>{count}</b>',tone:'error',rows:[],empty:true,widths:[320] });
+  for (const fault of ['fallbacks','empty','incomplete','total-mismatch','visits-not-array','http','server-identical']) {
+    await openRoute(fault);
+    const failed = ['incomplete','total-mismatch','visits-not-array','http','server-identical'].includes(fault);
+    await routeMatrix({ status: fault === 'empty' ? 'noStops' : failed ? fault === 'http' ? 'http' : 'incomplete' : 'loaded', rawStatus: fault === 'server-identical' ? routeWords.incomplete[0] : undefined, tone: fault === 'empty' ? 'warning' : failed ? 'error' : '', rows: failed || fault === 'empty' ? [] : routePayload().visits, empty: failed || fault === 'empty', widths: [320] });
+  }
+  await openRoute('no-zones'); await routeMatrix({ name:'original-no-zone-suggestions',rows:routePayload().visits,widths:[320] });
+  await openRoute('http');
+  await page.evaluate(async () => { const original=await parseResponse(new Response('{}',{status:503})).catch(error=>error); const clone=new Error(original.message);setStatus(clone.message,'error'); });
+  await routeMatrix({ name:'cloned-owned-error-remains-literal',rawStatus:routeWords.http[0].replace('{status}','503'),tone:'error',rows:[],empty:true,widths:[320] });
+  await openRoute('native'); await page.evaluate(async () => { const original=window.fetch;window.fetch=(...args)=>String(args[0]).startsWith('/api/technician/today?')?Promise.reject(new Error('')):original(...args);try{await loadRoute();}finally{window.fetch=original;} });
+  await routeMatrix({ name:'original-empty-error-message-catch-fallback',status:'failed',tone:'error',rows:[],empty:true,widths:[320] });
+  const savedRouteActors=await page.evaluate(()=>['user','cristalwater_user'].map(key=>localStorage.getItem(key)));
+  await page.evaluate(()=>{for(const key of ['user','cristalwater_user']){const actor=JSON.parse(localStorage.getItem(key));delete actor.id;delete actor.technicianId;localStorage.setItem(key,JSON.stringify(actor));}});
+  await openRoute('native'); await routeMatrix({ name:'original-valid-role-missing-technician-id',status:'missingTech',tone:'error',rows:[],missing:true,widths:[320] });
+  await page.evaluate(saved=>['user','cristalwater_user'].forEach((key,index)=>localStorage.setItem(key,saved[index])),savedRouteActors);
+  await openRoute('loading'); await routeMatrix({ status:'loading', rows:[], widths:[320], busy:true }); assert(routeHeld > 0); routeFault = 'native'; routeRelease(); await page.waitForFunction(() => !document.getElementById('refreshBtn').disabled); await page.locator('#refreshBtn').click(); await page.waitForFunction(() => !document.getElementById('refreshBtn').disabled); assert.equal(await page.locator('#route > .route-item').count(),sourceRows.visits.length);
+  await page.evaluate(() => { document.title='Foreign route title <b>{literal}</b>'; document.querySelector('.route-title').textContent='Foreign heading'; document.getElementById('refreshBtn').firstChild.nodeValue='Refresh leaf replaced'; const original=document.querySelector('main > section h2');original.replaceChildren(document.createTextNode('Original replaced leaf')); const clone=document.querySelector('.route-title').cloneNode(true);clone.id='qaRouteClone';clone.textContent='Stale clone';document.querySelector('main').appendChild(clone); });
+  await routeMatrix({ ownership:true,widths:[320] });
+  assert.deepEqual(await pending(),originalPending); assert.deepEqual(await page.evaluate(()=>['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key=>localStorage.getItem(key))),routeTokens); assert.deepEqual(errors,[]); routeClosing=true; await page.unroute(endpoint,routeHandler);
+  console.log('PASS legacy route language result ' + JSON.stringify({ routeCases,routeOwnershipChecks,ownedEntries:31,languages:5,widths:[320,390,1440],nativeRouteIds:sourceRows.visits.map(v=>[v.visitType,v.id]),nativeSuggestions:sourceRows.visits.filter(v=>Boolean(v.pool?.zone||v.client?.zone)).slice(0,4).length,actualQueryLanguage:true,actualSelector:true,oneExplicitRefresh:true,originalDatePrecedenceFormatAndInvalidDateLiteral:true,originalNodesFocusBusyGuardRetained:true,literalNamesLocationsZonesAndServerErrors:true,exactFinalRouteJsInCache298AndRealColdOffline:true,targets44AndRowsFit:true,typedPending:2,noOperationalWrites:true }));
   assert.deepEqual(errors,[]);assert(requests.filter(request => !['GET','HEAD'].includes(request.method)).every(request => request.path === '/api/settings/language/me' && request.method === 'PUT'));await context.close();
   const leaderContext = await makeContext(leaderToken,{ id: leader.id,role: 'TEAM_LEADER',name: leader.name }),leaderPage = await leaderContext.newPage(),leaderErrors = [],leaderRequests = [];
   leaderPage.on('pageerror',error => leaderErrors.push(error.message));leaderPage.on('request',request => { const path = new URL(request.url()).pathname;if (path.startsWith('/api/')) leaderRequests.push({ path,method: request.method(),body: request.postData(),auth: request.headers().authorization }); });
