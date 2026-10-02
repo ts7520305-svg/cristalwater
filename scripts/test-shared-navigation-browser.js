@@ -9,6 +9,7 @@ const source = file => baseline ? execFileSync('git', ['show', baseline + ':fron
 const visual = path.join(root, 'reports/field-visual', 'shared-navigation-' + Date.now());
 let mobileChecks = 0, mobileOwnershipChecks = 0;
 let headerChecks = 0, headerOwnershipChecks = 0, emptySearchChecks = 0;
+let sidebarChecks = 0, sidebarOwnershipChecks = 0, multilingualSearchChecks = 0;
 const languages = ['pt','en','fr','es','de'];
 const roleLabels = {ADMIN:['Administrador','Administrator','Administrateur','Administrador','Administrator'],TECHNICIAN:['Técnico','Technician','Technicien','Técnico','Techniker'],CLIENT:['Cliente','Client','Client','Cliente','Kunde']};
 const headerLabels = {
@@ -24,6 +25,30 @@ const headerLabels = {
 const searchLabels = ['Pesquisar','Search','Rechercher','Buscar','Suchen'],searchAria = ['Pesquisar no menu','Search the menu','Rechercher dans le menu','Buscar en el menú','Im Menü suchen'];
 const fullMenuLabels = ['Menu completo','Full menu','Menu complet','Menú completo','Vollständiges Menü'],closeLabels = ['Fechar','Close','Fermer','Cerrar','Schließen'];
 const emptyLabels = ['Sem resultados','No results','Aucun résultat','Sin resultados','Keine Ergebnisse'];
+const helpLabels = ['Ajuda','Help','Aide','Ayuda','Hilfe'];
+const sidebarGroups = {
+  ADMIN: [
+    ['1. Visão geral','1. Overview','1. Vue d’ensemble','1. Vista general','1. Übersicht'],
+    ['2. Operação','2. Operations','2. Opérations','2. Operaciones','2. Betrieb'],
+    ['3. Clientes','3. Clients','3. Clients','3. Clientes','3. Kunden'],
+    ['4. Piscinas','4. Pools','4. Piscines','4. Piscinas','4. Pools'],
+    ['5. Técnicos e equipa','5. Technicians and team','5. Techniciens et équipe','5. Técnicos y equipo','5. Techniker und Team'],
+    ['6. Comercial','6. Sales','6. Commercial','6. Comercial','6. Vertrieb'],
+    ['7. Faturação e financeiro','7. Billing and finance','7. Facturation et finances','7. Facturación y finanzas','7. Abrechnung und Finanzen'],
+    ['8. Stock e produtos','8. Stock and products','8. Stock et produits','8. Stock y productos','8. Lager und Produkte'],
+    ['9. Equipamentos','9. Equipment','9. Équipements','9. Equipos','9. Ausrüstung'],
+    ['10. Obras e logística','10. Works and logistics','10. Travaux et logistique','10. Obras y logística','10. Arbeiten und Logistik'],
+    ['11. Comunicação','11. Communication','11. Communication','11. Comunicación','11. Kommunikation'],
+    ['12. Relatórios e estatísticas','12. Reports and statistics','12. Rapports et statistiques','12. Informes y estadísticas','12. Berichte und Statistiken'],
+    ['13. Configurações','13. Settings','13. Paramètres','13. Configuración','13. Einstellungen'],
+  ],
+  TECHNICIAN: [['Hoje','Today','Aujourd’hui','Hoy','Heute'],['Logística','Logistics','Logistique','Logística','Logistik'],['Conta','Account','Compte','Cuenta','Konto']],
+  CLIENT: [['Portal do cliente','Client portal','Portail client','Portal del cliente','Kundenportal']],
+};
+const sidebarFirstLinks = {ADMIN:['Centro de operações','Operations centre','Centre des opérations','Centro de operaciones','Betriebszentrale'],TECHNICIAN:['Rota do dia','Today’s route','Tournée du jour','Ruta del día','Tagesroute'],CLIENT:['Estado da piscina','Pool status','État de la piscine','Estado de la piscina','Poolzustand']};
+const soundLabels = ['Preferências de som','Sound preferences','Préférences sonores','Preferencias de sonido','Toneinstellungen'];
+const sidebarAria = ['Navegacao principal V2','Main navigation V2','Navigation principale V2','Navegación principal V2','Hauptnavigation V2'];
+const mobileAria = ['Navegacao primaria mobile','Primary mobile navigation','Navigation mobile principale','Navegación móvil principal','Mobile Hauptnavigation'];
 const primaryLabels = {
   ADMIN: {pt:['Início','Visitas','Clientes','Financeiro','Menu'],en:['Home','Visits','Clients','Finance','Menu'],fr:['Accueil','Visites','Clients','Finances','Menu'],es:['Inicio','Visitas','Clientes','Finanzas','Menú'],de:['Start','Besuche','Kunden','Finanzen','Menü']},
   TECHNICIAN: {pt:['Início','Rota','Visita','GPS','Menu'],en:['Home','Route','Visit','GPS','Menu'],fr:['Accueil','Tournée','Visite','GPS','Menu'],es:['Inicio','Ruta','Visita','GPS','Menú'],de:['Start','Route','Besuch','GPS','Menü']},
@@ -73,6 +98,7 @@ const cases = [
         await context.close(); continue;
       }
       await page.evaluate(() => { window.qaHeaderNodes=[...document.querySelectorAll('.cw-v2-context-kicker,.cw-v2-context-title,[data-cw-breadcrumb],.cw-v2-shell-topbar [data-cw-open-drawer],.cw-v2-drawer-title')];window.qaHeaderLeaves=qaHeaderNodes.map(node=>node.firstChild);window.qaSearchNode=document.querySelector('[data-cw-search-input]'); });
+      await page.evaluate(() => { window.qaSidebarNodes=[...document.querySelectorAll('.cw-v2-shell-sidebar summary,.cw-v2-shell-sidebar .cw-v2-nav-links a,[data-cw-drawer-groups] summary,[data-cw-drawer-groups] a,.cw-v2-brand small')];window.qaSidebarLeaves=qaSidebarNodes.map(node=>node.firstChild);window.qaSidebarHrefs=qaSidebarNodes.map(node=>node.getAttribute('href')); });
       for (const width of [320, 390, 1024, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         await page.evaluate(() => scrollTo(0, 0));
@@ -87,6 +113,16 @@ const cases = [
           await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);
           await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
           const index=languages.indexOf(language),[areas,titles]=headerLabels[name];
+          for (const selector of ['.cw-v2-shell-sidebar','[data-cw-drawer-groups]']) {
+            assert.deepEqual(await page.locator(selector+' summary').allTextContents(),sidebarGroups[expectedRole].map(group=>group[index]));
+            assert.equal(await page.locator(selector+' .cw-v2-nav-links a').first().textContent(),sidebarFirstLinks[expectedRole][index]);
+            assert.equal(await page.locator(selector+' a[href="/help-center"]').textContent(),helpLabels[index]);
+            assert(await page.locator(selector+' [data-shell-search]').evaluateAll(nodes=>nodes.every(node=>node.textContent===node.getAttribute('data-shell-search')&&node.hasAttribute('data-cw-no-i18n')&&CWNavigationSearch.labels(node).length===5)));
+            if(expectedRole==='ADMIN')assert.equal(await page.locator(selector+' a[href="/settings"]').textContent(),soundLabels[index]);
+          }
+          assert.equal(await page.locator('.cw-v2-brand small').textContent(),roleLabels[expectedRole][index]);
+          assert.equal(await page.locator('.cw-v2-shell-sidebar nav').getAttribute('aria-label'),sidebarAria[index]);assert.equal(await page.locator('.cw-v2-mobile-primary').getAttribute('aria-label'),mobileAria[index]);
+          assert(await page.evaluate(()=>qaSidebarNodes.every((node,index)=>node.isConnected&&node.firstChild===qaSidebarLeaves[index]&&node.getAttribute('href')===qaSidebarHrefs[index])));sidebarChecks++;
           assert.equal(await page.locator('.cw-v2-context-kicker').textContent(),areas[index],name+'/'+language+'/'+width+': header area');
           assert.equal(await page.locator('.cw-v2-context-title').textContent(),titles[index],name+'/'+language+'/'+width+': header title');
           assert.equal(await page.locator('[data-cw-breadcrumb]').textContent(),[roleLabels[expectedRole][index],areas[index],titles[index]].join(' / '));
@@ -168,6 +204,28 @@ const cases = [
       assert.equal(await results.locator('a[href="/help-center"]').count(), 1, 'Duplicate sidebar/drawer destinations must appear once');
       await input.press('ArrowDown'); assert.equal(await results.locator('a').first().evaluate(node => node === document.activeElement), true);
       await page.keyboard.press('Escape'); assert.equal(await results.isVisible(), false); assert.equal(await input.evaluate(node => node === document.activeElement), true);
+      for(const language of languages){
+        await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);
+        await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+        for(const query of helpLabels){await input.fill(query);assert.equal(await results.locator('a[href="/help-center"]').count(),1);assert.equal(await results.locator('a[href="/help-center"]').textContent(),helpLabels[languages.indexOf(language)]);multilingualSearchChecks++;}
+      }
+      if(expectedRole==='ADMIN'){await input.fill('OPERACOES');assert.equal(await results.locator('a[href="/admin-master-control"]').textContent(),'Betriebszentrale');multilingualSearchChecks++;}
+      await input.fill('Hilfe');await input.press('ArrowDown');
+      await results.locator('a').first().evaluate(node=>{window.qaRetainedResult=node;window.qaRetainedResultLabel=node.textContent;});
+      await page.evaluate(()=>{document.documentElement.lang='en';dispatchEvent(new CustomEvent('cw-language-change',{detail:{language:'en'}}));});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      assert(await page.evaluate(()=>qaRetainedResult===document.activeElement&&qaRetainedResult.isConnected&&qaRetainedResult.textContent===qaRetainedResultLabel&&document.querySelector('[data-cw-search-input]').value==='Hilfe'));
+      await page.keyboard.press('Escape');await input.fill('Hilfe');assert.equal(await results.locator('a[href="/help-center"]').textContent(),'Help');
+      // Only original intact leaves provide aliases; public markers cannot adopt foreign nodes.
+      await page.evaluate(()=>{
+        const groups=[...document.querySelectorAll('.cw-v2-shell-sidebar summary')],links=[...document.querySelectorAll('.cw-v2-shell-sidebar .cw-v2-nav-links a')],clone=links[0].cloneNode(true);clone.id='qaSidebarClone';document.body.appendChild(clone);
+        groups[0].firstChild.nodeValue='Foreign group <b>{literal}</b>';links[0].firstChild.nodeValue='Foreign link';links[1].setAttribute('data-shell-search','Foreign search');links[2].replaceChild(document.createTextNode(links[2].textContent),links[2].firstChild);links[3].append(document.createElement('span'));
+        window.qaDetachedSidebar=links[4];qaDetachedSidebar.remove();const originalMetadata=links[5].getAttribute('data-shell-search');links[5].setAttribute('data-shell-search','Temporary foreign metadata');CWNavigationSearch.labels(links[5]);links[5].setAttribute('data-shell-search',originalMetadata);window.qaForeignSidebar=[groups[0],...links.slice(0,6),clone];window.qaForeignSidebarHtml=qaForeignSidebar.map(node=>node.innerHTML);window.qaForeignSidebarMetadata=qaForeignSidebar.map(node=>node.getAttribute('data-shell-search'));
+        const owned=document.querySelector('[data-cw-drawer-groups] a'),aliases=CWNavigationSearch.labels(owned);aliases[0]='Poisoned alias';window.qaAliasCopySafe=CWNavigationSearch.labels(owned)[0]!=='Poisoned alias';
+      });
+      for(const language of languages){await page.evaluate(language=>{document.documentElement.lang=language;dispatchEvent(new CustomEvent('cw-language-change',{detail:{language}}));},language);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));assert(await page.evaluate(()=>qaAliasCopySafe&&Object.isFrozen(CWNavigationSearch)&&qaForeignSidebar.every((node,index)=>node.innerHTML===qaForeignSidebarHtml[index]&&node.getAttribute('data-shell-search')===qaForeignSidebarMetadata[index]&&CWNavigationSearch.labels(node).length===0)));sidebarOwnershipChecks+=8;}
+      await page.evaluate(()=>{document.querySelector('.cw-v2-shell-sidebar .cw-v2-nav-links').appendChild(qaDetachedSidebar);document.getElementById('qaSidebarClone').remove();});
+      await page.evaluate(()=>{document.documentElement.lang='pt';dispatchEvent(new CustomEvent('cw-language-change',{detail:{language:'pt'}}));});
       await input.fill('no-such-menu-item'); assert.equal(await results.locator('a').count(), 0); assert(await results.locator('[role=status]').isVisible());
       await results.locator('[role=status]').evaluate(node=>{window.qaEmptyNode=node;window.qaEmptyLeaf=node.firstChild;window.qaEmptyParent=node.parentElement;});
       for(const language of ['en','fr','es','de','pt']){
@@ -198,6 +256,7 @@ const cases = [
     }
     console.log('PASS shared mobile navigation: ' + JSON.stringify({ mobileChecks,mobileOwnershipChecks,languages: 5,widths: [320,390],profiles: ['ADMIN','CLIENT','TECHNICIAN','TEAM_LEADER'],fiveWholeLabels: true,targetsAtLeast44px: true,nodesAndDestinationsAndWorkRetained: true,componentOnly: true }));
     console.log('PASS shared header and search: '+JSON.stringify({headerChecks,headerOwnershipChecks,emptySearchChecks,languages:5,widths:[320,390,1024,1440],ownedLeavesAndAttributes:true,focusSelectionValueNodesAndWorkRetained:true,componentOnly:true}));
+    console.log('PASS shared sidebar and multilingual search: '+JSON.stringify({sidebarChecks,sidebarOwnershipChecks,multilingualSearchChecks,languages:5,widths:[320,390,1024,1440],groupsRoleModulesAndAria:true,privateAliasCopies:true,existingResultFocusAndDestinationsRetained:true,componentOnly:true}));
     console.log('Navigation visual evidence: ' + visual);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

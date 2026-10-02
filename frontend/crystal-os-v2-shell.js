@@ -531,12 +531,13 @@
   function renderSearch(query) {
     if (!searchInput || !searchResults) return;
     const list = Array.from(document.querySelectorAll('[data-shell-search]'));
-    const term = String(query || '').trim().toLowerCase();
+    const normalize = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    const term = normalize(String(query || '').trim());
     if (!term) { closeSearch(); return; }
     const seen = new Set();
-    const matches = list.map((node) => ({ label: node.getAttribute('data-shell-search') || '', href: node.getAttribute('href') || node.getAttribute('data-shell-href') || '#' }))
+    const matches = list.map((node) => ({ label: node.getAttribute('data-shell-search') || '', aliases: window.CWNavigationSearch?.labels(node) || [], href: node.getAttribute('href') || node.getAttribute('data-shell-href') || '#' }))
       .filter((item) => {
-        if (!item.label.toLowerCase().includes(term) || seen.has(item.href) || !item.href.startsWith('/') || item.href.startsWith('//')) return false;
+        if (![item.label,...item.aliases].some(label => normalize(label).includes(term)) || seen.has(item.href) || !item.href.startsWith('/') || item.href.startsWith('//')) return false;
         seen.add(item.href); return true;
       }).slice(0, 8);
     searchResults.replaceChildren();

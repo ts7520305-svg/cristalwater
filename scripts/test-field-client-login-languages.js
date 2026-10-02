@@ -182,10 +182,10 @@ const capture = async (page, name) => {
   const offlinePage = await offlineContext.newPage(), offlineErrors = []; offlinePage.setDefaultTimeout(12000); offlinePage.on('pageerror', error => offlineErrors.push(error.message));
   await offlinePage.goto(base + '/client-login'); await offlinePage.locator('#cwLanguageSelect').waitFor(); await offlinePage.evaluate(() => navigator.serviceWorker.ready); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-login'); await offlinePage.locator('#cwLanguageSelect').waitFor();
-  await offlinePage.waitForFunction(async () => { const cache = await caches.open('cristalwater-field-20261001-v294'); return Boolean(await cache.match('/client-login')) && Boolean(await cache.match('/client-login.js')) && Boolean(await cache.match('/cw-i18n.js')); });
+  await offlinePage.waitForFunction(async () => { const cache = await caches.open('cristalwater-field-20261001-v295'); return Boolean(await cache.match('/client-login')) && Boolean(await cache.match('/client-login.js')) && Boolean(await cache.match('/cw-i18n.js')); });
   for (const [url, file] of [['/client-login', 'client-login.html'], ['/client-login.js', 'client-login.js'], ['/cw-auth.js', 'cw-auth.js'], ['/cw-i18n.js', 'cw-i18n.js']]) {
     const current = await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8');
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v294')).match(url)).text(), url), current);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v295')).match(url)).text(), url), current);
   }
   await offlinePage.evaluate(({ work, token, user }) => { for (const [key, value] of Object.entries(work)) localStorage.setItem(key, value); for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify(user)); }, { work, token: oldToken, user: oldUser });
   await offlinePage.addScriptTag({ url: base + '/cw-field-write-store.js' });

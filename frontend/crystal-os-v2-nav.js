@@ -282,8 +282,11 @@
       searchLabel: ['Pesquisar no menu','Search the menu','Rechercher dans le menu','Buscar en el menú','Im Menü suchen'],
       fullMenu: ['Menu completo','Full menu','Menu complet','Menú completo','Vollständiges Menü'],
       close: ['Fechar','Close','Fermer','Cerrar','Schließen'],
+      sidebarNavigation: ['Navegacao principal V2','Main navigation V2','Navigation principale V2','Navegación principal V2','Hauptnavigation V2'],
+      mobileNavigation: ['Navegacao primaria mobile','Primary mobile navigation','Navigation mobile principale','Navegación móvil principal','Mobile Hauptnavigation'],
+      workflow: ['Fluxo operacional unificado.','Unified operational workflow.','Flux opérationnel unifié.','Flujo operativo unificado.','Einheitlicher Betriebsablauf.'],
     };
-    // Only labels from our static page/navigation definitions may own header leaves.
+    // Only labels from our static page/navigation definitions may own these leaves.
     // The catalogue, page content and any labels supplied by users stay separate.
     const contextCopy = {
       'Administrador':['Administrador','Administrator','Administrateur','Administrador','Administrator'],
@@ -313,6 +316,7 @@
       'Hoje':['Hoje','Today','Aujourd’hui','Hoy','Heute'],
       'Logistica':['Logística','Logistics','Logistique','Logística','Logistik'],
       'Conta':['Conta','Account','Compte','Cuenta','Konto'],
+      'Preferencias de som':['Preferências de som','Sound preferences','Préférences sonores','Preferencias de sonido','Toneinstellungen'],
       'Menu de módulos':['Menu de módulos','Module menu','Menu des modules','Menú de módulos','Modulmenü'],
       'Índice de módulos':['Índice de módulos','Module index','Index des modules','Índice de módulos','Modulverzeichnis'],
       'Centro de operacoes':['Centro de operações','Operations centre','Centre des opérations','Centro de operaciones','Betriebszentrale'],
@@ -454,6 +458,28 @@
       if (!attributes.has(node)) attributes.set(node,new Map());
       attributes.get(node).set(attribute,{key,rendered});
     }
+    function bindLabel(node,source,search = false) {
+      if (Object.hasOwn(contextCopy,source)) bind(node,'context:'+source,search,source);
+    }
+    function bindGroup(node,source) {
+      const prefix = source.match(/^\d+\.\s*/)?.[0] || '';
+      const label = source.slice(prefix.length);
+      if (!Object.hasOwn(contextCopy,label)) return;
+      const key = 'group:'+source;
+      copy[key] = contextCopy[label].map(variant => prefix+variant);
+      bind(node,key,false,source);
+    }
+    function ownsLeaf(node,leaf) {
+      return node.isConnected && node.childNodes.length === 1 && node.firstChild === leaf.textNode && leaf.textNode.nodeValue === leaf.rendered && (!leaf.search || node.getAttribute('data-shell-search') === leaf.rendered);
+    }
+    // Return copies of known aliases only while the original search leaf is owned.
+    // Foreign nodes, changed metadata and clones keep their literal search text.
+    function searchLabels(node) {
+      const leaf = leaves.get(node);
+      if (!leaf?.search) return [];
+      if (!ownsLeaf(node,leaf)) { leaves.delete(node); return []; }
+      return copy[leaf.key].slice();
+    }
     function bindContext(top,meta,roleLabel) {
       for (const [selector,source] of [['.cw-v2-context-kicker',meta.area],['.cw-v2-context-title',meta.title]]) {
         if (Object.hasOwn(contextCopy,source)) bind(top.querySelector(selector),'context:'+source,false,source);
@@ -467,7 +493,7 @@
     }
     function paint() {
       for (const [node,leaf] of leaves) {
-        if (!node.isConnected || node.childNodes.length !== 1 || node.firstChild !== leaf.textNode || leaf.textNode.nodeValue !== leaf.rendered || (leaf.search && node.getAttribute('data-shell-search') !== leaf.rendered)) { leaves.delete(node); continue; }
+        if (!ownsLeaf(node,leaf)) { leaves.delete(node); continue; }
         const rendered = text(leaf.key); if (rendered !== leaf.rendered) { leaf.textNode.nodeValue = rendered; if (leaf.search) node.setAttribute('data-shell-search',rendered); } leaf.rendered = rendered;
       }
       for (const [node,owned] of attributes) {
@@ -481,7 +507,8 @@
     }
     window.addEventListener('cw-language-change',paint);
     new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
-    return {bind,bindAttribute,bindContext,paint};
+    window.CWNavigationSearch = Object.freeze({labels:searchLabels});
+    return {bind,bindAttribute,bindLabel,bindGroup,bindContext,paint};
   })();
 
   // Read-only catalogue of the same destinations used by the live ADMIN shell.
@@ -523,6 +550,7 @@
 
     const summary = document.createElement('summary');
     summary.textContent = group.label;
+    navigationCopy.bindGroup(summary,group.label);
     details.appendChild(summary);
 
     const links = document.createElement('div');
@@ -534,6 +562,7 @@
       a.textContent = label;
       a.setAttribute('data-shell-search', label);
       if (href === '/client' && label === 'Conta e dados') navigationCopy.bind(a,'account',true);
+      else navigationCopy.bindLabel(a,label,true);
       if (isActive(href)) a.classList.add('is-active');
       links.appendChild(a);
     });
@@ -557,15 +586,18 @@
     const sidebar = document.createElement('aside');
     sidebar.className = 'cw-v2-sidebar cw-v2-shell-sidebar';
     sidebar.innerHTML = '<div class="cw-v2-brand"><img src="/logo-cristalwater.png" alt="Cristal Water"><div><b>Crystal OS V2</b><small>' + config.title + '</small></div></div>';
+    navigationCopy.bindLabel(sidebar.querySelector('.cw-v2-brand small'),config.title);
 
     const nav = document.createElement('nav');
     nav.className = 'cw-v2-nav-groups';
     nav.setAttribute('aria-label', 'Navegacao principal V2');
+    navigationCopy.bindAttribute(nav,'aria-label','sidebarNavigation');
     config.groups.forEach((group) => nav.appendChild(createGroup(group)));
     sidebar.appendChild(nav);
 
     const subtitle = document.createElement('div');
     subtitle.textContent = 'Fluxo operacional unificado.';
+    navigationCopy.bind(subtitle,'workflow');
     subtitle.style.color = '#516c74';
     subtitle.style.fontSize = '12px';
     sidebar.appendChild(subtitle);
@@ -603,6 +635,7 @@
     const mobile = document.createElement('nav');
     mobile.className = 'cw-v2-mobile-primary';
     mobile.setAttribute('aria-label', 'Navegacao primaria mobile');
+    navigationCopy.bindAttribute(mobile,'aria-label','mobileNavigation');
     const primaryCopy = {
       '/admin-master-control':'home','/technician-field-mode':'home',
       '/admin-visits':'visits','/client-dashboard':'visits',
