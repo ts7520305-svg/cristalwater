@@ -1,6 +1,6 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-03 00:20 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 00:47 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
@@ -42,6 +42,13 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 
 ## Testes realizados nesta sessão
 
+- TASK547 / C06-011: ausência de tradução reproduzida com HTML/API/PostgreSQL reais (título ainda PT ao escolher EN). Página/modo route agora têm 35 entradas próprias PT/EN/FR/ES/DE; repintam textos, opções e erros por identidade nos mesmos nós. Nomes persistidos ficam literais, dia/técnico/ordem/destinos e endpoints são preservados. A comparação de sessão deste modo ignora somente `user.language`, porque o motor global guarda essa preferência na mesma conta; tokens/restantes propriedades continuam a invalidar. Outros modos não recebem o produtor de idioma.
+- Gates547 até agora: 43 migrações aditivas existentes passaram na nova instância PostgreSQL16.11 local, apenas127.0.0.1:5547; nenhuma base/serviço existente alterado. Base `cristalwater_qa`, uploads `uploads/qa/local-20261003`, integrações externas/schedulers desativados. Configuração `.env.test` e dados/evidências em reports ignorados pelo Git; nenhum segredo de produção utilizado.
+- Mapas Admin nativos passaram: lista sem fornecedor, coordenadas zero/inválidas/ausentes, nomes literais, seleção/âmbito/GPS tardio/conta e contrato Leaflet controlado; rota em cinco idiomas/três larguras, erro GPS e503 repintado, sem novas consultas por idioma nem escritas operacionais, snapshots SQL iguais. A única escrita permitida pela mudança de idioma é a preferência existente PUT/settings/language/me, com apenas `language`. Screenshot DE320 conferido. Mapa multi-técnico passou API/305 linhas/identidades/conta/timeout/Leaflet; API de agrupamento de zonas passou147 visitas/44 alertas, dados intactos.
+- Seis fluxos SQL/API existentes aprovados: Visit OS, Route OS, Customer OS, Administration OS, Finance OS e Equipment/Stock OS. Evidência local `reports/qa/focused-20261003/results.json`; não substitui os387 grupos nem restauro integrado.
+- Sintaxe completa695/308/45, oito JS alterados/diff-check, técnicos4/4 e preflight23/23 aprovados. Unitários1403/2 skipped/4 falhas Windows de backup idênticas, sem enfraquecer testes. Cache310/quatro expectativas atualizados; runner387/workflow/API/schema intactos.
+- Preparações547: primeira extensão do teste selecionava o técnico sem coordenadas ausentes; corrigida para o técnicoA antes da reprodução válida. A primeira ligação do motor global invalidava a sessão pela propriedade language; corrigida apenas nesse modo e validada. Preferências PUT inicialmente entravam no contador de escritas operacionais; agora são registadas separadamente com payload validado. Ensaio SQL/browser de chat nativo falhou no `page.goto`/load8s, devido à fonte Google importada pelo CSS; continua por validar localmente, sem atribuir sucesso. Próxima548: tornar esse ensaio independente do fornecedor opcional e repetir os fluxos browser nativos.
+
 - TASK546 / C06-006: reprodução com intake543–545 e store nativo dá prefixoEN/causaPT após mudança de idioma. A fixture concede o lock do formulário mas recusa o lock interno do store; o erro lockBusy é produzido pelo store real, antes de criar pedido/UUID ou enviar. Intake passa a conservar `error.copy` de fieldWriteError e a usar `CWFieldWriteStore.message(code, language)` existente na pintura, incluindo erros de refresh; nenhum novo dicionário nem alteração do store/persistência.
 - Gates546: componente ficha/intake aprovado, incluindo causa nativa em cinco idiomas, erro literal preservado, rascunho/requestId intactos, fila vazia e zero escritas operacionais. Motor de idioma/browser offline/técnicos4/4 aprovados; sintaxe dos sete JS/diff-check aprovados. Unitários1403/2 skipped/4 falhas Windows idênticas. Preflight23/23 completo permanece evidência545; não foi repetido todo em546. Cache309 e quatro expectativas; runner387/workflow/backend/schema intactos.
 
@@ -62,7 +69,7 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 - Técnico: 4/4. Sintaxe: 695 JS backend, 308 JS frontend, 45 scripts inline. `git diff --check` aprovado.
 - Chromium 153, componente inicial com o script real de navegação: reload, prontidão atrasada, duas contas, duas visitas, checkbox, refresh e bytes antigos passaram. A prontidão/identidade do componente é uma fixture; não alegar aceitação SQL/API deste ensaio.
 - TASK540/541: HTML/formulário e scripts reais de auth/guard/ficha/navegação com GETs QA assinados; reload retido, PIN/USER com mesmo ID, duas visitas, refresh, GET403, ficheiro excluído, snapshots antigos da visita intactos e zero escritas passaram. A extensão541 confirma também rascunho nativo de intake e captura o estado após memória genérica antes de nova pintura. Fonte antiga da navegação faz o ensaio falhar na recuperação prematura. A preparação inicial apontou para porta3002; configurada a origem de API QA sem alterar produto.
-- Download do Chromium do Playwright devolveu ZIP truncado; utilizado Chromium já instalado em `/tmp/chromium`. PostgreSQL local e integração completa ainda não preparados nesta sessão.
+- Download do Chromium do Playwright devolveu ZIP truncado na sessão anterior; utilizado Chromium já instalado em `/tmp/chromium`. Na retoma Windows usa-se Edge instalado; PostgreSQL local isolado preparado na TASK547. Suite387 completa/restauro local ainda não executados.
 
 - Gates finais TASK541 no código publicado: 1 409/1 409 testes em 142 ficheiros; 4/4 técnicos; sintaxe695/308/45; componente Chromium com duas superfícies aprovado; `git diff --check` aprovado. O negativo do intake falha no nome da conta anterior e o positivo passa, mantendo bytes do rascunho próprio.
 - Gates locais TASK542: `npm run check:syntax` aprovado (695 backend JS, 308 frontend JS, 45 inline scripts); `npm run test:technician` aprovado (4/4); `node scripts/test-visit-navigation-memory-browser.js` aprovado com Microsoft Edge instalado, cobrindo PT/EN/FR/ES/DE, larguras 320/390/1440, rascunho próprio, valores preservados e zero escritas operacionais; `git diff --check` aprovado.
@@ -87,7 +94,7 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK547 / C06-011: consultar conclusão e logs de CI542–546, corrigir qualquer falha real antes de aceitar. Sem falhas, observar `route-map` em PT/EN/FR/ES/DE e larguras320/390/1440, incluindo fallback sem fornecedor de mapa; confirmar os textos próprios ainda PT e traduzir apenas a página/modo route existente, preservando guard Admin, dia/técnico, coordenadas, lista/destinos, API e ausência de escritas de planeamento. Conferir primeiro se algum commit novo já tratou a lacuna. C06 permanece aberta.
+TASK548: conferir conclusão/logs/restauro de CI542–547 e corrigir falhas reais primeiro. Validar o ensaio SQL/browser de chat existente sem dependência da fonte Google opcional: reproduzir/bloquear só recursos externos no contexto QA, mantendo API/SQL/assertions/prazos originais, depois repetir chat e E2E dos três perfis na instância isolada. Não considerar prova de componente como aceitação SQL. Sem falhas, continuar C06-012/GPS na página existente em cinco idiomas/três larguras, conferindo commits novos antes de editar. C06 permanece aberta.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 23 scripts.
 
@@ -95,4 +102,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-TASK543–546 implementadas, testadas e publicadas nos quatro commits acima. Nenhuma alteração de código por publicar. CI540/541 e restauros conferidos; CI542–546 pendentes. Próxima547: conferir CI e observar route-map/C06-011. Preflight23 scripts, runner387 grupos intacto. Checkpoint documental pós546 usa `[skip ci]`; os runs de código mantêm-se válidos nos respetivos SHAs. Sem merge/deploy/mensagens a clientes.
+TASK547 implementada e em validação/publicação; SHA será registado depois do commit/push. CI540/541 e restauros conferidos; CI542–546 pendentes na consulta das00:45. Preflight23 scripts, runner387 grupos intacto. PostgreSQL QA local e backend3002 ativos somente para estes ensaios; não são produção. Próxima548 concreta acima. Sem merge/deploy/mensagens a clientes.

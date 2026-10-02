@@ -1,15 +1,39 @@
 (function () {
   'use strict';
-  function start(mode) {
+  function start(mode, copy) {
     const routeMode = mode === 'route', zonesMode = mode === 'zones', plannedMode = mode === 'planned', multiMode = mode === 'multi' || plannedMode, list = document.getElementById('mapList'), status = document.getElementById('mapStatus'), notice = document.getElementById('mapNotice'), canvas = document.getElementById('map');
     const load = document.getElementById('mapLoad'), nearby = document.getElementById('mapNearby'), date = document.getElementById('mapDate'), tech = document.getElementById('mapTechnician');
     const showZones = document.getElementById('mapZonesShow'), hideZones = document.getElementById('mapZonesHide'), zoneSummary = document.getElementById('mapZonesSummary');
     const zoneNames = ['Sudoeste', 'Sudeste', 'Noroeste', 'Nordeste'];
+    if (!routeMode) copy = null;
+    const messages = new WeakMap();
+    const own = (key, literal, params = {}) => copy ? { key, params } : { literal };
+    const format = value => typeof value === 'string' ? value : value.key ? (value.params.prefix || '') + copy.text(value.key, value.params) : value.literal;
+    function put(node, value) {
+      if (copy) { messages.set(node, value); node.dataset.routeDynamic = ''; }
+      const text = format(value); if (node.textContent !== text) node.textContent = text;
+    }
+    function fail(key, literal) {
+      const value = own(key, literal), error = Error(format(value)); error.mapCopy = value; return error;
+    }
+    if (copy) {
+      const paint = () => {
+        copy.paint();
+        for (const node of document.querySelectorAll('[data-route-dynamic]')) put(node, messages.get(node));
+      };
+      paint(); window.addEventListener('cw-language-change', paint);
+      new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    }
     const keys = ['cristalwater_jwt','token','cristalwater_user','user'];
-    const fingerprint = () => JSON.stringify(keys.map(key => localStorage.getItem(key)));
+    const fingerprint = () => JSON.stringify(keys.map(key => {
+      const raw = localStorage.getItem(key);
+      if (!copy || !['cristalwater_user', 'user'].includes(key) || !raw) return raw;
+      // The global language preference updates the same account's user record.
+      const { language, ...session } = JSON.parse(raw); return session;
+    }));
     let identity = '', credential = '', invalid = false, sequence = 0, request, map, layers, confirmedRows = [], zonesVisible = false, multiRows = [];
     try { identity = fingerprint(); credential = localStorage.getItem('cristalwater_jwt') || localStorage.getItem('token') || ''; } catch (_) {}
-    function state(kind, text) { status.dataset.state = kind; status.textContent = text; }
+    function state(kind, text) { status.dataset.state = kind; put(status, text); }
     function clear() {
       confirmedRows = []; zonesVisible = false; list.replaceChildren(); if (layers) layers.clearLayers();
       if (zoneSummary) { zoneSummary.replaceChildren(); zoneSummary.hidden = true; }
@@ -26,14 +50,14 @@
       if (same && !invalid) return true;
       invalid = true; sequence++; request?.abort(); clear(); busy(false);
       if (map) { try { map.remove(); } catch (_) {} map = null; layers = null; }
-      canvas.hidden = true; notice.textContent = '';
+      canvas.hidden = true; put(notice, '');
       if (tech) { tech.replaceChildren(); tech.disabled = true; } if (date) date.disabled = true;
-      state('session', 'A sessão mudou. Reabra a página com a conta pretendida.'); return false;
+      state('session', own('session', 'A sessão mudou. Reabra a página com a conta pretendida.')); return false;
     }
     function fallback() {
       try { map?.remove(); } catch (_) {}
       map = null; layers = null; canvas.hidden = true;
-      notice.textContent = 'Mapa indisponível. Consulte a lista e abra a navegação de cada piscina.';
+      put(notice, own('unavailable', 'Mapa indisponível. Consulte a lista e abra a navegação de cada piscina.'));
       notice.dataset.state = 'unavailable';
     }
     function initializeMap() { try {
@@ -43,7 +67,7 @@
         map = L.map(canvas).setView([37.1, -8.6], 10); layers = L.layerGroup().addTo(map);
         const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
         tiles.on('tileerror', fallback); tiles.addTo(map);
-        notice.textContent = 'Os pontos com coordenadas confirmadas aparecem também no mapa.'; notice.dataset.state = 'ready';
+        put(notice, own('mapped', 'Os pontos com coordenadas confirmadas aparecem também no mapa.')); notice.dataset.state = 'ready';
       }
     } catch (_) { fallback(); } }
     initializeMap();
@@ -61,14 +85,14 @@
     }
     function position() {
       return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) return reject(Error('Este dispositivo não disponibiliza localização.'));
-        const timer = setTimeout(() => reject(Error('Não foi possível obter a localização. Autorize o GPS e tente novamente.')), 10000);
+        if (!navigator.geolocation) return reject(fail('noGps', 'Este dispositivo não disponibiliza localização.'));
+        const timer = setTimeout(() => reject(fail('gps', 'Não foi possível obter a localização. Autorize o GPS e tente novamente.')), 10000);
         navigator.geolocation.getCurrentPosition(pos => {
           clearTimeout(timer);
           const result = point({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-          if (!result || !Number.isFinite(pos.timestamp) || Math.abs(Date.now()-pos.timestamp) > 60000) return reject(Error('A localização recebida não é atual ou válida. Tente novamente.'));
+          if (!result || !Number.isFinite(pos.timestamp) || Math.abs(Date.now()-pos.timestamp) > 60000) return reject(fail('staleGps', 'A localização recebida não é atual ou válida. Tente novamente.'));
           resolve(result);
-        }, () => { clearTimeout(timer); reject(Error('Não foi possível obter a localização. Autorize o GPS e tente novamente.')); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 });
+        }, () => { clearTimeout(timer); reject(fail('gps', 'Não foi possível obter a localização. Autorize o GPS e tente novamente.')); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 });
       });
     }
     async function json(url, signal) {
@@ -78,9 +102,9 @@
       const timer = setTimeout(() => { timedOut = true; abort(); }, 20000);
       try {
         const response = await fetch(url, { headers: { Authorization: 'Bearer '+credential }, cache: 'no-store', signal: controller.signal });
-        if (response.status !== 200) throw Error('Não foi possível confirmar os dados. Use Atualizar para tentar novamente.');
+        if (response.status !== 200) throw fail('readError', 'Não foi possível confirmar os dados. Use Atualizar para tentar novamente.');
         return { response, data: await response.json() };
-      } catch (error) { if (timedOut) throw Error('A consulta demorou demasiado. Use Atualizar para tentar novamente.'); throw error; }
+      } catch (error) { if (timedOut) throw fail('timeout', 'A consulta demorou demasiado. Use Atualizar para tentar novamente.'); throw error; }
       finally { clearTimeout(timer); signal?.removeEventListener('abort', abort); }
     }
     function renderZones(rows) {
@@ -120,13 +144,16 @@
       const points = [];
       for (const [index, row] of rows.entries()) {
         const article = document.createElement('article'), title = document.createElement('h2'), details = document.createElement('p'), links = document.createElement('div');
-        article.dataset.recordId = row.id; title.textContent = (routeMode ? (index+1)+'. ' : '') + row.name;
+        article.dataset.recordId = row.id;
+        if (routeMode && row.nameCopy) {
+          put(title, own(row.nameCopy.key, (index+1)+'. '+row.name, { ...row.nameCopy.params, prefix: (index+1)+'. ' }));
+        } else title.textContent = (routeMode ? (index+1)+'. ' : '') + row.name;
         if (multiMode) {
           article.dataset.technicianId = row.technicianId ?? 'unassigned';
           title.textContent = row.name+' · '+row.visitLabel+' #'+row.visitId;
           const assignment = document.createElement('p'); assignment.textContent = row.technicianLabel+' · '+row.statusLabel; article.append(assignment);
         }
-        details.textContent = row.point ? (row.distance == null ? 'Coordenadas: ' + row.point.join(', ') : row.distance.toFixed(2)+' km em linha reta') : 'Sem coordenadas válidas. Confirme a localização na ficha da piscina.';
+        put(details, row.point ? (row.distance == null ? own('coordinates', 'Coordenadas: ' + row.point.join(', '), { coordinates: row.point.join(', ') }) : row.distance.toFixed(2)+' km em linha reta') : own('missing', 'Sem coordenadas válidas. Confirme a localização na ficha da piscina.'));
         if (zoneFor && row.point) { article.dataset.zone = zoneFor(row.point); details.textContent += ' · Área: '+zoneNames[zoneFor(row.point)]; }
         article.append(title, details);
         if (row.point) {
@@ -154,7 +181,7 @@
     }
     function changed() {
       sequence++; request?.abort(); clear(); busy(false);
-      if (active()) state('idle', 'A seleção mudou. Atualize para consultar os dados correspondentes.');
+      if (active()) state('idle', own('selection', 'A seleção mudou. Atualize para consultar os dados correspondentes.'));
     }
     function showTechnician() {
       if (!active()) return;
@@ -195,20 +222,20 @@
       if (!active()) return;
       const current = ++sequence; request?.abort(); request = new AbortController();
       const chosenDate = date?.value, chosenTech = tech?.value;
-      clear(); busy(true); state('loading', proximity || routeMode ? 'A obter localização atual…' : multiMode ? 'A carregar visitas…' : 'A carregar piscinas…');
+      clear(); busy(true); state('loading', proximity || routeMode ? own('locating', 'A obter localização atual…') : multiMode ? 'A carregar visitas…' : 'A carregar piscinas…');
       const currentQuery = () => active() && current === sequence;
       try {
-        if (routeMode && (!date.checkValidity() || !chosenDate || !/^[1-9]\d*$/.test(chosenTech || ''))) throw Error('Escolha uma data válida e um técnico.');
+        if (routeMode && (!date.checkValidity() || !chosenDate || !/^[1-9]\d*$/.test(chosenTech || ''))) throw fail('choose', 'Escolha uma data válida e um técnico.');
         if (multiMode && (!date.checkValidity() || !chosenDate)) throw Error('Escolha uma data válida.');
         const origin = proximity || routeMode ? await position() : null;
         if (!currentQuery()) return;
         const url = routeMode ? '/api/route/optimize?'+new URLSearchParams({ lat: origin[0], lng: origin[1], date: chosenDate, technicianId: chosenTech }) : multiMode ? (plannedMode ? '/api/routes/auto-plan?' : '/api/technician/today?')+new URLSearchParams({ date: chosenDate }) : '/api/pools';
-        state('loading', 'A confirmar os dados…');
+        state('loading', own('confirming', 'A confirmar os dados…'));
         const { response, data } = await json(url, request.signal); if (!currentQuery()) return;
         let rows;
         if (routeMode) {
-          if (response.headers.get('X-CW-Route-Date') !== chosenDate || response.headers.get('X-CW-Route-Technician') !== chosenTech || response.headers.get('X-CW-Route-Mode') !== 'proximity-preview' || !Array.isArray(data) || !data.every(v => v && validId(v.id) && v.technicianId === Number(chosenTech) && v.status === 'PLANNED' && !v.startAt && !v.endAt && (v.pool === null || (v.pool && validId(v.pool.id) && (v.pool.name === null || typeof v.pool.name === 'string'))))) throw Error('A resposta não confirma a seleção. Atualize para tentar novamente.');
-          rows = data.map(v => ({ id: v.id, name: v.pool ? v.pool.name || 'Piscina #'+v.pool.id : 'Visita sem piscina associada', point: point(v.pool) }));
+          if (response.headers.get('X-CW-Route-Date') !== chosenDate || response.headers.get('X-CW-Route-Technician') !== chosenTech || response.headers.get('X-CW-Route-Mode') !== 'proximity-preview' || !Array.isArray(data) || !data.every(v => v && validId(v.id) && v.technicianId === Number(chosenTech) && v.status === 'PLANNED' && !v.startAt && !v.endAt && (v.pool === null || (v.pool && validId(v.pool.id) && (v.pool.name === null || typeof v.pool.name === 'string'))))) throw fail('scope', 'A resposta não confirma a seleção. Atualize para tentar novamente.');
+          rows = data.map(v => ({ id: v.id, name: v.pool ? v.pool.name || 'Piscina #'+v.pool.id : 'Visita sem piscina associada', nameCopy: !v.pool ? { key: 'noPool', params: {} } : !v.pool.name ? { key: 'pool', params: { id: v.pool.id } } : null, point: point(v.pool) }));
         } else if (multiMode) {
           rows = plannedMode ? plannedVisitRows(data, chosenDate) : multiVisitRows(data, chosenDate);
         } else {
@@ -216,7 +243,7 @@
           rows = data.pools.map(p => ({ id: p.id, name: p.name || 'Piscina #'+p.id, point: point(p) }));
           if (origin) { rows.forEach(row => { row.distance = row.point ? distance(origin, row.point) : null; }); rows.sort((a,b) => (a.distance ?? Infinity)-(b.distance ?? Infinity) || a.id-b.id); }
         }
-        if (new Set(rows.map(row => row.id)).size !== rows.length) throw Error('A resposta contém registos repetidos. Atualize para tentar novamente.');
+        if (new Set(rows.map(row => row.id)).size !== rows.length) throw fail('duplicate', 'A resposta contém registos repetidos. Atualize para tentar novamente.');
         if (multiMode) {
           multiRows = rows; tech.add(new Option('Todos os técnicos', 'all'));
           const technicians = new Map(rows.map(row => [row.technicianId ?? 'unassigned', row.technicianLabel]));
@@ -225,8 +252,8 @@
         }
         render(rows);
         const missing = rows.filter(row => !row.point).length;
-        state(rows.length ? 'ready' : 'empty', rows.length ? rows.length+' '+(routeMode ? 'visitas planeadas' : 'piscinas')+' · '+missing+' sem coordenadas válidas.' : routeMode ? 'Sem visitas regulares planeadas para este técnico e dia.' : 'Sem piscinas ativas.');
-      } catch (error) { if (currentQuery()) { clear(); state('error', error instanceof SyntaxError ? 'Resposta inválida. Atualize para tentar novamente.' : error.message || 'Consulta não confirmada. Tente novamente.'); } }
+        state(rows.length ? 'ready' : 'empty', rows.length ? routeMode ? own('ready', rows.length+' visitas planeadas · '+missing+' sem coordenadas válidas.', { count: rows.length, missing }) : rows.length+' piscinas · '+missing+' sem coordenadas válidas.' : routeMode ? own('empty', 'Sem visitas regulares planeadas para este técnico e dia.') : 'Sem piscinas ativas.');
+      } catch (error) { if (currentQuery()) { clear(); state('error', error instanceof SyntaxError ? own('invalid', 'Resposta inválida. Atualize para tentar novamente.') : error.mapCopy || error.message || own('unconfirmed', 'Consulta não confirmada. Tente novamente.')); } }
       finally { if (currentQuery()) busy(false); }
     }
     load.addEventListener('click', () => query(false)); nearby?.addEventListener('click', () => query(true));
@@ -246,10 +273,13 @@
         try {
           const { data } = await json('/api/technicians'); if (!active()) return;
           if (!Array.isArray(data) || !data.every(t => t && validId(t.id) && typeof t.name === 'string') || new Set(data.map(t=>t.id)).size !== data.length) throw Error('invalid');
-          const blank = new Option('Escolha o técnico', ''); tech.add(blank);
-          for (const t of data) tech.add(new Option(t.name+' · #'+t.id+(t.active === false ? ' (inativo)' : ''), String(t.id)));
-          state(data.length ? 'idle' : 'empty', data.length ? 'Escolha o técnico e atualize para obter uma sugestão por proximidade.' : 'Sem técnicos disponíveis.');
-        } catch (_) { if (active()) state('error','Não foi possível carregar os técnicos. Use Atualizar técnicos.'); }
+          const blank = new Option('', ''); put(blank, own('chooseTechnician', 'Escolha o técnico')); tech.add(blank);
+          for (const t of data) {
+            const option = new Option('', String(t.id));
+            put(option, t.active === false ? own('inactive', t.name+' · #'+t.id+' (inativo)', { name: t.name, id: t.id }) : t.name+' · #'+t.id); tech.add(option);
+          }
+          state(data.length ? 'idle' : 'empty', data.length ? own('idle', 'Escolha o técnico e atualize para obter uma sugestão por proximidade.') : own('noTechnicians', 'Sem técnicos disponíveis.'));
+        } catch (_) { if (active()) state('error', own('techniciansError', 'Não foi possível carregar os técnicos. Use Atualizar técnicos.')); }
         finally { if (active()) { retry.disabled = false; tech.disabled = false; } }
       }
       retry.addEventListener('click', technicians); void technicians();

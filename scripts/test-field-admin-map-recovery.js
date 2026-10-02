@@ -72,6 +72,8 @@ let browser;
  }
  console.log('PASS pools: actual object response, literal names, zero/missing/invalid coordinates, proximity/GPS failure, failed/malformed/empty reads and three widths without external map');
  await goto('/route-map');await state('idle');await page.locator('#mapDate').fill(day);await page.locator('#mapTechnician').selectOption(String(a.id));
+ const originals=await prisma.serviceVisit.findMany({where:{technicianId:{in:[a.id,b.id]}},orderBy:{id:'asc'}}),writes=[],languageWrites=[],routeReads=[];
+ page.on('request',request=>{const url=new URL(request.url());if(url.pathname==='/api/route/optimize')routeReads.push(request.url());if(url.pathname==='/api/settings/language/me'&&request.method()==='PUT')languageWrites.push(request.postDataJSON());else if(url.pathname.startsWith('/api/')&&request.method()!=='GET')writes.push(request.method()+' '+url.pathname);});
  await page.locator('#mapLoad').click();await state('ready');assert.equal(await page.locator('#mapList article').count(),4);
  assert.equal(await page.locator('#mapList a').count(),4);
  await page.locator('#mapTechnician').selectOption(String(b.id));await state('idle');assert.equal(await page.locator('#mapList a').count(),0);
@@ -84,6 +86,32 @@ let browser;
  await page.waitForFunction(()=>!!window.qaReleaseGeo);await page.locator('#mapDate').fill('2026-09-20');await page.evaluate(()=>window.qaReleaseGeo());
  await page.waitForTimeout(100);assert.equal(await page.locator('#mapStatus').getAttribute('data-state'),'idle');assert.equal(await page.locator('#mapList a').count(),0);
  await page.evaluate(()=>window.qaGeoMode='ready');await page.locator('#mapDate').fill(day);await page.locator('#mapLoad').click();await state('ready');
+ const routeLabels={pt:['Sugestão de rota','Atualizar sugestão','Escolha o técnico','Mapa indisponível.','Sem coordenadas válidas.'],en:['Route suggestion','Refresh suggestion','Choose a technician','Map unavailable.','No valid coordinates.'],fr:['Suggestion de parcours','Actualiser la suggestion','Choisissez un technicien','Carte indisponible.','Aucune coordonnée valide.'],es:['Sugerencia de ruta','Actualizar sugerencia','Elija un técnico','Mapa no disponible.','Sin coordenadas válidas.'],de:['Routenvorschlag','Vorschlag aktualisieren','Techniker auswählen','Karte nicht verfügbar.','Keine gültigen Koordinaten.']};
+ await page.locator('#mapTechnician').selectOption(String(a.id));await page.locator('#mapLoad').click();await state('ready');
+ const routeBefore=await page.evaluate(()=>({date:mapDate.value,technician:mapTechnician.value,rows:Array.from(mapList.children,n=>({id:n.dataset.recordId,links:Array.from(n.querySelectorAll('a'),a=>a.href)}))}));
+ const readsBeforeLanguage=routeReads.length;
+ for(const [lang,labels]of Object.entries(routeLabels)){
+  await page.locator('#cwLanguageSelect').selectOption(lang);
+  assert.equal(await page.locator('main h1').textContent(),labels[0]);assert.equal(await page.locator('#mapLoad').textContent(),labels[1]);
+  assert.equal(await page.locator('#mapTechnician option[value=""]').textContent(),labels[2]);assert((await page.locator('#mapNotice').textContent()).startsWith(labels[3]));
+  assert((await page.locator('#mapStatus').textContent()).startsWith({pt:'4 visitas planeadas',en:'4 planned visits',fr:'4 visites prévues',es:'4 visitas planificadas',de:'4 geplante Besuche'}[lang]));
+  assert((await page.locator('#mapList article p').evaluateAll(nodes=>nodes.map(n=>n.textContent))).some(text=>text.startsWith(labels[4])));
+  assert.deepEqual(await page.evaluate(()=>({date:mapDate.value,technician:mapTechnician.value,rows:Array.from(mapList.children,n=>({id:n.dataset.recordId,links:Array.from(n.querySelectorAll('a'),a=>a.href)}))})),routeBefore);
+  for(const width of [320,390,1440]){await page.setViewportSize({width,height:900});assert(await page.locator('main').evaluate(n=>n.scrollWidth<=n.clientWidth+1));assert(await page.locator('.map-controls input,.map-controls select,.map-controls button').evaluateAll(nodes=>nodes.every(n=>n.getBoundingClientRect().right<=innerWidth+1)));await page.screenshot({path:path.join(visual,'route-'+lang+'-'+width+'.png')});}
+ }
+ assert.equal(routeReads.length,readsBeforeLanguage);assert.equal(await page.locator('#mapStatus').getAttribute('data-state'),'ready');
+ await page.locator('#cwLanguageSelect').selectOption('pt');
+ assert(languageWrites.every(body=>Object.keys(body).length===1&&['pt','en','fr','es','de'].includes(body.language)));
+ assert.deepEqual(writes,[]);assert.deepEqual(await prisma.serviceVisit.findMany({where:{technicianId:{in:[a.id,b.id]}},orderBy:{id:'asc'}}),originals);
+ console.log('PASS route own copy in five languages/three widths with actual SQL/API, unchanged selected day/technician/order/destinations and zero operational writes');
+ await page.evaluate(()=>window.qaGeoMode='deny');await page.locator('#mapLoad').click();await state('error');
+ for(const [lang,text]of Object.entries({pt:'Não foi possível obter a localização.',en:'Unable to obtain your location.',fr:'Impossible d’obtenir votre position.',es:'No se pudo obtener la ubicación.',de:'Der Standort konnte nicht ermittelt werden.'})){await page.locator('#cwLanguageSelect').selectOption(lang);assert((await page.locator('#mapStatus').textContent()).startsWith(text));assert.equal(await page.locator('#mapList a').count(),0);}
+ await page.evaluate(()=>window.qaGeoMode='ready');
+ await page.route('**/api/route/optimize?**',r=>r.fulfill({status:503,json:{error:'PRIVATE_QA_ROUTE_FAILURE'}}));await page.locator('#mapLoad').click();await state('error');
+ for(const [lang,text]of Object.entries({pt:'Não foi possível confirmar os dados.',en:'Unable to confirm the data.',fr:'Impossible de confirmer les données.',es:'No se pudieron confirmar los datos.',de:'Die Daten konnten nicht bestätigt werden.'})){await page.locator('#cwLanguageSelect').selectOption(lang);assert((await page.locator('#mapStatus').textContent()).startsWith(text));assert.equal(await page.locator('#mapList a').count(),0);}
+ await page.unroute('**/api/route/optimize?**');await page.locator('#cwLanguageSelect').selectOption('pt');await page.locator('#mapLoad').click();await state('ready');
+ assert.deepEqual(writes,[]);assert.deepEqual(await prisma.serviceVisit.findMany({where:{technicianId:{in:[a.id,b.id]}},orderBy:{id:'asc'}}),originals);
+ console.log('PASS retained native GPS/read errors repaint in all five languages without new route reads or operational writes');
  for(const width of [320,390,1440]){
   await page.setViewportSize({width,height:900});await page.evaluate(()=>scrollTo(0,0));
   assert(await page.locator('.map-controls input,.map-controls select,.map-controls button').evaluateAll(nodes=>nodes.every(n=>{const r=n.getBoundingClientRect();return r.x>=0&&r.right<=innerWidth+1;})));

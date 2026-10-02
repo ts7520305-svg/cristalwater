@@ -4,13 +4,13 @@
 <link rel="stylesheet" href="/ui/foundation.css"><link rel="stylesheet" href="/ui/design-system.css">
 <link rel="stylesheet" href="/cw-admin-map.css">
 <link rel="stylesheet" href="/cristal-assist.css"><script src="/cw-auth.js"></script><script src="/admin-auth-guard.js"></script></head>
-<body data-required-role="ADMIN"><main class="admin-map-page" data-cw-state-managed="manual" data-cw-form-memory="managed">
-<h1>Sugestão de rota</h1>
-<p>Visitas regulares planeadas para o técnico e dia escolhidos, a partir da sua localização atual. A ordem é uma sugestão por proximidade, sem trânsito ou horários. Não altera o planeamento nem inclui visitas extra ou já iniciadas.</p>
-<a href="/admin-map">Consultar piscinas</a>
+<body data-required-role="ADMIN"><main class="admin-map-page" data-cw-state-managed="manual" data-cw-form-memory="managed" data-cw-no-i18n>
+<header><h1 data-route-copy="title">Sugestão de rota</h1><div class="cw-global-actions"></div></header>
+<p data-route-copy="intro">Visitas regulares planeadas para o técnico e dia escolhidos, a partir da sua localização atual. A ordem é uma sugestão por proximidade, sem trânsito ou horários. Não altera o planeamento nem inclui visitas extra ou já iniciadas.</p>
+<a href="/admin-map" data-route-copy="pools">Consultar piscinas</a>
 <div class="map-controls">
-<label>Dia<input id="mapDate" type="date" required></label><label>Técnico<select id="mapTechnician"></select></label><button id="mapTechniciansReload" type="button">Atualizar técnicos</button>
-<button id="mapLoad" type="button">Atualizar sugestão</button>
+<label><span data-route-copy="day">Dia</span><input id="mapDate" type="date" required></label><label><span data-route-copy="technician">Técnico</span><select id="mapTechnician"></select></label><button id="mapTechniciansReload" type="button" data-route-copy="reloadTechnicians">Atualizar técnicos</button>
+<button id="mapLoad" type="button" data-route-copy="reload">Atualizar sugestão</button>
 
 </div>
 <p id="mapStatus" role="status" aria-live="polite"></p>
@@ -18,6 +18,6 @@
 <div id="map" role="region" aria-label="Mapa com localizações confirmadas"></div>
 <div id="mapList"></div>
 </main>
-<script src="/cw-admin-map.js"></script><script src="/route-map.js"></script>
+<script src="/cw-i18n.js"></script><script src="/cw-admin-map.js"></script><script src="/route-map.js"></script>
 <script src="/cristal-help-data.js"></script><script src="/cristal-assist.js"></script><script src="/ui/core/navigation-context.js"></script><script src="/crystal-os-v2-shell.js"></script><script src="/crystal-os-v2-nav.js"></script><script defer src="/ui/design-system.js"></script>
 </body></html>
