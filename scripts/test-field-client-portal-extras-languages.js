@@ -395,9 +395,9 @@ async function database() {
   const offline = await context('allow'), offlinePage = await offline.newPage(); offlinePage.setDefaultTimeout(12000);
   await offlinePage.goto(base + '/admin-login'); await offlinePage.waitForFunction(() => Boolean(navigator.serviceWorker.controller));
   await offlinePage.goto(base + '/client-portal?lang=de'); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle');
-  for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js']]) {
-    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261001-v296')).match(url)), url);
-    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261001-v296')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
+  for (const [url, file] of [['/client-portal?lang=de', 'client-portal.html'], ['/client-portal.js', 'client-portal.js'], ['/cw-auth.js', 'cw-auth.js'], ['/client-quotes.js', 'client-quotes.js'], ['/cw-professional-portals.css', 'cw-professional-portals.css']]) {
+    await offlinePage.waitForFunction(async url => Boolean(await (await caches.open('cristalwater-field-20261002-v297')).match(url)), url);
+    assert.equal(await offlinePage.evaluate(async url => (await (await caches.open('cristalwater-field-20261002-v297')).match(url)).text(), url), await fs.readFile(path.join(__dirname, '../frontend', file), 'utf8'));
   }
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/visit-requests', route => route.abort('failed'));
   await offlinePage.route(base + '/api/client-portal/' + client.id + '/payment-notice', route => route.abort('failed'));
@@ -483,7 +483,21 @@ async function database() {
     mark: ['Marcar como lida', 'Mark as read', 'Marquer comme lue', 'Marcar como leída', 'Als gelesen markieren'], unread: ['Por ler', 'Unread', 'Non lue', 'Sin leer', 'Ungelesen'], read: ['Lida', 'Read', 'Lue', 'Leída', 'Gelesen'],
     error: ['Não foi possível confirmar a leitura. Tente novamente.', 'Could not confirm reading. Please try again.', 'Impossible de confirmer la lecture. Réessayez.', 'No se pudo confirmar la lectura. Vuelve a intentarlo.', 'Lesebestätigung fehlgeschlagen. Bitte erneut versuchen.'],
   };
-  let healthyNoticeCases = 0;
+  let healthyNoticeCases = 0, stationaryNoticeTargets = 0;
+  async function stationaryNoticeTarget(state, language) {
+    const button = offlinePage.locator('#notificationList [data-notice-read]');
+    await button.scrollIntoViewIfNeeded(); await offlinePage.mouse.move(0, 0); await settle(offlinePage);
+    const before = await button.boundingBox();
+    await offlinePage.mouse.move(before.x + before.width / 2, before.y + before.height / 2); await settle(offlinePage);
+    const hovered = await button.boundingBox();
+    const motion = await button.evaluate(node => ({ transform: getComputedStyle(node).transform, hovered: node.matches(':hover') }));
+    assert.equal(motion.hovered, true, 'Native pointer must reach the notification target');
+    assert.equal(motion.transform, 'none', 'Notification target must remain stationary: ' + JSON.stringify({ state, language, before, hovered, motion }));
+    assert.deepEqual(hovered, before, 'Notification hover cannot move or resize its target');
+    assert(hovered.height >= 44 && hovered.x >= 0 && hovered.x + hovered.width <= offlinePage.viewportSize().width);
+    await offlinePage.mouse.move(0, 0); await settle(offlinePage);
+    assert.deepEqual(await button.boundingBox(), before, 'Notification target must remain stationary when the pointer leaves'); stationaryNoticeTargets++;
+  }
   async function noticePreserve() {
     assert.deepEqual(await pending(offlinePage), coldPending); assert.deepEqual(await work(offlinePage), offlineWork);
     assert.deepEqual((await fields(offlinePage)).values.map(({ id, value }) => ({ id, value })), coldValues);
@@ -508,6 +522,7 @@ async function database() {
     await offlinePage.locator('#messageInput').focus(); await offlinePage.evaluate(() => document.getElementById('messageInput').setSelectionRange(2, 8)); const before = await fields(offlinePage); await noticeNodes();
     for (const width of [320, 390, 1440]) { await offlinePage.setViewportSize({ width, height: 900 }); for (const [index, language] of languages.entries()) {
       await offlinePage.evaluate(language => { queryLanguage = language; applyLanguage(language); }, language); await settle(offlinePage); await healthyLabels(index, state);
+      await stationaryNoticeTarget(state, language);
       assert.deepEqual(await fields(offlinePage), before); assert.equal(guardedReads(), readsBefore); assert.equal(coldRequests.filter(request => request.path === noticeReadPath).length, writesBefore);
       assert(await offlinePage.evaluate(() => qaNoticeNodes.every((node, index) => node.isConnected && node.firstChild === qaNoticeLeaves[index]))); assert(await offlinePage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)); healthyNoticeCases++;
     } }
@@ -528,7 +543,8 @@ async function database() {
     await offlinePage.locator('#cwLanguageSelect').selectOption(language); await offlinePage.waitForFunction(() => loadedClientId === clientId); await offlinePage.waitForLoadState('networkidle'); await healthyLabels(index, 'read', false); healthyNoticeCases++;
   } }
   assert.equal(coldRequests.slice(noticeStart).filter(request => request.path === noticeReadPath).length, 2, 'One failed attempt and one explicit native confirmation; repaint/selector/disabled handler cannot retry automatically'); assert.deepEqual(await database(), finalDatabaseExpected);
-  console.log('PASS healthy portal notifications ' + JSON.stringify({ healthyNoticeCases, languages: 5, widths: [320, 390, 1440], spanishNativeResponseRendered: true, explicitReadAttempts: 2, nativeSqlConfirmations: 1, pendingRequests: 2, originalNodesFocusAndGuardRetained: true }));
+  assert.equal(stationaryNoticeTargets, 60);
+  console.log('PASS healthy portal notifications ' + JSON.stringify({ healthyNoticeCases, stationaryNoticeTargets, languages: 5, widths: [320, 390, 1440], spanishNativeResponseRendered: true, explicitReadAttempts: 2, nativeSqlConfirmations: 1, pendingRequests: 2, originalNodesFocusAndGuardRetained: true }));
   console.log('PASS primary portal retry: exact core GET, native two-section reload, restored guard, literal notification and immutable pending work'); await offline.close();
   assert.deepEqual(await database(), finalDatabaseExpected);
   console.log('PASS portal extras result ' + JSON.stringify({ checks, languageCases: 210, nativeRetry: true, literalNativeNotification: true, ownershipControls: 2, pendingRequests: 2, currentWorkerShellBytes: true, actualPageContinuedOffline: true, actualColdOfflineReload: true, primaryFailureStates: 4, primaryRetry: true }));

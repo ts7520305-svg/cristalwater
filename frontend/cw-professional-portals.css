@@ -8,6 +8,11 @@
 .cw-professional-portal .cw-v2-card{background:#fff;border:1px solid #d4e0e4;box-shadow:0 3px 12px #16374608}
 .cw-professional-portal button,.cw-professional-portal select,.cw-professional-portal input:not([type=file]){min-height:44px;font-size:16px}
 .cw-professional-portal .cw-v2-btn{white-space:normal}
+/* Keep the acknowledgement target stationary across hover and disabled states. */
+.cw-professional-portal #notificationList [data-notice-read]{
+ transform:none;
+ transition:box-shadow 120ms ease,background-color 120ms ease;
+}
 .cw-professional-portal .cw-v2-mobile-nav{grid-template-columns:repeat(6,minmax(0,1fr));background:#fff;padding-bottom:env(safe-area-inset-bottom)}
 .cw-professional-portal .cw-v2-mobile-nav a{font-size:11px;min-width:0;padding:8px 2px;min-height:48px;color:#244b59}
 .cw-professional-portal .cw-v2-mobile-nav a.is-active{background:#e7f3ef;color:#075c4c}
