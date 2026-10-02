@@ -43,3 +43,7 @@
 - Memória da ficha por principal validado e visita, restaurada só após carregamento autorizado; refresh conserva a edição atual.
 - Dados antigos sem titular não são adotados; bytes inválidos arquivados antes de guardar novos campos. Ficheiros, credenciais e formulários geridos excluídos.
 - Cache v304; 13 regressões novas e ensaio Chromium de reload aprovados localmente. Aceitação integrada/produção permanece pendente.
+
+## TASK540 — regressão browser reproduzível (2026-10-02)
+- Adicionado ensaio da recuperação por conta/visita com HTML e scripts reais; respostas de API são fixtures QA explícitas, sem alegar validação SQL.
+- Reload atrasado, troca PIN/USER, refresh, outra visita, recusa GET, exclusão de ficheiros e preservação de bytes verificados. Incluído nos gates browser existentes; código antigo falha no mesmo ensaio.

@@ -18,9 +18,11 @@ O inventário de código inclui backend Express/Prisma, Admin, Técnico e Client
 
 O plano de conclusão existente (`docs/product/COMPLETION_PLAN_20260928.md`) regista C01–C05 concluídas: validação operacional anterior, probes de volume/consistência e inventário de idiomas. C06 está em execução; C07–C32 permanecem abertas. Preservar as evidências por commit. TASK535–538 tratam mapa, estados da rota, idioma da ficha e isolamento da ficha ativa após troca de conta. A recuperação após reload não ficou resolvida pela TASK538.
 
-## Tarefa em curso
+## Alterações publicadas / tarefa em curso
 
-TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw:ctx:<pathname>` sem titular nem visita. O código existente confirma o risco de recuperar leituras/notas da conta ou visita anterior. A correção local usa a identidade já validada pelo guard da ficha e o ID de visita, só restaura depois da leitura autorizada e não adota o armazenamento antigo sem titular. Ficheiros, credenciais e formulários geridos continuam excluídos; snapshots inválidos não são adotados e os seus bytes são arquivados antes de guardar trabalho novo. Cache v304 e quatro expectativas de testes atualizados. Correção testada localmente, a publicar no commit desta entrada; CI integrado ainda pendente.
+- Checkpoint/documentação: commit `404e7145f19d68fa8b5331c4532814aed4825734`.
+- TASK539 publicada: `c8c6a6f39624ffbfef2cc3bb3045e5bd28d7f378`, árvore `b85d91258935fbc4e518176a33fc61b35d4d8748`; run `37065691326` em execução. Memória da ficha usa principal validado pelo guard e ID da visita, só restaura após leitura autorizada. Não adota snapshots sem dono; preserva bytes inválidos num arquivo antes de guardar novo trabalho. Ficheiros/credenciais excluídos, refresh mantém edição. Cache v304 e quatro expectativas atualizadas; 10 ficheiros. 1 409 unitários/142 ficheiros, quatro técnicos, sintaxe e diff-check passaram.
+- TASK540 em validação local: ensaio reproduzível com HTML real, `cw-auth`, guard, ficha e script de navegação; GETs/identidades são fixtures QA explícitas. Incluído no preflight browser existente (22 scripts em vez de 21). Não modifica backend/schema nem runner de 387 grupos.
 
 ## Testes realizados nesta sessão
 
@@ -28,12 +30,13 @@ TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw
 - Baseline: 1 395/1 396 testes passaram; um timeout de 5 s ao `git show` de fonte histórica num clone com blobs sob demanda. Repetição do ficheiro: 26/26, sem alterar prazo/asserts.
 - Após correção local: 1 409 testes / 142 ficheiros passaram; 13 regressões novas de recuperação, conta, visita, corrupção, ficheiros/credenciais, refresh e compatibilidade genérica.
 - Técnico: 4/4. Sintaxe: 695 JS backend, 308 JS frontend, 45 scripts inline. `git diff --check` aprovado.
-- Chromium 153, componente com o script real de navegação: reload, prontidão atrasada, duas contas, duas visitas, checkbox, refresh e bytes antigos passaram. A prontidão/identidade do componente é uma fixture; não alegar aceitação SQL/API deste ensaio.
+- Chromium 153, componente inicial com o script real de navegação: reload, prontidão atrasada, duas contas, duas visitas, checkbox, refresh e bytes antigos passaram. A prontidão/identidade do componente é uma fixture; não alegar aceitação SQL/API deste ensaio.
+- TASK540: HTML/formulário e scripts reais de auth/guard/ficha/navegação com GETs QA assinados; reload retido, PIN/USER com mesmo ID, duas visitas, refresh, GET403, ficheiro excluído, snapshots antigos intactos e zero escritas passaram. Fonte antiga da navegação faz o ensaio falhar na recuperação prematura. A preparação inicial apontou para porta3002; configurada a origem de API QA sem alterar produto.
 - Download do Chromium do Playwright devolveu ZIP truncado; utilizado Chromium já instalado em `/tmp/chromium`. PostgreSQL local e integração completa ainda não preparados nesta sessão.
 
 ## Erros conhecidos e limites
 
-- Memória sem titular na ficha: correção local TASK539, validação integrada pendente.
+- Memória sem titular na ficha: TASK539 publicada, validação integrada pendente.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
 - CI537/538 pendentes; verificar estado final e diagnosticar qualquer falha antes de aceitar.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
@@ -49,6 +52,6 @@ TASK539: corrigir a memória genérica na ficha `/technician-visit`, que usa `cw
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK540: guardar o ensaio Chromium de reload como teste reproduzível no repositório e incluí-lo na validação browser existente; usar o script real com fixtures explicitamente identificadas e não alegar SQL/API. Conferir CI537/538/539 e depois prosseguir C06. A publicação TASK539 inclui 10 ficheiros: duas fontes, cache, quatro expectativas de cache, um teste e dois documentos. Publicar/checkar SHA remoto após cada commit.
+Finalizar/publicar TASK540, conferir SHA/árvore e Actions537–540. Se houver falha, ler o job e corrigir a primeira causa reproduzível. Depois continuar C06 pelo inventário `docs/product/LANGUAGE_INVENTORY_20260928.md` e checkpoint histórico, começando pela memória genérica das outras páginas técnicas que ainda não tem titular; verificar cada produtor/formulário gerido antes de alterar. Não declarar isolamento global por esta ficha.
 
-Registo anterior, resolvido nesta alteração — finalizar TASK539: versionar cache do service worker e expectativas correspondentes, repetir gates finais, publicar correção e documentação na branch de trabalho com parent remoto conferido; verificar Actions. Depois adicionar ensaio reproduzível de reload com navegador à validação existente, conferir CI537/538/539 e prosseguir o inventário C06. Se uma Action falhar, diagnosticar o primeiro erro real antes de novas tarefas. Nunca fechar C06 por este único lote.
+Integração futura: os três commits exclusivos da branch padrão alteram apenas `docs/product/BILLING_AUTOMATION_SPEC.md` (477 linhas), uma especificação marcada como não implementada. Ler a versão completa antes de conciliar requisitos de cobranças, IA preditiva e integridade de medidas/relatórios; não assumir que estão implementados nem apagar os commits.
