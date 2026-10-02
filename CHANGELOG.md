@@ -33,3 +33,8 @@
 - Adicionada cobertura de teste para ordenação da rota e carregamento do today route do técnico.
 - Implementada recuperação local da rota diária, deduplicação da fila offline e resolução determinística de conflitos de conclusão já efetuada.
 - Mantidos os contratos públicos da API, o formato JSON e os eventos do EventBus.
+
+## 2026-10-02 — checkpoint oficial (sem nova release)
+- Criados `PROJECT_STATE.md` e `BACKLOG.md` como checkpoint e índice do plano existente.
+- Arquitetura complementada com a estrutura atual e pipeline de validação.
+- Identificadas versões documentais divergentes e divergência entre branch padrão e branch de desenvolvimento; não foi atribuída prontidão de produção nem efetuado merge.
