@@ -73,3 +73,7 @@
 ## TASK544 — troca de conta no intake aberto (2026-10-03)
 - Evento de sessão limpa e bloqueia imediatamente os campos da conta anterior, incluindo quando o envio local está ocupado; gerações de leitura/GPS invalidadas antes de recuperar a conta original.
 - Regressão de sessão/storage/GPS retido conserva os dois rascunhos e não envia operações. Componentes de entrada dos três perfis, sessão e offline aprovados; cache307 e expectativas existentes atualizados.
+
+## TASK545 — troca de conta na conversa da equipa (2026-10-03)
+- Chat usa imediatamente a invalidação existente ao receber o evento de sessão, limpando mensagens/notificações/campos e abortando leituras antigas.
+- Novo componente browser para Técnico/Chefe/Admin preserva rascunhos e pedidos das duas contas e não envia operações; adicionado depois dos22 gates existentes, com preflight23/23 aprovado. Cache20261003-v308; runner integrado387 intacto.

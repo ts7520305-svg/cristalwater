@@ -160,7 +160,7 @@
     renderControls();
   });
   $('refreshChat').addEventListener('click', () => { sync(); void loadMessages(); void loadNotices(); });
-  window.addEventListener('storage', sync); window.addEventListener('focus', sync); window.addEventListener('cw-language-change', sync);
+  window.addEventListener('storage', sync); window.addEventListener('cw:session-change', sync); window.addEventListener('focus', sync); window.addEventListener('cw-language-change', sync);
   window.addEventListener('online', () => { sync(); void loadMessages(); void loadNotices(); }); window.addEventListener('offline', sync);
   document.addEventListener('visibilitychange', sync);
   setInterval(sync, 500);
