@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | Validação TASK542–546 | CI540/541 e restauros conferidos; obter conclusão/logs/restauro dos runs542–546 nos respetivos SHAs. |
-| 2 | C06 / TASK547 | Após os gates, observar route-map/C06-011 em cinco idiomas/três larguras/fallback; traduzir apenas lacunas próprias e manter dados, guard Admin e APIs. |
+| 1 | Validação TASK542–548 | CI540/541 e restauros conferidos; obter conclusão/logs/restauro dos runs542–548 nos respetivos SHAs. |
+| 2 | C06 / TASK549 | Rota547 traduzida/validada com SQL real; chat548 e E2E dos três perfis passaram. Próximo: testes GPS existentes, evento de sessão/leituras tardias; não duplicar o produtor de cinco idiomas já existente. |
 | 3 | Validação ambiental Windows | Distinguir as quatro falhas locais de backup (`symlink`/modo `0600`) de regressões reais antes de usar `npm test` como gate total nesta máquina. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -17,4 +17,4 @@ C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principa
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
 
-Atualização 03/10 às00:20: TASK543–546 publicadas; última `e3497a6`, Action37077034871. Cache309, preflight23/23 aprovado em545, runner387 intacto. CI540/541 success; CI542–546 em execução, sem falhas reportadas. Referências SHA/árvore/jobs, falhas Windows e próxima547 em `PROJECT_STATE.md`.
+Atualização 03/10 às00:52: TASK547 publicada `56ac2b8`, Action37079201848; TASK548 em publicação. Cache310, preflight23/23 aprovado em547, runner387 intacto. PostgreSQL16 QA isolado/migrações43, oito fluxos SQL/API/mapa e E2E nativo Admin/Técnico/Cliente passaram; chat nativo548 aprovado. CI542–547 pendentes; não transferir aceitação541. Referências/falhas Windows/próxima549 em `PROJECT_STATE.md`.

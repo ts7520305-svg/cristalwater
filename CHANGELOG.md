@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## TASK547–548 - rota e aceitação SQL local (2026-10-03)
+- Sugestão de rota Admin com 35 entradas PT/EN/FR/ES/DE; preservados seleção, nomes literais, dados, destinos, API e ausência de escritas de planeamento.
+- PostgreSQL16 QA isolado preparado; 43 migrações aditivas, mapas/API, seis fluxos operacionais e E2E nativo dos três perfis aprovados. CI integrada dos novos SHAs ainda pendente.
+- Ensaio SQL/browser de chat independente da fonte Google opcional; produto, assertions e prazos preservados. Quatro falhas ambientais de backup Windows continuam documentadas, sem enfraquecer testes.
+
 ## V23.2.1 - Engineering Foundation
 - Início do controlo de versões com Git.
 - Adicionado .gitignore.

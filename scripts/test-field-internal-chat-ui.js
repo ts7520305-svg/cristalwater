@@ -26,6 +26,8 @@ let browser;
   await prisma.notification.create({ data: { role: 'TECHNICIAN', type: 'INFO', title: 'Aviso de serviço', message: 'Verificar material antes de sair.', severity: 'INFO', metadata: { technicianId: tech.id } } });
   browser = await chromium.launch({ headless: true, ...(process.env.CW_CHROMIUM_PATH ? { executablePath: process.env.CW_CHROMIUM_PATH } : {}), args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, colorScheme: 'light', serviceWorkers: 'block' });
+  // Optional typography must not determine the SQL/browser acceptance result.
+  await context.route('https://fonts.googleapis.com/**', route => route.abort());
   await context.addInitScript(({ user, token }) => {
     if (sessionStorage.getItem('cwChatQAInitialized')) return;
     for (const key of ['cristalwater_jwt', 'token']) localStorage.setItem(key, token);

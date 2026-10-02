@@ -1,12 +1,12 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-03 00:47 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 00:52 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit de código validado localmente e publicado: `e3497a65789d8e962004f4f8633e603136030cde` (TASK546), árvore `2241293b6e37db93b5cea44b9feabef9f3ca0489`; SHA/árvore do GitHub conferidos após push. Aceitação integrada ainda pendente.
+- Último commit de código validado localmente e publicado: `56ac2b8c9f490e76eed305e6686cceabb6cfa528` (TASK547), árvore `b543bcbdd0b7d48b2889f3d31bd0331670a5decf`; SHA/árvore do GitHub conferidos após push. CI `37079201848`, job `111075769105`, em execução, sintaxe/migrações aprovadas; aceitação integrada ainda pendente. TASK548 pronta para publicação.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
 - Último commit com CI integrado concluído e log conferido: `31a6e548cdabfb236f95d7a8656d3becb73d48a2` (TASK541), run `37066631332`, job `111035975340`, success. TASK540 (`6cf781f`, run `37066186782`, job `111034430127`) também success: cada log confirma SHA, 387 grupos distintos/code0 e restauro de 128 tabelas/51 ficheiros com linhas e hashes iguais. TASK537–539 continuam aceites nos runs registados anteriormente.
 - TASK542 (`b73a04c`, run `37073275970`), TASK543 (`bfe82be`, run `37074953256`, job `111062639350`), TASK544 (`e5b2075`, run `37075670653`, job `111064906269`) e TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`) continuam `in_progress`; migrações, sintaxe e unitários/técnicos/browser passaram, suites integradas e restauros pendentes. TASK546 (`e3497a6`, run `37077034871`, job `111069139406`) está na preparação Prisma na consulta das00:20; nenhuma falha reportada, sem atribuir sucesso a etapas pendentes. Não transferir aceitação541 para542–546.
@@ -29,6 +29,7 @@ Publicações desta retoma, todas na branch autorizada:
 | 544 | `e5b2075c7e0cbec01e459ad856158d54df318b7c` | `c8a5ee72a45b44d9bd8caa14aa8b27771555e37a` | `37075670653` |
 | 545 | `3e56fe32b97b92a1742f965deda3a32e7cab851a` | `e79b8eff6558da1d40cb76ae7c93e96c1619e872` | `37076553416` |
 | 546 | `e3497a65789d8e962004f4f8633e603136030cde` | `2241293b6e37db93b5cea44b9feabef9f3ca0489` | `37077034871` |
+| 547 | `56ac2b8c9f490e76eed305e6686cceabb6cfa528` | `b543bcbdd0b7d48b2889f3d31bd0331670a5decf` | `37079201848` |
 
 As entradas abaixo conservam o estado histórico no momento da publicação; o estado corrente de CI é o da secção Versão e referências.
 
@@ -41,6 +42,9 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 - TASK542 publicada: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02`, árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`, [CI37073275970](https://github.com/ts7520305-svg/cristalwater/actions/runs/37073275970) em execução. `technician-new-client` ganhou cópia própria PT/EN/FR/ES/DE para permissões, rascunho, envio, política, GPS, campos, placeholders e opções visíveis. O contrato de dados do write-store foi preservado: `poolType` continua a enviar/validar `Privada`, `Condomínio`, `Hotel`, `Jacuzzi`; payload, UUID/requestId, recibos, endpoints e schema não mudaram. O seletor global de idioma passa a ter destino local no cabeçalho da página.
 
 ## Testes realizados nesta sessão
+
+- TASK548: confirmada a dependência ambiental do ensaio SQL/browser de chat: comando original excedia load8s; harness temporário bloqueando só fonts.googleapis.com passou todas as assertions. O ensaio existente agora aborta apenas esse fornecedor opcional no contexto QA; produto/CSS/API/schema, prazos e assertions intactos, nenhum grupo novo/retirado no runner387. Comando nativo corrigido aprovado: mensagens SQL reais, dois separadores, repetição/recibos errados/202, quota/corrupção/offline, resposta tardia/conta, cinco idiomas, layout/contraste e Admin/Chefe/Cliente. Sintaxe/diff-check e técnicos4/4 passaram; unitários1403/2 skipped/4 falhas Windows idênticas. O primeiro node--check no sandbox devolveu EPERM/realpath; repetição autorizada passou.
+- E2E nativo dos três perfis aprovado sem harness nem alteração: Técnico móvel (lembretes, responsabilidade, consumo/receção/retorno, fotografias, cache/reload offline, fecho/replay/impedimentos e concorrência de stock), Cliente móvel (portal/recuperação parcial/anexo persistido) e Admin desktop (troca de cliente/drafts, inventário, transferência/consumo/compra com perda de resposta e replay). Resultado failures[]; zero erros de API no estado inicial de cada perfil. Não certifica canais externos/pilotos/produção.
 
 - TASK547 / C06-011: ausência de tradução reproduzida com HTML/API/PostgreSQL reais (título ainda PT ao escolher EN). Página/modo route agora têm 35 entradas próprias PT/EN/FR/ES/DE; repintam textos, opções e erros por identidade nos mesmos nós. Nomes persistidos ficam literais, dia/técnico/ordem/destinos e endpoints são preservados. A comparação de sessão deste modo ignora somente `user.language`, porque o motor global guarda essa preferência na mesma conta; tokens/restantes propriedades continuam a invalidar. Outros modos não recebem o produtor de idioma.
 - Gates547 até agora: 43 migrações aditivas existentes passaram na nova instância PostgreSQL16.11 local, apenas127.0.0.1:5547; nenhuma base/serviço existente alterado. Base `cristalwater_qa`, uploads `uploads/qa/local-20261003`, integrações externas/schedulers desativados. Configuração `.env.test` e dados/evidências em reports ignorados pelo Git; nenhum segredo de produção utilizado.
@@ -94,7 +98,7 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK548: conferir conclusão/logs/restauro de CI542–547 e corrigir falhas reais primeiro. Validar o ensaio SQL/browser de chat existente sem dependência da fonte Google opcional: reproduzir/bloquear só recursos externos no contexto QA, mantendo API/SQL/assertions/prazos originais, depois repetir chat e E2E dos três perfis na instância isolada. Não considerar prova de componente como aceitação SQL. Sem falhas, continuar C06-012/GPS na página existente em cinco idiomas/três larguras, conferindo commits novos antes de editar. C06 permanece aberta.
+TASK549: conferir conclusão/logs/restauro de CI542–548 e corrigir falhas reais primeiro. Sem falhas, continuar C06-012/GPS: a página e o produtor já têm cinco idiomas/testes existentes, portanto não duplicar traduções. Executar os grupos GPS existentes com SQL real e auditar invalidação no evento cw:session-change, leitura GPS tardia/conta e preservação dos pontos; corrigir somente falhas reproduzidas. Conferir commits novos antes de editar. C06 permanece aberta.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 23 scripts.
 
@@ -102,4 +106,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-TASK547 implementada e em validação/publicação; SHA será registado depois do commit/push. CI540/541 e restauros conferidos; CI542–546 pendentes na consulta das00:45. Preflight23 scripts, runner387 grupos intacto. PostgreSQL QA local e backend3002 ativos somente para estes ensaios; não são produção. Próxima548 concreta acima. Sem merge/deploy/mensagens a clientes.
+TASK547 publicada/validada localmente, SHA/árvore acima; TASK548 corrigida e validada, em publicação. CI540/541 e restauros conferidos; CI542–547 pendentes na consulta das00:50. Preflight23 scripts, runner387 grupos intacto. PostgreSQL QA local e backend3002 ativos somente para estes ensaios; não são produção. Próxima549 concreta acima. Sem merge/deploy/mensagens a clientes.
