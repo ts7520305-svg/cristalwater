@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | TASK539 / C06 | Isolar recuperação da ficha por principal e visita; corrigido localmente, cache/publicação/CI pendentes. |
-| 2 | Validação TASK537–539 | Ler resultado final de cada Action; corrigir falhas reais e conferir restauro por SHA. |
+| 1 | TASK542 / C06 | Observar idiomas dos textos próprios do intake; confrontar inventário antes de qualquer tradução. |
+| 2 | Validação TASK537–541 | Ler resultado final de cada Action; corrigir falhas reais e conferir restauro por SHA. |
 | 3 | C06 | Prosseguir páginas técnicas/rascunhos/idiomas restantes do inventário; não repetir os lotes aprovados. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -16,3 +16,5 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principais ainda abertas por iniciar. Os subtarefas numeradas TASK não são percentagem de prontidão.
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
+
+Atualização 02/10 às22:25: TASK539–541 publicadas e testadas localmente; memória da visita e interferência do formulário de intake corrigidas. CI integrado destas revisões ainda em execução. Referências SHA/árvore/Actions e próxima ação exata em `PROJECT_STATE.md`.

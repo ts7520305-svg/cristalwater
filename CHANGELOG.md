@@ -51,3 +51,7 @@
 ## TASK541 — proteger o rascunho próprio de novo cliente (2026-10-02)
 - Formulário de intake marcado como gerido pelo mecanismo existente por conta; a memória genérica deixa de copiar ou sobrescrever os seus campos.
 - Reprodução browser com scripts reais capta o nome da conta antiga antes da repintura; após correção preserva 11 campos, rascunho original e edição normal, sem envio de negócio. Cache v305 e expectativas correspondentes atualizadas.
+
+## Checkpoint após TASK541 (2026-10-02)
+- Confirmados os commits remotos539–541 e checkout limpo; registados testes locais finais, Actions pendentes e próxima tarefa542 no estado oficial.
+- Checkpoint anterior conservado integralmente como arquivo; o estado oficial da raiz identifica explicitamente as entradas anteriores como históricas.
