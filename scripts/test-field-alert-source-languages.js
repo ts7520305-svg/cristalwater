@@ -202,7 +202,8 @@ process.on('exit',code=>{if(!code&&!completed)process.exitCode=1;});
  const max=await Promise.all([prisma.serviceVisit.aggregate({_max:{id:true}}),prisma.extraVisit.aggregate({_max:{id:true}})]),id=Math.max(...max.map(x=>x._max.id||0))+1,planned=new Date(now-45*60000),common={id,clientId:client.id,technicianId:tech.id,status:'PLANNED'};
  await prisma.serviceVisit.create({data:{...common,poolId:regularPool.id,date:planned,plannedDate:planned}});await prisma.extraVisit.create({data:{...common,poolId:extraPool.id,scheduledAt:planned}});
  for(const table of ['ServiceVisit','ExtraVisit'])await prisma.$queryRawUnsafe(`SELECT setval(pg_get_serial_sequence('"${table}"','id'),${id},true)`);
- const token=jwt.sign({id:tech.id,role:'TECHNICIAN',iat:Math.floor(now/1000)},getJwtSecret(),{expiresIn:'1h'});
+ // Keep the one-hour token valid for both the fixed UI noon and the live API clock.
+ const token=jwt.sign({id:tech.id,role:'TECHNICIAN',iat:Math.floor(Math.max(now,Date.now())/1000)},getJwtSecret(),{expiresIn:'1h'});
  const initialDraft={v:2,owner:'TECH:'+tech.id,drafts:{['visit-REGULAR-'+id]:{values:{notes:'Literal <b>{who}</b>'},checks:{},pendingProblems:[{severity:'Urgente',visitId:id,message:'Original <b>{count}</b>',createdAt:planned.toISOString()},{severity:'URGENTE',visitId:id,message:'Segunda ocorrência',createdAt:planned.toISOString()},{severity:'Normal',visitId:id,message:'Not critical',createdAt:planned.toISOString()}]}}};
  browser=await chromium.launch({headless:true,executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-dev-shm-usage']});
  const context=await browser.newContext({viewport:{width:390,height:900},timezoneId:'Europe/Lisbon'});await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
