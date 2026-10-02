@@ -1,3 +1,302 @@
+// Translate only original page labels and labels explicitly bound by their producers.
+// Server data, cloned nodes and replaced leaves never acquire translation ownership.
+const commandCopy = (() => {
+  const copy = {
+    "Administrador": ["Administrador", "Administrator", "Administrateur", "Administrador", "Administrator"],
+    "Tecnico": ["Técnico", "Technician", "Technicien", "Técnico", "Techniker"],
+    "Cliente": ["Cliente", "Client", "Client", "Cliente", "Kunde"],
+    "Operacao": ["Operação", "Operations", "Opérations", "Operación", "Betrieb"],
+    "Operação": ["Operação", "Operations", "Opérations", "Operaciones", "Betrieb"],
+    "Financeiro": ["Financeiro", "Finance", "Finances", "Finanzas", "Finanzen"],
+    "Clientes": ["Clientes", "Clients", "Clients", "Clientes", "Kunden"],
+    "Piscinas": ["Piscinas", "Pools", "Piscines", "Piscinas", "Pools"],
+    "Equipamentos": ["Equipamentos", "Equipment", "Équipements", "Equipos", "Ausrüstung"],
+    "Hoje": ["Hoje", "Today", "Aujourd’hui", "Hoy", "Heute"],
+    "Mapa operacional": ["Mapa operacional", "Operations map", "Carte des opérations", "Mapa operativo", "Betriebskarte"],
+    "Viaturas": ["Viaturas", "Vehicles", "Véhicules", "Vehículos", "Fahrzeuge"],
+    "Faturas": ["Faturas", "Invoices", "Factures", "Facturas", "Rechnungen"],
+    "Pagamentos": ["Pagamentos", "Payments", "Paiements", "Pagos", "Zahlungen"],
+    "Comunicacoes": ["Comunicações", "Communications", "Communications", "Comunicaciones", "Mitteilungen"],
+    "Relatorios": ["Relatórios", "Reports", "Rapports", "Informes", "Berichte"],
+    "Centro de relatorios": ["Centro de relatórios", "Report centre", "Centre de rapports", "Centro de informes", "Berichtszentrale"],
+    "Visitas": ["Visitas", "Visits", "Visites", "Visitas", "Besuche"],
+    "Tecnicos": ["Técnicos", "Technicians", "Techniciens", "Técnicos", "Techniker"],
+    "Guias de transporte": ["Guias de transporte", "Transport guides", "Bordereaux de transport", "Guías de transporte", "Transportbegleitpapiere"],
+    "Reparacoes": ["Reparações", "Repairs", "Réparations", "Reparaciones", "Reparaturen"],
+    "Historico": ["Histórico", "History", "Historique", "Historial", "Historie"],
+    "Notificacoes": ["Notificações", "Notifications", "Notifications", "Notificaciones", "Benachrichtigungen"],
+    "Cristal Water · Centro de Operações V2": ["Cristal Water · Centro de Operações V2", "Cristal Water · Operations Centre V2", "Cristal Water · Centre des opérations V2", "Cristal Water · Centro de operaciones V2", "Cristal Water · Betriebszentrale V2"],
+    "Idioma": ["Idioma", "Language", "Langue", "Idioma", "Sprache"],
+    "Centro": ["Centro", "Centre", "Centre", "Centro", "Start"],
+    "mobileAlerts": ["Alertas", "Alerts", "Alertes", "Alertas", "Alarme"],
+    "Centro de comando": ["Centro de comando", "Command centre", "Centre de commande", "Centro de mando", "Leitzentrale"],
+    "Operação diária": ["Operação diária", "Daily operations", "Opérations quotidiennes", "Operación diaria", "Tagesbetrieb"],
+    "Clientes e Equipas": ["Clientes e equipas", "Clients and teams", "Clients et équipes", "Clientes y equipos", "Kunden und Teams"],
+    "Intervenções e Campo": ["Intervenções e campo", "Interventions and field work", "Interventions et terrain", "Intervenciones y campo", "Einsätze und Außendienst"],
+    "Ativos e Armazém": ["Ativos e armazém", "Assets and warehouse", "Actifs et entrepôt", "Activos y almacén", "Anlagen und Lager"],
+    "Financeiro e Relatórios": ["Financeiro e relatórios", "Finance and reports", "Finances et rapports", "Finanzas e informes", "Finanzen und Berichte"],
+    "Sistema": ["Sistema", "System", "Système", "Sistema", "System"],
+    "Rotas / Rondas": ["Rotas / Rondas", "Routes / Rounds", "Itinéraires / Tournées", "Rutas / Rondas", "Routen / Touren"],
+    "Mapas / GPS": ["Mapas / GPS", "Maps / GPS", "Cartes / GPS", "Mapas / GPS", "Karten / GPS"],
+    "Instalacoes": ["Instalações", "Installations", "Installations", "Instalaciones", "Installationen"],
+    "Construcao": ["Construção", "Construction", "Construction", "Construcción", "Bau"],
+    "Intervencoes": ["Intervenções", "Interventions", "Interventions", "Intervenciones", "Einsätze"],
+    "Intervenções": ["Intervenções", "Interventions", "Interventions", "Intervenciones", "Einsätze"],
+    "Historico de servico": ["Histórico de serviço", "Service history", "Historique de service", "Historial de servicio", "Serviceverlauf"],
+    "Guias de trabalho": ["Guias de trabalho", "Work sheets", "Bons de travail", "Hojas de trabajo", "Arbeitsnachweise"],
+    "Stock / Inventario": ["Stock / Inventário", "Stock / Inventory", "Stock / Inventaire", "Stock / Inventario", "Lager / Inventar"],
+    "Armazens": ["Armazéns", "Warehouses", "Entrepôts", "Almacenes", "Lagerhäuser"],
+    "Produtos": ["Produtos", "Products", "Produits", "Productos", "Produkte"],
+    "Despesas": ["Despesas", "Expenses", "Dépenses", "Gastos", "Ausgaben"],
+    "Cobranca": ["Cobrança", "Collections", "Recouvrement", "Cobro", "Forderungen"],
+    "Cobranças": ["Cobranças", "Collections", "Recouvrement", "Cobros", "Forderungen"],
+    "Definicoes": ["Definições", "Settings", "Paramètres", "Configuración", "Einstellungen"],
+    "Permissoes": ["Permissões", "Permissions", "Autorisations", "Permisos", "Berechtigungen"],
+    "Indice de rotas (todos os modulos)": ["Índice de rotas (todos os módulos)", "Route index (all modules)", "Index des itinéraires (tous les modules)", "Índice de rutas (todos los módulos)", "Routenverzeichnis (alle Module)"],
+    "Resumo operacional em tempo real.": ["Resumo operacional em tempo real.", "Live operational summary.", "Résumé opérationnel en temps réel.", "Resumen operativo en tiempo real.", "Aktuelle Betriebsübersicht."],
+    "Pesquisa universal": ["Pesquisa universal", "Universal search", "Recherche universelle", "Búsqueda universal", "Globale Suche"],
+    "Pesquisa universal: alertas, visitas, stock, financeiro": ["Pesquisa universal: alertas, visitas, stock, financeiro", "Search: alerts, visits, stock, finance", "Rechercher : alertes, visites, stock, finances", "Buscar: alertas, visitas, stock, finanzas", "Suchen: Alarme, Besuche, Lager, Finanzen"],
+    "Voltar": ["Voltar", "Back", "Retour", "Volver", "Zurück"],
+    "Atualizar": ["Atualizar", "Refresh", "Actualiser", "Actualizar", "Aktualisieren"],
+    "Estado da operação com foco em decisão rápida.": ["Estado da operação com foco em decisão rápida.", "Operational status for quick decisions.", "État des opérations pour décider rapidement.", "Estado operativo para decisiones rápidas.", "Betriebsstatus für schnelle Entscheidungen."],
+    "Ver prioridades": ["Ver prioridades", "View priorities", "Voir les priorités", "Ver prioridades", "Prioritäten anzeigen"],
+    "Aprovações pendentes": ["Aprovações pendentes", "Pending approvals", "Approbations en attente", "Aprobaciones pendientes", "Ausstehende Freigaben"],
+    "Serviço técnico": ["Serviço técnico", "Technical service", "Service technique", "Servicio técnico", "Technischer Service"],
+    "Ajustar rondas": ["Ajustar rondas", "Adjust rounds", "Ajuster les tournées", "Ajustar rondas", "Touren anpassen"],
+    "Gerir visitas": ["Gerir visitas", "Manage visits", "Gérer les visites", "Gestionar visitas", "Besuche verwalten"],
+    "Abrir mapa": ["Abrir mapa", "Open map", "Ouvrir la carte", "Abrir mapa", "Karte öffnen"],
+    "Ver histórico técnico": ["Ver histórico técnico", "View technical history", "Voir l’historique technique", "Ver historial técnico", "Technischen Verlauf anzeigen"],
+    "Centro de alertas": ["Centro de alertas", "Alert centre", "Centre d’alertes", "Centro de alertas", "Alarmzentrale"],
+    "Abrir": ["Abrir", "Open", "Ouvrir", "Abrir", "Öffnen"],
+    "P0 crítico": ["P0 crítico", "P0 critical", "P0 critique", "P0 crítico", "P0 kritisch"],
+    "P1 alto": ["P1 alto", "P1 high", "P1 élevé", "P1 alto", "P1 hoch"],
+    "P2 monitorizar": ["P2 monitorizar", "P2 monitor", "P2 surveiller", "P2 supervisar", "P2 beobachten"],
+    "Ver fila": ["Ver fila", "View queue", "Voir la file", "Ver cola", "Warteschlange anzeigen"],
+    "Sempre visível no topo para decisão imediata.": ["Sempre visível no topo para decisão imediata.", "Always visible at the top for immediate decisions.", "Toujours visible en haut pour décider immédiatement.", "Siempre visible arriba para decidir de inmediato.", "Für sofortige Entscheidungen stets oben sichtbar."],
+    "Financeiro rápido": ["Financeiro rápido", "Finance at a glance", "Finances en bref", "Finanzas rápidas", "Finanzübersicht"],
+    "Detalhe": ["Detalhe", "Details", "Détails", "Detalle", "Details"],
+    "Receber": ["Receber", "Receivables", "À recevoir", "Por cobrar", "Forderungen"],
+    "Atrasos": ["Atrasos", "Overdue", "Retards", "Atrasos", "Überfällig"],
+    "Estado geral": ["Estado geral", "Overall status", "État général", "Estado general", "Gesamtstatus"],
+    "Visitas ativas": ["Visitas ativas", "Active visits", "Visites actives", "Visitas activas", "Aktive Besuche"],
+    "Alertas críticos": ["Alertas críticos", "Critical alerts", "Alertes critiques", "Alertas críticas", "Kritische Alarme"],
+    "Atualização": ["Atualização", "Update", "Actualisation", "Actualización", "Aktualisierung"],
+    "Resumo executivo": ["Resumo executivo", "Executive summary", "Résumé exécutif", "Resumen ejecutivo", "Managementübersicht"],
+    "4 KPIs principais": ["4 KPIs principais", "4 main KPIs", "4 indicateurs clés", "4 indicadores principales", "4 Hauptkennzahlen"],
+    "Prioridades": ["Prioridades", "Priorities", "Priorités", "Prioridades", "Prioritäten"],
+    "decisões necessárias": ["decisões necessárias", "decisions required", "décisions nécessaires", "decisiones necesarias", "Entscheidungen erforderlich"],
+    "Operação do dia": ["Operação do dia", "Today’s operations", "Opérations du jour", "Operación del día", "Tagesbetrieb"],
+    "atrasadas, em execução e próximas": ["atrasadas, em execução e próximas", "overdue, in progress and upcoming", "en retard, en cours et à venir", "atrasadas, en curso y próximas", "überfällig, laufend und bevorstehend"],
+    "Em campo": ["Em campo", "In the field", "Sur le terrain", "En campo", "Im Einsatz"],
+    "Disponível": ["Disponível", "Available", "Disponible", "Disponible", "Verfügbar"],
+    "Atenção atraso": ["Atenção atraso", "Delay warning", "Alerte de retard", "Aviso de retraso", "Verzögerungswarnung"],
+    "Registos da operação": ["Registos da operação", "Operational records", "Registres opérationnels", "Registros operativos", "Betriebsprotokolle"],
+    "Informação secundária": ["Informação secundária", "Additional information", "Informations complémentaires", "Información adicional", "Zusätzliche Informationen"],
+    "Histórico operacional recente": ["Histórico operacional recente", "Recent operational history", "Historique opérationnel récent", "Historial operativo reciente", "Aktueller Betriebsverlauf"],
+    "Mapa de operações": ["Mapa de operações", "Operations map", "Carte des opérations", "Mapa de operaciones", "Betriebskarte"],
+    "Planeamento e execução do dia.": ["Planeamento e execução do dia.", "Today’s planning and execution.", "Planification et exécution du jour.", "Planificación y ejecución del día.", "Planung und Ausführung des Tages."],
+    "Editar visita": ["Editar visita", "Edit visit", "Modifier la visite", "Editar visita", "Besuch bearbeiten"],
+    "Fechar": ["Fechar", "Close", "Fermer", "Cerrar", "Schließen"],
+    "Data e hora": ["Data e hora", "Date and time", "Date et heure", "Fecha y hora", "Datum und Uhrzeit"],
+    "Estado": ["Estado", "Status", "État", "Estado", "Status"],
+    "Motivo": ["Motivo", "Reason", "Motif", "Motivo", "Grund"],
+    "Notas": ["Notas", "Notes", "Notes", "Notas", "Notizen"],
+    "Notas internas": ["Notas internas", "Internal notes", "Notes internes", "Notas internas", "Interne Notizen"],
+    "Abrir módulo visitas": ["Abrir módulo visitas", "Open visits module", "Ouvrir le module visites", "Abrir módulo de visitas", "Besuchsmodul öffnen"],
+    "Abrir menu completo": ["Abrir menu completo", "Open full menu", "Ouvrir le menu complet", "Abrir menú completo", "Vollständiges Menü öffnen"],
+    "Menu completo administrador": ["Menu completo administrador", "Full administrator menu", "Menu administrateur complet", "Menú completo del administrador", "Vollständiges Administratormenü"],
+    "Fechar menu": ["Fechar menu", "Close menu", "Fermer le menu", "Cerrar menú", "Menü schließen"],
+    "Navegação principal": ["Navegação principal", "Main navigation", "Navigation principale", "Navegación principal", "Hauptnavigation"],
+    "Módulos completos": ["Módulos completos", "All modules", "Tous les modules", "Todos los módulos", "Alle Module"],
+    "Contexto de navegacao": ["Contexto de navegação", "Navigation context", "Contexte de navigation", "Contexto de navegación", "Navigationskontext"],
+    "Aprovações pendentes em destaque": ["Aprovações pendentes em destaque", "Highlighted pending approvals", "Approbations en attente mises en évidence", "Aprobaciones pendientes destacadas", "Hervorgehobene ausstehende Freigaben"],
+    "Ações rápidas operacionais": ["Ações rápidas operacionais", "Operational quick actions", "Actions opérationnelles rapides", "Acciones operativas rápidas", "Schnellaktionen im Betrieb"],
+    "Resumo rápido de comando": ["Resumo rápido de comando", "Quick command summary", "Résumé rapide de commande", "Resumen rápido de mando", "Schnelle Leitübersicht"],
+    "Hierarquia de alertas": ["Hierarquia de alertas", "Alert hierarchy", "Hiérarchie des alertes", "Jerarquía de alertas", "Alarmhierarchie"],
+    "Prioridades P0 P1 P2": ["Prioridades P0 P1 P2", "Priorities P0 P1 P2", "Priorités P0 P1 P2", "Prioridades P0 P1 P2", "Prioritäten P0 P1 P2"],
+    "Leitura financeira imediata": ["Leitura financeira imediata", "Finance at a glance", "Vue financière immédiate", "Vista financiera inmediata", "Finanzen auf einen Blick"],
+    "Receber atrasos e cobranças": ["Receber atrasos e cobranças", "Receivables, overdue and collections", "À recevoir, retards et recouvrement", "Por cobrar, atrasos y cobros", "Forderungen, Rückstände und Einzug"],
+    "Estado rápido": ["Estado rápido", "Quick status", "État rapide", "Estado rápido", "Schnellstatus"],
+    "Painel operacional por prioridade": ["Painel operacional por prioridade", "Operations by priority", "Opérations par priorité", "Operaciones por prioridad", "Betrieb nach Priorität"],
+    "Estado visual técnicos em campo": ["Estado visual técnicos em campo", "Field technician status", "État des techniciens sur le terrain", "Estado de técnicos en campo", "Status der Außendiensttechniker"],
+    "Navegação móvel administrador": ["Navegação móvel administrador", "Administrator mobile navigation", "Navigation mobile administrateur", "Navegación móvil del administrador", "Mobile Administratornavigation"],
+    "Todos os módulos do administrador": ["Todos os módulos do administrador", "All administrator modules", "Tous les modules administrateur", "Todos los módulos del administrador", "Alle Administratormodule"],
+    "Hoje operacao": ["Hoje operação", "Today’s operations", "Opérations du jour", "Operación de hoy", "Heutiger Betrieb"],
+    "Rotas Rondas": ["Rotas e rondas", "Routes and rounds", "Itinéraires et tournées", "Rutas y rondas", "Routen und Touren"],
+    "Mapas GPS": ["Mapas e GPS", "Maps and GPS", "Cartes et GPS", "Mapas y GPS", "Karten und GPS"],
+    "Stock inventario": ["Stock e inventário", "Stock and inventory", "Stock et inventaire", "Stock e inventario", "Lager und Inventar"],
+    "Indice de rotas todos os modulos": ["Índice de rotas: todos os módulos", "Route index: all modules", "Index des itinéraires : tous les modules", "Índice de rutas: todos los módulos", "Routenverzeichnis: alle Module"],
+    "Mapa de operações do dia": ["Mapa de operações do dia", "Today’s operations map", "Carte des opérations du jour", "Mapa de operaciones del día", "Betriebskarte des Tages"],
+    "A carregar dados por secção": ["A carregar dados por secção", "Loading data by section", "Chargement des données par section", "Cargando datos por sección", "Daten werden je Abschnitt geladen"],
+    "Dados parciais": ["Dados parciais", "Partial data", "Données partielles", "Datos parciales", "Teilweise Daten"],
+    "Sincronizado": ["Sincronizado", "Synced", "Synchronisé", "Sincronizado", "Synchronisiert"],
+    "A navegar": ["A navegar", "Browsing", "Navigation en cours", "Navegando", "Navigation"],
+    "A atualizar visitas, alertas e equipa.": ["A atualizar visitas, alertas e equipa.", "Refreshing visits, alerts and team.", "Actualisation des visites, alertes et équipes.", "Actualizando visitas, alertas y equipo.", "Besuche, Alarme und Team werden aktualisiert."],
+    "Alguns dados estão indisponíveis. Atualize para confirmar a situação da equipa.": ["Alguns dados estão indisponíveis. Atualize para confirmar a situação da equipa.", "Some data is unavailable. Refresh to confirm the team’s status.", "Certaines données sont indisponibles. Actualisez pour confirmer l’état de l’équipe.", "Algunos datos no están disponibles. Actualice para confirmar el estado del equipo.", "Einige Daten sind nicht verfügbar. Aktualisieren Sie, um den Teamstatus zu prüfen."],
+    "Visitas, alertas e equipa — informação atualizada.": ["Visitas, alertas e equipa — informação atualizada.", "Visits, alerts and team — up-to-date information.", "Visites, alertes et équipes — informations à jour.", "Visitas, alertas y equipo — información actualizada.", "Besuche, Alarme und Team — aktuelle Informationen."],
+    "Atualizado agora": ["Atualizado agora", "Updated just now", "Actualisé à l’instant", "Actualizado ahora", "Soeben aktualisiert"],
+    "Tentar novamente": ["Tentar novamente", "Try again", "Réessayer", "Reintentar", "Erneut versuchen"],
+    "Continuar sem dados": ["Continuar sem dados", "Continue without data", "Continuer sans données", "Continuar sin datos", "Ohne Daten fortfahren"],
+    "A carregar resumo": ["A carregar resumo", "Loading summary", "Chargement du résumé", "Cargando resumen", "Übersicht wird geladen"],
+    "Os indicadores principais estão a ser preparados.": ["Os indicadores principais estão a ser preparados.", "The main indicators are being prepared.", "Les principaux indicateurs sont en préparation.", "Se están preparando los indicadores principales.", "Die Hauptkennzahlen werden vorbereitet."],
+    "A carregar prioridades": ["A carregar prioridades", "Loading priorities", "Chargement des priorités", "Cargando prioridades", "Prioritäten werden geladen"],
+    "As prioridades e alertas ainda estão a ser reunidos.": ["As prioridades e alertas ainda estão a ser reunidos.", "Priorities and alerts are still being gathered.", "Les priorités et alertes sont en cours de collecte.", "Se están recopilando las prioridades y alertas.", "Prioritäten und Alarme werden zusammengestellt."],
+    "A carregar estado geral": ["A carregar estado geral", "Loading overall status", "Chargement de l’état général", "Cargando estado general", "Gesamtstatus wird geladen"],
+    "A leitura rápida da operação vai aparecer em breve.": ["A leitura rápida da operação vai aparecer em breve.", "The operational overview will appear shortly.", "L’aperçu des opérations apparaîtra bientôt.", "La vista operativa aparecerá en breve.", "Die Betriebsübersicht wird in Kürze angezeigt."],
+    "Não foi possível carregar os dados": ["Não foi possível carregar os dados", "Unable to load data", "Impossible de charger les données", "No se pudieron cargar los datos", "Daten konnten nicht geladen werden"],
+    "Não foi possível carregar os dados.": ["Não foi possível carregar os dados.", "Unable to load data.", "Impossible de charger les données.", "No se pudieron cargar los datos.", "Daten konnten nicht geladen werden."],
+    "Dados indisponíveis": ["Dados indisponíveis", "Data unavailable", "Données indisponibles", "Datos no disponibles", "Daten nicht verfügbar"],
+    "Pode continuar a navegar sem o resumo.": ["Pode continuar a navegar sem o resumo.", "You can continue browsing without the summary.", "Vous pouvez continuer sans le résumé.", "Puede continuar sin el resumen.", "Sie können ohne die Übersicht fortfahren."],
+    "As prioridades ficam vazias até voltar a carregar.": ["As prioridades ficam vazias até voltar a carregar.", "Priorities remain empty until data is loaded again.", "Les priorités restent vides jusqu’au prochain chargement.", "Las prioridades estarán vacías hasta volver a cargar.", "Prioritäten bleiben bis zum erneuten Laden leer."],
+    "O resumo rápido não está disponível, mas a página permanece funcional.": ["O resumo rápido não está disponível, mas a página permanece funcional.", "The quick summary is unavailable, but the page remains usable.", "Le résumé rapide est indisponible, mais la page reste utilisable.", "El resumen rápido no está disponible, pero la página sigue funcionando.", "Die Schnellübersicht ist nicht verfügbar; die Seite bleibt bedienbar."],
+    "A carregar operação do dia": ["A carregar operação do dia", "Loading today’s operations", "Chargement des opérations du jour", "Cargando operación del día", "Tagesbetrieb wird geladen"],
+    "As visitas e o estado operacional estão a chegar.": ["As visitas e o estado operacional estão a chegar.", "Visits and operational status are being loaded.", "Les visites et l’état opérationnel sont en cours de chargement.", "Se están cargando las visitas y el estado operativo.", "Besuche und Betriebsstatus werden geladen."],
+    "A carregar visitas": ["A carregar visitas", "Loading visits", "Chargement des visites", "Cargando visitas", "Besuche werden geladen"],
+    "A lista de visitas abre assim que os dados chegam.": ["A lista de visitas abre assim que os dados chegam.", "The visit list opens as soon as the data arrives.", "La liste des visites s’affiche dès réception des données.", "La lista de visitas se abre al recibir los datos.", "Die Besuchsliste wird nach Eingang der Daten angezeigt."],
+    "A carregar propagação técnica": ["A carregar propagação técnica", "Loading technical events", "Chargement des événements techniques", "Cargando eventos técnicos", "Technische Ereignisse werden geladen"],
+    "Os eventos técnicos aparecem quando o pedido responde.": ["Os eventos técnicos aparecem quando o pedido responde.", "Technical events appear when the request completes.", "Les événements techniques s’affichent à la réponse.", "Los eventos técnicos aparecen al recibir la respuesta.", "Technische Ereignisse erscheinen nach Eingang der Antwort."],
+    "A operação do dia pode ser aberta sem este bloco.": ["A operação do dia pode ser aberta sem este bloco.", "Today’s operations can be opened without this section.", "Les opérations du jour sont accessibles sans cette section.", "La operación del día puede abrirse sin esta sección.", "Der Tagesbetrieb kann ohne diesen Abschnitt geöffnet werden."],
+    "Sem visitas carregadas por enquanto.": ["Sem visitas carregadas por enquanto.", "No visits loaded yet.", "Aucune visite chargée pour le moment.", "Aún no hay visitas cargadas.", "Noch keine Besuche geladen."],
+    "Sem eventos técnicos carregados por enquanto.": ["Sem eventos técnicos carregados por enquanto.", "No technical events loaded yet.", "Aucun événement technique chargé pour le moment.", "Aún no hay eventos técnicos cargados.", "Noch keine technischen Ereignisse geladen."],
+    "Resposta inválida do servidor.": ["Resposta inválida do servidor.", "Invalid server response.", "Réponse du serveur invalide.", "Respuesta del servidor no válida.", "Ungültige Serverantwort."],
+    "Erro HTTP {status}": ["Erro HTTP {status}", "HTTP error {status}", "Erreur HTTP {status}", "Error HTTP {status}", "HTTP-Fehler {status}"],
+    "Não foi possível carregar os dados. O pedido excedeu o tempo limite.": ["Não foi possível carregar os dados. O pedido excedeu o tempo limite.", "Unable to load data. The request timed out.", "Impossible de charger les données. Le délai a été dépassé.", "No se pudieron cargar los datos. La solicitud agotó el tiempo.", "Daten konnten nicht geladen werden. Zeitüberschreitung der Anfrage."],
+    "Pedido cancelado.": ["Pedido cancelado.", "Request cancelled.", "Requête annulée.", "Solicitud cancelada.", "Anfrage abgebrochen."],
+    "Críticos": ["Críticos", "Critical", "Critiques", "Críticos", "Kritisch"],
+    "ações imediatas": ["ações imediatas", "immediate actions", "actions immédiates", "acciones inmediatas", "sofortiger Handlungsbedarf"],
+    "Visitas hoje": ["Visitas hoje", "Today’s visits", "Visites du jour", "Visitas de hoy", "Heutige Besuche"],
+    "planeadas no dia": ["planeadas no dia", "planned for today", "prévues aujourd’hui", "planificadas para hoy", "heute geplant"],
+    "Técnicos ativos": ["Técnicos ativos", "Active technicians", "Techniciens actifs", "Técnicos activos", "Aktive Techniker"],
+    "em operação no terreno": ["em operação no terreno", "working in the field", "en activité sur le terrain", "trabajando en campo", "im Außendienst tätig"],
+    "Pendências": ["Pendências", "Outstanding items", "Éléments en attente", "Pendientes", "Offene Punkte"],
+    "financeiro por fechar": ["financeiro por fechar", "finance awaiting completion", "finances à clôturer", "finanzas por cerrar", "offene Finanzvorgänge"],
+    "Abrir {label}": ["Abrir {label}", "Open {label}", "Ouvrir {label}", "Abrir {label}", "{label} öffnen"],
+    "{count} crítico(s)": ["{count} crítico(s)", "{count} critical", "{count} critique(s)", "{count} crítico(s)", "{count} kritisch"],
+    "{count} requer(em) atenção": ["{count} requer(em) atenção", "{count} need attention", "{count} nécessitent une attention", "{count} requieren atención", "{count} erfordern Aufmerksamkeit"],
+    "{count} informativo(s)": ["{count} informativo(s)", "{count} informational", "{count} informatif(s)", "{count} informativo(s)", "{count} informativ"],
+    "Decisão imediata necessária": ["Decisão imediata necessária", "Immediate decision required", "Décision immédiate nécessaire", "Decisión inmediata necesaria", "Sofortige Entscheidung erforderlich"],
+    "Pode impactar operação hoje": ["Pode impactar operação hoje", "May affect today’s operations", "Peut affecter les opérations du jour", "Puede afectar la operación de hoy", "Kann den Tagesbetrieb beeinträchtigen"],
+    "Monitorização e planeamento": ["Monitorização e planeamento", "Monitoring and planning", "Suivi et planification", "Seguimiento y planificación", "Überwachung und Planung"],
+    "Ver restantes": ["Ver restantes", "View remaining", "Voir les autres", "Ver restantes", "Übrige anzeigen"],
+    "{count} prioridade(s) agrupadas sem duplicação.": ["{count} prioridade(s) agrupadas sem duplicação.", "{count} priorities grouped without duplication.", "{count} priorités regroupées sans doublon.", "{count} prioridades agrupadas sin duplicados.", "{count} Prioritäten ohne Duplikate gruppiert."],
+    "Visitas em atraso": ["Visitas em atraso", "Overdue visits", "Visites en retard", "Visitas atrasadas", "Überfällige Besuche"],
+    "Em execução": ["Em execução", "In progress", "En cours", "En curso", "In Bearbeitung"],
+    "Técnicos disponíveis": ["Técnicos disponíveis", "Available technicians", "Techniciens disponibles", "Técnicos disponibles", "Verfügbare Techniker"],
+    "Próxima decisão": ["Próxima decisão", "Next decision", "Prochaine décision", "Próxima decisión", "Nächste Entscheidung"],
+    "Sem eventos técnicos propagados nas últimas horas.": ["Sem eventos técnicos propagados nas últimas horas.", "No technical events shared in recent hours.", "Aucun événement technique transmis ces dernières heures.", "No se han propagado eventos técnicos en las últimas horas.", "Keine technischen Ereignisse in den letzten Stunden weitergegeben."],
+    "Abrir ficha técnica": ["Abrir ficha técnica", "Open technical sheet", "Ouvrir la fiche technique", "Abrir ficha técnica", "Technisches Datenblatt öffnen"],
+    "Atenção": ["Atenção", "Attention", "Attention", "Atención", "Achtung"],
+    "Pontos a rever": ["Pontos a rever", "Items to review", "Points à revoir", "Puntos por revisar", "Zu prüfende Punkte"],
+    "Atualizado": ["Atualizado", "Updated", "Actualisé", "Actualizado", "Aktualisiert"],
+    "Atualizado às {time}": ["Atualizado às {time}", "Updated at {time}", "Actualisé à {time}", "Actualizado a las {time}", "Aktualisiert um {time}"],
+    "Atenção operacional": ["Atenção operacional", "Operational attention", "Attention opérationnelle", "Atención operativa", "Betrieblicher Handlungsbedarf"],
+    "{done} concluídas · {planned} planeadas · {messages} mensagem(ns) · {notifications} aviso(s) · {events} evento(s) técnicos/24h · {risk} ponto(s) a rever": ["{done} concluídas · {planned} planeadas · {messages} mensagem(ns) · {notifications} aviso(s) · {events} evento(s) técnicos/24h · {risk} ponto(s) a rever", "{done} completed · {planned} planned · {messages} messages · {notifications} notices · {events} technical events/24h · {risk} items to review", "{done} terminées · {planned} prévues · {messages} messages · {notifications} avis · {events} événements techniques/24h · {risk} points à revoir", "{done} completadas · {planned} planificadas · {messages} mensajes · {notifications} avisos · {events} eventos técnicos/24h · {risk} puntos por revisar", "{done} erledigt · {planned} geplant · {messages} Nachrichten · {notifications} Hinweise · {events} technische Ereignisse/24h · {risk} Prüfpunkte"],
+    "Sem visitas abertas. Quando existirem rondas/visitas, aparecem aqui.": ["Sem visitas abertas. Quando existirem rondas/visitas, aparecem aqui.", "No open visits. Rounds and visits will appear here when available.", "Aucune visite ouverte. Les tournées et visites apparaîtront ici.", "No hay visitas abiertas. Las rondas y visitas aparecerán aquí.", "Keine offenen Besuche. Vorhandene Touren und Besuche erscheinen hier."],
+    "Editar": ["Editar", "Edit", "Modifier", "Editar", "Bearbeiten"],
+    "Sem piscinas pendentes de ronda.": ["Sem piscinas pendentes de ronda.", "No pools awaiting a round.", "Aucune piscine en attente de tournée.", "No hay piscinas pendientes de ronda.", "Keine Pools warten auf eine Tour."],
+    "Planear": ["Planear", "Plan", "Planifier", "Planificar", "Planen"],
+    "Resumo carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).": ["Resumo carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).", "Summary loaded. {clients} clients, {pools} pools, {technicians} technicians.", "Résumé chargé. {clients} clients, {pools} piscines, {technicians} techniciens.", "Resumen cargado. {clients} clientes, {pools} piscinas, {technicians} técnicos.", "Übersicht geladen. {clients} Kunden, {pools} Pools, {technicians} Techniker."],
+    "Sistema carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).": ["Sistema carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).", "System loaded. {clients} clients, {pools} pools, {technicians} technicians.", "Système chargé. {clients} clients, {pools} piscines, {technicians} techniciens.", "Sistema cargado. {clients} clientes, {pools} piscinas, {technicians} técnicos.", "System geladen. {clients} Kunden, {pools} Pools, {technicians} Techniker."],
+    "Atenção: existem ": ["Atenção: existem ", "Attention: there are ", "Attention : il y a ", "Atención: hay ", "Achtung: Es gibt "],
+    " mensagem(ns) de clientes por responder. ": [" mensagem(ns) de clientes por responder. ", " client messages awaiting a reply. ", " messages clients en attente de réponse. ", " mensajes de clientes pendientes de respuesta. ", " Kundennachrichten ohne Antwort. "],
+    "Abrir mensagens": ["Abrir mensagens", "Open messages", "Ouvrir les messages", "Abrir mensajes", "Nachrichten öffnen"],
+    "Alertas": ["Alertas", "Alerts", "Alertes", "Alertas", "Warnmeldungen"],
+    "CRM": ["CRM", "CRM", "CRM", "CRM", "CRM"],
+    "Chaves": ["Chaves", "Keys", "Clés", "Llaves", "Schlüssel"],
+    "Menu": ["Menu", "Menu", "Menu", "Menú", "Menü"],
+    "Menu completo": ["Menu completo", "Full menu", "Menu complet", "Menú completo", "Vollständiges Menü"],
+    "Técnico": ["Técnico", "Technician", "Technicien", "Técnico", "Techniker"],
+    "A agregar alertas e decisões...": ["A agregar alertas e decisões...", "Grouping alerts and decisions...", "Regroupement des alertes et décisions...", "Agrupando alertas y decisiones...", "Alarme und Entscheidungen werden zusammengefasst..."],
+    "A carregar eventos técnicos...": ["A carregar eventos técnicos...", "Loading technical events...", "Chargement des événements techniques...", "Cargando eventos técnicos...", "Technische Ereignisse werden geladen..."],
+    "A carregar visitas...": ["A carregar visitas...", "Loading visits...", "Chargement des visites...", "Cargando visitas...", "Besuche werden geladen..."],
+    "mobileToday": ["Hoje", "Today", "Ce jour", "Hoy", "Heute"]
+  };
+  const languages = ['pt','en','fr','es','de'];
+  const leaves = new Map(), attributes = new Map(), errors = new WeakMap();
+  const language = () => Math.max(0,languages.indexOf(document.documentElement.lang));
+  const format = (source,params,index,original = false) => (original ? source : copy[source][index]).replace(/\{(\w+)\}/g,(_,key) => String(typeof params[key] === 'function' ? params[key](index) : params[key] ?? ''));
+  const value = (source,params = {},index = language()) => format(source,params,index);
+  function owns(leaf) {
+    const parent=leaf.node.parentNode;
+    return leaf.node.isConnected && parent===leaf.parent && leaf.node.nodeValue===leaf.rendered && parent.childNodes.length===leaf.children.length && leaf.children.every((node,index)=>parent.childNodes[index]===node) && parent.getAttribute('href')===leaf.href && (!leaf.search || parent.getAttribute('data-shell-search')===leaf.search.rendered);
+  }
+  function bindNode(node,source,params = {},original = source) {
+    if (!node || !Object.hasOwn(copy,source) || node.nodeType!==Node.TEXT_NODE || !node.parentElement) return;
+    const expected=format(original,params,0,true), raw=node.nodeValue;
+    if (raw!==expected && raw.trim()!==expected) return;
+    const parent=node.parentElement,prefix=raw===expected?'':raw.slice(0,raw.indexOf(expected)),suffix=raw===expected?'':raw.slice(raw.indexOf(expected)+expected.length);
+    const rendered=prefix+value(source,params)+suffix, metadata=parent.getAttribute('data-shell-search');
+    const search=metadata===null?null:{source:metadata,rendered:Object.hasOwn(copy,metadata)?value(metadata):metadata};
+    parent.dataset.cwNoI18n='';node.nodeValue=rendered;if(search)parent.setAttribute('data-shell-search',search.rendered);
+    leaves.set(node,{node,parent,source,params:{...params},prefix,suffix,rendered,children:[...parent.childNodes],href:parent.getAttribute('href'),search});
+  }
+  function bind(node,source,params = {}) {
+    if (!node || !Object.hasOwn(copy,source)) return;
+    const expected=format(source,params,0,true);
+    bindNode([...node.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&(child.nodeValue===expected||child.nodeValue.trim()===expected)),source,params);
+  }
+  function bindAttribute(node,name,source,params = {}) {
+    if (!node || !Object.hasOwn(copy,source) || node.getAttribute(name)!==format(source,params,0,true)) return;
+    const rendered=value(source,params);node.setAttribute(name,rendered);node.dataset.cwNoI18n='';
+    if(!attributes.has(node))attributes.set(node,new Map());attributes.get(node).set(name,{source,params:{...params},rendered});
+  }
+  function paint() {
+    for(const [node,leaf] of leaves){
+      if(!owns(leaf)){leaves.delete(node);continue;}
+      const rendered=leaf.prefix+value(leaf.source,leaf.params)+leaf.suffix;
+      if(rendered!==leaf.rendered)node.nodeValue=rendered;leaf.rendered=rendered;
+      if(leaf.search){const next=Object.hasOwn(copy,leaf.search.source)?value(leaf.search.source):leaf.search.source;if(next!==leaf.search.rendered)leaf.parent.setAttribute('data-shell-search',next);leaf.search.rendered=next;}
+    }
+    for(const [node,owned] of attributes){
+      if(!node.isConnected){attributes.delete(node);continue;}
+      for(const [name,leaf] of owned){if(node.getAttribute(name)!==leaf.rendered){owned.delete(name);continue;}const rendered=value(leaf.source,leaf.params);if(rendered!==leaf.rendered)node.setAttribute(name,rendered);leaf.rendered=rendered;}
+      if(!owned.size)attributes.delete(node);
+    }
+  }
+  function prune() {
+    for(const [node,leaf] of leaves)if(!owns(leaf))leaves.delete(node);
+    for(const [node] of attributes)if(!node.isConnected)attributes.delete(node);
+  }
+  function set(node,source,params = {}) {
+    if(!node)return;
+    node.textContent=format(source,params,0,true);
+    bind(node,source,params);
+    prune();
+  }
+  function labels(node) {
+    const leaf=leaves.get(node?.firstChild);
+    if(!leaf?.search)return [];
+    if(!owns(leaf)){leaves.delete(leaf.node);return [];}
+    return [leaf.source, leaf.search.source, ...copy[leaf.source], ...(Object.hasOwn(copy,leaf.search.source)?copy[leaf.search.source]:[])];
+  }
+  function problem(source,params = {}) {
+    const error=new Error(format(source,params,0,true));errors.set(error,{source,params:{...params}});return error;
+  }
+  function bindError(node,error) {const owned=errors.get(error);if(owned)bind(node,owned.source,owned.params);}
+  function state(root,title,message,ownedMessage = true) {
+    bind(root.querySelector('b'),title);
+    if(ownedMessage)bind(root.querySelector('.muted'),message);
+    root.querySelectorAll('[data-dashboard-retry]').forEach(node=>bind(node,'Tentar novamente'));
+    root.querySelectorAll('[data-dashboard-continue]').forEach(node=>bind(node,'Continuar sem dados'));
+  }
+  // Capture the page's original HTML once, before any business data is loaded.
+  // Later renders bind only the specific labels their own producers create.
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT),originals=[];
+  while(walker.nextNode())if(!walker.currentNode.parentElement.closest('script,style'))originals.push(walker.currentNode);
+  for(const node of originals){const source=node.nodeValue.trim();if(Object.hasOwn(copy,source)){if(source==='Alertas'&&node.parentElement.closest('.cw-v2-mobile-nav'))bindNode(node,'mobileAlerts',{},'Alertas');else if(source==='Hoje'&&node.parentElement.closest('.cw-v2-mobile-nav'))bindNode(node,'mobileToday',{},'Hoje');else bindNode(node,source);}}
+  bind(document.querySelector('title'),'Cristal Water · Centro de Operações V2');
+  for(const node of document.body.querySelectorAll('[aria-label],[title],[placeholder]'))for(const name of ['aria-label','title','placeholder']){const source=node.getAttribute(name);if(Object.hasOwn(copy,source))bindAttribute(node,name,source);}
+  document.getElementById('cwLanguageSelect')?.addEventListener('change',event=>window.CristalI18n?.applyLanguage(event.target.value));
+  window.CWCommandSearch=Object.freeze({labels});
+  window.addEventListener('DOMContentLoaded', () => {
+    const requested = new URLSearchParams(location.search).get('lang');
+    if (languages.includes(requested)) window.CristalI18n?.applyLanguage(requested);
+  }, { once: true });
+  window.addEventListener('cw-language-change',paint);
+  new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  return {bind,bindNode,bindAttribute,bindError,problem,state,value,set,prune};
+})();
+
 const API = '/api/core';
 const DASHBOARD_TIMEOUTS = window.__CW_DASHBOARD_TIMEOUTS__ || {};
 const SUMMARY_TIMEOUT_MS = Number(DASHBOARD_TIMEOUTS.summary || 12000);
@@ -71,35 +370,35 @@ function refreshLoadStatus() {
 
   if (syncState) {
     if ([summaryState, coreState, state.loadState.technicians].includes('loading')) {
-      syncState.textContent = 'A carregar dados por secção';
+      commandCopy.set(syncState, 'A carregar dados por secção');
     } else if ([summaryState, coreState, state.loadState.technicians].includes('error')) {
-      syncState.textContent = 'Dados parciais';
+      commandCopy.set(syncState, 'Dados parciais');
     } else if (summaryState === 'ready' && coreState === 'ready' && state.loadState.technicians === 'ready') {
-      syncState.textContent = 'Sincronizado';
+      commandCopy.set(syncState, 'Sincronizado');
     } else {
-      syncState.textContent = 'A navegar';
+      commandCopy.set(syncState, 'A navegar');
     }
   }
 
   if (metricsHint) {
     if ([summaryState, coreState, state.loadState.technicians].includes('loading')) {
-      metricsHint.textContent = 'A atualizar visitas, alertas e equipa.';
+      commandCopy.set(metricsHint, 'A atualizar visitas, alertas e equipa.');
     } else if ([summaryState, coreState, state.loadState.technicians].includes('error')) {
-      metricsHint.textContent = 'Alguns dados estão indisponíveis. Atualize para confirmar a situação da equipa.';
+      commandCopy.set(metricsHint, 'Alguns dados estão indisponíveis. Atualize para confirmar a situação da equipa.');
     } else {
-      metricsHint.textContent = 'Visitas, alertas e equipa — informação atualizada.';
+      commandCopy.set(metricsHint, 'Visitas, alertas e equipa — informação atualizada.');
     }
   }
 
   if (lastUpdate && summaryState === 'ready' && coreState === 'ready' && state.loadState.technicians === 'ready') {
-    lastUpdate.textContent = 'Atualizado agora';
+    commandCopy.set(lastUpdate, 'Atualizado agora');
   }
 }
 
 function renderInlineState({ title, message, group, tone = 'loading' }) {
   const stateClass = tone === 'error' ? 'cw-v2-state-error' : 'cw-v2-state-loading';
   return `
-    <div class="${stateClass}" data-cw-state="${tone}" data-cw-state-context="${tone}">
+    <div class="${stateClass}" data-cw-state="${tone}" data-cw-state-context="${tone}" role="${tone === 'error' ? 'alert' : 'status'}" aria-live="${tone === 'error' ? 'assertive' : 'polite'}">
       <div style="display:grid; gap:6px; min-width:0;">
         <b>${esc(title)}</b>
         <div class="muted">${esc(message)}</div>
@@ -115,21 +414,29 @@ function renderInlineState({ title, message, group, tone = 'loading' }) {
 function renderSectionLoading(root, title, message, group) {
   if (!root) return;
   root.innerHTML = renderInlineState({ title, message, group, tone: 'loading' });
+  commandCopy.state(root, title, message);
+  commandCopy.prune();
 }
 
-function renderSectionError(root, title, message, group) {
+function renderSectionError(root, title, error, group) {
   if (!root) return;
-  root.innerHTML = renderInlineState({ title, message, group, tone: 'error' });
+  const failure = error?.message ? error : commandCopy.problem('Não foi possível carregar os dados.');
+  root.innerHTML = renderInlineState({ title, message: failure.message, group, tone: 'error' });
+  commandCopy.state(root, title, '', false);
+  commandCopy.bindError(root.querySelector('.muted'), failure);
+  commandCopy.prune();
 }
 
 function renderSectionEmpty(root, title, message) {
   if (!root) return;
   root.innerHTML = `
-    <div class="empty" data-cw-state="empty">
+    <div class="empty cw-v2-state-empty" data-cw-state="empty" role="status" aria-live="polite">
       <b>${esc(title)}</b>
       <div class="muted">${esc(message)}</div>
     </div>
   `;
+  commandCopy.state(root, title, message);
+  commandCopy.prune();
 }
 
 function renderSummaryLoading() {
@@ -197,10 +504,16 @@ async function api(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     cache: 'no-store'
   });
-  const json = await response.json().catch(() => ({ ok: false, error: 'Resposta inválida do servidor.' }));
+  let invalidResponse = null;
+  const json = await response.json().catch(() => {
+    invalidResponse = commandCopy.problem('Resposta inválida do servidor.');
+    return { ok: false, error: invalidResponse.message };
+  });
   if (timeoutId) clearTimeout(timeoutId);
   if (!response.ok || json.ok === false) {
-    throw new Error(json.error || json.message || `Erro HTTP ${response.status}`);
+    throw invalidResponse || (json.error || json.message
+      ? new Error(json.error || json.message)
+      : commandCopy.problem('Erro HTTP {status}', { status: response.status }));
   }
   return json;
 }
@@ -211,11 +524,11 @@ async function apiWithTimeout(path, options = {}) {
   } catch (error) {
     if (error?.name === 'AbortError') {
       if (options.timeoutMs) {
-        const timeoutError = new Error('Não foi possível carregar os dados. O pedido excedeu o tempo limite.');
+        const timeoutError = commandCopy.problem('Não foi possível carregar os dados. O pedido excedeu o tempo limite.');
         timeoutError.code = 'TIMEOUT';
         throw timeoutError;
       }
-      const abortError = new Error('Pedido cancelado.');
+      const abortError = commandCopy.problem('Pedido cancelado.');
       abortError.code = 'ABORTED';
       throw abortError;
     }
@@ -268,6 +581,15 @@ function renderMetrics(counts = {}) {
       <div class="metric-label">${esc(item.hint)}</div>
     </a>
   `).join('');
+  $('#metrics').querySelectorAll('.metric-card').forEach((node, index) => {
+    const item = items[index];
+    commandCopy.bind(node.querySelector('.pill'), item.label);
+    commandCopy.bind(node.querySelector('.metric-label'), item.hint);
+    const params = { label: (language) => commandCopy.value(item.label, {}, language) };
+    commandCopy.bindAttribute(node, 'aria-label', 'Abrir {label}', params);
+    commandCopy.bindAttribute(node, 'title', 'Abrir {label}', params);
+  });
+  commandCopy.prune();
 }
 
 function renderPrioritySummary(counts = {}, pendingPools = []) {
@@ -300,6 +622,16 @@ function renderPrioritySummary(counts = {}, pendingPools = []) {
     </a>
     <div class="small">${total} prioridade(s) agrupadas sem duplicação.</div>
   `;
+  const rows = $('#prioritySummary').querySelectorAll('.item');
+  [['{count} crítico(s)', critical, 'Decisão imediata necessária', 'Abrir'],
+    ['{count} requer(em) atenção', attention, 'Pode impactar operação hoje', 'Abrir'],
+    ['{count} informativo(s)', info, 'Monitorização e planeamento', 'Ver restantes']].forEach(([source, count, hint, action], index) => {
+    commandCopy.bind(rows[index].querySelector('b'), source, { count });
+    commandCopy.bind(rows[index].querySelector('.muted'), hint);
+    commandCopy.bind(rows[index].querySelector('.pill'), action);
+  });
+  commandCopy.bind($('#prioritySummary > .small'), '{count} prioridade(s) agrupadas sem duplicação.', { count: total });
+  commandCopy.prune();
 }
 
 function renderOperationDigest(counts = {}, visits = []) {
@@ -322,13 +654,17 @@ function renderOperationDigest(counts = {}, visits = []) {
     <div class="item"><strong>${number(counts.techniciansActive || counts.techniciansOnField || counts.technicians)}</strong><span>Técnicos disponíveis</span></div>
     <div class="item"><strong>${nextDecision}</strong><span>Próxima decisão</span></div>
   `;
+  ['Visitas em atraso', 'Em execução', 'Técnicos disponíveis', 'Próxima decisão'].forEach((source, index) => commandCopy.bind(digest.querySelectorAll('.item span')[index], source));
+  commandCopy.prune();
 }
 
 function renderTechnicalPropagation(events = []) {
   const root = $('#technicalPropagationList');
   if (!root) return;
   if (!Array.isArray(events) || events.length === 0) {
-    root.innerHTML = '<div class="empty">Sem eventos técnicos propagados nas últimas horas.</div>';
+    root.innerHTML = '<div class="empty cw-v2-state-empty" data-cw-state="empty" role="status" aria-live="polite">Sem eventos técnicos propagados nas últimas horas.</div>';
+    commandCopy.bind(root.querySelector('.empty'), 'Sem eventos técnicos propagados nas últimas horas.');
+    commandCopy.prune();
     return;
   }
 
@@ -342,6 +678,8 @@ function renderTechnicalPropagation(events = []) {
       <a class="btn ghost" href="/admin-pool-technical">Abrir ficha técnica</a>
     </div>
   `).join('');
+  root.querySelectorAll('a').forEach(node => commandCopy.bind(node, 'Abrir ficha técnica'));
+  commandCopy.prune();
 }
 
 function renderStatusStrip(counts = {}, pendingPools = []) {
@@ -365,10 +703,13 @@ function renderStatusStrip(counts = {}, pendingPools = []) {
     <div class="status-mini"><strong>${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}</strong><span>Atualizado</span></div>
   `;
 
-  if (lastUpdate) lastUpdate.textContent = `Atualizado às ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`;
-  if (syncState) syncState.textContent = risk > 0 ? 'Atenção operacional' : 'Sincronizado';
+  ['Estado geral', 'Visitas ativas', 'Pontos a rever', 'Atualizado'].forEach((source, index) => commandCopy.bind($('#statusStrip').querySelectorAll('.status-mini span')[index], source));
+  if (risk > 0) commandCopy.bind($('#statusStrip .status-mini strong'), 'Atenção');
+  commandCopy.set(lastUpdate, 'Atualizado às {time}', { time: now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) });
+  commandCopy.set(syncState, risk > 0 ? 'Atenção operacional' : 'Sincronizado');
 
-  $('#metricsHint').textContent = `${done} concluídas · ${planned} planeadas · ${messages} mensagem(ns) · ${notifications} aviso(s) · ${technicalSheetEvents} evento(s) técnicos/24h · ${risk} ponto(s) a rever`;
+  commandCopy.set($('#metricsHint'), '{done} concluídas · {planned} planeadas · {messages} mensagem(ns) · {notifications} aviso(s) · {events} evento(s) técnicos/24h · {risk} ponto(s) a rever', { done, planned, messages, notifications, events: technicalSheetEvents, risk });
+  commandCopy.prune();
 }
 
 function morningTone(status) {
@@ -586,7 +927,9 @@ async function saveVisitEdit(event) {
 
 function renderVisits(visits = []) {
   if (!Array.isArray(visits) || visits.length === 0) {
-    $('#todayList').innerHTML = '<div class="empty">Sem visitas abertas. Quando existirem rondas/visitas, aparecem aqui.</div>';
+    $('#todayList').innerHTML = '<div class="empty cw-v2-state-empty" data-cw-state="empty" role="status" aria-live="polite">Sem visitas abertas. Quando existirem rondas/visitas, aparecem aqui.</div>';
+    commandCopy.bind($('#todayList').querySelector('.empty'), 'Sem visitas abertas. Quando existirem rondas/visitas, aparecem aqui.');
+    commandCopy.prune();
     return;
   }
 
@@ -604,11 +947,16 @@ function renderVisits(visits = []) {
       </div>
     </div>
   `).join('');
+  $('#todayList').querySelectorAll('[data-edit-visit]').forEach(node => commandCopy.bind(node, 'Editar'));
+  $('#todayList').querySelectorAll('.visit-actions a').forEach(node => commandCopy.bind(node, 'Abrir'));
+  commandCopy.prune();
 }
 
 function renderPendingPools(pools = []) {
   if (!Array.isArray(pools) || pools.length === 0) {
-    $('#pendingPoolsList').innerHTML = '<div class="empty">Sem piscinas pendentes de ronda.</div>';
+    $('#pendingPoolsList').innerHTML = '<div class="empty cw-v2-state-empty" data-cw-state="empty" role="status" aria-live="polite">Sem piscinas pendentes de ronda.</div>';
+    commandCopy.bind($('#pendingPoolsList').querySelector('.empty'), 'Sem piscinas pendentes de ronda.');
+    commandCopy.prune();
     return;
   }
 
@@ -621,6 +969,8 @@ function renderPendingPools(pools = []) {
       <a class="btn ghost" href="/admin-rounds">Planear</a>
     </div>
   `).join('');
+  $('#pendingPoolsList').querySelectorAll('a').forEach(node => commandCopy.bind(node, 'Planear'));
+  commandCopy.prune();
 }
 
 function renderSummary(data = {}) {
@@ -656,7 +1006,7 @@ function renderSummary(data = {}) {
     visitsDone: counts.visitsDone,
   }, pendingPools);
 
-  $('#statusBox').textContent = `Resumo carregado com sucesso. ${number(counts.clients)} cliente(s), ${number(counts.pools)} piscina(s), ${number(counts.technicians)} técnico(s).`;
+  commandCopy.set($('#statusBox'), 'Resumo carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).', { clients: number(counts.clients), pools: number(counts.pools), technicians: number(counts.technicians) });
   setLoadState('summary', 'ready');
 }
 
@@ -675,11 +1025,15 @@ function renderCore(data = {}) {
   const unreadMessages = number(counts.messagesUnread);
   if (unreadMessages > 0) {
     $('#statusBox').innerHTML = `Atenção: existem <b>${unreadMessages}</b> mensagem(ns) de clientes por responder. <a class="btn ghost" href="/chat?filter=unread" style="margin-left:8px">Abrir mensagens</a>`;
+    commandCopy.bindNode($('#statusBox').firstChild, 'Atenção: existem ');
+    commandCopy.bindNode($('#statusBox').childNodes[2], ' mensagem(ns) de clientes por responder. ');
+    commandCopy.bind($('#statusBox a'), 'Abrir mensagens');
+    commandCopy.prune();
     setLoadState('core', 'ready');
     return;
   }
 
-  $('#statusBox').textContent = `Sistema carregado com sucesso. ${number(counts.clients)} cliente(s), ${number(counts.pools)} piscina(s), ${number(counts.technicians)} técnico(s).`;
+  commandCopy.set($('#statusBox'), 'Sistema carregado com sucesso. {clients} cliente(s), {pools} piscina(s), {technicians} técnico(s).', { clients: number(counts.clients), pools: number(counts.pools), technicians: number(counts.technicians) });
   setLoadState('core', 'ready');
 }
 
@@ -707,7 +1061,7 @@ async function load() {
     if (runId !== loadGeneration || error?.code === 'ABORTED') return;
     console.error(error);
     setLoadState('summary', 'error');
-    renderSummaryError(error.message || 'Não foi possível carregar os dados.');
+    renderSummaryError(error);
   }).finally(() => releaseLoadController(summaryController));
 
   const corePromise = apiWithTimeout('/dashboard', {
@@ -720,7 +1074,7 @@ async function load() {
     if (runId !== loadGeneration || error?.code === 'ABORTED') return;
     console.error(error);
     setLoadState('core', 'error');
-    renderCoreError(error.message || 'Não foi possível carregar os dados.');
+    renderCoreError(error);
   }).finally(() => releaseLoadController(coreController));
 
   const techniciansPromise = apiWithTimeout('/api/technicians', {

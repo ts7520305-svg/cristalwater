@@ -6,11 +6,21 @@
   <meta name="theme-color" content="#0f1723">
   <title>Cristal Water · Centro de Operações V2</title>
   <script src="/cw-auth.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/cw-premium-admin-phase1.css">
   <link rel="stylesheet" href="/cw-ui-kit.css">
   <style>
+    .cw-v2-top-actions { flex-wrap: wrap; min-width: 0; }
+    .cw-command-language { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; font-weight: 700; }
+    .cw-command-language select { min-height: 44px; min-width: 100px; max-width: 140px; padding: 6px; border: 1px solid var(--cw-border); border-radius: 12px; background: var(--cw-surface, #fff); color: var(--cw-text, #0f1723); font: inherit; }
+    .cw-command-language select:focus-visible { outline: 3px solid var(--cw-primary, #126d4f); outline-offset: 2px; }
+    @media (max-width: 720px) {
+      .cw-command-language span { display: none; }
+    }
+    @media (max-width: 360px) { body.admin-shell .cw-v2-mobile-nav { gap: 2px; } }
+
     .admin-shell {
       --ac-radius-card: 16px;
       --ac-radius-control: 12px;
@@ -901,7 +911,7 @@
   <link rel="stylesheet" href="/ui/design-system.css">
   <link rel="stylesheet" href="/cw-professional-portals.css">
 </head>
-<body class="admin-shell cw-professional-admin" data-required-role="ADMIN">
+<body class="admin-shell cw-professional-admin" data-required-role="ADMIN" data-cw-no-i18n data-cw-state-managed="manual">
   <div class="cw-v2-app">
     <aside class="cw-v2-sidebar" aria-label="Navegação principal">
       <div class="cw-v2-brand">
@@ -990,6 +1000,7 @@
           <div class="cw-v2-search-results" data-cw-search-results></div>
         </div>
         <div class="cw-v2-top-actions">
+          <label class="cw-command-language"><span>Idioma</span><select id="cwLanguageSelect" aria-label="Idioma"><option value="pt">Português</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></label>
           <button class="cw-v2-btn cw-mobile-back" type="button" data-cw-action="back">Voltar</button>
           <span class="cw-v2-pill cw-v2-offline" data-offline-indicator>Online</span>
           <button id="refreshBtn" class="cw-v2-btn primary" type="button">Atualizar</button>

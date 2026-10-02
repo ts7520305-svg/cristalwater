@@ -123,7 +123,7 @@ function buildFakeJwt() {
 
 async function primeSession(page, timeoutOverrides) {
   const token = buildFakeJwt();
-  const user = { id: 'hotfix-test-admin', role: 'ADMIN', email: 'hotfix@test.local', name: 'Hotfix Test' };
+  const user = { id: 'hotfix-test-admin', role: 'ADMIN', email: 'hotfix@test.local', name: 'Hotfix Test', language: 'pt' };
   await page.addInitScript((payload) => {
     localStorage.clear();
     sessionStorage.clear();
@@ -357,7 +357,7 @@ async function waitForCommandCenterShell(page) {
 }
 
 async function scenarioSlowResponse() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, ...(process.env.CW_CHROMIUM_PATH ? { executablePath: process.env.CW_CHROMIUM_PATH } : {}) });
   const context = await browser.newContext({ viewport: { width: 1440, height: 920 }, serviceWorkers: 'block' });
   const page = await context.newPage();
   const trace = { console: [], pageErrors: [], requestFailures: [] };
@@ -385,7 +385,7 @@ async function scenarioSlowResponse() {
 }
 
 async function scenarioError500() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, ...(process.env.CW_CHROMIUM_PATH ? { executablePath: process.env.CW_CHROMIUM_PATH } : {}) });
   const context = await browser.newContext({ viewport: { width: 1440, height: 920 }, serviceWorkers: 'block' });
   const page = await context.newPage();
   const trace = { console: [], pageErrors: [], requestFailures: [] };
@@ -413,7 +413,7 @@ async function scenarioError500() {
 }
 
 async function scenarioHangingRequestTimesOut() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({ headless: true, ...(process.env.CW_CHROMIUM_PATH ? { executablePath: process.env.CW_CHROMIUM_PATH } : {}) });
   const context = await browser.newContext({ viewport: { width: 1440, height: 920 }, serviceWorkers: 'block' });
   const page = await context.newPage();
   const trace = { console: [], pageErrors: [], requestFailures: [] };

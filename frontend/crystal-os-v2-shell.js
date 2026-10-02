@@ -535,7 +535,7 @@
     const term = normalize(String(query || '').trim());
     if (!term) { closeSearch(); return; }
     const seen = new Set();
-    const matches = list.map((node) => ({ label: node.getAttribute('data-shell-search') || '', aliases: window.CWNavigationSearch?.labels(node) || [], href: node.getAttribute('href') || node.getAttribute('data-shell-href') || '#' }))
+    const matches = list.map((node) => ({ label: node.getAttribute('data-shell-search') || '', aliases: [...(window.CWNavigationSearch?.labels(node) || []), ...(window.CWCommandSearch?.labels(node) || [])], href: node.getAttribute('href') || node.getAttribute('data-shell-href') || '#' }))
       .filter((item) => {
         if (![item.label,...item.aliases].some(label => normalize(label).includes(term)) || seen.has(item.href) || !item.href.startsWith('/') || item.href.startsWith('//')) return false;
         seen.add(item.href); return true;
