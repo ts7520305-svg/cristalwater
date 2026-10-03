@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK557 - barra de pendentes e sessão legada (2026-10-03)
+- Proteção existente limpa rótulos/controlos/contagens e invalida a geração da fila na troca de conta; resultado tardio após regresso rápido não repinta, leitura de outra conta recusada. Pedidos/UUID/hash/payload/drafts e recuperação própria preservados, sem novo engine/bloqueio permanente/API/schema.
+- Cinco grupos nativos, cache317 exata/reload frio offline, E2E dos três perfis e preflight23/23 aprovados; CI552/log/restauro conferidos. Caso atual TECH/PIN/conclusão será alargado em558, sem alegar aceitação global dos principais/tipos de pendentes.
+
 ## TASK556 - evento de sessão na página técnica legada (2026-10-03)
 - Ligado somente cw:session-change à proteção existente da lista: formulários limpam no evento e a geração invalida GET tardio após regresso rápido. Cache/pedidos/rascunhos e comportamento de nova leitura própria preservados; não acrescenta bloqueio permanente nem aborto HTTP.
 - Recuperação nativa/cache316 exata/191 tuplos de idioma, E2E dos três perfis e preflight23/23 aprovados; CI551/restauro conferidos. API/schema/payload e runner387 intactos; barra de pendentes fica para observação separada na TASK557.

@@ -2,6 +2,7 @@
 require('../src/loadEnv')();
 const assert = require('node:assert/strict'), fs = require('node:fs'), jwt = require('jsonwebtoken');
 const { chromium } = require('playwright'), { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
+const waitBrowserState = require('./fixtures/wait-browser-state');
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true') throw Error('Isolated QA required');
 // Check every translation tuple and template placeholder, including states not
 // forced through the browser fixture. This does not replace the UI assertions.
@@ -156,6 +157,9 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.waitForFunction(()=>document.getElementById('cwLanguageSelect').value==='de');
   console.log('PASS the product language selector shares the global preference without delayed reversal or operational byte changes');
   await page.evaluate(() => navigator.serviceWorker.ready);
+  const cacheVersion=fs.readFileSync('frontend/sw.js','utf8').match(/const CACHE = '([^']+)'/)[1];
+  await waitBrowserState(page,async expected=>{const cache=await caches.open(expected.version);for(const[url,source]of expected.files){const response=await cache.match(url);if(!response||await response.text()!==source)return false;}return true;},{version:cacheVersion,files:[['/technician.html','frontend/technician.html'],['/technician.js','frontend/technician.js'],['/cw-field-write-store.js','frontend/cw-field-write-store.js']].map(([url,file])=>[url,fs.readFileSync(file,'utf8')])});
+  console.log('PASS exact legacy shell/script/store in declared cache '+cacheVersion);
   await context.setOffline(true); await page.reload({waitUntil:'domcontentloaded'});
   await page.waitForFunction(id => document.getElementById('notes-' + id)?.value.includes('17,25'), visit.id);
   assert.equal(await page.locator('header h2').textContent(),copy.de[0]);
@@ -175,6 +179,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   for (let i=0;!held && i<100;i++) await new Promise(resolve=>setTimeout(resolve,10)); assert(held);
   const heldWrites = operational.filter(row=>row.path.endsWith('/424242/complete')).length;
   const retryNode = await page.locator('#legacyFieldRecovery button').elementHandle();
+  await page.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));
+  assert(await retryNode.evaluate(node=>node.isConnected && node.disabled),'Same-owner session event must not replace or re-enable an in-flight retry');
   for (const language of ['en','de','fr']) { await page.evaluate(language=>CristalI18n.applyLanguage(language),language); assert(await retryNode.evaluate(node=>node.isConnected && node.disabled)); }
   assert.equal(operational.filter(row=>row.path.endsWith('/424242/complete')).length,heldWrites);
   assert.equal(held.request().postDataJSON().requestId,pending.requestId);
@@ -183,6 +189,53 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   for (const language of Object.keys(copy)) { await page.evaluate(language=>CristalI18n.applyLanguage(language),language); assert((await page.locator('#legacyFieldRecovery').textContent()).includes('Guardar <b>Original server evidence</b>')); assert.equal(await page.locator('#legacyFieldRecovery b').count(),0); }
   const failed = await page.evaluate(id=>CWFieldWriteStore.get(id,CWFieldWriteStore.session()),pending.requestId); assert.equal(failed.requestId,pending.requestId); assert.deepEqual(failed.payload,pending.payload); assert.equal(failed.payloadHash,pending.payloadHash);
   console.log('PASS delayed send stays disabled across languages, retains original UUID/content and displays server failure literally');
+  const pendingBytes = await snapshot();
+  const sql = () => Promise.all([prisma.serviceVisit.findMany({where:{id:{in:[visit.id,second.id,done.id]}},orderBy:{id:'asc'}}),prisma.fieldWriteRequest.count(),prisma.stockMovement.count()]);
+  const pendingSql = await sql(), writesBeforeSession = operational.filter(row=>row.method !== 'GET').length;
+  const samePanel = await page.locator('#legacyFieldRecovery').innerHTML();
+  await page.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));
+  assert.equal(await page.locator('#legacyFieldRecovery').innerHTML(),samePanel,'Same account must preserve its pending presentation');
+  // Retain rows obtained from the real queue, not a fabricated pending result.
+  await page.evaluate(()=>{
+    const original = window.getOfflineQueue;
+    const state = window.qaLegacyPendingRead = {original,ready:false,release:null,promise:null,reads:0};
+    const gate = new Promise(resolve=>{state.release=resolve;});
+    window.getOfflineQueue = async (...args)=>{++state.reads;const rows=await original(...args);state.ready=true;await gate;return rows;};
+    state.promise=updateOfflineBar();
+  });
+  await page.waitForFunction(()=>qaLegacyPendingRead.ready);
+  const pendingPrivacy = await page.evaluate(({token,other})=>{
+    const inspect=()=>({children:document.getElementById('legacyFieldRecovery').childElementCount,visits:document.getElementById('offlineVisits').textContent,evidence:document.getElementById('offlinePhotos').textContent});
+    const keys=['token','cristalwater_jwt','adminToken','user','cristalwater_user'],saved=keys.map(key=>localStorage.getItem(key));
+    for(const key of keys.slice(0,3))localStorage.setItem(key,token);
+    for(const key of keys.slice(3))localStorage.setItem(key,JSON.stringify({id:other.id,name:other.name,role:'TECHNICIAN'}));
+    dispatchEvent(new CustomEvent('cw:session-change'));updateOfflineBar();const changed=inspect();
+    keys.forEach((key,i)=>saved[i]===null?localStorage.removeItem(key):localStorage.setItem(key,saved[i]));
+    dispatchEvent(new CustomEvent('cw:session-change'));return {changed,returned:inspect()};
+  },{token:otherToken,other});
+  assert.deepEqual(pendingPrivacy,{changed:{children:0,visits:'',evidence:''},returned:{children:0,visits:'',evidence:''}},'Session event must immediately remove private pending labels, controls and counts even after a rapid return');
+  assert.equal(await page.evaluate(()=>qaLegacyPendingRead.reads),1,'Old page must not start a queue read for the other account');
+  await page.evaluate(async()=>{qaLegacyPendingRead.release();await qaLegacyPendingRead.promise;window.getOfflineQueue=qaLegacyPendingRead.original;});
+  for(const width of [320,390,1440]){
+    await page.setViewportSize({width,height:1000});
+    for(const [language,expected] of Object.entries(copy)){
+      await page.evaluate(language=>CristalI18n.applyLanguage(language),language);
+      assert.equal(await page.locator('#legacyFieldRecovery').innerHTML(),'','Late queue result or translation must not restore private controls');
+      assert.equal(await page.locator('#offlineVisits').textContent(),'');assert.equal(await page.locator('#offlinePhotos').textContent(),'');
+      assert((await page.locator('#offlineNetwork').textContent()).startsWith(expected[8]));
+      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Session message must fit '+language+'/'+width);
+    }
+  }
+  assert.equal(await snapshot(),pendingBytes);assert.deepEqual(await sql(),pendingSql);
+  assert.equal(operational.filter(row=>row.method!=='GET').length,writesBeforeSession);
+  await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.getElementById('legacyFieldRecovery')?.textContent.includes('Original server evidence'));
+  for(const field of fields)assert.equal(await page.locator('#'+field+'-'+visit.id).inputValue(),values[field]);
+  assert.equal(await snapshot(),pendingBytes);assert.deepEqual(await sql(),pendingSql);
+  console.log('PASS pending bar: same owner retained, rapid-return event clears labels/controls/counts synchronously, native late queue and language cannot repaint, bytes/UUID/SQL unchanged and own reload recovers');
+  await page.evaluate(()=>{Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>false});});
+  await context.setOffline(false);await page.waitForLoadState('networkidle');
+  await page.evaluate(()=>{Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>true});});
   const preserved = await page.evaluate(key=>localStorage.getItem(key),draftKey);
   await page.evaluate(({token,person})=>CristalAuth.persistSession(token,{id:person.id,role:'TECHNICIAN',name:person.name}),{token:otherToken,person:other});
   await page.waitForFunction(()=>document.querySelectorAll('#list .card').length===0);

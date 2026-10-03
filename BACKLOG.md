@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | Validação TASK543–556 | CI540–542/544–551 e restauros conferidos. CI543 falhou na passagem de dia; correção temporal aceite no SHA551, sem apagar a falha/restauro skipped543. Conferir os restantes runs por SHA. |
-| 2 | C06-016 / TASK557 | Perfil555 validado nos quatro principais; lista/formulários /technician556 usam agora o evento com proteção existente. Próximo: observar o produtor separado da barra de pendentes/resultado tardio de leitura de fila; preservar bytes/payloads e todos os casos. |
+| 1 | Validação TASK543–557 | CI540–542/544–552 e restauros conferidos. CI543 falhou na passagem de dia; correção temporal aceite no SHA551, sem apagar a falha/restauro skipped543. Conferir os restantes runs por SHA. |
+| 2 | C06-016 / TASK558 | Barra557 limpa rótulos/controlos/contagens e invalida leitura real tardia no regresso rápido, mantendo bytes. Próximo: alargar ensaio existente aos quatro principais, fotografia/conclusão/alerta e expiração; sem mudar produto se passar. |
 | 3 | Validação ambiental Windows | Distinguir as quatro falhas locais de backup (`symlink`/modo `0600`) de regressões reais antes de usar `npm test` como gate total nesta máquina. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -17,4 +17,4 @@ C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principa
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
 
-Atualização 03/10 às02:55: TASK555 publicada `4abe67a`, Action37087120698; TASK556 em publicação. Cache316, preflight23/23 e E2E três perfis aprovado em556; sintaxe completa é prova554/CI551, sete JS atuais conferidos. CI551 success/logs387/restauro128 tabelas/51 ficheiros conferidos; CI543 failure não aceite, CI552–555 pendentes. Referências/falhas Windows/próxima557 em `PROJECT_STATE.md`.
+Atualização 03/10 às03:14: TASK556 publicada `567321c`, Action37088143270; TASK557 em publicação. Cache317, cinco grupos nativos, preflight23/23 e E2E três perfis aprovado em557; sintaxe completa é prova554/CI552, sete JS atuais conferidos. CI552 success/logs387/restauro128 tabelas/51 ficheiros conferidos; CI543 failure não aceite, CI553–556 pendentes. Referências/falhas Windows/próxima558 em `PROJECT_STATE.md`.
