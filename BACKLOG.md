@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | Validação TASK543–560 | CI540–542/544–554 e restauros conferidos. CI543 falhou na passagem de dia; correção temporal aceite no SHA551, sem apagar a falha/restauro skipped543. Conferir os restantes runs por SHA. |
-| 2 | C06-001 / TASK561 | Auditoria560 guarda hashes/323 candidatos e28 IDs do dashboard: nav já coberto, corpo PT/sem seletor e contraste fraco observados nativamente. Próximo: texto próprio do dashboard/seletor global, dados/códigos literais, contraste computado e prova nativa; rondas permanece aberta. |
+| 1 | Validação TASK543–562 | CI540–542/544–556 e restauros conferidos. CI543 falhou na passagem de dia; correção temporal aceite no SHA551, sem apagar a falha/restauro skipped543. Conferir os restantes runs por SHA. |
+| 2 | C06-001 / TASK563 | Dashboard561: cinco idiomas/cópia própria/contraste/API/SQL aprovados,28 IDs classificados. Fixture visual562 corrigida/duas repetições. Próximo: formulários/seletores próprios de admin-rounds com IDs/valores/dados literais; planeador/cobertura/estados dinâmicos continuam separados e abertos. |
 | 3 | Validação ambiental Windows | Distinguir as quatro falhas locais de backup (`symlink`/modo `0600`) de regressões reais antes de usar `npm test` como gate total nesta máquina. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -17,4 +17,4 @@ C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principa
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
 
-Atualização 03/10 às04:00: TASK559 publicada `f82f2ec`, Action37090788455; TASK560 auditoria em publicação. Cache319/preflight23/E2E são provas559; auditoria560 valida ledger/hashes, GETs200/SQL intacto, técnicos4/4 e dois JS, sem mudanças do produto. CI554 success/logs387/restauro128 tabelas/51 ficheiros conferidos; CI543 failure não aceite, CI555–559 pendentes. Referências/falhas Windows/próxima561 em `PROJECT_STATE.md` e evidência560.
+Atualização 03/10 às04:31: TASK561 publicada `1ffa2f5`, Action37093197368; TASK562 fixture visual em publicação. Cache320/preflight23/E2E completo/sintaxe são provas561; visual562 passou duas vezes com ID Admin na lista20 e três visitas originais intactas. CI556 success/logs387/restauro128 tabelas/51 ficheiros conferidos; CI543 failure não aceite, CI557–561 pendentes. Quatro falhas unitárias Windows conhecidas preservadas. Próxima563 em `PROJECT_STATE.md`; inventário/evidência560 intactos.

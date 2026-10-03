@@ -64,6 +64,8 @@ async function runPersona(fixture, persona) {
   page.on('response',response=>{const url=new URL(response.url());if(url.origin===new URL(base).origin && url.pathname.startsWith('/api/') && response.status()>=500)apiErrors.push({path:url.pathname,status:response.status()});});
   const record = {profile:persona.role,passed:false,screenshots:[],pageErrors,apiErrors};
   results.push(record);
+  let adminVisit, originalVisits;
+  const visitRows = () => prisma.serviceVisit.findMany({where:{id:{in:fixture.pools.map(item=>item.visit.id)}},orderBy:{id:'asc'}});
   try {
     await page.goto(base+persona.login,{waitUntil:'domcontentloaded'});
     await capture(page, persona.role.toLowerCase()+'-login');record.screenshots.push(persona.role.toLowerCase()+'-login.png');
@@ -76,13 +78,26 @@ async function runPersona(fixture, persona) {
       await page.locator('#loginBtn').click();
     }
     await page.waitForURL(url=>!url.pathname.includes('login'),{timeout:20000});
-    if(persona.role==='ADMIN')await page.goto(base+'/admin-master-control',{waitUntil:'domcontentloaded'});
+    if(persona.role==='ADMIN') {
+      originalVisits = await visitRows();
+      // The real command centre returns only the first20 open visits. An Admin-only
+      // fixture precedes existing dates without changing the visits used above.
+      const earliest = (await prisma.serviceVisit.aggregate({where:{status:{in:['PLANNED','IN_PROGRESS','PENDING_TECHNICIAN']}},_min:{plannedDate:true}}))._min.plannedDate;
+      adminVisit = await prisma.serviceVisit.create({data:{clientId:fixture.client.id,poolId:fixture.pools[0].pool.id,plannedDate:new Date(Math.min(Date.now(),earliest?.getTime() ?? Date.now())-1),status:'PLANNED',notes:`QA_ADMIN_VISUAL_${stamp}`}});
+      await page.goto(base+'/admin-master-control',{waitUntil:'domcontentloaded'});
+    }
     await page.waitForFunction(()=>window.CristalAuth?.getToken());
     assert.equal(await page.evaluate(()=>CristalAuth.parseUser().role),persona.role);
     if(persona.role==='TECHNICIAN')await page.locator('#fieldFocusNow').filter({hasText:fixture.pools[0].pool.name}).waitFor();
     if(persona.role==='CLIENT')await page.locator('#clientName').filter({hasText:fixture.client.name}).waitFor();
     if(persona.role==='ADMIN')await page.locator('#todayList').filter({hasText:fixture.pools[0].pool.name}).waitFor();
     if(persona.role==='ADMIN') {
+      const native = await page.evaluate(async()=>{const response=await fetch('/api/core/dashboard',{headers:{Authorization:'Bearer '+CristalAuth.getToken()}});const data=await response.json();return {status:response.status,ids:data.nextVisits.map(visit=>visit.id)};});
+      assert.equal(native.status,200);assert(native.ids.length<=20);assert(native.ids.includes(adminVisit.id),'Own Admin fixture must appear in the real bounded GET');
+      const card = page.locator('#todayList .visit-item').filter({has:page.locator(`[data-edit-visit="${adminVisit.id}"]`)});
+      await card.waitFor();assert.equal(await card.locator('b').textContent(),fixture.pools[0].pool.name);
+      assert.deepEqual(await visitRows(),originalVisits,'Admin fixture must not change the original three visits');
+      record.adminListFixture={visitId:adminVisit.id,nativeReturnedVisits:native.ids.length,ownIdPresent:true,originalThreeVisitsUnchanged:true};
       const icons=page.locator('#metrics .metric-icon svg[aria-hidden="true"][focusable="false"]');
       assert.equal(await icons.count(),4,'All four management KPI icons must use accessible decorative SVG');
       assert.equal(await page.locator('#metrics .metric-icon').allTextContents().then(values=>values.every(value=>!value.trim())),true,'KPI icons must not depend on emoji fonts');
@@ -122,6 +137,7 @@ async function runPersona(fixture, persona) {
     if(persona.role==='TECHNICIAN')assert.equal(await page.evaluate(key=>localStorage.getItem(key),queueKey),pending,'Logout discarded pending work');
     await page.goto(base+persona.destination,{waitUntil:'domcontentloaded'});
     await page.waitForURL(url=>url.pathname.includes('login'));
+    if(persona.role==='ADMIN')assert.deepEqual(await visitRows(),originalVisits,'Logout and protected return preserve the original visits');
     record.passed=true;console.log('PASS visual real form, profile data, logout and protected return:',persona.role);
   } catch(error) {
     record.error=redact(error.message);

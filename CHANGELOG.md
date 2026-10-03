@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK562 - fixture visual Admin em QA preservada (2026-10-03)
+- Visita QA exclusiva do passo Admin entra na lista limitada20 sem alterar as três visitas técnicas/Cliente nem dados anteriores. GET real e cartão conferidos pelo ID próprio, mantendo todas as assertions/prazos originais.
+- Duas execuções consecutivas Admin/Técnico/Cliente aprovadas sem erros de browser/API; snapshots das visitas originais intactos antes/depois/logout. Produto/cache/API/runner intactos; CI556/log/restauro conferidos. Próxima563 retoma formulários/seletores de rondas, C06 permanece aberta.
+
 ## TASK561 - idiomas e legibilidade do dashboard de visitas (2026-10-03)
 - Dashboard usa o seletor global e25 entradas próprias em cinco idiomas, repintando folhas/atributos sem recriar cartões/controlos. Nomes/notas/datas/leituras/URLs/códigos literais e valores de filtros preservados; nav existente não duplicado. Contraste local corrigido, mínimo4,67:1 nas amostras sólidas.
 - Grupo Admin nativo alargado aprovado com SQL/API reais, três larguras, estados/ARIA/alt/foco/caret/imutabilidade e zero escrita de negócio. Preflight23, E2E completo/cache320, sintaxe completa e técnicos4/4 aprovados; quatro falhas Windows conhecidas dos unitários registadas. CI555/log/restauro conferidos, CI própria pendente.
