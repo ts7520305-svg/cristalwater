@@ -483,6 +483,7 @@ async function selectRoundLanguage(page,language){
 async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
   const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
   const languages=['pt','en','fr','es','de'],headings=['Rondas','Rounds','Tournées','Rondas','Rundgänge'];
+  const plannerUnassigned=['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen'],plannerNumber=['Tecnico #{id}','Technician #{id}','Technicien #{id}','Técnico #{id}','Techniker #{id}'],plannerDrop=['Arraste visitas para aqui','Drag visits here','Glissez les visites ici','Arrastra visitas aquí','Besuche hierher ziehen'];
   const now=new Date(),ago=days=>new Date(now.getTime()-days*86400000),tomorrow=new Date(now.getTime()+86400000);
   const coverageClient=await prisma.client.create({data:{name:'Rondas',active:true}}),coverageTechnician=await prisma.technician.create({data:{name:'Rondas',active:true}});
   const coveragePools=[];
@@ -596,18 +597,27 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
   const sourceIds=new Set([...summarySources.week.map(row=>'SERVICE-'+row.id),...summarySources.extras.map(row=>'EXTRA-'+row.id)]);assert(filteredRows.every(([kind,id])=>sourceIds.has(kind+'-'+id)),'Every filtered row exists in its native source');
   const summaryCopy=['{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} cobravel(is)','{visible} of {total} visit(s) - {alerts} alert(s) - {late} overdue - {extras} extra(s) - {billable} chargeable','{visible} sur {total} visite(s) - {alerts} alerte(s) - {late} en retard - {extras} supplémentaire(s) - {billable} facturable(s)','{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} facturable(s)','{visible} von {total} Besuch(en) - {alerts} Alarm(e) - {late} überfällig - {extras} zusätzlich - {billable} kostenpflichtig'];
   const before=await sql(),requests=[];
+  const plannerSql=async()=>JSON.stringify({rows:await prisma.technician.findMany({where:{id:{in:[summarySources.emptyTechnician.id,summarySources.literalTechnician.id]}},orderBy:{id:'asc'}}),count:await prisma.technician.count()});const plannerBefore=await plannerSql();
   const warningEntries=await page.evaluate(()=>state.rounds.filter(round=>round.active!==false&&!roundHasTechnician(round)).map(round=>({id:round.id,name:String(round.name),day:Number(round.dayOfWeek)||0})));
   assert(warningEntries.some(round=>round.id===summarySources.warningRound.id&&round.name===summarySources.warningRound.name));
   const warningIds=new Set(warningEntries.map(round=>round.id));assert.deepEqual(warningEntries,summarySources.rounds.filter(round=>warningIds.has(round.id)).map(round=>({id:round.id,name:String(round.name),day:Number(round.dayOfWeek)||0})),'All warning entries agree with the actual page API');
   const warningCopy=['Aviso: {count} ronda(s) sem tecnico atribuido','Warning: {count} round(s) without an assigned technician','Attention : {count} tournée(s) sans technicien attribué','Aviso: {count} ronda(s) sin técnico asignado','Warnung: {count} Rundgang/Rundgänge ohne zugewiesenen Techniker'],warningAction=['. Associa um tecnico antes de gerar ou executar visitas.','. Assign a technician before generating or carrying out visits.','. Attribuez un technicien avant de générer ou effectuer des visites.','. Asigna un técnico antes de generar o realizar visitas.','. Vor dem Erzeugen oder Ausführen von Besuchen einen Techniker zuweisen.'];
+  assert(Array.isArray(summarySources.technicians));assert(summarySources.technicians.some(tech=>tech.id===summarySources.emptyTechnician.id&&tech.name===''));assert(summarySources.technicians.some(tech=>tech.id===summarySources.literalTechnician.id&&tech.name==='Sem tecnico'));
+  const plannerExpected=index=>[{id:'',label:plannerUnassigned[index]+' '},...summarySources.technicians.filter(tech=>tech.active!==false).map(tech=>({id:String(tech.id),label:(tech.name||plannerNumber[index].replace('{id}',String(tech.id)))+' '}))];
   const listen=request=>{if(new URL(request.url()).pathname.startsWith('/api/'))requests.push({method:request.method(),path:new URL(request.url()).pathname});};
   await page.locator('#roundName').fill('Criar ronda <img src=x>');await page.locator('#extraNotes').fill('Rondas / Atualizar <b>draft literal</b>');
   await page.locator('#extraPool').selectOption(String(pool.id));await page.locator('#coverageCause').selectOption('Falta de produtos químicos');
   await page.locator(`[data-transfer-visit="${coverageVisits[0].id}"]`).check();
   await page.evaluate(()=>{
     document.getElementById('extraPrice').disabled=true;document.getElementById('createExtraVisitBtn').setAttribute('aria-busy','true');
-    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label),#coverageList :is(article,p,a,span),#coverageStatus,#visitFilterSummary,#status,#roundTechWarning,#roundTechWarning >*')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
-    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>({node,markup:node.innerHTML}));
+    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label),#coverageList :is(article,p,a,span),#coverageStatus,#visitFilterSummary,#status,#roundTechWarning,#roundTechWarning >*,#visitPlanner,#visitPlanner *')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
+    window.qaRoundPlannerMarkup=()=>{
+      const clone=document.getElementById('visitPlanner').cloneNode(true),fallbackIds=new Set(state.technicians.filter(tech=>tech.active!==false&&!tech.name).map(tech=>String(tech.id)));
+      for(const column of clone.querySelectorAll('.tech-column'))if(column.dataset.technicianId===''||fallbackIds.has(column.dataset.technicianId))column.querySelector('h4').firstChild.nodeValue='QA_OWN_PLANNER_HEADING';
+      for(const hint of clone.querySelectorAll('.tech-drop > .empty'))hint.firstChild.nodeValue='QA_OWN_PLANNER_HINT';
+      return clone.innerHTML;
+    };
+    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>({node,markup:node.id==='visitPlanner'?qaRoundPlannerMarkup():node.innerHTML}));
   });
   const fingerprint=()=>page.evaluate(()=>JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select')].filter(node=>node.id!=='cwLanguageSelect').map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,hidden:node.hidden,options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),busy:document.getElementById('createExtraVisitBtn').getAttribute('aria-busy'),links:[...document.querySelectorAll('main a')].map(node=>node.getAttribute('href'))}));
   const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-coverage-languages');await fs.mkdir(output,{recursive:true});
@@ -627,6 +637,8 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
       assert.equal(await page.locator('#roundTechWarning strong').textContent(),warningCopy[index].replace('{count}',String(warningEntries.length)),language+' native warning count');
       assert.equal(await page.locator('#roundTechWarning span').textContent(),warningEntries.map(({day,name})=>`${weekdays[index][day]??String(weekdays[0][day])} - ${name}`).join(', ')+warningAction[index],language+' retains all API names and owns only weekdays/instruction');
       assert.equal(await page.locator('#kpiUnassignedRounds').textContent(),String(warningEntries.length));assert.equal(await page.locator('#roundTechWarning img').count(),0);
+      const planner=await page.locator('#visitPlanner .tech-column').evaluateAll(nodes=>nodes.map(node=>({id:node.dataset.technicianId,label:node.querySelector('h4').firstChild.nodeValue,count:Number(node.querySelector('h4 span').textContent),chips:node.querySelectorAll('.visit-chip').length,hint:node.querySelector('.tech-drop > .empty')?.textContent??null})));
+      assert.deepEqual(planner.map(({id,label})=>({id,label})),plannerExpected(index),language+' planner owns only unassigned/fallback copy, never public names');assert(planner.every(column=>column.count===column.chips&&(column.hint===null||column.hint===plannerDrop[index])));
       assert.equal(await page.locator('#coverageStatus').textContent(),coverageData.rows.length+[' piscina(s) a verificar.',' pool(s) to review.',' piscine(s) à vérifier.',' piscina(s) por revisar.',' Pool(s) zu prüfen.'][index]+' '+coverageData.scope+' '+(coverageData.automaticAlertsEnabled?['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'][index]:['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'][index]),language+' native read-only coverage ready');
       assert.equal(await page.locator(`[data-coverage-pool="${coveragePools[0].id}"] img`).count(),0);
       for(const [selector,labels] of expected){const actual=await page.locator(selector).evaluateAll(nodes=>nodes.map(node=>[...node.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&child.nodeValue.trim())?.nodeValue.trim()));assert(actual.length>0,selector);assert(actual.every(value=>value===labels[index]),language+' '+selector+' '+JSON.stringify(actual));textCases+=actual.length;}
@@ -635,7 +647,7 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
       for(const selector of ['#assignTechRound','#assignPoolRound'])assert.equal(await page.locator(selector+` option[value="${round.id}"]`).textContent(),weekdays[index][round.dayOfWeek]+' - '+round.name);
       assert.equal(await page.locator(`#extraPool option[value="${pool.id}"]`).textContent(),pool.name+' - Cliente geração QA');
       assert.equal(await fingerprint(),controls);assert(await page.evaluate(()=>qaRoundNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))));
-      assert.deepEqual(await page.evaluate(()=>qaRoundLiteral.filter(({node,markup})=>node.innerHTML!==markup).map(({node,markup})=>{const after=node.innerHTML;let index=0;while(index<markup.length&&markup[index]===after[index])index++;return {id:node.id,index,before:markup.slice(Math.max(0,index-60),index+180),after:after.slice(Math.max(0,index-60),index+180)};})),[],'Deferred operational producers remain literal');
+      assert.deepEqual(await page.evaluate(()=>qaRoundLiteral.map(({node,markup})=>({node,markup,after:node.id==='visitPlanner'?qaRoundPlannerMarkup():node.innerHTML})).filter(({markup,after})=>after!==markup).map(({node,markup,after})=>{let index=0;while(index<markup.length&&markup[index]===after[index])index++;return {id:node.id,index,before:markup.slice(Math.max(0,index-60),index+180),after:after.slice(Math.max(0,index-60),index+180)};})),[],'All non-owned planner markup and deferred operational producers remain literal');
       for(const width of [320,390,1440]){
         await page.setViewportSize({width,height:1000});await page.locator('#roundName').scrollIntoViewIfNeeded();
         assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),language+'/'+width+' page overflow');
@@ -643,6 +655,7 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
         assert(geometry.every(box=>box.left>=-1&&box.right<=box.viewport+1),language+'/'+width+' '+JSON.stringify(geometry));
         assert(await page.locator('#clearVisitFilters').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left&&line.right<=box.right)&&node.scrollWidth<=node.clientWidth;}),'Clear filter label fits '+language+'/'+width);
         assert(await page.locator('#roundTechWarning').evaluate(node=>{const box=node.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth+1&&[...node.querySelectorAll('strong,span')].every(child=>{const range=document.createRange();range.selectNodeContents(child);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);});}),'Warning label fits '+language+'/'+width);
+        assert(await page.locator(`#visitPlanner [data-technician-id="${summarySources.emptyTechnician.id}"]`).evaluate(node=>{const box=node.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth+1&&[...node.querySelectorAll('h4,.empty')].every(child=>{const range=document.createRange();range.selectNodeContents(child);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);});}),'Planner fallback and empty hint fit '+language+'/'+width);
         await page.locator(`[data-coverage-pool="${coveragePools[0].id}"]`).scrollIntoViewIfNeeded();
         assert(await page.locator('#coverageList [data-coverage-copy]').evaluateAll(nodes=>nodes.every(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);})),language+'/'+width+' coverage text fits');
         await page.screenshot({path:path.join(output,language+'-'+width+'.png'),caret:'initial'});geometryCases++;
@@ -668,7 +681,9 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
     assert.deepEqual(requests.filter(request=>request.method==='GET'),[],'Changing language must not reload operational data');
     assert.deepEqual(requests.filter(request=>request.method!=='PUT'||request.path!=='/api/settings/language/me'),[],'Only the existing language preference may be written');
     assert.equal(await sql(),before,'Language changes must preserve exact native SQL rows and write/stock/receipt counts');
+    assert.equal(await plannerSql(),plannerBefore,'Planner technician SQL rows and total count remain exact');
     const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,coverageFlags:[...actualFlags].sort(),coverageRows:coverageData.rows.length,ownCoveragePools:coveragePools.map(pool=>pool.id),coverageReadOnlyReady:true,mainReadOnlyReady:true,unassignedWarning:{count:warningEntries.length,ownRound:summarySources.warningRound.id,languageCases:5,geometryCases:15,capturedApiNames:true},filterSummary:{counts:summaryCounts,languageCases:5,actualPageApiSources:true},realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','main write and validation feedback','coverage transfer feedback','receipts','dialogs','empty option fallbacks']};
+    proof.planner={languageCases:5,geometryCases:15,nativeTechnicians:summarySources.technicians.length,emptyTechnician:summarySources.emptyTechnician.id,literalTechnician:summarySources.literalTechnician.id,actualPageApiSources:true,allNonOwnedMarkupCompared:true};proof.deferred[0]='planner chips and table';
     await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS rounds form languages '+JSON.stringify(proof));
   }finally{page.off('request',listen);}
 }
@@ -722,17 +737,19 @@ async function testRoundAssignmentPeriods(adminUser){
 
   const plan=await request('GET',`/api/rounds/week?date=${date}`);assert.equal(plan.status,200);assert(plan.body.plan.days.some(day=>day.rounds.some(item=>item.id===round.id&&item.technicians[0]?.id===b.id)));
   const warningRound=await prisma.round.create({data:{name:'Aviso: <img src=x> $& {count} '+uniqueSuffix(),dayOfWeek:2,active:true}});
+  const plannerSuffix=uniqueSuffix(),emptyTechnician=await prisma.technician.create({data:{name:'',active:true,notes:plannerSuffix+'-planner fallback only'}}),literalTechnician=await prisma.technician.create({data:{name:'Sem tecnico',active:true,notes:plannerSuffix+'-planner literal only'}});
   const {chromium}=require('playwright');
   const browser=await chromium.launch({headless:true,...(process.env.CW_CHROMIUM_PATH?{executablePath:process.env.CW_CHROMIUM_PATH,args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']}:{})});
   try{
     const context=await browser.newContext({viewport:{width:1280,height:900}});
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({...user,role:'ADMIN'}));},{token:authToken,user:adminUser||{}});
     const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
-    const weekRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/round-planner/week'),extrasRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/extra-visits'),roundsRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/rounds');
+    const weekRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/round-planner/week'),extrasRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/extra-visits'),roundsRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/rounds'),techniciansRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/technicians');
     await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
     const weekReply=await weekRead,extrasReply=await extrasRead;assert.equal(weekReply.status(),200);assert.equal(extrasReply.status(),200);
     const roundsReply=await roundsRead;assert.equal(roundsReply.status(),200);const roundsPayload=await roundsReply.json();assert.equal(roundsPayload.ok,true);assert(Array.isArray(roundsPayload.rounds));
-    const summarySources={week:await weekReply.json(),extras:(await extrasReply.json()).extraVisits,rounds:roundsPayload.rounds,warningRound};
+    const techniciansReply=await techniciansRead;assert.equal(techniciansReply.status(),200);
+    const summarySources={week:await weekReply.json(),extras:(await extrasReply.json()).extraVisits,rounds:roundsPayload.rounds,warningRound,technicians:await techniciansReply.json(),emptyTechnician,literalTechnician};
     await selectRoundLanguage(page,'pt');
     await page.locator('#assignTechRound').selectOption(String(round.id));await page.locator('#assignTech').selectOption(String(b.id));
     await page.locator('#assignmentPeriod').selectOption('PERMANENT');assert(await page.locator('#assignmentEndField').isHidden());
@@ -750,6 +767,7 @@ async function testRoundAssignmentPeriods(adminUser){
   // Remove this template from later acceptance fixtures; preserve its history and assignments.
   await prisma.round.update({where:{id:round.id},data:{active:false}});
   await prisma.round.update({where:{id:warningRound.id},data:{active:false}});
+  await prisma.technician.delete({where:{id:emptyTechnician.id}});await prisma.technician.delete({where:{id:literalTechnician.id}});
   console.log('PASS round date ranges include final day, cross years, expire to base, preserve started visits and generate once with assigned technician');
 }
 

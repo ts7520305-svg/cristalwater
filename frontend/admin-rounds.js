@@ -142,6 +142,8 @@ const roundCopy = (() => {
     readWarnings: ['Carregado com avisos: {warnings}','Loaded with warnings: {warnings}','Chargé avec avertissements : {warnings}','Cargado con avisos: {warnings}','Mit Warnungen geladen: {warnings}'],
     unassignedWarning: ['Aviso: {count} ronda(s) sem tecnico atribuido','Warning: {count} round(s) without an assigned technician','Attention : {count} tournée(s) sans technicien attribué','Aviso: {count} ronda(s) sin técnico asignado','Warnung: {count} Rundgang/Rundgänge ohne zugewiesenen Techniker'],
     assignBeforeVisits: ['. Associa um tecnico antes de gerar ou executar visitas.','. Assign a technician before generating or carrying out visits.','. Attribuez un technicien avant de générer ou effectuer des visites.','. Asigna un técnico antes de generar o realizar visitas.','. Vor dem Erzeugen oder Ausführen von Besuchen einen Techniker zuweisen.'],
+    plannerUnassigned: ['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen'],
+    plannerDrop: ['Arraste visitas para aqui','Drag visits here','Glissez les visites ici','Arrastra visitas aquí','Besuche hierher ziehen'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -818,6 +820,7 @@ function technicianOptions(selected){
 function renderPlanner(visits = filterVisits()){
   const box = document.getElementById("visitPlanner");
   if(!box) return;
+  roundCopy.forget(box);
   const columns = [
     { id: "", name: "Sem tecnico" },
     ...state.technicians.filter((tech) => tech.active !== false).map((tech) => ({ id: String(tech.id), name: tech.name || `Tecnico #${tech.id}` }))
@@ -834,6 +837,14 @@ function renderPlanner(visits = filterVisits()){
       </section>
     `;
   }).join("");
+
+  const fallbackIds = new Set(state.technicians.filter(tech => tech.active !== false && !tech.name).map(tech => String(tech.id)));
+  for(const column of box.querySelectorAll('.tech-column')){
+    const id = column.dataset.technicianId,heading = column.querySelector('h4');
+    if(id === '')roundCopy.bind(heading, () => roundCopy.text('plannerUnassigned')+' ');
+    else if(fallbackIds.has(id))roundCopy.bind(heading, () => roundCopy.text('technicianNumber').replace('{id}',id)+' ');
+  }
+  for(const hint of box.querySelectorAll('.tech-drop > .empty'))roundCopy.bind(hint,'plannerDrop');
 
   box.querySelectorAll(".visit-chip").forEach((chip) => {
     chip.addEventListener("dragstart", (event) => {
