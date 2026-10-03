@@ -58,11 +58,18 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   page.on('request', r => { const path = new URL(r.url()).pathname; if (path.startsWith('/api/')) requests.push({ path, method: r.method(), body: r.postData(), authorization: r.headers().authorization }); });
   const panel = page.locator('#pumpReminderCard'), banner = page.locator('#pumpReminderBanner');
   const key = `cwFieldReminders:v1:TECH:${tech.id}`, endpoint = '/api/technician/pump-reminders';
+  const draftKey = `cwFieldVisitDrafts:v2:TECH:${tech.id}`, draftId = `visit-REGULAR-${id}`, originalNotes = 'Original <b>notes</b> {minutes}';
+  let matrixCases=0,languageCases=0;
   const raw = () => page.evaluate(key => localStorage.getItem(key), key), rows = async () => Object.values(JSON.parse(await raw() || '{}'));
   const database = async () => ({ reminders: await prisma.operationalReminder.findMany({ where: { assignedToTechnicianId: tech.id }, orderBy: { id: 'asc' } }), history: await prisma.technicalHistory.findMany({ where: { poolId: { in: [regularPool.id, extraPool.id] } }, orderBy: { id: 'asc' } }) });
   const locale = async lang => { await page.locator('#cwLanguageSelect').selectOption(lang); await page.waitForFunction(lang => document.documentElement.lang === lang, lang); };
   const instrument = () => page.evaluate(() => { window.qaPumpCalls = {}; for (const name of ['create', 'mark', 'list', 'sync', 'context', 'legacyWarning']) { const fn = CWFieldReminders[name]; CWFieldReminders[name] = (...args) => { qaPumpCalls[name] = (qaPumpCalls[name] || 0) + 1; return fn(...args); }; } });
   const state = () => page.evaluate(() => ({ focus: document.activeElement.id, selection: [document.activeElement.selectionStart, document.activeElement.selectionEnd], minutes: document.getElementById('pumpReminderMinutes').value, notes: document.getElementById('notes').value, disabled: document.getElementById('pumpReminderCreate').disabled, calls: { ...qaPumpCalls }, context: CWFieldVisitContext(), token: localStorage.getItem('token'), alternateToken: localStorage.getItem('cristalwater_jwt'), drafts: Object.keys(localStorage).filter(k => k.startsWith('cwField') || k.startsWith('cwWater') || k.startsWith('cwPump')).sort().map(k => [k, localStorage.getItem(k)]) }));
+  const settleInitialDraft = () => page.waitForFunction(({key,entry,owner,id,poolId,notes})=>{
+    if(document.getElementById('fieldSaveStatus')?.dataset.state!=='saved')return false;
+    const value=JSON.parse(localStorage.getItem(key)||'null'),draft=value?.drafts?.[entry],meta=draft?._draft;
+    return value?.v===2&&value.owner===owner&&draft?.values?.notes===notes&&meta?.v===1&&meta.visitId===id&&meta.visitType==='REGULAR'&&meta.poolId===poolId&&meta.mode==='WORK'&&Number.isFinite(Date.parse(meta.savedAt));
+  },{key:draftKey,entry:draftId,owner:`TECH:${tech.id}`,id,poolId:regularPool.id,notes:originalNotes});
   async function matrix(feedback = '', literal = null, display = []) {
     await page.evaluate(() => { document.getElementById('pumpReminderMinutes').focus(); window.qaPumpNodes = Array.from(document.querySelectorAll('#pumpReminderCard,#pumpReminderCard *,#pumpReminderBanner,#pumpReminderBanner *')); });
     const before = await state(), stored = await raw(), db = await database(), count = requests.length;
@@ -82,9 +89,11 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
         assert.deepEqual(await raw(), stored); assert.deepEqual(await state(), before); assert.deepEqual(await database(), db);
         assert(await page.evaluate(() => qaPumpNodes.every(node => node.isConnected)));
         for (const selector of ['#pumpReminderCard', '#pumpReminderBanner']) assert(await page.locator(selector).evaluate(n => n.hidden || n.scrollWidth <= n.clientWidth + 1), selector + ' fits');
+        languageCases++;
       }
     }
     for (const r of requests.slice(count)) { assert.equal(r.path, '/api/settings/language/me'); assert.equal(r.method, 'PUT'); assert.deepEqual(Object.keys(JSON.parse(r.body)), ['language']); }
+    matrixCases++;
   }
   const displayRows = async () => (await rows()).filter(x => !x.closed || !x.closeSyncedAt).map(x => ({ ...x, remaining: Math.ceil((Date.parse(x.dueAt) - Date.now()) / 60000), elapsed: Math.max(0, Math.floor((Date.now() - Date.parse(x.openedAt)) / 60000)) }));
   const selectExtra = async () => { await page.locator('[data-field-tab-button=hoje]').click(); await page.locator('[data-pool-filter=TODO]').click(); await page.locator('#visitList [data-visit-index]').filter({ hasText: extraPool.name }).click(); await page.waitForFunction(() => CWFieldVisitContext()?.visitType === 'EXTRA'); await page.locator('[data-field-tab-button=agora]').click(); };
@@ -92,7 +101,17 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.waitForFunction(id => CWFieldVisitContext()?.id === id && CWFieldVisitContext().visitType === 'REGULAR', id); await page.waitForFunction(() => navigator.serviceWorker.controller);
   await page.locator('[data-field-tab-button=agora]').click(); await locale('en');
   assert.equal(await page.locator('#pumpReminderCreate').textContent(), words.create[1]);
-  await page.locator('#notes').fill('Original <b>notes</b> {minutes}'); await instrument(); await matrix();
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),null);
+  // A slow real input save must settle before the language-only snapshot.
+  await page.evaluate(key=>{window.qaInitialDraftHeld=false;const gate=new Promise(resolve=>{window.qaReleaseInitialDraft=resolve;});window.qaInitialDraftLock=navigator.locks.request(key,async()=>{window.qaInitialDraftHeld=true;await gate;});},draftKey);
+  releases.push(()=>page.evaluate(()=>window.qaReleaseInitialDraft?.()).catch(()=>{}));
+  await page.waitForFunction(()=>qaInitialDraftHeld);await page.locator('#notes').fill(originalNotes);
+  await page.waitForFunction(async key=>(await navigator.locks.query()).pending.some(lock=>lock.name===key),draftKey);
+  assert.equal(await page.evaluate(key=>localStorage.getItem(key),draftKey),null);
+  console.log('PRECONDITION real input draft queued behind native lock '+JSON.stringify({draftKey,draftId,notes:originalNotes,writeStillPending:true}));
+  await page.evaluate(async()=>{qaReleaseInitialDraft();window.qaReleaseInitialDraft=null;await qaInitialDraftLock;});await settleInitialDraft();
+  console.log('PASS initial native draft confirmed before language-only snapshots '+JSON.stringify({owner:`TECH:${tech.id}`,visitType:'REGULAR',visitId:id,poolId:regularPool.id,fullOriginalBytesStillCompared:true}));
+  await instrument(); await matrix();
   await page.locator('#pumpReminderMinutes').fill('0'); await page.locator('#pumpReminderCreate').click(); await page.waitForFunction(text => document.getElementById('pumpReminderFeedback').textContent === text, words.invalid[4]); await matrix('invalid'); assert.equal(await raw(), null);
   await page.locator('#pumpReminderMinutes').fill('30'); await context.setOffline(true);
   await page.evaluate(({ key, literal }) => { window.qaStorageWrite = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === key) throw Error(literal); return qaStorageWrite.call(this, k, v); }; }, { key, literal: words.invalid[0] });
@@ -142,6 +161,7 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   db = await database(); assert.equal(db.reminders.length, 2); assert(db.reminders.every(x => x.isCompleted));
   assert.equal(db.history.filter(x => x.type === 'PUMP_MANUAL' && x.message === 'OPEN').length, 2); assert.equal(db.history.filter(x => x.type === 'PUMP_MANUAL' && x.message === 'CLOSED').length, 2);
   assert.equal(await banner.locator('b').count(), 0); assert.deepEqual(errors, []);
+  assert.equal(matrixCases,13);assert.equal(languageCases,195);console.log('PASS original pump matrices '+JSON.stringify({matrices:matrixCases,languageCases,languages,widths:[320,390,1440],fullDraftBytesAndSavedAtCompared:true,realNativeInputSaveReadiness:true}));
   console.log('PASS fallback names/overdue/elapsed/server states, exact legacy warning, physical offline closure,403 preservation, language changes during a held response, identical lost-response replay and incomplete close rejection; two typed reminders each open/close once');
   completed = true;
-})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { clearTimeout(deadline); for (const release of releases) release(); if (browser) await browser.close(); await prisma.$disconnect(); });
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { clearTimeout(deadline); for (const release of releases) await release(); if (browser) await browser.close(); await prisma.$disconnect(); });
