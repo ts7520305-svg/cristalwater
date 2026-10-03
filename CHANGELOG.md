@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK563 - PINs isolados nas fixtures Route OS (2026-10-03)
+- Reproduzido login recusado por dois técnicos QA ativos com o PIN fixo. Grupo existente atribui PINs livres pelo comparador nativo e exige login200/token antes da recusa403 original. Técnicos antigos, produto/API/schema/assertions/prazos preservados.
+- Duas execuções completas consecutivas aprovadas com SQL/API/browser reais: atribuições, cobertura/transferência, recorrência, rota/workday e notificações. Gates obrigatórios e quatro limitações Windows registados; próxima564 retoma formulários/seletores de rondas.
+
 ## TASK562 - fixture visual Admin em QA preservada (2026-10-03)
 - Visita QA exclusiva do passo Admin entra na lista limitada20 sem alterar as três visitas técnicas/Cliente nem dados anteriores. GET real e cartão conferidos pelo ID próprio, mantendo todas as assertions/prazos originais.
 - Duas execuções consecutivas Admin/Técnico/Cliente aprovadas sem erros de browser/API; snapshots das visitas originais intactos antes/depois/logout. Produto/cache/API/runner intactos; CI556/log/restauro conferidos. Próxima563 retoma formulários/seletores de rondas, C06 permanece aberta.

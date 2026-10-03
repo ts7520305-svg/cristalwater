@@ -121,6 +121,15 @@ function uniqueSuffix() {
   return `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 }
 
+async function availablePin() {
+  const pins = require('../src/services/technicianPinService');
+  for(let attempt=0;attempt<20;attempt++) {
+    const pin = String(require('node:crypto').randomInt(100000,1000000));
+    if(!(await pins.findMatches(prisma,pin,{activeOnly:true,stopAfter:1})).length)return pin;
+  }
+  throw new Error('Unable to allocate a distinct Route OS QA PIN');
+}
+
 function assertStep(condition, message) {
   if (!condition) {
     throw new Error(message);
@@ -174,7 +183,7 @@ async function main() {
   await testRecurrence(adminLogin.body.user);
   const startedAt = Date.now();
   const suffix = uniqueSuffix();
-  const pin = String(740000 + (Date.now() % 100000)).slice(-6);
+  const pin = await availablePin();
   const today = new Date().toISOString();
   const now = new Date();
   const clientIds = [];
@@ -536,7 +545,7 @@ async function testRoundAssignmentPeriods(adminUser){
 async function testVisitCoverage(adminUser){
   const assert=require('node:assert/strict'),uuid=()=>require('node:crypto').randomUUID();
   const old=new Date();old.setDate(old.getDate()-20);const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
-  const a=await prisma.technician.create({data:{name:'Cobertura origem QA',active:true,pin:'984731'}}),b=await prisma.technician.create({data:{name:'Cobertura destino QA',active:true}});
+  const a=await prisma.technician.create({data:{name:'Cobertura origem QA',active:true,pin:await availablePin()}}),b=await prisma.technician.create({data:{name:'Cobertura destino QA',active:true}});
   const client=await prisma.client.create({data:{name:'Cliente cobertura QA',active:true}});
   const pool=await prisma.pool.create({data:{name:'Piscina cobertura QA',clientId:client.id,createdAt:old}});
   const done=await prisma.serviceVisit.create({data:{poolId:pool.id,clientId:client.id,technicianId:a.id,status:'DONE',endAt:old}});
@@ -550,6 +559,7 @@ async function testVisitCoverage(adminUser){
   const row=coverage.body.rows.find(row=>row.poolId===pool.id);assert(row.flags.includes('STALE_COMPLETION'));assert(row.visits.find(v=>v.id===pending.id).issues.includes('OVERDUE'));assert(!row.visits.find(v=>v.id===started.id).canTransfer);assert(!row.visits.some(v=>v.id===historical.id));
   assert(coverage.body.rows.find(row=>row.poolId===missing.id).flags.includes('NOT_SCHEDULED_TODAY'));
   const login=await request('POST','/api/technician-auth/login',{pin:a.pin});
+  assert.equal(login.status,200);assert.equal(typeof login.body.token,'string');
   const foreign=await fetch(BASE+'/api/rounds/coverage',{headers:{Authorization:`Bearer ${login.body.token}`}});assert.equal(foreign.status,403);
   const service=require('../src/services/autoVisitAlertService');await Promise.all([service.runAutoVisitAlerts(),service.runAutoVisitAlerts()]);
   const where={eventType:'VISIT_COVERAGE',metadata:{path:['poolId'],equals:pool.id}};assert.equal(await prisma.notification.count({where}),1);assert.equal((await prisma.notification.findFirst({where})).role,'ADMIN');
