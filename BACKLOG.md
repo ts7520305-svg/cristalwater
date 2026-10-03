@@ -4,8 +4,8 @@ Fonte do estado corrente: [PROJECT_STATE.md](PROJECT_STATE.md). O plano detalhad
 
 | Prioridade | Item existente | Estado / próxima ação |
 |---|---|---|
-| 1 | Validação TASK543–563 | CI540–542/544–556 e restauros conferidos. CI543 falhou na passagem de dia; correção temporal aceite no SHA551, sem apagar a falha/restauro skipped543. Conferir os restantes runs por SHA. |
-| 2 | C06-001 / TASK564 | Dashboard561 aprovado/28 IDs classificados; visual562 e Route OS563 corrigidos/duas repetições próprias. Próximo: formulários/seletores próprios de admin-rounds com IDs/valores/dados literais; planeador/cobertura/estados dinâmicos permanecem separados e abertos. |
+| 1 | Validação TASK543–565 / TASK566 | CI540–542/544–561/563 e restauros conferidos. CI543 failure preservada/correção551 aceite. CI562 falhou na expiração do histórico/linha450; restauro skipped, próxima566 reproduz/alinha relógio da fixture ao exp real, sem mudar guardas/prazos. CI564 pendente. |
+| 2 | C06-001 | Dashboard561, formulários/seletores564 e cartões read-only565 aprovados localmente. Próximo após566: feedback coverageStatus no grupo Admin nativo existente; Route OS já114s/120s na QA acumulada. Recibos/diálogos/planeador/fallbacks vazios permanecem abertos. |
 | 3 | Validação ambiental Windows | Distinguir as quatro falhas locais de backup (`symlink`/modo `0600`) de regressões reais antes de usar `npm test` como gate total nesta máquina. |
 | 4 | C07–C09 | Dashboards, administração, portal/relatórios/PDF; usar manifesto C05 e evidência por página. |
 | 5 | C10–C14 | Política temporal, crédito, incidentes, obras/instalações e interface/acesso. Ver dependências no plano. |
@@ -17,4 +17,4 @@ C01–C05 concluídas no plano existente; C06 em execução; 26 tarefas principa
 
 Antes da integração final: comparar os três commits exclusivos de `feature/technicians-v25` com a branch de trabalho. Não integrar automaticamente. Contrato jurídico anual e ideias opcionais permanecem adiados.
 
-Atualização 03/10 às04:39: TASK562 publicada `99775ee`, Action37093523948; TASK563 fixtures PIN Route OS em publicação, duas repetições completas aprovadas mantendo403/permissões. Cache320/preflight23/E2E completo/sintaxe são provas561; visual562 passou duas vezes com ID próprio/visitas intactas. CI556 success/logs387/restauro128 tabelas/51 ficheiros conferidos; CI543 failure não aceite, CI557–562 pendentes. Quatro falhas unitárias Windows conhecidas preservadas. Próxima564 em `PROJECT_STATE.md`; inventário/evidência560 intactos.
+Atualização 03/10 às06:07: TASK564 publicada `079a47e`, Action37096545823; TASK565 cartões/ARIA de cobertura em publicação, duas repetições nativas109,85s/114,29s/214 cartões/8 códigos/5 idiomas, dados/seleção/SQL intactos. Preflight23/E2E final/cache322/técnicos4/4/sete JS aprovados; unitários com4 limitações Windows. Primeiro E2E565/Admin inventário reload7s falhou, repetição passou sem mudanças; não há causa comprovada. CI561/563 logs387/restauros128 tabelas/51 ficheiros conferidos, falha562 do histórico não aceite nem apagada. Próxima566 em PROJECT_STATE, antes do feedback C06; inventário/evidência560 intactos.

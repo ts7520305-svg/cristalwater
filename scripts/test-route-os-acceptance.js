@@ -483,6 +483,28 @@ async function selectRoundLanguage(page,language){
 async function checkRoundFormLanguages(page,round,pool,visits){
   const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
   const languages=['pt','en','fr','es','de'],headings=['Rondas','Rounds','Tournées','Rondas','Rundgänge'];
+  const now=new Date(),ago=days=>new Date(now.getTime()-days*86400000),tomorrow=new Date(now.getTime()+86400000);
+  const coverageClient=await prisma.client.create({data:{name:'Rondas',active:true}}),coverageTechnician=await prisma.technician.create({data:{name:'Rondas',active:true}});
+  const coveragePools=[];
+  for(const name of ['Criar ronda <img src=x>','Agendada','Sem data'])coveragePools.push(await prisma.pool.create({data:{name,clientId:coverageClient.id,active:true,createdAt:ago(40),volumeM3:40,technicalSheet:{create:{volumeM3:40,disinfectionType:'CHLORINE'}}}}));
+  const coverageVisits=[];
+  for(const data of [{plannedDate:ago(1),technicianId:null,status:'PLANNED'},{plannedDate:null,technicianId:coverageTechnician.id,status:'PLANNED'},{plannedDate:now,technicianId:coverageTechnician.id,status:'IN_PROGRESS',startAt:now},{plannedDate:now,technicianId:coverageTechnician.id,status:'INCOMPLETE',startAt:ago(1)},{plannedDate:tomorrow,technicianId:coverageTechnician.id,status:'PLANNED'}])coverageVisits.push(await prisma.serviceVisit.create({data:{poolId:coveragePools[0].id,...data}}));
+  coverageVisits.push(await prisma.serviceVisit.create({data:{poolId:coveragePools[1].id,technicianId:coverageTechnician.id,plannedDate:ago(20),startAt:ago(20),endAt:ago(20),status:'DONE',ph:7.3,internalNotes:'Rondas'}}));
+  await prisma.roundPool.create({data:{roundId:round.id,poolId:coveragePools[2].id,order:2}});
+  const refreshed=page.waitForResponse(response=>response.url().endsWith('/api/rounds/coverage')&&response.request().method()==='GET');await page.locator('#coverageRefresh').click();const coverageResponse=await refreshed;assert.equal(coverageResponse.status(),200);
+  const coverageData=await coverageResponse.json();assert(coveragePools.every(pool=>coverageData.rows.some(row=>row.poolId===pool.id)),'All own native coverage cases are returned');
+  await page.waitForFunction(ids=>ids.every(id=>document.querySelector(`[data-coverage-pool="${id}"]`)),coveragePools.map(pool=>pool.id));
+  const coverageLabels={
+    NO_ROUND:['Sem ronda ativa','No active round','Aucune tournée active','Sin ronda activa','Kein aktiver Rundgang'],
+    STALE_COMPLETION:['Última manutenção precisa de revisão','Last maintenance needs review','Dernier entretien à vérifier','Último mantenimiento pendiente de revisión','Letzte Wartung prüfen'],
+    NEVER_COMPLETED:['Sem manutenção concluída registada','No completed maintenance recorded','Aucun entretien terminé enregistré','Sin mantenimiento completado registrado','Keine abgeschlossene Wartung erfasst'],
+    NOT_SCHEDULED_TODAY:['Ronda prevista hoje, sem visita gerada','Round scheduled today, no visit generated','Tournée prévue aujourd’hui, aucune visite générée','Ronda prevista hoy, sin visita generada','Rundgang heute geplant, kein Besuch erzeugt'],
+    OVERDUE:['Em atraso','Overdue','En retard','Atrasada','Überfällig'],UNASSIGNED:['Sem técnico ativo','No active technician','Aucun technicien actif','Sin técnico activo','Kein aktiver Techniker'],
+    NO_DATE:['Sem data','No date','Sans date','Sin fecha','Ohne Datum'],INCOMPLETE:['Por concluir','Incomplete','À terminer','Por completar','Unvollständig'],
+  };
+  const actualFlags=new Set(coverageData.rows.filter(row=>coveragePools.some(pool=>pool.id===row.poolId)).flatMap(row=>[...row.flags,...row.visits.flatMap(visit=>visit.issues)]));assert(Object.keys(coverageLabels).every(flag=>actualFlags.has(flag)),'Eight flag/issue codes need native own fixtures');
+  const coverageExpected=index=>coverageData.rows.map(row=>({id:row.poolId,pool:row.poolName,client:row.clientName+' · ',completion:row.lastCompleted?['Última conclusão: ','Last completion: ','Dernière réalisation : ','Última finalización: ','Letzter Abschluss: '][index]+new Date(row.lastCompleted).toLocaleDateString('pt-PT'):['Sem conclusão registada','No completion recorded','Aucune réalisation enregistrée','Sin finalización registrada','Kein Abschluss erfasst'][index],flags:row.flags.map(flag=>coverageLabels[flag]?.[index]||'').join(' · '),visits:row.visits.map(visit=>({id:visit.id,line:['Visita','Visit','Visite','Visita','Besuch'][index]+' #'+visit.id+' · '+(visit.plannedDate?new Date(visit.plannedDate).toLocaleDateString('pt-PT'):coverageLabels.NO_DATE[index])+' · '+(visit.technicianName||['Por atribuir','Unassigned','À attribuer','Sin asignar','Nicht zugewiesen'][index]),issues:(visit.issues.map(flag=>coverageLabels[flag]?.[index]||'').join(' · ')||['Agendada','Scheduled','Planifiée','Programada','Geplant'][index])+(visit.canTransfer?'':' · '+['Acompanhamento individual necessário','Individual follow-up required','Suivi individuel nécessaire','Seguimiento individual necesario','Individuelle Betreuung erforderlich'][index]),aria:visit.canTransfer?['Selecionar visita ','Select visit ','Sélectionner la visite ','Seleccionar visita ','Besuch '][index]+visit.id+(index===4?' auswählen':''):null})),returnLabel:row.visits.some(visit=>visit.issues.includes('INCOMPLETE'))?['Combinar regresso','Arrange return visit','Organiser une nouvelle visite','Coordinar regreso','Rückbesuch vereinbaren'][index]:null,plan:row.flags.includes('NOT_SCHEDULED_TODAY')?['Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.','Check the rounds below and generate weekly visits after confirming the plan.','Vérifiez les tournées ci-dessous et générez les visites de la semaine après confirmation du planning.','Comprueba las rondas siguientes y genera las visitas semanales tras confirmar el plan.','Die Rundgänge unten prüfen und nach Bestätigung der Planung Wochenbesuche erzeugen.'][index]:null}));
+  const coverageView=()=>page.locator('#coverageList').evaluate(root=>[...root.querySelectorAll('.coverage-pool')].map(card=>({id:Number(card.dataset.coveragePool),pool:card.querySelector('h3').textContent,client:card.children[1].firstChild.nodeValue,completion:card.querySelector('[data-coverage-copy="completion"]').textContent,flags:card.querySelector('[data-coverage-copy="flags"]').textContent,visits:[...card.querySelectorAll('.coverage-visit')].map(label=>({id:Number(label.dataset.coverageVisit),line:label.querySelector('[data-coverage-copy="visit"]').textContent,issues:label.querySelector('[data-coverage-copy="issues"]').textContent,aria:label.querySelector('[data-transfer-visit]')?.getAttribute('aria-label')||null})),returnLabel:card.querySelector('a[href="/admin-alerts#incompleteFollowups"]')?.textContent||null,plan:card.lastElementChild.tagName==='P'&&card.lastElementChild!==card.children[2]?card.lastElementChild.textContent:null})));
   const expected=[
     ['#createRoundBtn',['Criar ronda','Create round','Créer une tournée','Crear ronda','Rundgang erstellen']],
     ['label[for="roundName"]',['Nome da ronda','Round name','Nom de la tournée','Nombre de la ronda','Name des Rundgangs']],
@@ -561,23 +583,31 @@ async function checkRoundFormLanguages(page,round,pool,visits){
     ['#visitDateFilter','title',['Filtrar por dia','Filter by day','Filtrer par jour','Filtrar por día','Nach Tag filtern']],
     ['#visitWeekFilter','title',['Filtrar por semana','Filter by week','Filtrer par semaine','Filtrar por semana','Nach Woche filtern']],
   ];
-  const sql=async()=>JSON.stringify({round:await prisma.round.findUnique({where:{id:round.id},include:{technicians:true,pools:true,assignments:true}}),visits:await prisma.serviceVisit.findMany({where:{OR:[{id:{in:visits.map(visit=>visit.id)}},{poolId:pool.id}]},orderBy:{id:'asc'}}),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
+  const sql=async()=>JSON.stringify({round:await prisma.round.findUnique({where:{id:round.id},include:{technicians:true,pools:true,assignments:true}}),visits:await prisma.serviceVisit.findMany({where:{OR:[{id:{in:visits.map(visit=>visit.id)}},{poolId:{in:[pool.id,...coveragePools.map(pool=>pool.id)]}}]},orderBy:{id:'asc'}}),client:await prisma.client.findUnique({where:{id:coverageClient.id}}),technician:await prisma.technician.findUnique({where:{id:coverageTechnician.id}}),pools:await prisma.pool.findMany({where:{id:{in:coveragePools.map(pool=>pool.id)}},orderBy:{id:'asc'}}),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
   const before=await sql(),requests=[];
   const listen=request=>{if(new URL(request.url()).pathname.startsWith('/api/'))requests.push({method:request.method(),path:new URL(request.url()).pathname});};
   await page.locator('#roundName').fill('Criar ronda <img src=x>');await page.locator('#extraNotes').fill('Rondas / Atualizar <b>draft literal</b>');
   await page.locator('#extraPool').selectOption(String(pool.id));await page.locator('#coverageCause').selectOption('Falta de produtos químicos');
+  await page.locator(`[data-transfer-visit="${coverageVisits[0].id}"]`).check();
   await page.evaluate(()=>{
     document.getElementById('extraPrice').disabled=true;document.getElementById('createExtraVisitBtn').setAttribute('aria-busy','true');
-    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label)')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
-    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#coverageList,#visitReceiptsAdmin,#status,#coverageStatus,#visitFilterSummary')].map(node=>({node,markup:node.innerHTML}));
+    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label),#coverageList :is(article,p,a,span)')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
+    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin,#status,#coverageStatus,#visitFilterSummary')].map(node=>({node,markup:node.innerHTML}));
   });
   const fingerprint=()=>page.evaluate(()=>JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select')].filter(node=>node.id!=='cwLanguageSelect').map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,hidden:node.hidden,options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),busy:document.getElementById('createExtraVisitBtn').getAttribute('aria-busy'),links:[...document.querySelectorAll('main a')].map(node=>node.getAttribute('href'))}));
-  const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-form-languages');await fs.mkdir(output,{recursive:true});
+  const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-coverage-languages');await fs.mkdir(output,{recursive:true});
   page.on('request',listen);let textCases=0,geometryCases=0;
   try{
     for(const [index,language] of languages.entries()){
       await selectRoundLanguage(page,language);
+      if(language==='en'){
+        const ownCheckbox=page.locator(`[data-coverage-pool="${pool.id}"] [data-transfer-visit]`).first();
+        assert.equal(await ownCheckbox.count(),1,'Native own coverage visit must be present');
+        assert.equal(await ownCheckbox.getAttribute('aria-label'),'Select visit '+await ownCheckbox.getAttribute('data-transfer-visit'),'Own coverage checkbox must follow the selected language');
+      }
       assert.equal(await page.locator('main h1').textContent(),headings[index]);assert.equal(await page.title(),'Cristal Water LDA - '+headings[index]);
+      assert.deepEqual(await coverageView(),coverageExpected(index),language+' native coverage labels and literal data');
+      assert.equal(await page.locator(`[data-coverage-pool="${coveragePools[0].id}"] img`).count(),0);
       for(const [selector,labels] of expected){const actual=await page.locator(selector).evaluateAll(nodes=>nodes.map(node=>[...node.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&child.nodeValue.trim())?.nodeValue.trim()));assert(actual.length>0,selector);assert(actual.every(value=>value===labels[index]),language+' '+selector+' '+JSON.stringify(actual));textCases+=actual.length;}
       for(let day=0;day<7;day++)assert.deepEqual(await page.locator(`#roundDay option[value="${day}"],#visitDayFilter option[value="${day}"]`).allTextContents(),[weekdays[index][day],weekdays[index][day]]);
       for(const [selector,attribute,labels] of attributes)assert.equal(await page.locator(selector).getAttribute(attribute),labels[index]);
@@ -591,6 +621,8 @@ async function checkRoundFormLanguages(page,round,pool,visits){
         const geometry=await page.locator('.cols2>.card:first-child :is(h2,label,button),#coverageTransfer :is(label,button),.visit-filter-panel :is(input,select,button)').evaluateAll(nodes=>nodes.filter(node=>node.getClientRects().length).map(node=>{const box=node.getBoundingClientRect();return {text:node.firstChild?.textContent,width:box.width,left:box.left,right:box.right,viewport:innerWidth};}));
         assert(geometry.every(box=>box.left>=-1&&box.right<=box.viewport+1),language+'/'+width+' '+JSON.stringify(geometry));
         assert(await page.locator('#clearVisitFilters').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left&&line.right<=box.right)&&node.scrollWidth<=node.clientWidth;}),'Clear filter label fits '+language+'/'+width);
+        await page.locator(`[data-coverage-pool="${coveragePools[0].id}"]`).scrollIntoViewIfNeeded();
+        assert(await page.locator('#coverageList [data-coverage-copy]').evaluateAll(nodes=>nodes.every(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);})),language+'/'+width+' coverage text fits');
         await page.screenshot({path:path.join(output,language+'-'+width+'.png'),caret:'initial'});geometryCases++;
       }
     }
@@ -605,12 +637,16 @@ async function checkRoundFormLanguages(page,round,pool,visits){
       document.getElementById('roundName').setAttribute('placeholder','Nome da ronda');
       window.qaRoundForeign=[heading,button,clone,literal].map(node=>({node,markup:node.outerHTML}));
     });
-    for(const language of languages){await selectRoundLanguage(page,language);assert(await page.evaluate(()=>qaRoundForeign.every(({node,markup})=>node.outerHTML===markup)));assert.equal(await page.locator('#roundName').getAttribute('placeholder'),'Nome da ronda');assert.equal(await fingerprint(),controls);}
+    await page.evaluate(id=>{
+      const card=document.querySelector(`[data-coverage-pool="${id}"]`),flags=card.querySelector('[data-coverage-copy="flags"]'),clone=flags.cloneNode(true);clone.id='qaCoverageClone';flags.after(clone);flags.replaceChildren(document.createTextNode('Sem ronda ativa'));
+      const checkbox=card.querySelector('[data-transfer-visit]');checkbox.setAttribute('aria-label','Selecionar visita');window.qaCoverageForeign=[flags,clone].map(node=>({node,markup:node.outerHTML}));window.qaCoverageCheckbox=checkbox;
+    },coveragePools[0].id);
+    for(const language of languages){await selectRoundLanguage(page,language);assert(await page.evaluate(()=>qaRoundForeign.every(({node,markup})=>node.outerHTML===markup)&&qaCoverageForeign.every(({node,markup})=>node.outerHTML===markup)&&qaCoverageCheckbox.getAttribute('aria-label')==='Selecionar visita'));assert.equal(await page.locator('#roundName').getAttribute('placeholder'),'Nome da ronda');assert.equal(await fingerprint(),controls);}
     await selectRoundLanguage(page,'pt');
     assert.deepEqual(requests.filter(request=>request.method==='GET'),[],'Changing language must not reload operational data');
     assert.deepEqual(requests.filter(request=>request.method!=='PUT'||request.path!=='/api/settings/language/me'),[],'Only the existing language preference may be written');
     assert.equal(await sql(),before,'Language changes must preserve exact native SQL rows and write/stock/receipt counts');
-    const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','coverage status and cards','receipts','dialogs','loading and errors','empty option fallbacks']};
+    const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,coverageFlags:[...actualFlags].sort(),coverageRows:coverageData.rows.length,ownCoveragePools:coveragePools.map(pool=>pool.id),realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','coverage status','receipts','dialogs','loading and errors','empty option fallbacks']};
     await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS rounds form languages '+JSON.stringify(proof));
   }finally{page.off('request',listen);}
 }

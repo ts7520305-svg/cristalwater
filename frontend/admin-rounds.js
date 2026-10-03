@@ -114,6 +114,23 @@ const roundCopy = (() => {
     technicianNumber: ['Tecnico #{id}','Technician #{id}','Technicien #{id}','Técnico #{id}','Techniker #{id}'],
     poolNumber: ['Piscina #{id}','Pool #{id}','Piscine #{id}','Piscina #{id}','Pool #{id}'],
     noClient: ['Sem cliente','No client','Sans client','Sin cliente','Kein Kunde'],
+    coverageNoRound: ['Sem ronda ativa','No active round','Aucune tournée active','Sin ronda activa','Kein aktiver Rundgang'],
+    coverageStale: ['Última manutenção precisa de revisão','Last maintenance needs review','Dernier entretien à vérifier','Último mantenimiento pendiente de revisión','Letzte Wartung prüfen'],
+    coverageNever: ['Sem manutenção concluída registada','No completed maintenance recorded','Aucun entretien terminé enregistré','Sin mantenimiento completado registrado','Keine abgeschlossene Wartung erfasst'],
+    coverageNotScheduled: ['Ronda prevista hoje, sem visita gerada','Round scheduled today, no visit generated','Tournée prévue aujourd’hui, aucune visite générée','Ronda prevista hoy, sin visita generada','Rundgang heute geplant, kein Besuch erzeugt'],
+    coverageOverdue: ['Em atraso','Overdue','En retard','Atrasada','Überfällig'],
+    coverageUnassigned: ['Sem técnico ativo','No active technician','Aucun technicien actif','Sin técnico activo','Kein aktiver Techniker'],
+    coverageNoDate: ['Sem data','No date','Sans date','Sin fecha','Ohne Datum'],
+    coverageIncomplete: ['Por concluir','Incomplete','À terminer','Por completar','Unvollständig'],
+    coverageLastCompleted: ['Última conclusão: {date}','Last completion: {date}','Dernière réalisation : {date}','Última finalización: {date}','Letzter Abschluss: {date}'],
+    coverageNoCompleted: ['Sem conclusão registada','No completion recorded','Aucune réalisation enregistrée','Sin finalización registrada','Kein Abschluss erfasst'],
+    coverageToAssign: ['Por atribuir','Unassigned','À attribuer','Sin asignar','Nicht zugewiesen'],
+    coverageVisit: ['Visita #{id} · {date} · {technician}','Visit #{id} · {date} · {technician}','Visite #{id} · {date} · {technician}','Visita #{id} · {date} · {technician}','Besuch #{id} · {date} · {technician}'],
+    coverageScheduled: ['Agendada','Scheduled','Planifiée','Programada','Geplant'],
+    coverageFollowup: ['Acompanhamento individual necessário','Individual follow-up required','Suivi individuel nécessaire','Seguimiento individual necesario','Individuelle Betreuung erforderlich'],
+    coverageReturn: ['Combinar regresso','Arrange return visit','Organiser une nouvelle visite','Coordinar regreso','Rückbesuch vereinbaren'],
+    coveragePlan: ['Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.','Check the rounds below and generate weekly visits after confirming the plan.','Vérifiez les tournées ci-dessous et générez les visites de la semaine après confirmation du planning.','Comprueba las rondas siguientes y genera las visitas semanales tras confirmar el plan.','Die Rundgänge unten prüfen und nach Bestätigung der Planung Wochenbesuche erzeugen.'],
+    coverageSelectVisit: ['Selecionar visita {id}','Select visit {id}','Sélectionner la visite {id}','Seleccionar visita {id}','Besuch {id} auswählen'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -1180,6 +1197,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
 (() => {
   const labels={NO_ROUND:'Sem ronda ativa',STALE_COMPLETION:'Última manutenção precisa de revisão',NEVER_COMPLETED:'Sem manutenção concluída registada',NOT_SCHEDULED_TODAY:'Ronda prevista hoje, sem visita gerada',OVERDUE:'Em atraso',UNASSIGNED:'Sem técnico ativo',NO_DATE:'Sem data',INCOMPLETE:'Por concluir'};
+  const flagKeys={NO_ROUND:'coverageNoRound',STALE_COMPLETION:'coverageStale',NEVER_COMPLETED:'coverageNever',NOT_SCHEDULED_TODAY:'coverageNotScheduled',OVERDUE:'coverageOverdue',UNASSIGNED:'coverageUnassigned',NO_DATE:'coverageNoDate',INCOMPLETE:'coverageIncomplete'};
+  const flagText=flags=>flags.map(flag=>flagKeys[flag]?roundCopy.text(flagKeys[flag]):labels[flag]).join(' · ');
+  function bindCoverageCard(card,row){
+    const leaf=(key,render)=>{const node=document.createElement('span');node.dataset.coverageCopy=key;node.textContent=render();roundCopy.bind(node,render);return node;};
+    const completed=row.lastCompleted?new Date(row.lastCompleted).toLocaleDateString('pt-PT'):null;
+    card.children[1].replaceChildren(document.createTextNode(row.clientName+' · '),leaf('completion',()=>completed?roundCopy.text('coverageLastCompleted').replace('{date}',completed):roundCopy.text('coverageNoCompleted')));
+    const flags=[...row.flags];card.children[2].dataset.coverageCopy='flags';roundCopy.bind(card.children[2],()=>flagText(flags));
+    for(const [index,visit] of row.visits.entries()){
+      const label=card.querySelectorAll('.coverage-visit')[index],span=label.querySelector('span'),id=String(visit.id),name=visit.technicianName,date=visit.plannedDate?new Date(visit.plannedDate).toLocaleDateString('pt-PT'):null,issues=[...visit.issues],canTransfer=visit.canTransfer;
+      label.dataset.coverageVisit=id;
+      span.replaceChildren(leaf('visit',()=>roundCopy.text('coverageVisit').replace('{id}',id).replace('{date}',date||roundCopy.text('coverageNoDate')).replace('{technician}',name||roundCopy.text('coverageToAssign'))),document.createElement('br'),leaf('issues',()=>(flagText(issues)||roundCopy.text('coverageScheduled'))+(canTransfer?'':' · '+roundCopy.text('coverageFollowup'))));
+      roundCopy.bind(label.querySelector('[data-transfer-visit]'),()=>roundCopy.text('coverageSelectVisit').replace('{id}',id),'aria-label');
+    }
+    roundCopy.bind(card.querySelector('a[href="/admin-alerts#incompleteFollowups"]'),'coverageReturn');
+    if(flags.includes('NOT_SCHEDULED_TODAY'))roundCopy.bind(card.lastElementChild,'coveragePlan');
+  }
   let revision=0;
   const message=()=>document.getElementById('coverageStatus');
   async function refresh(){
@@ -1190,7 +1223,9 @@ window.addEventListener("DOMContentLoaded", () => {
       roundCopy.forget(document.getElementById('coverageTechnician'));
       document.getElementById('coverageTechnician').innerHTML='<option value="">Selecionar técnico</option>'+data.technicians.map(tech=>`<option value="${tech.id}">${escapeHtml(tech.name)}</option>`).join('');
       roundCopy.bind(document.getElementById('coverageTechnician').options[0],'selectTechnician');
+      roundCopy.forget(document.getElementById('coverageList'));
       document.getElementById('coverageList').innerHTML=data.rows.map(row=>`<article class="coverage-pool" data-coverage-pool="${row.poolId}"><h3>${escapeHtml(row.poolName)}</h3><p>${escapeHtml(row.clientName)} · ${row.lastCompleted?'Última conclusão: '+new Date(row.lastCompleted).toLocaleDateString('pt-PT'):'Sem conclusão registada'}</p><p>${row.flags.map(flag=>escapeHtml(labels[flag])).join(' · ')}</p>${row.visits.map(visit=>`<label class="coverage-visit">${visit.canTransfer?`<input type="checkbox" data-transfer-visit="${visit.id}" aria-label="Selecionar visita ${visit.id}">`:''}<span>Visita #${visit.id} · ${visit.plannedDate?new Date(visit.plannedDate).toLocaleDateString('pt-PT'):'Sem data'} · ${escapeHtml(visit.technicianName||'Por atribuir')}<br>${visit.issues.map(flag=>escapeHtml(labels[flag])).join(' · ')||'Agendada'}${visit.canTransfer?'':' · Acompanhamento individual necessário'}</span></label>`).join('')}${row.visits.some(v=>v.issues.includes('INCOMPLETE'))?'<a href="/admin-alerts#incompleteFollowups">Combinar regresso</a>':''}${row.flags.includes('NOT_SCHEDULED_TODAY')?'<p>Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.</p>':''}</article>`).join('');
+      for(const row of data.rows)bindCoverageCard(document.querySelector(`[data-coverage-pool="${row.poolId}"]`),row);
       document.getElementById('visitReceiptsAdmin').innerHTML=(data.receipts||[]).map(row=>`<p data-admin-receipt="${row.id}"><strong>${escapeHtml(row.poolName)} · #${row.visitId}</strong> · ${escapeHtml(row.technicianName)} · ${({PENDING:'Por confirmar pelo técnico',RECEIVED:'Receção confirmada',RECEIVED_PREVIOUS:'Receção confirmada numa atribuição anterior',SUPERSEDED:'Atribuição substituída',CLOSED:'Visita encerrada sem confirmação de receção'})[row.state]}${row.receivedAt?' · '+new Date(row.receivedAt).toLocaleString('pt-PT'):''}</p>`).join('')||'<p>Sem transferências com confirmação registada.</p>';
       message().textContent=`${data.rows.length} piscina(s) a verificar. ${data.scope} ${data.automaticAlertsEnabled?'Avisos ao escritório verificados automaticamente de hora a hora.':'Avisos automáticos desativados neste ambiente; utilize Verificar agora.'}`;
     }catch(error){if(own===revision&&token===localStorage.getItem('token'))message().textContent=`Não foi possível atualizar: ${error.message}. A informação anterior pode estar desatualizada.`;}
