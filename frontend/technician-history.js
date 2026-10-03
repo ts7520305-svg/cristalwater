@@ -119,6 +119,7 @@ const historyUi = (() => {
   const value = (key, params = {}) => { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); entries.add(entry); return entry; };
   function text(entry, language = document.documentElement.lang || 'pt') {
     if (!entry || typeof entry !== 'object' || !entries.has(entry)) return String(entry ?? '');
+    if (entry.key === 'session') return window.CWFieldWriteStore.message('sessionPreserved', language);
     const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
     return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => text(entry.params[key], language));
   }
@@ -149,6 +150,21 @@ const historyUi = (() => {
 
 const statusBox = document.getElementById("statusBox");
 const historyList = document.getElementById("historyList");
+const historyStore = window.CWFieldWriteStore, historySession = historyStore?.session();
+let historyRead = null, historyRevision = 0, historyBlocked = false, historyExpires = 0;
+try {
+  const claim = JSON.parse(atob(historySession.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (typeof claim.exp === 'number') historyExpires = claim.exp * 1000;
+} catch (_) { /* An unreadable session cannot authorize a history read. */ }
+
+function protectHistory() {
+  if (historyBlocked) return false;
+  if (historyStore?.same(historySession) && Number.isFinite(historyExpires) && historyExpires > Date.now() && !window.CristalAuth?.isSessionExpired()) return true;
+  historyBlocked = true; ++historyRevision; historyRead?.abort();
+  historyUi.clearTree(historyList); historyList.replaceChildren();
+  setStatus(historyUi.value('session'), 'error');
+  return false;
+}
 
 function setStatus(message, tone = "") {
   if (!statusBox) return;
@@ -224,6 +240,7 @@ function render(visits) {
 }
 
 async function loadHistory() {
+  if (!protectHistory()) return;
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
 
   const user = userData();
@@ -234,10 +251,15 @@ async function loadHistory() {
     return;
   }
 
+  const revision = ++historyRevision, read = new AbortController();
+  historyRead?.abort(); historyRead = read;
   setStatus(historyUi.value('loading'));
   try {
-    const data = await parseResponse(await fetch(`/api/technician/today?technicianId=${encodeURIComponent(technicianId)}`));
-    if(data.complete!==true||!Array.isArray(data.visits)||data.total!==data.visits.length)throw historyUi.ownError('incomplete');
+    const response = await fetch(`/api/technician/today?technicianId=${encodeURIComponent(technicianId)}`, { cache: 'no-store', headers: { Authorization: 'Bearer ' + historySession.token }, signal: read.signal });
+    if (!protectHistory() || revision !== historyRevision) return;
+    const data = await parseResponse(response);
+    if (!protectHistory() || revision !== historyRevision) return;
+    if(data.complete!==true||data.technicianId!==historySession.technicianId||!Array.isArray(data.visits)||data.total!==data.visits.length)throw historyUi.ownError('incomplete');
     const visits = data.visits.filter((visit) => {
       const status = String(visit.status || "").toUpperCase();
       return Boolean(visit.endAt) || status === "DONE";
@@ -245,9 +267,13 @@ async function loadHistory() {
     render(visits);
     setStatus(visits.length ? historyUi.value('loaded', { count: visits.length }) : historyUi.value('noCompleted'), visits.length ? "" : "warning");
   } catch (error) {
+    if (!protectHistory() || revision !== historyRevision) return;
     render([]);
     setStatus(historyUi.fromError(error) || historyUi.value('loadFailed'), "error");
-  }
+  } finally { if (historyRead === read) historyRead = null; }
 }
 
+for (const event of ['cw:session-change', 'storage', 'focus', 'pageshow']) window.addEventListener(event, protectHistory);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) protectHistory(); });
+setInterval(protectHistory, 1000);
 loadHistory();

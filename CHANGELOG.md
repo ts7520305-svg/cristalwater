@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK553 - histórico e sessão ativa (2026-10-03)
+- Histórico usa identidade e mensagem do store existente: limpa dados privados e aborta leituras na troca/expiração da sessão, recusa owner incorreto e respostas tardias; só reload recupera a conta própria.
+- Ensaio nativo aprovado nos quatro principais PIN/USER/Técnico/Chefe, cinco idiomas, cache313/reload frio offline e snapshots SQL/outbox intactos. E2E dos três perfis e preflight23/23 aprovados; CI547/restauro conferidos, CI do novo SHA pendente. Sem alteração de API/schema/dados.
+
 ## TASK552 - guia técnico e troca de conta (2026-10-03)
 - Guia liga o evento de sessão à proteção existente: limpa dados e links privados, aborta movimentos/PDF e só recupera a conta após reload. Mesmo principal preserva a vista; quatro identidades PIN/USER/Técnico/Chefe validadas.
 - Ensaios nativos do guia, fonte cacheada/reload frio offline, E2E Admin/Técnico/Cliente e preflight23/23 aprovados; APIs, documentos, dados e idiomas preservados. Cache312/quatro expectativas atualizados. CI545/546 e restauros conferidos, CI do novo commit pendente.

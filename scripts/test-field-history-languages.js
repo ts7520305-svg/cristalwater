@@ -44,7 +44,7 @@ async function waitForCache(page, predicate, expected) {
   const now = Date.now(), parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(now));
   const day = ['year','month','day'].map(name => parts.find(part => part.type === name).value).join('-'), scheduledAt = new Date(day + 'T12:00:00.000Z');
   const vehicle = await prisma.vehicle.create({ data: { plate: 'PROFILE-LANG-' + now, active: true } });
-  const tech = await prisma.technician.create({ data: { name: 'Profile owner <b>{day}</b>', vehicleId: vehicle.id, active: true } });
+  const tech = await prisma.technician.create({ data: { name: 'Profile owner <b>{day}</b>', email: 'history-tech-'+now+'@qa.test', vehicleId: vehicle.id, active: true } });
   const client = await prisma.client.create({ data: { name: 'Profile client', active: true } });
   const pools = await Promise.all(['REGULAR','EXTRA'].map(type => prisma.pool.create({ data: { clientId: client.id, name: type + ' profile <b>{date}</b>', active: true } })));
   const maxima = await Promise.all([prisma.serviceVisit.aggregate({ _max: { id: true } }), prisma.extraVisit.aggregate({ _max: { id: true } })]);
@@ -58,7 +58,8 @@ async function waitForCache(page, predicate, expected) {
 
   const token = jwt.sign({ id: tech.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' });
   const source = { id: tech.id, technicianId: tech.id, role: 'TECHNICIAN', name: 'Session source <b>{name}</b> & <img src=x>', zone: 'ZONE-' + 'x'.repeat(95), phone: '+351 999 123 456', privateNote: 'Unexposed <b>{phone}</b>' };
-  const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', role: 'TEAM_LEADER', active: true } });
+  const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', email: 'history-leader-'+now+'@qa.test', role: 'TEAM_LEADER', active: true } });
+  const associatedUsers=await Promise.all([tech,leader].map(person=>prisma.user.create({data:{email:person.email,name:person.name,role:person.role,password:'unused',active:true}})));
   const leaderToken = jwt.sign({ id: leader.id, role: 'TEAM_LEADER' }, getJwtSecret(), { expiresIn: '1h' });
   browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox','--disable-dev-shm-usage'] });
   const database = () => Promise.all([
@@ -146,6 +147,7 @@ async function waitForCache(page, predicate, expected) {
     }
     if (profile === 'empty') json.visits = [];
     if (profile === 'incomplete') json.complete = false;
+    if (profile === 'wrong-owner') json.technicianId = other.id;
     if (profile === 'total-mismatch') json.total++;
     if (profile === 'visits-not-array') json.visits = {};
     if (profile === 'empty') json.total = 0;
@@ -221,7 +223,7 @@ async function waitForCache(page, predicate, expected) {
   await locale('pt');await page.evaluate(() => { for (const node of [...document.querySelectorAll('[data-cw-history-copy]'),...document.querySelectorAll('#historyList b,#historyList small')]) node.replaceChildren(document.createTextNode(node.textContent)); });await matrix({ name: 'foreign-identical-card-and-status-leaves',widths: [320],foreign: true });
   await openHistory('empty');await matrix({ name: 'empty-complete-list',status: 'noCompleted',tone: 'warning',rows: [],empty: true,widths: [320] });
   await locale('pt');await page.evaluate(() => { for (const node of [...document.querySelectorAll('[data-cw-history-copy]'),document.querySelector('#historyList .empty')]) node.replaceChildren(document.createTextNode(node.textContent)); });await matrix({ name: 'foreign-identical-empty-and-status',status: 'noCompleted',tone: 'warning',rows: [],empty: true,foreign: true,widths: [320] });
-  for (const next of ['incomplete','total-mismatch','visits-not-array']) { await openHistory(next);await matrix({ name: next,status: 'incomplete',tone: 'error',rows: [],empty: true,widths: [320] }); }
+  for (const next of ['incomplete','total-mismatch','visits-not-array','wrong-owner']) { await openHistory(next);await matrix({ name: next,status: 'incomplete',tone: 'error',rows: [],empty: true,widths: [320] }); }
   await openHistory('http');await matrix({ name: 'owned-http-fallback-original-error',status: 'http',tone: 'error',rows: [],empty: true,widths: [320] });
   await page.evaluate(async () => { window.qaHistoryError = await parseResponse(new Response('{}',{ status: 503 })).catch(error => error);window.qaHistoryClone = new Error(qaHistoryError.message);setStatus(qaHistoryClone.message,'error'); });
   await matrix({ name: 'cloned-error-message-remains-literal',rawStatus: 'Falha HTTP 503',tone: 'error',rows: [],empty: true,widths: [320] });
@@ -232,16 +234,36 @@ async function waitForCache(page, predicate, expected) {
   await page.evaluate(() => { for (const key of ['user','cristalwater_user']) localStorage.setItem(key,JSON.stringify({ id: 0,role: 'TECHNICIAN' })); });
   await page.goto(base + '/technician-history',{ waitUntil: 'networkidle' });await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').textContent !== 'A carregar historico.');await matrix({ name: 'original-valid-role-missing-technician-id',status: 'missingTechnician',tone: 'error',rows: [],empty: true,widths: [320] });
   await page.evaluate(source => { for (const key of ['user','cristalwater_user']) localStorage.setItem(key,JSON.stringify(source)); },source);await openHistory('native');
+  const visibleHistory=await page.locator('#historyList').innerHTML(),sameCount=requests.length;
+  await page.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));assert.equal(await page.locator('#historyList').innerHTML(),visibleHistory);assert.equal(requests.length,sameCount);
+  let readEntered;const readBegun=new Promise(resolve=>readEntered=resolve),readGate=new Promise(resolve=>{release=resolve;});
+  await page.route(endpoint,async route=>{const response=await route.fetch();readEntered();await readGate;await route.fulfill({response}).catch(()=>{});},{times:1});
+  await page.evaluate(()=>{window.qaHistoryRead=loadHistory();});await readBegun;
+  const nativeAbort=page.waitForEvent('requestfailed',{predicate:request=>new URL(request.url()).pathname==='/api/technician/today',timeout:10000});nativeAbort.catch(()=>{});
+  const foreignToken=jwt.sign({id:other.id,role:'TECHNICIAN'},getJwtSecret(),{expiresIn:'1h'});
+  const cleared=await page.evaluate(({foreignToken,other})=>{
+    const keys=['token','cristalwater_jwt','adminToken','user','cristalwater_user'],before=keys.map(key=>localStorage.getItem(key)),view=()=>({items:document.querySelectorAll('#historyList .item').length,empty:document.querySelectorAll('#historyList .empty').length});
+    for(const key of keys.slice(0,3))localStorage.setItem(key,foreignToken);for(const key of keys.slice(3))localStorage.setItem(key,JSON.stringify({id:other.id,role:'TECHNICIAN'}));dispatchEvent(new CustomEvent('cw:session-change'));const changed=view();
+    keys.forEach((key,index)=>before[index]===null?localStorage.removeItem(key):localStorage.setItem(key,before[index]));dispatchEvent(new CustomEvent('cw:session-change'));return {changed,returned:view()};
+  },{foreignToken,other});
+  assert.deepEqual(cleared,{changed:{items:0,empty:0},returned:{items:0,empty:0}},'History must clear synchronously and cannot reopen after rapid account return');await nativeAbort;release();release=null;await page.evaluate(()=>qaHistoryRead);
+  assert.equal(await page.locator('#historyList').innerHTML(),'');const closedCount=requests.length;await page.evaluate(()=>loadHistory());assert.equal(requests.length,closedCount);assert.deepEqual(await pending(),originalPending);
+  for(const language of languages){await locale(language);assert.equal(await page.locator('#statusBox').textContent(),await page.evaluate(language=>CWFieldWriteStore.message('sessionPreserved',language),language));assert.equal(await page.locator('#historyList').innerHTML(),'');}
+  await openHistory('native');assert.equal(await page.locator('#historyList .item').count(),3);
+  console.log('PASS history session event: same owner retained, synchronous A-B-A clear, native GET abort, five-language refusal, own reload and original typed pending bytes');
   await page.evaluate(() => navigator.serviceWorker.ready);await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   const sharedEmptyCss = await fs.readFile('frontend/ui/components/empty-state.css','utf8');
   const routeWorker=await fs.readFile('frontend/sw.js','utf8'),routeCacheDeclarations=[...routeWorker.matchAll(/^const CACHE = '(cristalwater-field-[0-9]{8}-v[0-9]+)';$/gm)];
   assert.equal(routeCacheDeclarations.length,1,'One exact application cache declaration is required');
   const routeCacheVersion=routeCacheDeclarations[0][1];
-  await waitForCache(page,async expected => { const cache = await caches.open(expected.version),css = await cache.match('/ui/components/empty-state.css');return !!await cache.match('/technician-history') && !!await cache.match('/technician-history.js') && !!css && await css.text() === expected.css; },{css:sharedEmptyCss,version:routeCacheVersion});
+  const historySources=await Promise.all([['/technician-history','frontend/technician-history.html'],['/technician-history.js','frontend/technician-history.js'],['/cw-field-write-store.js','frontend/cw-field-write-store.js']].map(async([url,file])=>[url,await fs.readFile(file,'utf8')]));
+  await waitForCache(page,async expected => { const cache = await caches.open(expected.version),css = await cache.match('/ui/components/empty-state.css');if(!css||await css.text()!==expected.css)return false;for(const[url,source]of expected.sources){const response=await cache.match(url);if(!response||await response.text()!==source)return false;}return true; },{css:sharedEmptyCss,version:routeCacheVersion,sources:historySources});
   const beforeOffline = await raw(),dbOffline = await database();await context.setOffline(true);
   await matrix({ name: 'real-in-memory-history-offline' });
   await page.reload({ waitUntil: 'domcontentloaded' });await page.waitForFunction(() => window.CristalI18n && document.getElementById('statusBox').dataset.tone === 'error');
   const rawOffline = await page.locator('#statusBox').textContent();assert.equal(rawOffline,'Failed to fetch');await matrix({ name: 'real-cached-shell-no-invented-history-cache',rawStatus: rawOffline,tone: 'error',rows: [],empty: true,widths: [320] });
+  assert(await page.evaluate(foreignToken=>{const keys=['token','cristalwater_jwt','adminToken'],saved=keys.map(key=>localStorage.getItem(key));for(const key of keys)localStorage.setItem(key,foreignToken);dispatchEvent(new CustomEvent('cw:session-change'));const changed=document.getElementById('historyList').childElementCount===0;keys.forEach((key,i)=>saved[i]===null?localStorage.removeItem(key):localStorage.setItem(key,saved[i]));dispatchEvent(new CustomEvent('cw:session-change'));return changed&&document.getElementById('historyList').childElementCount===0&&document.getElementById('statusBox').textContent===CWFieldWriteStore.message('sessionPreserved');},foreignToken));
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.getElementById('statusBox')?.dataset.tone==='error');assert.equal(await page.locator('#statusBox').textContent(),'Failed to fetch');
   assert.deepEqual(await raw(),beforeOffline);assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),dbOffline);
   for (const type of ['REGULAR','EXTRA']) { await openField(type);assert.deepEqual(await page.evaluate(ids => ids.map(id => { const node = document.getElementById(id);return [id,node.value,node.checked]; }),fieldIds),visitFields[type]);assert.equal(await page.evaluate(() => CWFieldDaySnapshot().confirmedAt),null); }
   assert.deepEqual(await pending(),originalPending);const draftKey = 'cwFieldVisitDrafts:v2:TECH:' + tech.id;assert.equal((await raw())[draftKey],historyEntryStorage[draftKey]);
@@ -419,5 +441,21 @@ async function waitForCache(page, predicate, expected) {
   }}
   for (const request of leaderRequests.slice(first)) { assert.equal(request.path,'/api/settings/language/me');assert.equal(request.method,'PUT');assert.equal(request.auth,'Bearer ' + leaderToken); }
   assert.deepEqual(leaderErrors,[]);scenarios++;await leaderContext.close();
-  console.log('PASS history language result ' + JSON.stringify({ checks,scenarios,emptyProviderChecks,actualEmptyBadgeChecks,sharedSelectors: 4,sharedBadgeLanguages: 5,sourceBodyLiteral: true,exactSharedCssCachedAndRealOffline: true,ownedEntries: 16,languages: 5,realScopedFourVisitsThreeCompleted: true,originalDatePrecedenceFormatAndInvalidDateLiteral: true,techAndTeamLeader: true,readOnly: true,typedDraftFields: 13,immutablePending: 2,realOfflineNoHistoryCacheInvented: true,rawErrorsAndSourceNamesLiteral: true,noOperationalWrites: true }));completed = true;
+  const sessionDb=await database();
+  for(const [person,user]of [[tech,associatedUsers[0]],[leader,associatedUsers[1]],[leader,null]]){
+    const actor=user?{id:user.id,userId:user.id,technicianId:person.id,role:person.role,principalType:'USER'}:{id:person.id,role:person.role},credential=jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'}),owned=await makeContext(credential,actor),ownedPage=await owned.newPage();ownedPage.setDefaultTimeout(10000);
+    const pageErrors=[],pageRequests=[];ownedPage.on('pageerror',e=>pageErrors.push(e.message));ownedPage.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))pageRequests.push(r.method());});
+    await ownedPage.goto(base+'/technician-history',{waitUntil:'networkidle'});await ownedPage.waitForFunction(()=>['warning',''].includes(document.getElementById('statusBox').dataset.tone||'')&&!document.getElementById('statusBox').textContent.includes('A carregar'));
+    assert.equal(await ownedPage.locator('#historyList .item').count(),person.id===tech.id?3:0);const before=await ownedPage.locator('#historyList').innerHTML(),first=pageRequests.length;
+    await ownedPage.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));assert.equal(await ownedPage.locator('#historyList').innerHTML(),before);assert.equal(pageRequests.length,first);
+    let entered;const begun=new Promise(resolve=>entered=resolve),gate=new Promise(resolve=>{release=resolve;});await ownedPage.route(endpoint,async route=>{const response=await route.fetch();entered();await gate;await route.fulfill({response}).catch(()=>{});},{times:1});
+    await ownedPage.evaluate(()=>{window.qaRead=loadHistory();});await begun;const aborted=ownedPage.waitForEvent('requestfailed',{predicate:r=>new URL(r.url()).pathname==='/api/technician/today',timeout:10000});aborted.catch(()=>{});
+    assert(await ownedPage.evaluate(foreignToken=>{const keys=['token','cristalwater_jwt','adminToken','user','cristalwater_user'],saved=keys.map(key=>localStorage.getItem(key));for(const key of keys.slice(0,3))localStorage.setItem(key,foreignToken);dispatchEvent(new CustomEvent('cw:session-change'));const changed=document.getElementById('historyList').childElementCount===0;keys.forEach((key,i)=>saved[i]===null?localStorage.removeItem(key):localStorage.setItem(key,saved[i]));dispatchEvent(new CustomEvent('cw:session-change'));return changed&&document.getElementById('historyList').childElementCount===0;},foreignToken));
+    await aborted;release();release=null;await ownedPage.evaluate(()=>qaRead);assert.equal(await ownedPage.locator('#statusBox').textContent(),await ownedPage.evaluate(()=>CWFieldWriteStore.message('sessionPreserved')));
+    await ownedPage.reload({waitUntil:'networkidle'});await ownedPage.waitForFunction(()=>document.querySelector('#historyList .item,#historyList .empty'));assert.equal(await ownedPage.locator('#historyList .item').count(),person.id===tech.id?3:0);
+    await ownedPage.clock.setFixedTime(Date.now()+3600001);assert(await ownedPage.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('historyList').childElementCount===0;}));assert.deepEqual(pageErrors,[]);assert(pageRequests.every(method=>method==='GET'));await owned.close();
+    console.log('PASS history '+person.role+'/'+(user?'USER':'TECHNICIAN')+': native owner scope, same-account event, rapid account return, GET abort, own reload and expiry');
+  }
+  assert.deepEqual(await database(),sessionDb);
+  console.log('PASS history language result ' + JSON.stringify({ checks,scenarios,emptyProviderChecks,actualEmptyBadgeChecks,sharedSelectors: 4,sharedBadgeLanguages: 5,sourceBodyLiteral: true,exactSharedCssCachedAndRealOffline: true,ownedEntries: 17,languages: 5,realScopedFourVisitsThreeCompleted: true,originalDatePrecedenceFormatAndInvalidDateLiteral: true,techAndTeamLeader: true,readOnly: true,typedDraftFields: 13,immutablePending: 2,realOfflineNoHistoryCacheInvented: true,rawErrorsAndSourceNamesLiteral: true,noOperationalWrites: true }));completed = true;
 })().catch(error => { console.error(error);process.exitCode = 1; }).finally(async () => { if (typeof release === 'function') release();clearTimeout(deadline);await browser?.close();await prisma.$disconnect(); });
