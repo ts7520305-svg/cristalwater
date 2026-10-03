@@ -159,6 +159,7 @@ const roundCopy = (() => {
     tableWithAlert: ['Com alerta','With alert','Avec alerte','Con alerta','Mit Warnung'],
     tableSaveChanges: ['Guardar alteracoes','Save changes','Enregistrer','Guardar cambios','Änderungen speichern'],
     tableLate: ['atrasada','overdue','en retard','atrasada','überfällig'],
+    tableFilteredEmpty: ['Nenhuma visita corresponde aos filtros escolhidos.','No visits match the selected filters.','Aucune visite ne correspond aux filtres choisis.','Ninguna visita coincide con los filtros elegidos.','Keine Besuche entsprechen den gewählten Filtern.'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -930,6 +931,7 @@ function renderVisits(){
   }
   if(!filteredVisits.length){
     box.innerHTML = `<div class="empty">Nenhuma visita corresponde aos filtros escolhidos.</div>`;
+    roundCopy.bind(box.querySelector('.empty'),'tableFilteredEmpty');
     return;
   }
 
