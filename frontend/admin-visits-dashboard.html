@@ -4,10 +4,11 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <meta name="theme-color" content="#0f1723">
   <meta charset="utf-8">
-  <title>Painel Admin - Visitas</title>
+  <title data-cw-visits-copy="title" data-cw-no-i18n>Painel Admin - Visitas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="/cristal-assist.css">
   <script src="/cw-auth.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <link rel="stylesheet" href="/ui/foundation.css">
   <link rel="stylesheet" href="/ui/design-system.css">
   <style>
@@ -16,10 +17,14 @@
     body {
       margin: 0;
       color: var(--cw-text, #1f2937);
-      background: radial-gradient(circle at 10% 0%, #f0f7ff 0%, #ecf3fb 45%, #e7eef7 100%);
+      background: #eef3f8;
     }
 
     .page {
+      --cw-text: #1f2937;
+      --cw-muted: #4b6075;
+      --cw-border: #c8d7e7;
+      color: var(--cw-text);
       max-width: 1480px;
       margin: 0 auto;
       padding: 18px;
@@ -48,6 +53,7 @@
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .cw-btn {
@@ -66,7 +72,7 @@
     }
 
     .cw-btn.primary {
-      background: linear-gradient(135deg, #1f78e0, #22a2f2);
+      background: #1267c4;
       color: #fff;
       border-color: #1f78e0;
     }
@@ -125,7 +131,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
       gap: 10px;
       margin-top: 10px;
     }
@@ -141,14 +147,16 @@
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 800;
-      letter-spacing: 0.03em;
+      letter-spacing: 0;
       color: #5f7388;
       margin-bottom: 4px;
     }
 
     .value { font-weight: 800; }
-    .done-text { color: #1b8d4e; }
-    .pending-text { color: #b9681d; }
+    .done-text { color: #176f3e; }
+    .pending-text { color: #945012; }
+    .page h1, .card h3, .value, .card p { overflow-wrap: anywhere; }
+    .page-actions .cw-lang-switch select { min-height: 44px; }
 
     .photos {
       display: flex;
@@ -181,25 +189,25 @@
   </style>
 </head>
 <body data-required-role="ADMIN">
-  <main class="page">
+  <main class="page" data-cw-no-i18n data-cw-state-managed="manual">
     <section class="page-head">
       <div>
-        <h1>Painel Admin - Visitas</h1>
-        <p>Monitorizacao operacional de visitas com estado, parametros e evidencias fotograficas.</p>
+        <h1 data-cw-visits-copy="title">Painel Admin - Visitas</h1>
+        <p data-cw-visits-copy="intro">Monitorizacao operacional de visitas com estado, parametros e evidencias fotograficas.</p>
       </div>
-      <div class="page-actions">
-        <button class="cw-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
-        <button class="cw-btn primary" id="refreshBtn" type="button">Atualizar</button>
-        <button class="cw-btn danger" id="logoutBtn" type="button" data-cw-logout>Sair</button>
+      <div class="page-actions cw-global-actions">
+        <button class="cw-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control" data-cw-visits-copy="back">Voltar</button>
+        <button class="cw-btn primary" id="refreshBtn" type="button" data-cw-visits-copy="refresh">Atualizar</button>
+        <button class="cw-btn danger" id="logoutBtn" type="button" data-cw-logout data-cw-visits-copy="logout">Sair</button>
       </div>
     </section>
 
-    <section class="toolbar" aria-label="Filtros de visitas">
-      <input id="searchInput" placeholder="Pesquisar cliente, piscina, tecnico ou nota">
-      <select id="statusFilter" aria-label="Filtrar por estado">
-        <option value="">Todos os estados</option>
-        <option value="DONE">DONE</option>
-        <option value="IN_PROGRESS">IN PROGRESS</option>
+    <section class="toolbar" aria-label="Filtros de visitas" data-cw-visits-aria="filters">
+      <input id="searchInput" placeholder="Pesquisar cliente, piscina, tecnico ou nota" data-cw-visits-placeholder="search" aria-label="Pesquisar cliente, piscina, tecnico ou nota" data-cw-visits-aria="search">
+      <select id="statusFilter" aria-label="Filtrar por estado" data-cw-visits-aria="statusFilter">
+        <option value="" data-cw-visits-copy="all">Todos os estados</option>
+        <option value="DONE" data-cw-visits-copy="done">Concluída</option>
+        <option value="IN_PROGRESS" data-cw-visits-copy="progress">Em curso</option>
       </select>
     </section>
 

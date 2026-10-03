@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## TASK561 - idiomas e legibilidade do dashboard de visitas (2026-10-03)
+- Dashboard usa o seletor global e25 entradas próprias em cinco idiomas, repintando folhas/atributos sem recriar cartões/controlos. Nomes/notas/datas/leituras/URLs/códigos literais e valores de filtros preservados; nav existente não duplicado. Contraste local corrigido, mínimo4,67:1 nas amostras sólidas.
+- Grupo Admin nativo alargado aprovado com SQL/API reais, três larguras, estados/ARIA/alt/foco/caret/imutabilidade e zero escrita de negócio. Preflight23, E2E completo/cache320, sintaxe completa e técnicos4/4 aprovados; quatro falhas Windows conhecidas dos unitários registadas. CI555/log/restauro conferidos, CI própria pendente.
+- Ensaio visual adicional passou Técnico/Cliente e falhou Admin: fixture ausente da lista nativa limitada20; leitura SQL/API confirmou. Próxima562 corrige só a fixture, sem apagar dados ou alterar produto. Rondas/restante C06 continuam abertas.
+
 ## TASK560 - reconciliação do primeiro lote de idiomas C06 (2026-10-03)
 - Ledger verificável do inventário original: quatro hashes atuais,323 candidatos e28 IDs do dashboard classificados; nav já traduzido separado do corpo descoberto e de dados/códigos internos que permanecem literais. Snapshot C05 intacto.
 - Observação Admin/Edge/API/SQL real em320/1440: GETs200, zero escritas operacionais e SQL intacto; corpo PT sem seletor e contraste fraco do dashboard observados. Apenas evidência/documentação, sem produto novo. CI554/log/restauro conferidos; próxima561 trata o dashboard, C06 continua aberta.

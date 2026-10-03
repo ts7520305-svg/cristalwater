@@ -97,6 +97,110 @@ async function inject(route) {
   await new Promise(resolve => held.push({resolve}));
   await route.fulfill({response}).catch(()=>{});
 }
+async function checkVisitsDashboard(admin) {
+  const fixtureVisits = [], reads = [], businessWrites = [], preferenceWrites = [], pageErrors = [];
+  const dashboardCopy = {
+    title: ['Painel Admin - Visitas','Admin Dashboard - Visits','Tableau Admin - Visites','Panel Admin - Visitas','Admin-Dashboard - Besuche'],
+    intro: ['Monitorizacao operacional de visitas com estado, parametros e evidencias fotograficas.','Visit monitoring with status, readings and photographic evidence.','Suivi des visites avec état, paramètres et preuves photographiques.','Seguimiento de visitas con estado, parámetros y evidencias fotográficas.','Besuchsübersicht mit Status, Messwerten und Fotobelegen.'],
+    back: ['Voltar','Back','Retour','Volver','Zurück'],
+    logout: ['Sair','Log out','Déconnexion','Salir','Abmelden'],
+    filters: ['Filtros de visitas','Visit filters','Filtres de visites','Filtros de visitas','Besuchsfilter'],
+    notes: ['Notas:','Notes:','Notes :','Notas:','Notizen:'],
+    labels: [['Estado','Técnico','Início','Fim','pH','Cloro','Alcalinidade','Sal'],['Status','Technician','Start','End','pH','Chlorine','Alkalinity','Salt'],['État','Technicien','Début','Fin','pH','Chlore','Alcalinité','Sel'],['Estado','Técnico','Inicio','Fin','pH','Cloro','Alcalinidad','Sal'],['Status','Techniker','Beginn','Ende','pH','Chlor','Alkalinität','Salz']],
+    empty: ['Sem visitas','No visits','Aucune visite','Sin visitas','Keine Besuche'],
+    emptyBody: ['Não existem visitas para os filtros selecionados.','No visits match the selected filters.','Aucune visite ne correspond aux filtres sélectionnés.','No hay visitas para los filtros seleccionados.','Keine Besuche für die ausgewählten Filter.'],
+    loading: ['A carregar visitas...','Loading visits...','Chargement des visites...','Cargando visitas...','Besuche werden geladen...'],
+    error: ['Erro ao carregar visitas','Unable to load visits','Impossible de charger les visites','No se pudieron cargar las visitas','Besuche konnten nicht geladen werden'],
+    errorBody: ['Confirma login e ligação ao servidor.','Check your login and server connection.','Vérifiez votre connexion et la liaison au serveur.','Comprueba el acceso y la conexión al servidor.','Anmeldung und Serververbindung prüfen.'],
+    photo: ['Foto da visita','Visit photo','Photo de la visite','Foto de la visita','Besuchsfoto'],
+    filter: ['Filtrar por estado','Filter by status','Filtrer par état','Filtrar por estado','Nach Status filtern'],
+    placeholder: ['Pesquisar cliente, piscina, tecnico ou nota','Search client, pool, technician or note','Rechercher client, piscine, technicien ou note','Buscar cliente, piscina, técnico o nota','Kunde, Pool, Techniker oder Notiz suchen'],
+    options: [['Todos os estados','Concluída','Em curso'],['All statuses','Completed','In progress'],['Tous les états','Terminée','En cours'],['Todos los estados','Completada','En curso'],['Alle Status','Abgeschlossen','In Bearbeitung']],
+  };
+  const nativeCounts = async () => [...await counts(),await prisma.fieldWriteRequest.count(),await prisma.stockMovement.count(),await prisma.visitPhoto.count()];
+  let dashboardContext, dashboardPage, heldReply, visitMode = 'normal';
+  try {
+    for (const status of ['PLANNED','IN_PROGRESS','DONE']) fixtureVisits.push(await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:technician.id,plannedDate:new Date(),startAt:new Date(),...(status==='DONE'?{endAt:new Date()}:{}),status,notes:'Atualizar <img src=x onerror=alert(1)>',ph:7.2,chlorine:1.4,alkalinity:80,salt:4000,photos:{create:{url:'/icon-192.png'}}}}));
+    const records = await prisma.serviceVisit.findMany({where:{id:{in:fixtureVisits.map(v=>v.id)}},include:{photos:true},orderBy:{id:'asc'}}), before = await nativeCounts();
+    const native = await fetch(base+'/api/visits/today',{headers:{Authorization:'Bearer '+token}});assert.equal(native.status,200);assert.match(native.headers.get('cache-control'),/private.*no-store/);
+    const nativeData = await native.json(), nativeRows = Array.isArray(nativeData)?nativeData:nativeData.visits;assert(Array.isArray(nativeRows));for(const v of fixtureVisits)assert(nativeRows.some(row=>row.id===v.id),'Own fixture appears in native daily GET');
+    dashboardContext = await browser.newContext({viewport:{width:320,height:1000},serviceWorkers:'block'});
+    await dashboardContext.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
+    await dashboardContext.addInitScript(({token,id})=>{
+      for(const key of ['token','cristalwater_jwt','adminToken'])localStorage.setItem(key,token);
+      for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id,role:'ADMIN'}));
+      localStorage.setItem('cwFieldOutbox:dashboard-languages','pending original work <img src=x>');
+    },{token,id:admin.id});
+    await dashboardContext.route('**/api/visits/today',async route=>{
+      if(visitMode==='http')return route.fulfill({status:503,json:{error:'Atualizar'}});
+      if(visitMode!=='hold')return route.continue();
+      const response=await route.fetch();assert.equal(response.status(),200);assert.match(response.headers()['cache-control'],/private.*no-store/);
+      await new Promise(resolve=>{heldReply=resolve;});await route.fulfill({response}).catch(()=>{});
+    });
+    dashboardPage = await dashboardContext.newPage();dashboardPage.setDefaultTimeout(7000);dashboardPage.on('pageerror',error=>pageErrors.push(error.message));
+    dashboardPage.on('request',request=>{const url=new URL(request.url());if(url.origin!==base||!url.pathname.startsWith('/api/'))return;if(request.method()==='GET'&&url.pathname==='/api/visits/today')reads.push(url.pathname);if(request.method()==='PUT'&&url.pathname==='/api/settings/language/me')preferenceWrites.push(request.postDataJSON());else if(!['GET','HEAD'].includes(request.method()))businessWrites.push({method:request.method(),path:url.pathname});});
+    const choose = async language => {await dashboardPage.locator('#cwLanguageSelect').selectOption(language);await dashboardPage.waitForFunction(language=>document.documentElement.lang===language,language);};
+    const snapshot = () => dashboardPage.evaluate(()=>JSON.stringify({data:[...document.querySelectorAll('#visits article h3,#visits .value,#visits article p')].map(node=>node.matches('p')?node.lastChild.nodeValue:node.textContent),photos:[...document.querySelectorAll('#visits img')].map(node=>node.getAttribute('src')),query:document.getElementById('searchInput').value,status:document.getElementById('statusFilter').value,controls:[...document.querySelectorAll('main button,main input,main select')].map(node=>({id:node.id,disabled:node.disabled,busy:node.getAttribute('aria-busy')})),token:localStorage.getItem('token'),outbox:localStorage.getItem('cwFieldOutbox:dashboard-languages')}));
+    await dashboardPage.goto(base+'/admin-visits-dashboard?lang=de',{waitUntil:'networkidle'});await dashboardPage.locator('#visits article').first().waitFor();
+    const colors = await dashboardPage.locator('.page-head p,.page .cw-btn,.toolbar input,.toolbar select,#visits article:first-child .label,#visits article:first-child .value').evaluateAll(nodes=>nodes.map(node=>{const style=getComputedStyle(node);let parent=node,bg='';while(parent){bg=getComputedStyle(parent).backgroundColor;if(bg!=='rgba(0, 0, 0, 0)'&&bg!=='transparent')break;parent=parent.parentElement;}return {text:node.textContent,color:style.color,background:bg};}));
+    const channel = n => {n/=255;return n<=0.04045?n/12.92:((n+0.055)/1.055)**2.4;};
+    const luminance = color => color.match(/[\d.]+/g).slice(0,3).reduce((sum,n,i)=>sum+channel(Number(n))*[0.2126,0.7152,0.0722][i],0);
+    const contrasts = colors.map(item=>{const a=luminance(item.color),b=luminance(item.background);return {...item,ratio:(Math.max(a,b)+0.05)/(Math.min(a,b)+0.05)};});
+    console.log('PRECONDITION visits dashboard computed contrast '+JSON.stringify(contrasts));
+    assert.equal(await dashboardPage.locator('main h1').textContent(),dashboardCopy.title[4],'Own dashboard title must follow actual DE language selection');
+    assert(contrasts.every(item=>item.ratio>=4.5),'Dashboard copy and controls need readable contrast: '+JSON.stringify(contrasts.filter(item=>item.ratio<4.5)));
+    await dashboardPage.locator('#searchInput').fill('Atualizar');
+    assert.equal(await dashboardPage.locator('#visits article').count(),3);
+    const expectedDates = await dashboardPage.evaluate(rows=>rows.flatMap(row=>[row.startAt?new Date(row.startAt).toLocaleString('pt-PT'):'-',row.endAt?new Date(row.endAt).toLocaleString('pt-PT'):'-']),nativeRows.filter(row=>fixtureVisits.some(v=>v.id===row.id)));
+    assert.deepEqual(await dashboardPage.locator('#visits article').evaluateAll(nodes=>nodes.flatMap(node=>[node.querySelectorAll('.value')[2].textContent,node.querySelectorAll('.value')[3].textContent])),expectedDates);
+    await dashboardPage.waitForFunction(()=>[...document.querySelectorAll('#visits img')].every(img=>img.complete&&img.naturalWidth>0));
+    await dashboardPage.evaluate(()=>{window.qaVisitNodes=[...document.querySelectorAll('main h1,.page-head p,.page-actions button,.toolbar input,.toolbar select,.toolbar option,#visits article,#visits .label,#visits .value,#visits img,#visits p b')].map(node=>({node,first:node.firstChild,children:[...node.childNodes]}));});
+    const original = await snapshot();
+    for(let i=0;i<languages.length;i++) {
+      const count=reads.length;await choose(languages[i]);
+      assert.equal(await dashboardPage.title(),dashboardCopy.title[i]);assert.equal(await dashboardPage.locator('main h1').textContent(),dashboardCopy.title[i]);assert.equal(await dashboardPage.locator('#refreshBtn').textContent(),expected.refresh[i]);
+      assert.equal(await dashboardPage.locator('.page-head p').textContent(),dashboardCopy.intro[i]);assert.equal(await dashboardPage.locator('[data-cw-back]').textContent(),dashboardCopy.back[i]);assert.equal(await dashboardPage.locator('#logoutBtn').textContent(),dashboardCopy.logout[i]);assert.equal(await dashboardPage.locator('.toolbar').getAttribute('aria-label'),dashboardCopy.filters[i]);assert.equal(await dashboardPage.locator('#visits p b').first().textContent(),dashboardCopy.notes[i]);
+      assert.deepEqual(await dashboardPage.locator('#visits article').first().locator('.label').allTextContents(),dashboardCopy.labels[i]);
+      assert.deepEqual(await dashboardPage.locator('#statusFilter option').allTextContents(),dashboardCopy.options[i]);assert.deepEqual(await dashboardPage.locator('#statusFilter option').evaluateAll(nodes=>nodes.map(node=>node.value)),['','DONE','IN_PROGRESS']);
+      assert.equal(await dashboardPage.locator('#statusFilter').getAttribute('aria-label'),dashboardCopy.filter[i]);assert.equal(await dashboardPage.locator('#searchInput').getAttribute('placeholder'),dashboardCopy.placeholder[i]);assert.equal(await dashboardPage.locator('#visits img').first().getAttribute('alt'),dashboardCopy.photo[i]);
+      assert.equal(await dashboardPage.locator('#searchInput').getAttribute('aria-label'),dashboardCopy.placeholder[i]);
+      assert.equal(await snapshot(),original);assert.equal(reads.length,count);
+      assert(await dashboardPage.evaluate(()=>qaVisitNodes.every(({node,first,children})=>node.isConnected&&node.firstChild===first&&node.childNodes.length===children.length&&children.every((child,index)=>node.childNodes[index]===child))));
+      for(const width of [320,390,1440]) {
+        await dashboardPage.setViewportSize({width,height:1000});await dashboardPage.locator('main h1').scrollIntoViewIfNeeded();
+        assert(await dashboardPage.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+        assert(await dashboardPage.locator('main h1,.page-actions button,.toolbar input,.toolbar select,#visits .box').evaluateAll(nodes=>nodes.every(node=>{const r=node.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&node.scrollWidth<=node.clientWidth+1;})),'Dashboard controls fit '+languages[i]+'/'+width);
+        await dashboardPage.screenshot({path:path.join(__dirname,'../reports/field-visual/admin-master-languages','visits-'+languages[i]+'-'+width+'.png')});
+      }
+    }
+    await dashboardPage.evaluate(()=>{const field=document.getElementById('searchInput');field.focus();field.setSelectionRange(2,6);CristalI18n.applyLanguage('fr');});
+    assert.deepEqual(await dashboardPage.locator('#searchInput').evaluate(node=>({focus:document.activeElement===node,value:node.value,start:node.selectionStart,end:node.selectionEnd})),{focus:true,value:'Atualizar',start:2,end:6});
+    for(const status of ['DONE','IN_PROGRESS']) {await dashboardPage.locator('#statusFilter').selectOption(status);assert.equal(await dashboardPage.locator('#visits article').count(),1);const filtered=await snapshot();for(const language of languages){await choose(language);assert.equal(await snapshot(),filtered);}}
+    await dashboardPage.locator('#searchInput').fill('no-native-visit-'+randomUUID());
+    const captureFeedback = () => dashboardPage.evaluate(()=>{window.qaVisitFeedback=[...document.querySelectorAll('#visits .card,#visits h3,#visits p')].map(node=>({node,first:node.firstChild,children:[...node.childNodes]}));});
+    const sameFeedback = () => dashboardPage.evaluate(()=>qaVisitFeedback.every(({node,first,children})=>node.isConnected&&node.firstChild===first&&node.childNodes.length===children.length&&children.every((child,index)=>node.childNodes[index]===child)));
+    await captureFeedback();
+    for(let i=0;i<languages.length;i++){const count=reads.length;await choose(languages[i]);assert.equal(await dashboardPage.locator('#visits h3').textContent(),dashboardCopy.empty[i]);assert.equal(await dashboardPage.locator('#visits p').textContent(),dashboardCopy.emptyBody[i]);assert.equal(reads.length,count);assert(await sameFeedback());}
+    await dashboardPage.locator('#statusFilter').selectOption('');await dashboardPage.locator('#searchInput').fill('Atualizar');
+    visitMode='hold';await dashboardPage.locator('#refreshBtn').click();await dashboardPage.locator('#visits .card:not(article)').waitFor();
+    await captureFeedback();
+    for(let i=0;i<languages.length;i++){const count=reads.length;await choose(languages[i]);assert.equal(await dashboardPage.locator('#visits h3').textContent(),dashboardCopy.loading[i]);assert.equal(reads.length,count);assert(await sameFeedback());}
+    const deadline=Date.now()+7000;while(!heldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(heldReply);heldReply();heldReply=null;visitMode='normal';await dashboardPage.locator('#visits article').first().waitFor();
+    visitMode='http';await dashboardPage.locator('#refreshBtn').click();await dashboardPage.waitForFunction(()=>!document.querySelector('#visits article')&&document.querySelector('#visits p'));
+    await captureFeedback();
+    for(let i=0;i<languages.length;i++){const count=reads.length;await choose(languages[i]);assert.equal(await dashboardPage.locator('#visits h3').textContent(),dashboardCopy.error[i]);assert.equal(await dashboardPage.locator('#visits p').textContent(),dashboardCopy.errorBody[i]);assert(!await dashboardPage.locator('#visits').textContent().then(text=>text.includes('Atualizar')));assert.equal(reads.length,count);assert(await sameFeedback());}
+    visitMode='normal';await dashboardPage.locator('#refreshBtn').click();await dashboardPage.locator('#visits article').first().waitFor();
+    await dashboardPage.evaluate(()=>{const node=document.querySelector('#visits .label'),clone=node.cloneNode(true);clone.id='qaForeignVisitLabel';node.parentNode.appendChild(clone);node.firstChild.nodeValue='Estado';const photo=document.querySelector('#visits img');photo.alt='Foto da visita';const input=document.getElementById('searchInput');input.placeholder='Pesquisar cliente, piscina, tecnico ou nota';window.qaVisitForeign=[{node,value:node.outerHTML},{node:clone,value:clone.outerHTML},{node:photo,attribute:'alt',value:photo.alt},{node:input,attribute:'placeholder',value:input.placeholder}];});
+    for(const language of languages){await choose(language);assert(await dashboardPage.evaluate(()=>qaVisitForeign.every(({node,attribute,value})=>(attribute?node.getAttribute(attribute):node.outerHTML)===value)));}
+    assert.deepEqual(pageErrors,[]);assert.deepEqual(businessWrites,[]);assert(preferenceWrites.every(body=>Object.keys(body).length===1&&languages.includes(body.language)));
+    assert.deepEqual(await nativeCounts(),before);assert.deepEqual(await prisma.serviceVisit.findMany({where:{id:{in:fixtureVisits.map(v=>v.id)}},include:{photos:true},orderBy:{id:'asc'}}),records);
+    const proof={languages,widths:[320,390,1440],literalData:true,nodeIdentity:true,focusCaret:true,states:['ready','filtered','empty','loading native GET','503','recovered'],privateNoStore:true,zeroBusinessWrites:true,sqlUnchanged:true,minContrast:Math.min(...contrasts.map(item=>item.ratio))};
+    console.log('PASS visits dashboard native languages '+JSON.stringify(proof));return proof;
+  } finally {
+    heldReply?.();await dashboardContext?.close();
+    if(fixtureVisits.length)await prisma.serviceVisit.deleteMany({where:{id:{in:fixtureVisits.map(v=>v.id)}}});
+  }
+}
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}});
   token = jwt.sign({id:admin.id,role:'ADMIN',principalType:'USER'},getJwtSecret(),{expiresIn:'1h'});
@@ -207,7 +311,8 @@ async function inject(route) {
   // Reload restores normal owned labels and the latest persisted language preference.
   await select('de');await page.reload({waitUntil:'networkidle'});await ready();assert.equal(await page.locator('h1').textContent(),expected.title[4]);assert.equal(await page.locator('#cwLanguageSelect').inputValue(),'de');
   assert.equal(await page.locator('#todayList img').count(),0);assert.deepEqual(errors,[]);assert.deepEqual(routeErrors,[]);assert.deepEqual(writes,[]);assert.deepEqual(await raw(),records);assert.deepEqual(await counts(),before);
-  const proof={ok:true,realAuthenticatedPage:true,successPayloadMocks:false,controlledGetFailures:['503 literal server text','malformed JSON','HTTP fallback','12000ms deadline'],languages,widths:[320,390,1440],readyCases,stateCases,searchCases,ownershipCases,nodeIdentityRetained:true,focusAndCaretRetained:true,literalNamesMessagesAndRecordBytes:true,zeroBusinessWrites:true,apiPaths:[...new Set(requests)],states:stateProof};
+  const visitsDashboard = await checkVisitsDashboard(admin);
+  const proof={ok:true,realAuthenticatedPage:true,successPayloadMocks:false,controlledGetFailures:['503 literal server text','malformed JSON','HTTP fallback','12000ms deadline'],languages,widths:[320,390,1440],readyCases,stateCases,searchCases,ownershipCases,nodeIdentityRetained:true,focusAndCaretRetained:true,literalNamesMessagesAndRecordBytes:true,zeroBusinessWrites:true,apiPaths:[...new Set(requests)],states:stateProof,visitsDashboard};
   await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS command centre native languages '+JSON.stringify(proof));
 })().catch(async error=>{console.error(redact(error.stack || error));if(page)console.error('Command centre state',await page.locator('#metrics').textContent().catch(()=>null));process.exitCode=1;}).finally(async()=>{
   closing=true;release();await page?.unrouteAll({behavior:'ignoreErrors'});await browser?.close();
