@@ -145,6 +145,11 @@ const roundCopy = (() => {
     plannerUnassigned: ['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen'],
     plannerDrop: ['Arraste visitas para aqui','Drag visits here','Glissez les visites ici','Arrastra visitas aquí','Besuche hierher ziehen'],
     plannerExtra: ['Extra','Extra','Supplément','Extra','Zusatz'],
+    chipNormal: ['Normal','Normal','Normal','Normal','Normal'],
+    chipSupport: ['Ajuda / apoio','Help / support','Aide / renfort','Ayuda / apoyo','Hilfe / Unterstützung'],
+    chipSubstitution: ['Substituicao','Substitution','Remplacement','Sustitución','Vertretung'],
+    chipOtherDay: ['Ronda de outro dia','Round from another day','Tournée d’un autre jour','Ronda de otro día','Rundgang eines anderen Tages'],
+    chipReschedule: ['Reagendada','Rescheduled','Replanifiée','Reprogramada','Neu geplant'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -848,10 +853,11 @@ function renderPlanner(visits = filterVisits()){
   for(const hint of box.querySelectorAll('.tech-drop > .empty'))roundCopy.bind(hint,'plannerDrop');
 
   const visitsById = new Map(visits.map(visit => [`${visit.kind}-${visit.id}`,visit]));
+  const assignmentCopies = {NORMAL:'chipNormal',SUPPORT:'chipSupport',SUBSTITUTION:'chipSubstitution',OTHER_DAY:'chipOtherDay',RESCHEDULE:'chipReschedule',UNASSIGNED:'plannerUnassigned'};
   box.querySelectorAll(".visit-chip").forEach((chip) => {
     const visit = visitsById.get(`${chip.dataset.kind}-${chip.dataset.id}`),date = getVisitDate(visit);
-    const prefix = date ? date.toLocaleString("pt-PT") : "Sem data",suffix = assignmentLabel(visit.assignmentMode);
-    roundCopy.bind(chip.children[2], () => `${prefix} - ${roundCopy.text(visit.kind === "EXTRA" ? 'plannerExtra' : 'round')} - ${suffix}`);
+    const prefix = date ? date.toLocaleString("pt-PT") : "Sem data",assignmentCopy = assignmentCopies[String(visit.assignmentMode || 'NORMAL').toUpperCase()] || 'chipNormal';
+    roundCopy.bind(chip.children[2], () => `${prefix} - ${roundCopy.text(visit.kind === "EXTRA" ? 'plannerExtra' : 'round')} - ${roundCopy.text(assignmentCopy)}`);
     chip.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", JSON.stringify({ kind: chip.dataset.kind, id: chip.dataset.id }));
       event.dataTransfer.effectAllowed = "move";
