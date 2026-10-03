@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK552 - guia técnico e troca de conta (2026-10-03)
+- Guia liga o evento de sessão à proteção existente: limpa dados e links privados, aborta movimentos/PDF e só recupera a conta após reload. Mesmo principal preserva a vista; quatro identidades PIN/USER/Técnico/Chefe validadas.
+- Ensaios nativos do guia, fonte cacheada/reload frio offline, E2E Admin/Técnico/Cliente e preflight23/23 aprovados; APIs, documentos, dados e idiomas preservados. Cache312/quatro expectativas atualizados. CI545/546 e restauros conferidos, CI do novo commit pendente.
+
 ## TASK551 - fixture temporal de equipamentos (2026-10-03)
 - Reproduzido o timeout de prontidão ao atravessar a meia-noite de Lisboa; visitas do dia anterior são corretamente excluídas da ronda seguinte.
 - Ensaio existente alinhado a um dia QA passado com relógio progressivo; dois grupos completos passaram, incluindo intervalos reais, offline e proteção de conta. Produto, assertions, prazo7s e runner387 preservados; CI do novo SHA ainda necessária.
