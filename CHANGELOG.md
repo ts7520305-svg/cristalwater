@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK581 - conciliação do backlog e publicação580 (2026-10-03)
+- Apenas BACKLOG/PROJECT_STATE/CHANGELOG conciliam publicação580/SHA/árvore/parent579/Action37124719060 e CI578 própria/log387/restauro128 tabelas/51 ficheiros. Índice ainda577/próxima578/CI572; snapshot11:13/aceitação577 preservados e históricos, aceitação local/CI própria/pendentes579-580 separados. C06/C07–C32 abertas, sem percentagem por TASK ou novos candidatos aceites.
+- Produto/cache333/155 chaves/runner387/preflight23/fixtures/API/schema/dados/guardas/C05/ledger560 ligado à559 intactos. Provas Admin116,85s/Route OS94,20s/preflight23/E2E333 dos três perfis são580, não repetidas para docs; gates próprios581:unitários1403 pass/2 skipped/4 limitações Windows iguais, técnicos4/três JS estáveis/checks docs-referências-links-hashes/diff-check aprovados. Falhas543/562/E2E565 preservadas, sem merge/deploy. Próxima582 só rótulo do comando Guardar alteracoes, com handlers/payload/valores/escritas e todos os ciclos/limites atuais intactos; CI própria581 necessária.
+
 ## TASK580 - indicadores de ronda e alerta na tabela (2026-10-03)
 - Gate final de sintaxe695 backend/308 frontend/45 inline/diff-check e fetchHEAD/origin579 iguais aprovados; publicação só na branch autorizada.
 - Negativo28,40s confirmou Ronda normal/Com alerta sob EN com SERVICE/EXTRA próprios/SQL/API real. Só duas entradas/155 chaves e bindings privados nas folhas originais; predicados/classes/cores/IDs/nós/filhos/opções/valores/seleções/datas/nomes/aliases/save/handlers/write/recibos/API/schema/CSS579 intactos. Cache333/quatro expectativas.
