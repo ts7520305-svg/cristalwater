@@ -382,9 +382,15 @@ function updateConnectionStatus(){
 
 let offlineBarRevision = 0, legacyEntryGeneration = 0;
 const legacyWriteSession = window.CWFieldWriteStore.session();
+let legacyWriteExpires = 0;
+try {
+  const claim = JSON.parse(atob(legacyWriteSession.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (typeof claim.exp === 'number') legacyWriteExpires = claim.exp * 1000;
+} catch (_) { /* An unreadable credential cannot authorize private pending views. */ }
+const legacySessionCurrent = () => window.CWFieldWriteStore.same(legacyWriteSession) && Number.isFinite(legacyWriteExpires) && legacyWriteExpires > Date.now() && !window.CristalAuth?.isSessionExpired?.();
 const legacyCompletionBusy = new Set();
 function protectLegacyRouteSession() {
-  if (!window.CWFieldWriteStore.same(legacyWriteSession)) {
+  if (!legacySessionCurrent()) {
     ++routeLoadRevision; ++offlineBarRevision; visits = []; document.getElementById('list')?.replaceChildren(); showRouteStatus(legacyCopy.spec('sessionChanged'));
     const panel = document.getElementById('legacyFieldRecovery');
     if (panel) { panel.replaceChildren(); panel.hidden = true; }
@@ -401,7 +407,7 @@ window.addEventListener('pagehide', () => { legacyEntryGeneration++; });
 window.addEventListener('pageshow', () => updateOfflineBar());
 window.addEventListener('cw:field-write-change', () => updateOfflineBar());
 async function updateOfflineBar(syncState) {
-  if (!window.CWFieldWriteStore.same(legacyWriteSession)) { protectLegacyRouteSession(); return; }
+  if (!legacySessionCurrent()) { protectLegacyRouteSession(); return; }
   const revision = ++offlineBarRevision, credential = window.CristalAuth?.getToken?.();
   const results = await Promise.allSettled([
     typeof getOfflineQueue === 'function' ? getOfflineQueue() : [],
@@ -409,7 +415,7 @@ async function updateOfflineBar(syncState) {
     Promise.resolve().then(() => typeof getOfflineGps === 'function' ? getOfflineGps() : []),
     window.CWFieldWriteStore.records('TECHNICIAN_ALERT', legacyWriteSession)
   ]);
-  if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.() || !window.CWFieldWriteStore.same(legacyWriteSession)) return;
+  if (revision !== offlineBarRevision || credential !== window.CristalAuth?.getToken?.() || !legacySessionCurrent()) return;
   const errors = results.map((result, index) => result.status === 'rejected' ? (index === 2 ? legacyCopy.spec('gpsReview') : window.CWLegacyQueueErrors.copy(result.reason) || window.CWLegacyPhotoErrors.copy(result.reason) || legacyCopy.spec('literal', { text: result.reason.message })) : '').filter(Boolean);
   const rows = results.map(result => result.status === 'fulfilled' ? result.value : []);
   const network = document.getElementById('offlineNetwork'), visitsEl = document.getElementById('offlineVisits'), photosEl = document.getElementById('offlinePhotos');

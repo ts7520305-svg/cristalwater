@@ -248,5 +248,79 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   console.log('PASS pending alerts prevent a false synced state in every language using a stable state identifier');
   assert.equal(await page.evaluate(()=>window.qaInjection),undefined); assert.deepEqual(errors,[]);
   console.log('PASS changed account clears old route, preserves the original draft, and localizes session/empty states');
+  const matrixPeople = await Promise.all(['TECHNICIAN','TEAM_LEADER'].map((role,index)=>prisma.technician.create({data:{name:'Pending matrix '+role,email:'legacy-pending-'+Date.now()+'-'+index+'@qa.test',role,active:true}})));
+  const matrixUsers = await Promise.all(matrixPeople.map(person=>prisma.user.create({data:{email:person.email,name:person.name,role:person.role,password:'unused',active:true}})));
+  const matrixVisits = await Promise.all(matrixPeople.map(person=>prisma.serviceVisit.create({data:{...common,technicianId:person.id,status:'PLANNED'}})));
+  const matrixSql=()=>Promise.all([prisma.serviceVisit.findMany({where:{id:{in:matrixVisits.map(row=>row.id)}},orderBy:{id:'asc'}}),prisma.fieldWriteRequest.count(),prisma.stockMovement.count(),prisma.user.findMany({where:{id:{in:matrixUsers.map(row=>row.id)}},orderBy:{id:'asc'}})]);
+  const matrixBefore=await matrixSql();
+  for(const [index,person]of matrixPeople.entries())for(const principal of ['PIN','USER']){
+    const account=matrixUsers[index],row=matrixVisits[index];
+    const actor=principal==='USER'?{id:account.id,userId:account.id,technicianId:person.id,principalType:'USER',role:person.role,name:person.name}:{id:person.id,role:person.role,name:person.name};
+    const credential=jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'}),expiry=jwt.decode(credential).exp*1000;
+    const native=await fetch(base+'/api/visits/today',{headers:{Authorization:'Bearer '+credential}}),nativeData=await native.json();
+    assert.equal(native.status,200);assert.equal(native.headers.get('cache-control'),'private, no-store');assert.equal(nativeData.technicianId,person.id);assert(nativeData.visits.some(item=>item.id===row.id));
+    const own=await browser.newContext({viewport:{width:390,height:900}});
+    await own.addInitScript(({token,actor,origin})=>{
+      if(top!==window||location.origin!==origin)return;
+      if(!localStorage.getItem('qaLegacyMatrixSession')){
+        for(const key of ['token','cristalwater_jwt','adminToken'])localStorage.setItem(key,token);
+        for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(actor));
+        localStorage.setItem('qaLegacyMatrixSession','1');
+      }
+      const interval=setInterval;window.setInterval=(fn,delay,...args)=>delay===15000?0:interval(fn,delay,...args);
+      Object.defineProperty(navigator,'geolocation',{value:{watchPosition:()=>1,clearWatch(){}}});window.alert=()=>{};
+    },{token:credential,actor,origin:new URL(base).origin});
+    const ownPage=await own.newPage(),ownErrors=[],ownWrites=[];ownPage.setDefaultTimeout(7000);
+    ownPage.on('pageerror',error=>ownErrors.push(error.message));ownPage.on('request',request=>{const path=new URL(request.url()).pathname;if(path.startsWith('/api/')&&path!=='/api/settings/language/me'&&request.method()!=='GET')ownWrites.push(request.url());});
+    await ownPage.goto(base+'/technician.html',{waitUntil:'networkidle'});await ownPage.waitForFunction(id=>document.getElementById('notes-'+id),row.id);
+    await ownPage.evaluate(()=>navigator.serviceWorker.ready);
+    await waitBrowserState(ownPage,async expected=>{const cache=await caches.open(expected.version);for(const[url,source]of expected.files){const response=await cache.match(url);if(!response||await response.text()!==source)return false;}return true;},{version:cacheVersion,files:[['/technician.html','frontend/technician.html'],['/technician.js','frontend/technician.js'],['/cw-field-write-store.js','frontend/cw-field-write-store.js']].map(([url,file])=>[url,fs.readFileSync(file,'utf8')])});
+    await own.setOffline(true);
+    const matrixDraft='cwLegacyVisitDraft:v1:'+(principal==='USER'?'USER:'+account.id+':TECH:'+person.id:'TECH:'+person.id)+':'+row.id;
+    await ownPage.evaluate(({id,values})=>{
+      for(const[field,value]of Object.entries(values)){const node=document.getElementById(field+'-'+id);node.value=value;node.dispatchEvent(new Event('input',{bubbles:true}));}
+    },{id:row.id,values});
+    await ownPage.waitForFunction(draftReady,{key:matrixDraft,id:row.id,values});
+    await ownPage.evaluate(async({id,person})=>{
+      const encoded='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl6tAAAAABJRU5ErkJggg==';
+      const file=new File([Uint8Array.from(atob(encoded),char=>char.charCodeAt(0))],'Private original.png',{type:'image/png'});
+      await saveOfflinePhoto({visitId:id,type:'BEFORE',file});
+      await CWFieldWriteStore.prepare('VISIT_COMPLETION',id,{notes:'Private original completion',products:[]},{label:'Private completion <b>literal</b>'});
+      await CWFieldWriteStore.prepare('TECHNICIAN_ALERT',person,{message:'Private original alert',priority:'NORMAL',visitId:null},{label:'Private alert <b>literal</b>'});
+      saveOfflineGps({latitude:38.7,longitude:-9.1,accuracy:5});await updateOfflineBar();
+    },{id:row.id,person:person.id});
+    assert.deepEqual(await ownPage.evaluate(key=>JSON.parse(localStorage.getItem(key)).fields,matrixDraft),values);
+    assert.equal(await ownPage.locator('#legacyFieldRecovery button').count(),3);
+    const bytes=()=>ownPage.evaluate(async()=>{
+      const local=Object.fromEntries(Object.keys(localStorage).filter(key=>/^(cwLegacy|cwGpsPoint|cwField|offline)/.test(key)).sort().map(key=>[key,localStorage.getItem(key)]));
+      const rows=await new Promise((resolve,reject)=>{const open=indexedDB.open('cw-field-writes',1);open.onerror=()=>reject(open.error);open.onsuccess=()=>{const db=open.result,tx=db.transaction('requests'),get=tx.objectStore('requests').getAll();tx.oncomplete=()=>{db.close();resolve(get.result);};tx.onerror=()=>reject(tx.error);};});
+      const normalized=await Promise.all(rows.map(async record=>({...record,...(record.file?{file:{type:record.file.type,size:record.file.size,sha256:await CWFieldWriteStore.digest(await record.file.arrayBuffer())}}:{})})));
+      return JSON.stringify({local,rows:normalized});
+    });
+    const originalBytes=await bytes(),originalPanel=await ownPage.locator('#legacyFieldRecovery').innerHTML(),writes=ownWrites.length;
+    await ownPage.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));assert.equal(await ownPage.locator('#legacyFieldRecovery').innerHTML(),originalPanel);
+    await ownPage.evaluate(()=>{const original=getOfflinePhotos,state=window.qaMatrixPhotoRead={original,ready:false,release:null,promise:null,reads:0},gate=new Promise(resolve=>{state.release=resolve;});window.getOfflinePhotos=async()=>{++state.reads;const rows=await original();state.ready=true;await gate;return rows;};state.promise=updateOfflineBar();});
+    await ownPage.waitForFunction(()=>qaMatrixPhotoRead.ready);
+    assert.deepEqual(await ownPage.evaluate(({token,other})=>{
+      const inspect=()=>[document.getElementById('legacyFieldRecovery').childElementCount,document.getElementById('offlineVisits').textContent,document.getElementById('offlinePhotos').textContent];
+      const keys=['token','cristalwater_jwt','adminToken','user','cristalwater_user'],saved=keys.map(key=>localStorage.getItem(key));
+      for(const key of keys.slice(0,3))localStorage.setItem(key,token);for(const key of keys.slice(3))localStorage.setItem(key,JSON.stringify({id:other.id,role:'TECHNICIAN',name:other.name}));
+      dispatchEvent(new CustomEvent('cw:session-change'));updateOfflineBar();const changed=inspect();keys.forEach((key,i)=>saved[i]===null?localStorage.removeItem(key):localStorage.setItem(key,saved[i]));dispatchEvent(new CustomEvent('cw:session-change'));return[changed,inspect()];
+    },{token:otherToken,other}),[[0,'',''],[0,'','']]);
+    assert.equal(await ownPage.evaluate(()=>qaMatrixPhotoRead.reads),1);
+    await ownPage.evaluate(async()=>{qaMatrixPhotoRead.release();await qaMatrixPhotoRead.promise;window.getOfflinePhotos=qaMatrixPhotoRead.original;});
+    for(const language of Object.keys(copy)){await ownPage.evaluate(language=>CristalI18n.applyLanguage(language),language);assert.equal(await ownPage.locator('#legacyFieldRecovery').innerHTML(),'');assert.equal(await ownPage.locator('#offlineVisits').textContent(),'');assert.equal(await ownPage.locator('#offlinePhotos').textContent(),'');}
+    assert.equal(await bytes(),originalBytes);assert.equal(ownWrites.length,writes);
+    await ownPage.reload({waitUntil:'domcontentloaded'});await ownPage.waitForFunction(()=>document.querySelectorAll('#legacyFieldRecovery button').length===3);
+    for(const field of fields)assert.equal(await ownPage.locator('#'+field+'-'+row.id).inputValue(),values[field]);
+    assert.equal(await bytes(),originalBytes);assert.equal(await ownPage.locator('#legacyFieldRecovery b').count(),0);
+    await ownPage.clock.setFixedTime(expiry+1);
+    assert.deepEqual(await ownPage.evaluate(async()=>{await updateOfflineBar();return[document.getElementById('legacyFieldRecovery').childElementCount,document.getElementById('offlineVisits').textContent,document.getElementById('offlinePhotos').textContent];}),[0,'',''],'Expired session must hide private pending controls and counts without touching saved requests');
+    assert.equal(await bytes(),originalBytes);assert.equal(ownWrites.length,writes);
+    const renewed=jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'});await ownPage.clock.setFixedTime(Date.now());await ownPage.evaluate(({token,actor})=>CristalAuth.persistSession(token,actor),{token:renewed,actor});
+    await ownPage.reload({waitUntil:'domcontentloaded'});await ownPage.waitForFunction(()=>document.querySelectorAll('#legacyFieldRecovery button').length===3);assert.equal(await bytes(),originalBytes);assert.deepEqual(ownErrors,[]);assert.equal(ownWrites.length,writes);await own.close();
+    console.log('PASS pending matrix '+person.role+'/'+principal+': native SQL identity, photo/completion/alert/GPS bytes, same owner, synchronous rapid return, late actual photo queue, exact offline reload, expiry and renewal');
+  }
+  assert.deepEqual(await matrixSql(),matrixBefore);
   completed=true;
 })().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{try{await browser?.close();await prisma.$disconnect();}finally{clearTimeout(deadline);}});

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK558 - expiração da barra de pendentes legada (2026-10-03)
+- Reproduzidos três botões privados após exp do JWT; proteção da vista usa agora exp capturado/store.same/isSessionExpired existentes, sem alterar as filas/envios. Dados preservados e recuperação após reautenticação/reload.
+- Quatro principais PIN/USER/Técnico/Chefe aprovados com fotografia binária/conclusão/alerta/GPS, troca rápida, resultado real tardio, cache318/reload offline e UUID/hash/bytes/SQL intactos. Cinco grupos nativos, E2E dos três perfis e preflight23/23 aprovados; produtor da lista após expiração fica para559. CI própria pendente.
+
 ## TASK557 - barra de pendentes e sessão legada (2026-10-03)
 - Proteção existente limpa rótulos/controlos/contagens e invalida a geração da fila na troca de conta; resultado tardio após regresso rápido não repinta, leitura de outra conta recusada. Pedidos/UUID/hash/payload/drafts e recuperação própria preservados, sem novo engine/bloqueio permanente/API/schema.
 - Cinco grupos nativos, cache317 exata/reload frio offline, E2E dos três perfis e preflight23/23 aprovados; CI552/log/restauro conferidos. Caso atual TECH/PIN/conclusão será alargado em558, sem alegar aceitação global dos principais/tipos de pendentes.
