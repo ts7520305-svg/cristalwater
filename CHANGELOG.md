@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK566 - expiração real do JWT na fixture histórico/rota (2026-10-03)
+- Reprodução nativa com emissão atrasada2s conservou asserção antiga e falhou: relógio1900ms antes do exp, JWT corretamente ainda válido. Só a fixture usa agora exp emitido+1ms; nova asserção confirma preservação/zero GET a exp-1ms. Atraso QA opcional/bounded0–2000ms permite repetir o mecanismo, sem expor tokens nem alterar produto/guardas/API/schema/cache/prazos/principais.
+- Grupo completo normal81,65s/atrasado83,61s aprovado, histórico135/19/540 probes/80 badges, rota115/25/quatro principais/PIN-USER/cacheoffline/drafts/dois pendentes/SQL intactos. Técnicos4/4/sintaxe/diff-check aprovados; quatro limitações unitárias Windows mantidas. CI562 failure/restauro skipped não convertida em aceite, CI própria necessária; preflight/E2E são provas565. Próxima567 feedback read-only coverageStatus, C06 ainda aberta.
+
 ## TASK565 - cartões read-only de cobertura em cinco idiomas (2026-10-03)
 - Reproduzida aria PT sob EN;17 entradas/folhas privadas localizam flags, conclusão/visitas/acompanhamento e checkboxes sem alterar nomes/IDs/datas/links/seleções/valores/payload/guardas. Metadata de ID só no DOM; bindings antigos libertados no produtor, sem novo engine ou mudança de API/schema.
 - Dois Route OS completos aprovados109,85s/114,29s, oito códigos em fixtures próprias e todos203/214 cartões comparados nos cinco idiomas/três larguras, zero GET/escrita de negócio por idioma e SQL/nós/drafts/foco/caret preservados. Preflight23/E2E final/cache322/técnicos/sete JS aprovados;4 limitações unitárias Windows mantidas. E2E inicial/Admin reload7s falhou e repetição passou sem mudança, causa não estabelecida. CI560/561/563/logs/restauros conferidos; CI562 falhou na expiração do histórico/restauro skipped, próxima566 prioriza reprodução/correção da fixture. Feedback/recibos/diálogos/planeador/C06 ainda abertos.

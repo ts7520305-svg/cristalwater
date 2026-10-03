@@ -56,7 +56,13 @@ async function waitForCache(page, predicate, expected) {
   await prisma.workGuide.create({ data: { vehicleId: vehicle.id, technicianId: tech.id, guideId: guide.id, status: 'OPEN', isDraft: false } });
   for (const type of ['INSURANCE','INSPECTION']) await prisma.vehicleMaintenanceRecord.create({ data: { vehicleId: vehicle.id, type, title: type, status: 'ACTIVE', dueDate: new Date(now + 30 * 86400000) } });
 
+  // Reproduce issuance after fixture preparation without changing the real JWT.
+  const tokenIssueDelay = Number(process.env.CW_HISTORY_TOKEN_ISSUE_DELAY_MS || 0);
+  assert(Number.isInteger(tokenIssueDelay) && tokenIssueDelay >= 0 && tokenIssueDelay <= 2000, 'QA token issue delay must be between 0 and 2000ms');
+  if (tokenIssueDelay) await new Promise(resolve => setTimeout(resolve, tokenIssueDelay));
   const token = jwt.sign({ id: tech.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' });
+  const tokenExpiresAt = jwt.decode(token).exp * 1000;
+  assert(Number.isSafeInteger(tokenExpiresAt));
   const source = { id: tech.id, technicianId: tech.id, role: 'TECHNICIAN', name: 'Session source <b>{name}</b> & <img src=x>', zone: 'ZONE-' + 'x'.repeat(95), phone: '+351 999 123 456', privateNote: 'Unexposed <b>{phone}</b>' };
   const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', email: 'history-leader-'+now+'@qa.test', role: 'TEAM_LEADER', active: true } });
   const associatedUsers=await Promise.all([tech,leader].map(person=>prisma.user.create({data:{email:person.email,name:person.name,role:person.role,password:'unused',active:true}})));
@@ -447,7 +453,12 @@ async function waitForCache(page, predicate, expected) {
   for(const language of languages){await locale(language);assert.equal(await page.locator('#statusBox').textContent(),await page.evaluate(language=>CWFieldWriteStore.message('sessionPreserved',language),language));assert.equal(await page.locator('#route').innerHTML(),'');assert.equal(await page.locator('#suggestions').innerHTML(),'');assert(await page.locator('#refreshBtn').isDisabled());}
   assert.deepEqual(await pending(),originalPending);await openRoute('native');assert.equal(await page.locator('#route > .route-item').count(),sourceRows.visits.length);
   assert.deepEqual(await database(),routePrivacyDb);assert.deepEqual(await raw(),routePrivacyRaw);
-  await page.clock.setFixedTime(now+3600001);assert(await page.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('route').childElementCount===0&&document.getElementById('suggestions').childElementCount===0&&document.getElementById('refreshBtn').disabled;}));
+  assert.equal(routeTokens[0],token);
+  const beforeExpiryRoute=await page.locator('#route').innerHTML(),beforeExpirySuggestions=await page.locator('#suggestions').innerHTML(),beforeExpiryReads=requests.length;
+  await page.clock.setFixedTime(tokenExpiresAt-1);await page.evaluate(()=>dispatchEvent(new Event('focus')));
+  assert.equal(await page.locator('#route').innerHTML(),beforeExpiryRoute);assert.equal(await page.locator('#suggestions').innerHTML(),beforeExpirySuggestions);assert.equal(await page.locator('#refreshBtn').isDisabled(),false);assert.equal(requests.length,beforeExpiryReads);
+  await page.clock.setFixedTime(tokenExpiresAt+1);assert(await page.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('route').childElementCount===0&&document.getElementById('suggestions').childElementCount===0&&document.getElementById('refreshBtn').disabled;}));
+  console.log('PASS route expiry clock ' + JSON.stringify({ fixtureNow:now,tokenExpiresAt,oldExpiryClock:now+3600001,oldClockBeforeExpiry:now+3600001<tokenExpiresAt,tokenIssueDelay,actualJwtBoundaryMinusAndPlus1ms:true,noRefetch:true }));
   console.log('PASS legacy route native GET abort, synchronous privacy, same-account preservation, terminal rapid-return state and own reload');
   assert.deepEqual(await pending(),originalPending); assert.deepEqual(await page.evaluate(()=>['token','cristalwater_jwt','adminToken','user','cristalwater_user'].map(key=>localStorage.getItem(key))),routeTokens); assert.deepEqual(errors,[]); routeClosing=true; await page.unroute(endpoint,routeHandler);
   console.log('PASS legacy route language result ' + JSON.stringify({ routeCases,routeOwnershipChecks,routeEmptyBadgeChecks,ownedEntries:34,languages:5,widths:[320,390,1440],nativeRouteIds:sourceRows.visits.map(v=>[v.visitType,v.id]),nativeSuggestions:sourceRows.visits.filter(v=>Boolean(v.pool?.zone||v.client?.zone)).slice(0,4).length,actualQueryLanguage:true,actualSelector:true,explicitRefreshes:2,originalDatePrecedenceFormatAndInvalidDateLiteral:true,originalNodesFocusBusyGuardRetained:true,literalNamesLocationsZonesAndServerErrors:true,exactFinalRouteJsAndShellInDeclaredCacheAndRealColdOffline:true,cacheVersion:routeCacheVersion,targets44AndRowsFit:true,typedPending:2,noOperationalWrites:true }));
