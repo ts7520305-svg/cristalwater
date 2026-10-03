@@ -137,6 +137,9 @@ const roundCopy = (() => {
     coverageManual: ['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'],
     coverageRefreshError: ['Não foi possível atualizar: {error}. A informação anterior pode estar desatualizada.','Could not refresh: {error}. Previous information may be out of date.','Impossible d’actualiser : {error}. Les informations précédentes peuvent être obsolètes.','No se pudo actualizar: {error}. La información anterior puede estar desactualizada.','Aktualisierung nicht möglich: {error}. Die bisherigen Informationen können veraltet sein.'],
     visitFilterSummary: ['{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} cobravel(is)','{visible} of {total} visit(s) - {alerts} alert(s) - {late} overdue - {extras} extra(s) - {billable} chargeable','{visible} sur {total} visite(s) - {alerts} alerte(s) - {late} en retard - {extras} supplémentaire(s) - {billable} facturable(s)','{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} facturable(s)','{visible} von {total} Besuch(en) - {alerts} Alarm(e) - {late} überfällig - {extras} zusätzlich - {billable} kostenpflichtig'],
+    readLoading: ['A carregar rondas, tecnicos, piscinas, visitas e extras...','Loading rounds, technicians, pools, visits and extras...','Chargement des tournées, techniciens, piscines, visites et suppléments...','Cargando rondas, técnicos, piscinas, visitas y extras...','Rundgänge, Techniker, Pools, Besuche und Zusätze werden geladen...'],
+    readReady: ['Rondas e visitas carregadas com sucesso.','Rounds and visits loaded successfully.','Tournées et visites chargées avec succès.','Rondas y visitas cargadas correctamente.','Rundgänge und Besuche erfolgreich geladen.'],
+    readWarnings: ['Carregado com avisos: {warnings}','Loaded with warnings: {warnings}','Chargé avec avertissements : {warnings}','Cargado con avisos: {warnings}','Mit Warnungen geladen: {warnings}'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -212,8 +215,13 @@ function authHeaders(){
 function setStatus(message, type = "info"){
   const el = document.getElementById("status");
   if(!el) return;
-  el.textContent = message;
+  roundCopy.forget(el);
+  el.textContent = typeof message === 'function' ? message() : message;
   el.className = `status ${type === "error" ? "error" : type === "ok" ? "ok" : ""}`.trim();
+  if(typeof message === 'function'){
+    el.style.overflowWrap = 'anywhere';
+    roundCopy.bind(el, message);
+  }
 }
 
 function val(id){
@@ -946,7 +954,7 @@ function render(){
 
 async function loadAll(){
   try{
-    setStatus("A carregar rondas, tecnicos, piscinas, visitas e extras...");
+    setStatus(() => roundCopy.text('readLoading'));
     const [roundsData, poolsData, techData, visitsData, extraData] = await Promise.allSettled([
       fetchJSON(`${API}/rounds`),
       fetchJSON(`${API}/pools`),
@@ -963,7 +971,8 @@ async function loadAll(){
 
     const errors = [roundsData, poolsData, techData, visitsData, extraData].filter(r => r.status === "rejected").map(r => r.reason.message);
     render();
-    setStatus(errors.length ? `Carregado com avisos: ${errors.join(" - ")}` : "Rondas e visitas carregadas com sucesso.", errors.length ? "error" : "info");
+    const details = errors.join(" - ");
+    setStatus(errors.length ? () => roundCopy.text('readWarnings').replace('{warnings}', () => details) : () => roundCopy.text('readReady'), errors.length ? "error" : "info");
   }catch(err){
     setStatus(err.message, "error");
   }

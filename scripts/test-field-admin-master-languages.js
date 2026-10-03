@@ -203,6 +203,9 @@ async function checkVisitsDashboard(admin) {
 }
 async function checkCoverageStatus(admin) {
   const copy = {
+    mainLoading: ['A carregar rondas, tecnicos, piscinas, visitas e extras...','Loading rounds, technicians, pools, visits and extras...','Chargement des tournées, techniciens, piscines, visites et suppléments...','Cargando rondas, técnicos, piscinas, visitas y extras...','Rundgänge, Techniker, Pools, Besuche und Zusätze werden geladen...'],
+    mainReady: ['Rondas e visitas carregadas com sucesso.','Rounds and visits loaded successfully.','Tournées et visites chargées avec succès.','Rondas y visitas cargadas correctamente.','Rundgänge und Besuche erfolgreich geladen.'],
+    mainWarnings: ['Carregado com avisos: {warnings}','Loaded with warnings: {warnings}','Chargé avec avertissements : {warnings}','Cargado con avisos: {warnings}','Mit Warnungen geladen: {warnings}'],
     loading: ['A verificar as visitas…','Checking visits…','Vérification des visites…','Comprobando visitas…','Besuche werden geprüft…'],
     ready: [' piscina(s) a verificar.',' pool(s) to review.',' piscine(s) à vérifier.',' piscina(s) por revisar.',' Pool(s) zu prüfen.'],
     automatic: ['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'],
@@ -213,7 +216,10 @@ async function checkCoverageStatus(admin) {
   };
   const reads=[],businessWrites=[],preferences=[],pageErrors=[],routeFailures=[];
   const detail='A verificar as visitas… <img src=x onerror=alert(1)> $& {count} '+ 'x'.repeat(90);
+  const mainDetail=detail+' {warnings}';
   let coverageContext,coveragePage,coverageMode='normal',heldReply,latestCoverage,statusVisit,summaryExtra,states=0,geometry=0,foreign=0,summaryCases=0,summaryGeometry=0,summaryForeign=0;
+  let mainMode='normal',mainHeldReply,mainKind='ready',mainCases=0,mainGeometry=0,mainForeign=0;
+  const mainStates={ready:0,loading:0,warnings:0};
   const matrixTimings=[],refreshContrasts=[];
   const sql=async()=>JSON.stringify({records:await raw(),visit:await prisma.serviceVisit.findUnique({where:{id:statusVisit.id}}),extra:await prisma.extraVisit.findUnique({where:{id:summaryExtra.id}}),extraCount:await prisma.extraVisit.count(),counts:await counts(),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
   const output=path.join(__dirname,'../reports/field-visual/round-coverage-status-languages'),filter='coverage-status-'+randomUUID();
@@ -237,12 +243,21 @@ async function checkCoverageStatus(admin) {
         await route.fulfill({response}).catch(()=>{});
       } catch(error) {routeFailures.push(redact(error.message));await route.abort().catch(()=>{});}
     });
+    await coverageContext.route('**/api/round-planner/week',async route=>{
+      if(mainMode==='http')return route.fulfill({status:503,json:{ok:false,message:mainDetail}});
+      try {
+        const response=await route.fetch();assert.equal(response.status(),200);assert.equal(route.request().headers().authorization,'Bearer '+token);
+        if(mainMode==='hold')await new Promise(resolve=>{mainHeldReply=resolve;});
+        await route.fulfill({response});
+      } catch(error) {routeFailures.push(redact(error.message));await route.abort().catch(()=>{});}
+    });
     coveragePage=await coverageContext.newPage();coveragePage.setDefaultTimeout(7000);coveragePage.on('pageerror',error=>pageErrors.push(error.message));
     coveragePage.on('request',request=>{const url=new URL(request.url());if(url.origin!==base||!url.pathname.startsWith('/api/'))return;const entry={method:request.method(),path:url.pathname};if(entry.method==='GET')reads.push(entry);else if(entry.method==='PUT'&&entry.path==='/api/settings/language/me')preferences.push(request.postDataJSON());else if(entry.method!=='HEAD')businessWrites.push(entry);});
     const choose=async language=>{const saved=coveragePage.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language===language);await coveragePage.locator('#cwLanguageSelect').selectOption(language);const response=await saved;assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,language});await coveragePage.waitForFunction(value=>document.documentElement.lang===value,language);};
     const expectedReady=index=>latestCoverage.rows.length+copy.ready[index]+' '+latestCoverage.scope+' '+(latestCoverage.automaticAlertsEnabled?copy.automatic[index]:copy.manual[index]);
+    const expectedMain=index=>mainKind==='loading'?copy.mainLoading[index]:mainKind==='warnings'?copy.mainWarnings[index].replace('{warnings}',()=>mainDetail):copy.mainReady[index];
     // Compare every original byte in the browser; do not transport huge markup.
-    const snapshot=save=>coveragePage.evaluate(save=>{const value=JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select,main button')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,busy:node.getAttribute('aria-busy'),options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),links:[...document.querySelectorAll('main a[href]')].map(node=>node.getAttribute('href')),pools:[...document.querySelectorAll('#coverageList h3')].map(node=>node.textContent),deferred:[...document.querySelectorAll('#status,#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>[node.id,node.innerHTML]),tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)),bytes:Object.keys(localStorage).filter(key=>/^cwField|^cw:tech/.test(key)).sort().map(key=>[key,localStorage.getItem(key)])});if(save){window.qaCoverageSnapshot=value;return value.length;}return value===qaCoverageSnapshot;},save);
+    const snapshot=save=>coveragePage.evaluate(save=>{const value=JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select,main button')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,busy:node.getAttribute('aria-busy'),options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),links:[...document.querySelectorAll('main a[href]')].map(node=>node.getAttribute('href')),pools:[...document.querySelectorAll('#coverageList h3')].map(node=>node.textContent),deferred:[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>[node.id,node.innerHTML]),tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)),bytes:Object.keys(localStorage).filter(key=>/^cwField|^cw:tech/.test(key)).sort().map(key=>[key,localStorage.getItem(key)])});if(save){window.qaCoverageSnapshot=value;return value.length;}return value===qaCoverageSnapshot;},save);
     const capture=()=>coveragePage.evaluate(()=>{window.qaCoverageNodes=[...document.querySelectorAll('main,main *')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));});
     async function checkRefreshContrast(language,width) {
       const button=coveragePage.locator('#coverageRefresh'),count=reads.length;
@@ -283,6 +298,9 @@ async function checkCoverageStatus(admin) {
         const actual=await coveragePage.evaluate(()=>{const node=document.getElementById('coverageStatus');return{text:node.textContent,role:node.getAttribute('role'),live:node.getAttribute('aria-live'),images:node.querySelectorAll('img').length,sameNodes:qaCoverageNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))};});
         assert.equal(actual.text,render(index),kind+'/'+language+' owns only its message prefix');assert.deepEqual({role:actual.role,live:actual.live,images:actual.images,sameNodes:actual.sameNodes},{role:'status',live:'polite',images:0,sameNodes:true});
         assert.equal(await coveragePage.locator('#visitFilterSummary').textContent(),expectedSummary(index),kind+'/'+language+' retains the six native totals');summaryCases++;
+        assert.equal(await coveragePage.locator('#status').textContent(),expectedMain(index),mainKind+'/'+language+' owns only read feedback');
+        assert.equal(await coveragePage.locator('#status').getAttribute('class'),mainKind==='warnings'?'status error':'status');
+        assert.equal(await coveragePage.locator('#status img').count(),0);mainCases++;mainStates[mainKind]++;
         assert.equal(reads.length,count,'Language must not re-read operations');assert.equal(await snapshot(false),true,'All captured form, markup, token and pending bytes must remain equal');
           await coveragePage.locator('#coverageStatus').scrollIntoViewIfNeeded();
           assert(await coveragePage.locator('#coverageStatus').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return document.documentElement.scrollWidth<=innerWidth+1&&box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Coverage message fits '+kind+'/'+language+'/'+width);
@@ -290,6 +308,9 @@ async function checkCoverageStatus(admin) {
         await coveragePage.locator('#visitFilterSummary').scrollIntoViewIfNeeded();
         assert(await coveragePage.locator('#visitFilterSummary').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Filter summary fits '+kind+'/'+language+'/'+width);summaryGeometry++;
         if(['ready','loading','error'].includes(kind)&&language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,'filter-'+kind+'-'+language+'-'+width+'.png'),caret:'initial'});
+        await coveragePage.locator('#status').scrollIntoViewIfNeeded();
+        assert(await coveragePage.locator('#status').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Main read feedback fits '+mainKind+'/'+language+'/'+width);mainGeometry++;
+        if(language==='de'&&((kind==='ready'||kind==='error')&&[320,1440].includes(width)||kind==='loading'&&width===320))await coveragePage.screenshot({path:path.join(output,'main-'+mainKind+'-'+language+'-'+width+'.png'),caret:'initial'});
         if(kind==='ready')await checkRefreshContrast(language,width);
         states++;
       }}
@@ -298,8 +319,14 @@ async function checkCoverageStatus(admin) {
     const refresh=async()=>{await coveragePage.locator('#coverageRefresh').click();};
     const ready=()=>coveragePage.waitForFunction(()=>document.querySelectorAll('#coverageList article').length>0&&!document.getElementById('coverageStatus').textContent.includes('…'));
     const held=async()=>{const deadline=Date.now()+7000;while(!heldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(heldReply,'Actual coverage GET must reach latency gate');};
+    // Start the existing read producer; there is no separate load-all UI button.
+    const readAgain=()=>coveragePage.evaluate(()=>{window.qaMainRead=loadAll();});
+    const readSettled=()=>coveragePage.evaluate(()=>window.qaMainRead);
+    const mainHeld=async()=>{const deadline=Date.now()+7000;while(!mainHeldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(mainHeldReply,'Actual planner GET must reach latency gate');};
     await coveragePage.goto(base+'/admin-rounds',{waitUntil:'networkidle'});await ready();await choose('en');
     assert.equal(await coveragePage.locator('#coverageStatus').textContent(),expectedReady(1),'Native ready feedback must follow actual EN selection');
+    console.log('QA native rounds read feedback '+JSON.stringify({text:await coveragePage.locator('#status').textContent(),language:'en'}));
+    assert.equal(await coveragePage.locator('#status').textContent(),'Rounds and visits loaded successfully.','Native main read feedback must follow actual EN selection');
     await coveragePage.locator('#visitSearch').fill(filter+'-regular');
     assert.deepEqual(await coveragePage.locator('#weekVisits tbody tr').evaluateAll(nodes=>nodes.map(node=>[node.dataset.kind,Number(node.dataset.id)])),[['SERVICE',statusVisit.id]],'Real UI filter must retain exactly the own SQL visit without pruning data');
     const weekResponse=await fetch(base+'/api/round-planner/week',{headers:{Authorization:'Bearer '+token}}),extraResponse=await fetch(base+'/api/extra-visits',{headers:{Authorization:'Bearer '+token}});assert.equal(weekResponse.status,200);assert.equal(extraResponse.status,200);
@@ -315,12 +342,16 @@ async function checkCoverageStatus(admin) {
     await matrix('ready',expectedReady);
     for(const width of [320,390,1440]) {
       await coveragePage.setViewportSize({width,height:1000});
+      if(width===320){mainMode='hold';await readAgain();await mainHeld();mainKind='loading';}
+      if(width===390){mainMode='http';await readAgain();await readSettled();mainKind='warnings';}
       if(width===390){await coveragePage.locator('#visitSearch').fill(filter);Object.assign(summaryCounts,{visible:2,alerts:1,late:1,extras:1,billable:1});assert.deepEqual(await coveragePage.locator('#weekVisits tbody tr').evaluateAll(nodes=>nodes.map(node=>[node.dataset.kind,Number(node.dataset.id)])),[['SERVICE',statusVisit.id],['EXTRA',summaryExtra.id]]);}
       if(width===1440){await coveragePage.locator('#visitStatusFilter').selectOption('extra');Object.assign(summaryCounts,{visible:1,alerts:1,late:0,extras:1,billable:1});assert.deepEqual(await coveragePage.locator('#weekVisits tbody tr').evaluateAll(nodes=>nodes.map(node=>[node.dataset.kind,Number(node.dataset.id)])),[['EXTRA',summaryExtra.id]]);assert.equal(await coveragePage.locator('#weekVisits tbody img').count(),0);}
       coverageMode='hold';await refresh();await held();await matrix('loading',index=>copy.loading[index],[width]);heldReply();heldReply=null;coverageMode='normal';await ready();
+      if(width===320){mainHeldReply();mainHeldReply=null;mainMode='normal';await readSettled();mainKind='ready';}
     }
     await coveragePage.locator('#visitSearch').fill(filter+'-no-result');await coveragePage.locator('#visitStatusFilter').selectOption('');Object.assign(summaryCounts,{visible:0,alerts:0,late:0,extras:0,billable:0});assert.equal(await coveragePage.locator('#weekVisits tbody tr').count(),0);
     coverageMode='http';await refresh();await coveragePage.waitForFunction(detail=>document.getElementById('coverageStatus').textContent.includes(detail),detail);await matrix('error',index=>copy.error[index]+detail+copy.stale[index]);
+    mainMode='normal';await readAgain();await readSettled();mainKind='ready';
     await coveragePage.locator('#visitSearch').fill(filter+'-regular');Object.assign(summaryCounts,{visible:1,alerts:0,late:1,extras:0,billable:0});
     coverageMode='normal';await refresh();await ready();await matrix('recovered',expectedReady,[320]);
     await coveragePage.evaluate(()=>{const input=document.getElementById('coverageReason');input.focus();input.setSelectionRange(3,9);});await snapshot(true);
@@ -331,17 +362,20 @@ async function checkCoverageStatus(admin) {
     await coveragePage.waitForFunction(detail=>document.getElementById('coverageStatus').textContent.includes(detail),timeoutDetail,{timeout:16000});await failed;assert(Date.now()-started>=14000,'Original 15000ms production deadline must actually elapse');
     await matrix('timeout',index=>copy.error[index]+timeoutDetail+copy.stale[index],[320]);heldReply();heldReply=null;coverageMode='normal';await refresh();await ready();
     for(const replacement of [false,true]) {
+      await readAgain();await readSettled();
       await choose('de');await refresh();await ready();
       await coveragePage.locator('#visitStatusFilter').selectOption('pending');await coveragePage.locator('#visitStatusFilter').selectOption('');assert.equal(await coveragePage.locator('#visitFilterSummary').textContent(),expectedSummary(4),'A native filter producer owns its fresh summary leaf');
       await coveragePage.evaluate(replacement=>{const node=document.getElementById('coverageStatus'),clone=node.cloneNode(true);clone.removeAttribute('id');node.after(clone);if(replacement)node.replaceChildren(document.createTextNode(node.textContent));else node.firstChild.nodeValue='A verificar as visitas…';window.qaCoverageForeign=[node,clone].map(node=>({node,markup:node.outerHTML}));},replacement);
       await coveragePage.evaluate(({replacement,text})=>{const node=document.getElementById('visitFilterSummary'),clone=node.cloneNode(true);clone.removeAttribute('id');node.after(clone);if(replacement)node.replaceChildren(document.createTextNode(node.textContent));else node.firstChild.nodeValue=text;window.qaSummaryForeign=[node,clone].map(node=>({node,markup:node.outerHTML}));},{replacement,text:expectedSummary(0)});
-      for(const language of languages){const count=reads.length;await choose(language);assert(await coveragePage.evaluate(()=>qaCoverageForeign.every(({node,markup})=>node.outerHTML===markup)));assert(await coveragePage.evaluate(()=>qaSummaryForeign.every(({node,markup})=>node.outerHTML===markup)));assert.equal(reads.length,count);foreign++;summaryForeign++;}
-      await coveragePage.evaluate(()=>{qaCoverageForeign[1].node.remove();qaSummaryForeign[1].node.remove();});
+      await coveragePage.evaluate(({replacement,text})=>{const node=document.getElementById('status');if(replacement)node.replaceChildren(document.createTextNode(node.textContent));else setStatus(text,'error');const clone=node.cloneNode(true);clone.removeAttribute('id');node.after(clone);window.qaMainForeign=[node,clone].map(node=>({node,markup:node.outerHTML}));},{replacement,text:copy.mainReady[0]});
+      assert.equal(await coveragePage.locator('#status').getAttribute('class'),replacement?'status':'status error');
+      for(const language of languages){const count=reads.length;await choose(language);assert(await coveragePage.evaluate(()=>qaCoverageForeign.every(({node,markup})=>node.outerHTML===markup)));assert(await coveragePage.evaluate(()=>qaSummaryForeign.every(({node,markup})=>node.outerHTML===markup)));assert(await coveragePage.evaluate(()=>qaMainForeign.every(({node,markup})=>node.outerHTML===markup)),'Literal setStatus, foreign same-byte leaf and clones never gain read ownership');assert.equal(reads.length,count);foreign++;summaryForeign++;mainForeign++;}
+      await coveragePage.evaluate(()=>{qaCoverageForeign[1].node.remove();qaSummaryForeign[1].node.remove();qaMainForeign[1].node.remove();});
     }
     assert.deepEqual(await sql(),before);assert.deepEqual(pageErrors,[]);assert.deepEqual(routeFailures,[]);assert.deepEqual(businessWrites,[]);assert(preferences.every(body=>Object.keys(body).length===1&&languages.includes(body.language)));
     assert.equal(refreshContrasts.length,45);assert(refreshContrasts.every(item=>item.ratio>=4.5),'All 45 native coverage refresh contrasts must reach 4.5:1');
-    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,refreshContrastCases:refreshContrasts.length,minRefreshContrast:Math.min(...refreshContrasts.map(item=>item.ratio)),summary:{cases:summaryCases,geometry:summaryGeometry,foreign:summaryForeign,nativeTotal,weekRows:nativeWeek.length,extraRows:nativeExtras.length,ownExtra:summaryExtra.id,states:['regular','regular + urgent chargeable extra','extra only','zero result','regular recovered'],sixCapturedCounts:true,freshProducerLeaf:true},nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
-  } finally {heldReply?.();await coverageContext?.close();if(summaryExtra)await prisma.extraVisit.delete({where:{id:summaryExtra.id}});if(statusVisit)await prisma.serviceVisit.delete({where:{id:statusVisit.id}});}
+    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,refreshContrastCases:refreshContrasts.length,minRefreshContrast:Math.min(...refreshContrasts.map(item=>item.ratio)),mainRead:{cases:mainCases,geometry:mainGeometry,foreign:mainForeign,states:mainStates,loadingWidths:[320],readyAndWarningWidths:[320,390,1440],actualReadProducer:true,legacyStringContract:true},summary:{cases:summaryCases,geometry:summaryGeometry,foreign:summaryForeign,nativeTotal,weekRows:nativeWeek.length,extraRows:nativeExtras.length,ownExtra:summaryExtra.id,states:['regular','regular + urgent chargeable extra','extra only','zero result','regular recovered'],sixCapturedCounts:true,freshProducerLeaf:true},nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
+  } finally {heldReply?.();mainHeldReply?.();await coverageContext?.close();if(summaryExtra)await prisma.extraVisit.delete({where:{id:summaryExtra.id}});if(statusVisit)await prisma.serviceVisit.delete({where:{id:statusVisit.id}});}
 }
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}});
