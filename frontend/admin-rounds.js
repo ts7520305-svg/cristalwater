@@ -136,6 +136,7 @@ const roundCopy = (() => {
     coverageAutomatic: ['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'],
     coverageManual: ['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'],
     coverageRefreshError: ['Não foi possível atualizar: {error}. A informação anterior pode estar desatualizada.','Could not refresh: {error}. Previous information may be out of date.','Impossible d’actualiser : {error}. Les informations précédentes peuvent être obsolètes.','No se pudo actualizar: {error}. La información anterior puede estar desactualizada.','Aktualisierung nicht möglich: {error}. Die bisherigen Informationen können veraltet sein.'],
+    visitFilterSummary: ['{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} cobravel(is)','{visible} of {total} visit(s) - {alerts} alert(s) - {late} overdue - {extras} extra(s) - {billable} chargeable','{visible} sur {total} visite(s) - {alerts} alerte(s) - {late} en retard - {extras} supplémentaire(s) - {billable} facturable(s)','{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} facturable(s)','{visible} von {total} Besuch(en) - {alerts} Alarm(e) - {late} überfällig - {extras} zusätzlich - {billable} kostenpflichtig'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -866,7 +867,11 @@ function renderVisits(){
     const lateCount = filteredVisits.filter(visitIsLate).length;
     const extraCount = filteredVisits.filter((visit) => visit.kind === "EXTRA").length;
     const billableCount = filteredVisits.filter((visit) => visit.kind === "EXTRA" && visit.billingMode === "EXTRA").length;
-    summary.textContent = `${filteredVisits.length} de ${allVisits.length} visita(s) - ${alertCount} alerta(s) - ${lateCount} atrasada(s) - ${extraCount} extra(s) - ${billableCount} cobravel(is)`;
+    const counts = {visible:filteredVisits.length,total:allVisits.length,alerts:alertCount,late:lateCount,extras:extraCount,billable:billableCount};
+    const renderSummary = () => roundCopy.text('visitFilterSummary').replace(/\{(visible|total|alerts|late|extras|billable)\}/g,(_,key)=>counts[key]);
+    roundCopy.forget(summary);
+    summary.textContent = renderSummary();
+    roundCopy.bind(summary,renderSummary);
   }
 
   renderPlanner(filteredVisits);

@@ -480,7 +480,7 @@ async function selectRoundLanguage(page,language){
   await page.waitForFunction(value=>document.documentElement.lang===value,language);
 }
 
-async function checkRoundFormLanguages(page,round,pool,visits){
+async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
   const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
   const languages=['pt','en','fr','es','de'],headings=['Rondas','Rounds','Tournées','Rondas','Rundgänge'];
   const now=new Date(),ago=days=>new Date(now.getTime()-days*86400000),tomorrow=new Date(now.getTime()+86400000);
@@ -587,6 +587,14 @@ async function checkRoundFormLanguages(page,round,pool,visits){
   await page.locator('#visitSearch').fill(pool.name);
   const ownPoolVisits=await prisma.serviceVisit.findMany({where:{poolId:pool.id},select:{id:true}}),filteredIds=await page.locator('#weekVisits tbody tr[data-kind="SERVICE"]').evaluateAll(nodes=>nodes.map(node=>Number(node.dataset.id)));
   assert(ownPoolVisits.some(visit=>filteredIds.includes(visit.id)),'Real UI filter must keep an own generated visit without pruning SQL data');
+  const summaryCounts=await page.evaluate(()=>{const all=allPlannerVisits(),rows=filterVisits(all);return{visible:rows.length,total:all.length,alerts:rows.filter(visitHasAlert).length,late:rows.filter(visitIsLate).length,extras:rows.filter(row=>row.kind==='EXTRA').length,billable:rows.filter(row=>row.kind==='EXTRA'&&row.billingMode==='EXTRA').length};});
+  const filteredRows=await page.locator('#weekVisits tbody tr').evaluateAll(nodes=>nodes.map(node=>[node.dataset.kind,Number(node.dataset.id)]));
+  assert.equal(summaryCounts.visible,filteredRows.length,'The native filtered table contains the captured visit count');
+  assert(Array.isArray(summarySources.week));assert(Array.isArray(summarySources.extras));
+  const summaryBounds=await page.evaluate(()=>{const start=new Date();start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+7);return{start:start.getTime(),end:end.getTime()};});
+  assert.equal(summaryCounts.total,summarySources.week.length+summarySources.extras.filter(row=>{const date=new Date(row.scheduledAt||row.date||row.plannedDate).getTime();return date>=summaryBounds.start&&date<summaryBounds.end;}).length,'The captured total agrees with both actual page API responses');
+  const sourceIds=new Set([...summarySources.week.map(row=>'SERVICE-'+row.id),...summarySources.extras.map(row=>'EXTRA-'+row.id)]);assert(filteredRows.every(([kind,id])=>sourceIds.has(kind+'-'+id)),'Every filtered row exists in its native source');
+  const summaryCopy=['{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} cobravel(is)','{visible} of {total} visit(s) - {alerts} alert(s) - {late} overdue - {extras} extra(s) - {billable} chargeable','{visible} sur {total} visite(s) - {alerts} alerte(s) - {late} en retard - {extras} supplémentaire(s) - {billable} facturable(s)','{visible} de {total} visita(s) - {alerts} alerta(s) - {late} atrasada(s) - {extras} extra(s) - {billable} facturable(s)','{visible} von {total} Besuch(en) - {alerts} Alarm(e) - {late} überfällig - {extras} zusätzlich - {billable} kostenpflichtig'];
   const before=await sql(),requests=[];
   const listen=request=>{if(new URL(request.url()).pathname.startsWith('/api/'))requests.push({method:request.method(),path:new URL(request.url()).pathname});};
   await page.locator('#roundName').fill('Criar ronda <img src=x>');await page.locator('#extraNotes').fill('Rondas / Atualizar <b>draft literal</b>');
@@ -594,8 +602,8 @@ async function checkRoundFormLanguages(page,round,pool,visits){
   await page.locator(`[data-transfer-visit="${coverageVisits[0].id}"]`).check();
   await page.evaluate(()=>{
     document.getElementById('extraPrice').disabled=true;document.getElementById('createExtraVisitBtn').setAttribute('aria-busy','true');
-    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label),#coverageList :is(article,p,a,span),#coverageStatus')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
-    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin,#status,#visitFilterSummary')].map(node=>({node,markup:node.innerHTML}));
+    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label),#coverageList :is(article,p,a,span),#coverageStatus,#visitFilterSummary')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
+    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#visitReceiptsAdmin,#status')].map(node=>({node,markup:node.innerHTML}));
   });
   const fingerprint=()=>page.evaluate(()=>JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select')].filter(node=>node.id!=='cwLanguageSelect').map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,hidden:node.hidden,options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),busy:document.getElementById('createExtraVisitBtn').getAttribute('aria-busy'),links:[...document.querySelectorAll('main a')].map(node=>node.getAttribute('href'))}));
   const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-coverage-languages');await fs.mkdir(output,{recursive:true});
@@ -610,6 +618,7 @@ async function checkRoundFormLanguages(page,round,pool,visits){
       }
       assert.equal(await page.locator('main h1').textContent(),headings[index]);assert.equal(await page.title(),'Cristal Water LDA - '+headings[index]);
       assert.deepEqual(await coverageView(),coverageExpected(index),language+' native coverage labels and literal data');
+      assert.equal(await page.locator('#visitFilterSummary').textContent(),summaryCopy[index].replace(/\{(visible|total|alerts|late|extras|billable)\}/g,(_,key)=>summaryCounts[key]),language+' retains the six native filter totals');
       assert.equal(await page.locator('#coverageStatus').textContent(),coverageData.rows.length+[' piscina(s) a verificar.',' pool(s) to review.',' piscine(s) à vérifier.',' piscina(s) por revisar.',' Pool(s) zu prüfen.'][index]+' '+coverageData.scope+' '+(coverageData.automaticAlertsEnabled?['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'][index]:['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'][index]),language+' native read-only coverage ready');
       assert.equal(await page.locator(`[data-coverage-pool="${coveragePools[0].id}"] img`).count(),0);
       for(const [selector,labels] of expected){const actual=await page.locator(selector).evaluateAll(nodes=>nodes.map(node=>[...node.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&child.nodeValue.trim())?.nodeValue.trim()));assert(actual.length>0,selector);assert(actual.every(value=>value===labels[index]),language+' '+selector+' '+JSON.stringify(actual));textCases+=actual.length;}
@@ -650,7 +659,7 @@ async function checkRoundFormLanguages(page,round,pool,visits){
     assert.deepEqual(requests.filter(request=>request.method==='GET'),[],'Changing language must not reload operational data');
     assert.deepEqual(requests.filter(request=>request.method!=='PUT'||request.path!=='/api/settings/language/me'),[],'Only the existing language preference may be written');
     assert.equal(await sql(),before,'Language changes must preserve exact native SQL rows and write/stock/receipt counts');
-    const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,coverageFlags:[...actualFlags].sort(),coverageRows:coverageData.rows.length,ownCoveragePools:coveragePools.map(pool=>pool.id),coverageReadOnlyReady:true,realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','main status and filter summary','coverage transfer feedback','receipts','dialogs','empty option fallbacks']};
+    const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,coverageFlags:[...actualFlags].sort(),coverageRows:coverageData.rows.length,ownCoveragePools:coveragePools.map(pool=>pool.id),coverageReadOnlyReady:true,filterSummary:{counts:summaryCounts,languageCases:5,actualPageApiSources:true},realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','main status','coverage transfer feedback','receipts','dialogs','empty option fallbacks']};
     await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS rounds form languages '+JSON.stringify(proof));
   }finally{page.off('request',listen);}
 }
@@ -709,7 +718,10 @@ async function testRoundAssignmentPeriods(adminUser){
     const context=await browser.newContext({viewport:{width:1280,height:900}});
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({...user,role:'ADMIN'}));},{token:authToken,user:adminUser||{}});
     const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
+    const weekRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/round-planner/week'),extrasRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/extra-visits');
     await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    const weekReply=await weekRead,extrasReply=await extrasRead;assert.equal(weekReply.status(),200);assert.equal(extrasReply.status(),200);
+    const summarySources={week:await weekReply.json(),extras:(await extrasReply.json()).extraVisits};
     await selectRoundLanguage(page,'pt');
     await page.locator('#assignTechRound').selectOption(String(round.id));await page.locator('#assignTech').selectOption(String(b.id));
     await page.locator('#assignmentPeriod').selectOption('PERMANENT');assert(await page.locator('#assignmentEndField').isHidden());
@@ -720,7 +732,7 @@ async function testRoundAssignmentPeriods(adminUser){
     await page.getByRole('dialog').getByRole('button',{name:/Cancelar/i}).click();
     assert.equal(await prisma.roundAssignment.count({where:{roundId:round.id}}),before);
     assert.deepEqual(errors,[]);
-    await checkRoundFormLanguages(page,round,pool,[planned,started,after]);
+    await checkRoundFormLanguages(page,round,pool,[planned,started,after],summarySources);
     assert.deepEqual(errors,[]);
     await context.close();
   }finally{await browser.close();}
