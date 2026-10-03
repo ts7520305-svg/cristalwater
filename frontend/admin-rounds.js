@@ -155,6 +155,8 @@ const roundCopy = (() => {
     tableTypeBilling: ['Tipo / cobranca','Type / billing','Type / facturation','Tipo / facturación','Typ / Abrechnung'],
     tableEdit: ['Editar','Edit','Modifier','Editar','Bearbeiten'],
     editableVisitList: ['Lista editavel de visitas da semana','Editable weekly visits list','Liste modifiable des visites de la semaine','Lista editable de visitas de la semana','Bearbeitbare Liste der Wochenbesuche'],
+    tableNormalRound: ['Ronda normal','Normal round','Tournée normale','Ronda normal','Normaler Rundgang'],
+    tableWithAlert: ['Com alerta','With alert','Avec alerte','Con alerta','Mit Warnung'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -944,6 +946,8 @@ function renderVisits(){
   const headingKeys = ['tableDate','tableClient','pool','technician','tableTypeBilling','status','tableEdit'];
   box.querySelectorAll('thead th').forEach((node,index)=>roundCopy.bind(node,headingKeys[index]));
   roundCopy.bind(box.querySelector('.table-scroll'),'editableVisitList','aria-label');
+  box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
+  box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
 
   box.querySelectorAll("[data-save-visit]").forEach((btn) => {
     btn.addEventListener("click", () => saveVisitFromRow(btn.dataset.kind, btn.dataset.id));
