@@ -13,7 +13,7 @@
   }
   const canRemember = el => el && el.type !== 'file' && el.type !== 'password'
     && !/password|passwd|token|secret|^pin$/i.test(el.name || el.id || '')
-    && !el.closest('[data-cw-form-memory="managed"]');
+    && !el.closest('[data-cw-form-memory="managed"], .cw-lang-switch');
 
   function validVisitSnapshot(parsed, context) {
     return parsed && parsed.version === 1 && parsed.owner === context.owner
@@ -106,6 +106,10 @@
     window.location.href = fallback;
   }
 
+  function saveFieldContext(event) {
+    if (canRemember(event.target)) saveContext();
+  }
+
   document.addEventListener('click', handleBack);
   window.addEventListener('cw:visit-context-ready', restoreContext);
   window.addEventListener('pagehide', saveContext);
@@ -114,8 +118,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     restoreContext();
     document.querySelectorAll('input[id], select[id], textarea[id]').forEach((el) => {
-      el.addEventListener('input', saveContext);
-      el.addEventListener('change', saveContext);
+      el.addEventListener('input', saveFieldContext);
+      el.addEventListener('change', saveFieldContext);
     });
   });
 })();
