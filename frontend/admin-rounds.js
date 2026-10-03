@@ -150,6 +150,11 @@ const roundCopy = (() => {
     chipSubstitution: ['Substituicao','Substitution','Remplacement','Sustitución','Vertretung'],
     chipOtherDay: ['Ronda de outro dia','Round from another day','Tournée d’un autre jour','Ronda de otro día','Rundgang eines anderen Tages'],
     chipReschedule: ['Reagendada','Rescheduled','Replanifiée','Reprogramada','Neu geplant'],
+    tableDate: ['Data','Date','Date','Fecha','Datum'],
+    tableClient: ['Cliente','Client','Client','Cliente','Kunde'],
+    tableTypeBilling: ['Tipo / cobranca','Type / billing','Type / facturation','Tipo / facturación','Typ / Abrechnung'],
+    tableEdit: ['Editar','Edit','Modifier','Editar','Bearbeiten'],
+    editableVisitList: ['Lista editavel de visitas da semana','Editable weekly visits list','Liste modifiable des visites de la semaine','Lista editable de visitas de la semana','Bearbeitbare Liste der Wochenbesuche'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -895,6 +900,7 @@ function renderVisitChip(visit){
 function renderVisits(){
   const box = document.getElementById("weekVisits");
   if(!box) return;
+  roundCopy.forget(box);
   // Normalize once so the table and planner use the same visit snapshot.
   const allVisits = allPlannerVisits();
   const filteredVisits = filterVisits(allVisits);
@@ -934,6 +940,10 @@ function renderVisits(){
       </table>
     </div>
   `;
+
+  const headingKeys = ['tableDate','tableClient','pool','technician','tableTypeBilling','status','tableEdit'];
+  box.querySelectorAll('thead th').forEach((node,index)=>roundCopy.bind(node,headingKeys[index]));
+  roundCopy.bind(box.querySelector('.table-scroll'),'editableVisitList','aria-label');
 
   box.querySelectorAll("[data-save-visit]").forEach((btn) => {
     btn.addEventListener("click", () => saveVisitFromRow(btn.dataset.kind, btn.dataset.id));
