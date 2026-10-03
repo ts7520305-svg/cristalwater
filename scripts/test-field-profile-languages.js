@@ -40,7 +40,13 @@ async function switchProfile(page, token, user) {
   await prisma.workGuide.create({ data: { vehicleId: vehicle.id, technicianId: tech.id, guideId: guide.id, status: 'OPEN', isDraft: false } });
   for (const type of ['INSURANCE','INSPECTION']) await prisma.vehicleMaintenanceRecord.create({ data: { vehicleId: vehicle.id, type, title: type, status: 'ACTIVE', dueDate: new Date(now + 30 * 86400000) } });
 
+  // Reproduce issuance after fixture preparation with the real JWT issuer.
+  const tokenIssueDelay = Number(process.env.CW_PROFILE_TOKEN_ISSUE_DELAY_MS || 0);
+  assert(Number.isInteger(tokenIssueDelay) && tokenIssueDelay >= 0 && tokenIssueDelay <= 2000, 'QA token issue delay must be between 0 and 2000ms');
+  if (tokenIssueDelay) await new Promise(resolve => setTimeout(resolve, tokenIssueDelay));
   const token = jwt.sign({ id: tech.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' });
+  const tokenExpiresAt = jwt.decode(token).exp * 1000;
+  assert(Number.isSafeInteger(tokenExpiresAt));
   const source = { id: tech.id, technicianId: tech.id, role: 'TECHNICIAN', name: 'Session source <b>{name}</b> & <img src=x>', zone: 'ZONE-' + 'x'.repeat(95), phone: '+351 999 123 456', privateNote: 'Unexposed <b>{phone}</b>' };
   const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', email: 'profile-leader-'+now+'@qa.test', role: 'TEAM_LEADER', active: true } });
   const associatedUsers=await Promise.all([tech,leader].map(person=>prisma.user.create({data:{email:person.email,name:person.name,role:person.role,password:'unused',active:true}})));
@@ -189,8 +195,17 @@ async function switchProfile(page, token, user) {
   for (const type of ['REGULAR','EXTRA']) { await openField(type); assert.deepEqual(await page.evaluate(ids => ids.map(id => { const node = document.getElementById(id); return [id,node.value,node.checked]; }),fieldIds),visitFields[type]); assert.equal(await page.evaluate(() => CWFieldDaySnapshot().confirmedAt),null); }
   assert.deepEqual(await pending(),originalPending);
   const draftKey = 'cwFieldVisitDrafts:v2:TECH:' + tech.id; assert.equal((await raw())[draftKey],profileEntryStorage[draftKey]);
-  await page.goto(base+'/technician-profile',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('#profileGrid .field').length===6);await page.clock.setFixedTime(now+3600001);
+  await page.goto(base+'/technician-profile',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('#profileGrid .field').length===6);
+  const beforeExpiryProfile=await page.locator('#profileGrid').innerHTML(),beforeExpiryReads=requests.length,beforeExpiryRaw=await raw(),beforeExpiryPending=await pending(),beforeExpiryDatabase=await database();
+  await page.evaluate(()=>{window.qaProfileExpiryNodes=[...document.querySelectorAll('#profileGrid,#profileGrid *')];});
+  await page.clock.setFixedTime(tokenExpiresAt-1);await page.evaluate(()=>dispatchEvent(new Event('focus')));
+  assert.equal(await page.locator('#profileGrid').innerHTML(),beforeExpiryProfile);assert.equal(requests.length,beforeExpiryReads);
+  assert(await page.evaluate(()=>qaProfileExpiryNodes.every(node=>node.isConnected)));await page.evaluate(()=>delete window.qaProfileExpiryNodes);
+  assert.deepEqual(await raw(),beforeExpiryRaw);assert.deepEqual(await pending(),beforeExpiryPending);assert.deepEqual(await database(),beforeExpiryDatabase);
+  await page.clock.setFixedTime(tokenExpiresAt+1);
   assert(await page.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('profileGrid').childElementCount===0;}));assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),dbOffline);
+  assert.equal(requests.length,beforeExpiryReads);
+  console.log('PASS profile expiry clock '+JSON.stringify({tokenIssueDelay,legacyClockBeforeActualExpiryMs:tokenExpiresAt-(now+3600001),actualJwtBoundaryMinusAndPlus1ms:true,validProfileNodesRetained:true,noRefetch:true,originalExpiredAssertionRetained:true}));
   assert.deepEqual(errors,[]); assert(requests.filter(request => !['GET','HEAD'].includes(request.method)).every(request => request.path === '/api/settings/language/me' && request.method === 'PUT'));
   await context.close();
   // A separate context with no registered worker selects the QA source before the final producer call.
