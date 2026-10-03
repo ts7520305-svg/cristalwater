@@ -232,7 +232,7 @@ async function checkCoverageStatus(admin) {
   const modeFilter='assignment-copy-'+randomUUID(),modeFixtures=[];let latestWeek;
   const assignmentCopy={NORMAL:['Normal','Normal','Normal','Normal','Normal'],SUPPORT:['Ajuda / apoio','Help / support','Aide / renfort','Ayuda / apoyo','Hilfe / Unterstützung'],SUBSTITUTION:['Substituicao','Substitution','Remplacement','Sustitución','Vertretung'],OTHER_DAY:['Ronda de outro dia','Round from another day','Tournée d’un autre jour','Ronda de otro día','Rundgang eines anderen Tages'],RESCHEDULE:['Reagendada','Rescheduled','Replanifiée','Reprogramada','Neu geplant'],UNASSIGNED:['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen']};
   const modeSql=async()=>JSON.stringify(await prisma.serviceVisit.findMany({where:{id:{in:modeFixtures.map(row=>row.id)}},orderBy:{id:'asc'}}));let modeCases=0,modeGeometry=0;
-  const matrixTimings=[],refreshContrasts=[];
+  const matrixTimings=[],refreshContrasts=[];let stateCollectionCalls=0;
   const sql=async()=>JSON.stringify({records:await raw(),visit:await prisma.serviceVisit.findUnique({where:{id:statusVisit.id}}),extra:await prisma.extraVisit.findUnique({where:{id:summaryExtra.id}}),round:await prisma.round.findUnique({where:{id:warningRound.id},include:{pools:true,technicians:true,assignments:true}}),plannerTechnicians:await prisma.technician.findMany({where:{id:{in:[emptyTechnician.id,literalTechnician.id]}},orderBy:{id:'asc'}}),roundCount:await prisma.round.count(),extraCount:await prisma.extraVisit.count(),counts:await counts(),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
   const output=path.join(__dirname,'../reports/field-visual/round-coverage-status-languages'),filter='coverage-status-'+randomUUID();
   try {
@@ -332,23 +332,34 @@ async function checkCoverageStatus(admin) {
     }
     async function matrix(kind,render,widths=[320,390,1440]) {
       await capture();const snapshotChars=await snapshot(true);
-      const started=Date.now();
+      const started=Date.now(),phaseMs={language:0,state:0,snapshot:0,geometry:0,contrast:0};let stamp=started;
+      const mark=phase=>{const now=Date.now();phaseMs[phase]+=now-stamp;stamp=now;};
       for(const width of widths) {await coveragePage.setViewportSize({width,height:1000});for(const [index,language]of languages.entries()) {
-        const count=reads.length;await choose(language);
-        const actual=await coveragePage.evaluate(()=>{const node=document.getElementById('coverageStatus');return{text:node.textContent,role:node.getAttribute('role'),live:node.getAttribute('aria-live'),images:node.querySelectorAll('img').length,sameNodes:qaCoverageNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))};});
+        const count=reads.length;await choose(language);mark('language');
+        // Collect one unchanged DOM state; missing or duplicate original targets still fail.
+        const actual=await coveragePage.evaluate(()=>{
+          const one=(selector,root=document)=>{const nodes=root.querySelectorAll(selector);if(nodes.length!==1)throw new Error('Expected one native state target: '+selector+', got '+nodes.length);return nodes[0];};
+          const node=one('#coverageStatus'),main=one('#status'),warning=one('#roundTechWarning'),planner=one('#visitPlanner');
+          return{text:node.textContent,role:node.getAttribute('role'),live:node.getAttribute('aria-live'),images:node.querySelectorAll('img').length,sameNodes:qaCoverageNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child)),
+            summary:one('#visitFilterSummary').textContent,main:{text:main.textContent,class:main.getAttribute('class'),images:main.querySelectorAll('img').length},
+            warning:{heading:one('strong',warning).textContent,body:one('span',warning).textContent},warningCount:one('#kpiUnassignedRounds').textContent,warningImages:warning.querySelectorAll('img').length,
+            planner:[...planner.querySelectorAll('.tech-column')].map(node=>({id:node.dataset.technicianId,label:node.querySelector('h4').firstChild.nodeValue,count:Number(node.querySelector('h4 span').textContent),visits:node.querySelectorAll('.visit-chip').length,hint:node.querySelector('.tech-drop>.empty')?.textContent||null})),
+            chips:[...planner.querySelectorAll('.visit-chip')].map(node=>({kind:node.dataset.kind,id:node.dataset.id,metadata:node.children[2].textContent})),chipParts:qaChipSegments};
+        });stateCollectionCalls++;
         assert.equal(actual.text,render(index),kind+'/'+language+' owns only its message prefix');assert.deepEqual({role:actual.role,live:actual.live,images:actual.images,sameNodes:actual.sameNodes},{role:'status',live:'polite',images:0,sameNodes:true});
-        assert.equal(await coveragePage.locator('#visitFilterSummary').textContent(),expectedSummary(index),kind+'/'+language+' retains the six native totals');summaryCases++;
-        assert.equal(await coveragePage.locator('#status').textContent(),expectedMain(index),mainKind+'/'+language+' owns only read feedback');
-        assert.equal(await coveragePage.locator('#status').getAttribute('class'),mainKind==='warnings'?'status error':'status');
-        assert.equal(await coveragePage.locator('#status img').count(),0);mainCases++;mainStates[mainKind]++;
-        assert.deepEqual(await coveragePage.locator('#roundTechWarning').evaluate(node=>({heading:node.querySelector('strong').textContent,body:node.querySelector('span').textContent})),expectedWarning(index),language+' owns warning count/weekdays/instruction, never received names');
-        assert.equal(await coveragePage.locator('#kpiUnassignedRounds').textContent(),String(warningEntries.length));assert.equal(await coveragePage.locator('#roundTechWarning img').count(),0);warningCases++;
-        const planner=await coveragePage.locator('#visitPlanner .tech-column').evaluateAll(nodes=>nodes.map(node=>({id:node.dataset.technicianId,label:node.querySelector('h4').firstChild.nodeValue,count:Number(node.querySelector('h4 span').textContent),visits:node.querySelectorAll('.visit-chip').length,hint:node.querySelector('.tech-drop>.empty')?.textContent||null})));
+        assert.equal(actual.summary,expectedSummary(index),kind+'/'+language+' retains the six native totals');summaryCases++;
+        assert.equal(actual.main.text,expectedMain(index),mainKind+'/'+language+' owns only read feedback');
+        assert.equal(actual.main.class,mainKind==='warnings'?'status error':'status');
+        assert.equal(actual.main.images,0);mainCases++;mainStates[mainKind]++;
+        assert.deepEqual(actual.warning,expectedWarning(index),language+' owns warning count/weekdays/instruction, never received names');
+        assert.equal(actual.warningCount,String(warningEntries.length));assert.equal(actual.warningImages,0);warningCases++;
+        const planner=actual.planner;
         assert.deepEqual(planner.map(({id,label})=>({id,label})),expectedPlanner(index),language+' owns only unassigned/nameless headings, never API names');
         assert(planner.every(column=>column.count===column.visits&&column.hint===(column.visits?null:copy.plannerDrop[index])),language+' retains badge counts and native empty-column instructions');plannerCases++;
-        const chipView=await coveragePage.locator('#visitPlanner .visit-chip').evaluateAll(nodes=>nodes.map(node=>({kind:node.dataset.kind,id:node.dataset.id,metadata:node.children[2].textContent})));
-        const chipParts=await coveragePage.evaluate(()=>qaChipSegments);assert.deepEqual(chipView,chipParts.map(({kind,id,prefix,mode})=>({kind,id,metadata:prefix+' - '+chipKinds[kind][index]+' - '+assignmentCopy[mode][index]})),language+' owns chip copy only; date and internal assignment code stay exact');chipCases++;if(chipView.some(chip=>chip.kind==='SERVICE'))chipStates.service++;if(chipView.some(chip=>chip.kind==='EXTRA'))chipStates.extra++;if(!chipView.length)chipStates.empty++;
+        const chipView=actual.chips,chipParts=actual.chipParts;assert.deepEqual(chipView,chipParts.map(({kind,id,prefix,mode})=>({kind,id,metadata:prefix+' - '+chipKinds[kind][index]+' - '+assignmentCopy[mode][index]})),language+' owns chip copy only; date and internal assignment code stay exact');chipCases++;if(chipView.some(chip=>chip.kind==='SERVICE'))chipStates.service++;if(chipView.some(chip=>chip.kind==='EXTRA'))chipStates.extra++;if(!chipView.length)chipStates.empty++;
+        mark('state');
         assert.equal(reads.length,count,'Language must not re-read operations');assert.equal(await snapshot(false),true,'All captured form, markup, token and pending bytes must remain equal');
+        mark('snapshot');
           await coveragePage.locator('#coverageStatus').scrollIntoViewIfNeeded();
           assert(await coveragePage.locator('#coverageStatus').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return document.documentElement.scrollWidth<=innerWidth+1&&box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Coverage message fits '+kind+'/'+language+'/'+width);
           if(['ready','loading','error'].includes(kind)&&language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,kind+'-'+language+'-'+width+'.png'),caret:'initial'});geometry++;
@@ -366,10 +377,11 @@ async function checkCoverageStatus(admin) {
         if(kind==='ready'&&language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,'planner-'+language+'-'+width+'.png'),caret:'initial'});
         const ownChip=coveragePage.locator(`#visitPlanner .visit-chip[data-kind="${summaryCounts.extras?'EXTRA':'SERVICE'}"][data-id="${summaryCounts.extras?summaryExtra.id:statusVisit.id}"]`);
         if(summaryCounts.visible){await ownChip.scrollIntoViewIfNeeded();assert(await ownChip.evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node.children[2]);return box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Native chip metadata fits '+language+'/'+width);chipGeometry++;if(language==='de'&&[320,1440].includes(width)&&((kind==='ready')||(kind==='loading'&&width===1440)))await coveragePage.screenshot({path:path.join(output,'chip-'+(summaryCounts.extras?'extra':'service')+'-'+language+'-'+width+'.png'),caret:'initial'});}
-        if(kind==='ready')await checkRefreshContrast(language,width);
+        mark('geometry');
+        if(kind==='ready')await checkRefreshContrast(language,width);mark('contrast');
         states++;
       }}
-      const timing={kind,widths,snapshotChars,ms:Date.now()-started};matrixTimings.push(timing);console.log('QA coverage matrix time '+JSON.stringify(timing));
+      const timing={kind,widths,snapshotChars,ms:Date.now()-started,phaseMs};matrixTimings.push(timing);console.log('QA coverage matrix time '+JSON.stringify(timing));
     }
     const refresh=async()=>{await coveragePage.locator('#coverageRefresh').click();};
     const ready=()=>coveragePage.waitForFunction(()=>document.querySelectorAll('#coverageList article').length>0&&!document.getElementById('coverageStatus').textContent.includes('…'));
@@ -465,11 +477,12 @@ async function checkCoverageStatus(admin) {
     assert.deepEqual(await sql(),before);assert.deepEqual(pageErrors,[]);assert.deepEqual(routeFailures,[]);assert.deepEqual(businessWrites,[]);assert(preferences.every(body=>Object.keys(body).length===1&&languages.includes(body.language)));
     assert.equal(refreshContrasts.length,45);assert(refreshContrasts.every(item=>item.ratio>=4.5),'All 45 native coverage refresh contrasts must reach 4.5:1');
     assert.equal(plannerCases,55);assert.equal(plannerGeometry,55);assert.equal(plannerForeign,10);
+    assert.equal(stateCollectionCalls,55);assert.equal(stateCollectionCalls,states);
     assert.equal(chipCases,55);assert.equal(chipGeometry,40);assert.equal(chipForeign,10);
     assert.deepEqual(chipStates,{service:35,extra:10,empty:15});
     const plannerProof={cases:plannerCases,geometry:plannerGeometry,foreign:plannerForeign,nativeTechnicians:latestTechnicians.length,emptyTechnician:emptyTechnician.id,literalTechnician:literalTechnician.id,allNonOwnedMarkupCompared:true,originalDragPayload:true};console.log('PASS native planner labels '+JSON.stringify(plannerProof));
     plannerProof.chipKinds={cases:chipCases,geometry:chipGeometry,foreign:chipForeign,foreignKind:'SERVICE',kinds:['SERVICE','EXTRA'],states:chipStates,datesRemainLiteral:true,assignmentCodesUnchanged:true,allNonOwnedMarkupCompared:true};plannerProof.assignments={cases:modeCases,geometry:modeGeometry,codes:modeParts.map(row=>row.mode),fixtures:modeFixtures.map(row=>row.id),nativeSourceRows:latestWeek.length,allOriginal55CyclesRetained:true,totalCopyCycles:60,dateKindAndNonOwnedMarkupRetained:true};
-    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,refreshContrastCases:refreshContrasts.length,minRefreshContrast:Math.min(...refreshContrasts.map(item=>item.ratio)),planner:plannerProof,unassignedWarning:{cases:warningCases,geometry:warningGeometry,foreign:warningForeign,count:warningEntries.length,ownRound:warningRound.id,nativeRoundRows:latestRounds.length,capturedApiNames:true},mainRead:{cases:mainCases,geometry:mainGeometry,foreign:mainForeign,states:mainStates,loadingWidths:[320],readyAndWarningWidths:[320,390,1440],actualReadProducer:true,legacyStringContract:true},summary:{cases:summaryCases,geometry:summaryGeometry,foreign:summaryForeign,nativeTotal,weekRows:nativeWeek.length,extraRows:nativeExtras.length,ownExtra:summaryExtra.id,states:['regular','regular + urgent chargeable extra','extra only','zero result','regular recovered'],sixCapturedCounts:true,freshProducerLeaf:true},nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
+    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,stateCollection:{calls:stateCollectionCalls,callsPerCycle:1,originalCallsPerCycle:11,allOriginalAssertionsRetained:true,requiredTargetsUnique:true},refreshContrastCases:refreshContrasts.length,minRefreshContrast:Math.min(...refreshContrasts.map(item=>item.ratio)),planner:plannerProof,unassignedWarning:{cases:warningCases,geometry:warningGeometry,foreign:warningForeign,count:warningEntries.length,ownRound:warningRound.id,nativeRoundRows:latestRounds.length,capturedApiNames:true},mainRead:{cases:mainCases,geometry:mainGeometry,foreign:mainForeign,states:mainStates,loadingWidths:[320],readyAndWarningWidths:[320,390,1440],actualReadProducer:true,legacyStringContract:true},summary:{cases:summaryCases,geometry:summaryGeometry,foreign:summaryForeign,nativeTotal,weekRows:nativeWeek.length,extraRows:nativeExtras.length,ownExtra:summaryExtra.id,states:['regular','regular + urgent chargeable extra','extra only','zero result','regular recovered'],sixCapturedCounts:true,freshProducerLeaf:true},nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
   } finally {heldReply?.();mainHeldReply?.();await coverageContext?.close();for(const fixture of modeFixtures)await prisma.serviceVisit.delete({where:{id:fixture.id}});if(emptyTechnician)await prisma.technician.delete({where:{id:emptyTechnician.id}});if(literalTechnician)await prisma.technician.delete({where:{id:literalTechnician.id}});if(warningRound)await prisma.round.delete({where:{id:warningRound.id}});if(summaryExtra)await prisma.extraVisit.delete({where:{id:summaryExtra.id}});if(statusVisit)await prisma.serviceVisit.delete({where:{id:statusVisit.id}});}
 }
 (async () => {
