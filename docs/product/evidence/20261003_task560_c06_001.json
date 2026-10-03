@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "task": "TASK560",
+  "batch": "C06-001",
+  "observedAt": "2026-10-03T02:49:10Z",
+  "workBranch": "work/field-readiness-20260915-simulation",
+  "observedCommit": "f82f2ec3897472a28bc458bc091f62a9ff01a866",
+  "observedTree": "b8cc8c76248aa8651a85c007a3f1690ba8549b1f",
+  "scope": "Read-only reconciliation. No product, API, schema, worker, runner or inventory changes.",
+  "originalInventory": {
+    "path": "docs/product/LANGUAGE_INVENTORY_20260928.json",
+    "baseCommit": "3c3e65eb307e59176dc58a316b4822cfb403e651",
+    "sha256": "2aaa3b19c106aa419e318151e737c153cd370bc37e003dd429af03825335d2c3",
+    "method": "Static candidate assignment, not execution or translation acceptance",
+    "c06Batches": 36,
+    "c06Files": 143,
+    "batchCandidates": 323,
+    "batchHistoricalStatuses": { "no-static-provider": 272, "engine-excluded-review": 51 },
+    "regenerated": false
+  },
+  "currentSources": [
+    { "file": "frontend/admin-rounds.html", "sha256": "fe3756968f146d960e786f2437c9d5aa48ae7822afa5cb1cb93ae050a6514610", "originalCandidates": 107, "nativeRoute": "/admin-rounds" },
+    { "file": "frontend/admin-rounds.js", "sha256": "f0c3d04db1921e7a295efdb6db0c5fc8e2c64a097ce5724d6305d6ed0c04488c", "originalCandidates": 188, "nativeRoute": "/admin-rounds" },
+    { "file": "frontend/admin-visits-dashboard.html", "sha256": "e6f01fa93a724f556cf428bd8b07008908f32084c07b0a7b261dcd8624c153e9", "originalCandidates": 12, "nativeRoute": "/admin-visits-dashboard" },
+    { "file": "frontend/admin-visits-dashboard.js", "sha256": "23bec6d432e0d9732e6b215800af6cd1b941497d93d838a268e02482384e3daf", "originalCandidates": 16, "nativeRoute": "/admin-visits-dashboard" }
+  ],
+  "existingCoverage": {
+    "sharedNavigation": "Existing shell/nav owned-copy producer renders DE header and mobile navigation after document lang changes. Do not duplicate it.",
+    "operationalCi": {
+      "commit": "71ebc46dec1c09d9372dad2ab761abdbdd3db818",
+      "run": 37085255802,
+      "job": 111094096631,
+      "groups": [
+        { "script": "test-route-os-acceptance.js", "code": 0, "ms": 11743 },
+        { "script": "test-field-agenda-volume.js", "code": 0, "ms": 85740 },
+        { "script": "test-field-water-api.js", "code": 0, "ms": 9067 }
+      ],
+      "limit": "Accepted operational coverage at SHA553, not language acceptance for these page bodies or the current SHA."
+    },
+    "adminDashboardEntryComponent": {
+      "script": "scripts/test-auth-entry-browser.js",
+      "scope": "Existing real HTML/auth/guard/dashboard scripts with HTTP fixtures; administrative logout and preserved work, not native SQL language proof."
+    },
+    "recentSourceHistory": [
+      "0816432: TASK500 live planner snapshot and date changes",
+      "5addca4: seasonal service planning and billing",
+      "aafd1c8: TASK223 administrative logout"
+    ]
+  },
+  "nativeObservation": {
+    "environment": "Separate local PostgreSQL16 QA, local backend3002, actual Edge/Playwright, ADMIN login, external jobs/channels disabled",
+    "entryHttpStatus": 200,
+    "requestedQuery": "?lang=de",
+    "queryDocumentLanguage": "pt",
+    "manualDocumentLanguageProbe": "de",
+    "manualProbeLimit": "Attribute-only observation because neither page has a language selector; not an end-user language workflow.",
+    "globalLanguageEngine": false,
+    "languageSelect": false,
+    "widths": [320, 1440],
+    "rootScrollWidthExceeded": false,
+    "pageErrors": [],
+    "operationalWrites": [],
+    "sqlCountOrder": ["Round", "ServiceVisit", "FieldWriteRequest", "StockMovement"],
+    "sqlCountsBeforeAndAfter": [6, 264, 59, 135],
+    "sqlUnchanged": true,
+    "rounds": {
+      "mainHeadingAfterProbe": "Rondas",
+      "ownHeadingsRemainPt": true,
+      "successfulGetPaths": ["/api/rounds/coverage", "/api/technicians", "/api/rounds", "/api/extra-visits", "/api/pools", "/api/round-planner/week"]
+    },
+    "visitsDashboard": {
+      "mainHeadingAfterProbe": "Painel Admin - Visitas",
+      "refreshAfterProbe": "Atualizar",
+      "statusOptionValues": ["", "DONE", "IN_PROGRESS"],
+      "ownLabelsRemainPt": true,
+      "successfulGetPaths": ["/api/visits/today"]
+    },
+    "captures": [
+      "reports/field-ui/C06_001_ADMIN_ROUNDS_DE_320.png",
+      "reports/field-ui/C06_001_ADMIN_ROUNDS_DE_1440.png",
+      "reports/field-ui/C06_001_ADMIN_VISITS_DASHBOARD_DE_320.png",
+      "reports/field-ui/C06_001_ADMIN_VISITS_DASHBOARD_DE_1440.png"
+    ],
+    "visualReview": "Both320 captures inspected. Shared header/navigation already DE; body PT. Dashboard values/buttons are very pale on white cards. Confirm computed styles before a narrowly scoped contrast repair; no whole-page geometry or accessibility acceptance claimed."
+  },
+  "dashboardEntryLedger": {
+    "total": 28,
+    "applicationCopyUncoveredIds": [
+      "ab013a928da97ce9", "cd7a72711c689717", "94a20d92e011200e", "85c92521e8b1259b",
+      "604139f038f48bfb", "1cca5cd19002df63", "870a62e4e433d7d0", "99892064891df07c",
+      "ba3fba59f9285eb8", "fccbef46f33e7149", "2ecb626338259ff1", "5207b330540921cf",
+      "06f4639d06936368", "a528a3f2182bcaf4", "ceeeeb46fc5d6a20", "8d8f9dc9fba5926c",
+      "ea2cce11160ad450", "5c0f4e9f4055aa2c", "1e4c8a591f43e4bd", "0266607b43e6d383",
+      "a711479f4cafd646", "cc233baa1fb2fcdc", "30b168f8df4890bd", "f0619e1407a5e739"
+    ],
+    "protocolErrorLiteralIds": ["96655b83b7758af7"],
+    "stableScientificLabelIds": ["c25e4a9f122feb9d"],
+    "optionLabelIdsWithImmutableValues": ["27ca1a89f078d6c4", "60eaf6ac1b40a6a9"],
+    "requiredLiteralData": ["client/pool/technician names", "notes", "unknown returned states", "HTTP/server errors", "dates in existing pt-PT format", "readings", "photo URLs"],
+    "nextProof": "Loading/empty/error, accessible attrs, literal data and photo alt need runtime cases; static classification alone does not close these IDs."
+  },
+  "roundsLedgerLimit": {
+    "candidates": 295,
+    "observedUncoveredHeadingId": "d879287f147a55f6",
+    "uncoveredOwnRecurrenceLabelIds": ["c9120ed1e4e33b52", "d6ad0adb3b22e97a"],
+    "internalParsingAliasesToPreserveIds": ["09113b66d178bdf6", "7d5a7ced28ed3f04"],
+    "requiredLiteralData": ["round/pool/client/technician names", "reason/notes", "assignment codes", "dates/week/day keys", "backend errors and receipt details"],
+    "fullyClassified": false,
+    "reason": "Main-page language gap is observed; all dynamic states/candidates still require source and runtime mapping."
+  },
+  "excludedAttempt": "First observation expected #cwLanguageSelect and timed out at7000ms on admin-rounds. No claim of a selected-language workflow; later explicit observations record the absence and attribute-only probe.",
+  "acceptance": "C06-001 open; audit does not declare the pages translated or the complete C06 finished.",
+  "nextTask": "TASK561: admin-visits-dashboard own-copy producer and existing language selection, preserve read-only API/filter/status values/date/data/guards and use existing native tests; verify the observed local contrast before changing CSS."
+}

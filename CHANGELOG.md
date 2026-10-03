@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK560 - reconciliação do primeiro lote de idiomas C06 (2026-10-03)
+- Ledger verificável do inventário original: quatro hashes atuais,323 candidatos e28 IDs do dashboard classificados; nav já traduzido separado do corpo descoberto e de dados/códigos internos que permanecem literais. Snapshot C05 intacto.
+- Observação Admin/Edge/API/SQL real em320/1440: GETs200, zero escritas operacionais e SQL intacto; corpo PT sem seletor e contraste fraco do dashboard observados. Apenas evidência/documentação, sem produto novo. CI554/log/restauro conferidos; próxima561 trata o dashboard, C06 continua aberta.
+
 ## TASK559 - rota legada após expiração (2026-10-03)
 - Reproduzido cartão privado repintado a partir da cache após expiração; loadRoute/current/renderVisits reutilizam agora o predicado de sessão existente. Sem novo engine/latch/envio, mantendo contratos/dia/cache e dados guardados.
 - Quatro principais aprovados na recusa de releitura/pintura, GET nativo tardio e renovação/reload com bytes intactos. Cinco grupos nativos, cache319 exata, E2E dos três perfis e preflight23/23 aprovados; CI553/log/restauro conferidos, CI própria pendente. Próximo: reconciliação das fontes C06 com inventário original.
