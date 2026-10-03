@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## TASK586 - conciliação do backlog e publicação585 (2026-10-03)
+- Apenas BACKLOG/PROJECT_STATE/CHANGELOG conciliam585 SHA6eb9faf943ada8927997246f22adb845de3c8b94/árvore22b143de7eafe289bb4e6f5e07030972c6fb0e03/parent584/Action37139936045 em execução/pasta limpa e CI próprias582–584 success/jobs/logs387/restauros128 tabelas/51 ficheiros iguais. Última584, não585; estados anteriores16:12 e falhas543-562-581-E2E565 preservados como históricos.
+- Produto/cache335/157 chaves/fixtures/runner387/preflight browser23/API/schema/guardas/dados/C05-ledger560 invariantes, nenhum candidato novo. Admin116,45s-117,75s/Route OS107,76s/preflight23/E2E71,52s/quatro grupos cache/pump25,28s são provas585, não repetidas nesta586 só documental. Gates próprios:unitários1403 pass/2 skipped/4 limitações Windows iguais/37,72s/técnicos4/656ms/três JS estáveis/docs-referências-hashes/diff-check aprovados; própria CI/restauro necessários.
+- Próxima587 refinada após ler produtor/API: só vazio por filtro read-only e15 casos nativos existentes; vazio total exige prova isolada real, filtro de semana não esvazia allPlannerVisits. Não limpar state/mockar sucesso/apagar antigos para o demonstrar. C06/C07–C32 abertas, sem merge/deploy.
+
 ## TASK585 - sufixo nativo de visitas atrasadas (2026-10-03)
 - Negativo28,15s/code1: SERVICE/EXTRA atrasadas mantinham PT sob EN, EXTRA futura sem sufixo. Só tableLate/folha privada do produtor real; nome SQL/API `atrasada $& {late}` e prefixo `Visita extra` literais, decisão temporal/handlers/payload/HTML/CSS intactos. Seis linhas novas de produto,157 chaves/cache335/quatro expectativas literal-only.
 - Admin Edge final116,45s/117,75s/code0<120s conserva55+5 ciclos/90 ações originais+10 novas/45 contrastes/15s real/SQL/bytes/nós/foco/503/recovery/centro/dashboard. Sufixo55 checks/10 autoria/cinco recuperações/18 medições iniciais+100 matriz+210 recuperação, duas posições/320-390-1440, EXTRA futura original intacta. Fonte659 semanais/31 extras/27 janela/686 total/459 técnicos/498 cobertura/snapshot741068 sem pruning, sete tamanhos iguais nas finais. DE320/1440 SVC revistos; texto externo/clones/TEXT same-byte não adotados.
