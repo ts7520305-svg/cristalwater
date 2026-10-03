@@ -158,6 +158,7 @@ const roundCopy = (() => {
     tableNormalRound: ['Ronda normal','Normal round','Tournée normale','Ronda normal','Normaler Rundgang'],
     tableWithAlert: ['Com alerta','With alert','Avec alerte','Con alerta','Mit Warnung'],
     tableSaveChanges: ['Guardar alteracoes','Save changes','Enregistrer','Guardar cambios','Änderungen speichern'],
+    tableLate: ['atrasada','overdue','en retard','atrasada','überfällig'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -949,6 +950,11 @@ function renderVisits(){
   roundCopy.bind(box.querySelector('.table-scroll'),'editableVisitList','aria-label');
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
+  box.querySelectorAll('tbody tr').forEach((row,index)=>{
+    if(!row.classList.contains('visit-row-late'))return;
+    const name=String(visitRoundName(filteredVisits[index]));
+    roundCopy.bind(row.querySelector('.table-actions>.mini'),()=>name+' - '+roundCopy.text('tableLate'));
+  });
 
   box.querySelectorAll("[data-save-visit]").forEach((btn) => {
     roundCopy.bind(btn,'tableSaveChanges');
