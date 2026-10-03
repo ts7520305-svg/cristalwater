@@ -140,6 +140,8 @@ const roundCopy = (() => {
     readLoading: ['A carregar rondas, tecnicos, piscinas, visitas e extras...','Loading rounds, technicians, pools, visits and extras...','Chargement des tournées, techniciens, piscines, visites et suppléments...','Cargando rondas, técnicos, piscinas, visitas y extras...','Rundgänge, Techniker, Pools, Besuche und Zusätze werden geladen...'],
     readReady: ['Rondas e visitas carregadas com sucesso.','Rounds and visits loaded successfully.','Tournées et visites chargées avec succès.','Rondas y visitas cargadas correctamente.','Rundgänge und Besuche erfolgreich geladen.'],
     readWarnings: ['Carregado com avisos: {warnings}','Loaded with warnings: {warnings}','Chargé avec avertissements : {warnings}','Cargado con avisos: {warnings}','Mit Warnungen geladen: {warnings}'],
+    unassignedWarning: ['Aviso: {count} ronda(s) sem tecnico atribuido','Warning: {count} round(s) without an assigned technician','Attention : {count} tournée(s) sans technicien attribué','Aviso: {count} ronda(s) sin técnico asignado','Warnung: {count} Rundgang/Rundgänge ohne zugewiesenen Techniker'],
+    assignBeforeVisits: ['. Associa um tecnico antes de gerar ou executar visitas.','. Assign a technician before generating or carrying out visits.','. Attribuez un technicien avant de générer ou effectuer des visites.','. Asigna un técnico antes de generar o realizar visitas.','. Vor dem Erzeugen oder Ausführen von Besuchen einen Techniker zuweisen.'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -615,10 +617,15 @@ function renderKpis(){
   const warning = document.getElementById("roundTechWarning");
   const warningCard = document.getElementById("kpiUnassignedRoundsCard");
   if(warning){
+    roundCopy.forget(warning);
     if(unassignedRounds.length){
       const names = unassignedRounds.map(round => `${dayNames[Number(round.dayOfWeek) || 0]} - ${round.name}`).join(", ");
+      const count = String(unassignedRounds.length),entries = unassignedRounds.map(round => ({day:Number(round.dayOfWeek)||0,name:String(round.name)}));
       warning.style.display = "block";
+      warning.style.overflowWrap = 'anywhere';
       warning.innerHTML = `<strong>Aviso: ${unassignedRounds.length} ronda(s) sem tecnico atribuido</strong><span>${escapeHtml(names)}. Associa um tecnico antes de gerar ou executar visitas.</span>`;
+      roundCopy.bind(warning.querySelector('strong'), () => roundCopy.text('unassignedWarning').replace('{count}', count));
+      roundCopy.bind(warning.querySelector('span'), () => entries.map(({day,name}) => `${day>=0&&day<=6?roundCopy.text('day'+day):String(dayNames[day])} - ${name}`).join(', ')+roundCopy.text('assignBeforeVisits'));
     }else{
       warning.style.display = "none";
       warning.innerHTML = "";
