@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK556 - evento de sessão na página técnica legada (2026-10-03)
+- Ligado somente cw:session-change à proteção existente da lista: formulários limpam no evento e a geração invalida GET tardio após regresso rápido. Cache/pedidos/rascunhos e comportamento de nova leitura própria preservados; não acrescenta bloqueio permanente nem aborto HTTP.
+- Recuperação nativa/cache316 exata/191 tuplos de idioma, E2E dos três perfis e preflight23/23 aprovados; CI551/restauro conferidos. API/schema/payload e runner387 intactos; barra de pendentes fica para observação separada na TASK557.
+
 ## TASK555 - perfil técnico e sessão (2026-10-03)
 - Seis campos locais do perfil limpam ao mudar/expirar sessão e não repintam até reload. Store/mensagem existentes reutilizados; fontes literais, contactos ocultos e 17 entradas de idioma anteriores preservados.
 - Grupo nativo dos quatro principais, cache315 byte a byte/reload frio offline, E2E dos três perfis e preflight23/23 aprovados, sem GET/escrita operacional novos. CI550/restauro conferidos, aceitação do novo SHA pendente.

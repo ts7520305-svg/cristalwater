@@ -388,6 +388,7 @@ function protectLegacyRouteSession() {
   else if (routeVisibleDay && routeVisibleDay !== todayRouteKey()) { visits = []; document.getElementById('list')?.replaceChildren(); routeVisibleDay = null; loadRoute(); }
 }
 window.addEventListener('storage', protectLegacyRouteSession);
+window.addEventListener('cw:session-change', protectLegacyRouteSession);
 window.addEventListener('offline', () => { if (window.CWFieldWriteStore.same(legacyWriteSession) && routeVisibleDay) { routeViewSource = 'offline'; showRouteStatus(); } });
 setInterval(protectLegacyRouteSession, 1000);
 window.addEventListener('pagehide', () => { legacyEntryGeneration++; });
