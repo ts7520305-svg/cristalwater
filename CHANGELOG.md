@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK564 - formulários e seletores de rondas em cinco idiomas (2026-10-03)
+- Motor/seletor global existente e112 entradas próprias; folhas/atributos/opções repintados nos mesmos nós, sem alterar valores/drafts/payload/aliases/dados literais. Valores PT de coverageCause preservados explicitamente e bindings antigos libertados pelo produtor. Filtros responsivos corrigidos após captura DE, sem palavras partidas.
+- Extensão do Route OS nativo aprovada com370 verificações de texto, cinco idiomas/três larguras, SQL/nós/valores/foco/caret intactos e zero GET/escrita de negócio por idioma. Todos os casos operacionais originais e prazos mantidos; grupo final98,90s abaixo do limite120s existente. Preflight23, E2E/cache321 e visual dos três perfis, sintaxe completa/técnicos4/4 aprovados; quatro falhas Windows conhecidas sem dispensas. CI557–559/logs/restauros conferidos; própria ainda pendente. Cartões/estados/recibos/diálogos/planeador continuam abertos; próxima565 apenas cartões de cobertura read-only.
+
 ## TASK563 - PINs isolados nas fixtures Route OS (2026-10-03)
 - Reproduzido login recusado por dois técnicos QA ativos com o PIN fixo. Grupo existente atribui PINs livres pelo comparador nativo e exige login200/token antes da recusa403 original. Técnicos antigos, produto/API/schema/assertions/prazos preservados.
 - Duas execuções completas consecutivas aprovadas com SQL/API/browser reais: atribuições, cobertura/transferência, recorrência, rota/workday e notificações. Gates obrigatórios e quatro limitações Windows registados; próxima564 retoma formulários/seletores de rondas.

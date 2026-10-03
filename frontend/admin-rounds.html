@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cristal Water LDA - Rondas</title>
   <script src="/cw-auth.js"></script>
+  <script defer src="/cw-i18n.js"></script>
   <link rel="stylesheet" href="/crystal-os-v2-foundation.css">
   <link rel="stylesheet" href="/crystal-os-v2-phase2-adapter.css">
   <link rel="stylesheet" href="/ui/foundation.css">
@@ -25,10 +26,12 @@
     .status.error{border-color:color-mix(in srgb, var(--ds-danger) 40%, white);background:#fff4f4;color:#7f2326}
     .status.ok{border-color:color-mix(in srgb, var(--ds-success) 40%, white);background:#f2faf5;color:#185c33}
     .actions{display:flex;gap:8px;flex-wrap:wrap}.actions a,.actions button{min-width:120px;text-align:center}
+    main.page :is(h1,h2,h3,label,button,.mini,.rule-note){overflow-wrap:anywhere}main.page .cw-lang-switch select{min-height:44px}.actions{align-items:center}
     .weekly-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.force-note{color:var(--ds-text-muted);font-size:12px}
     .rule-note{border:1px solid color-mix(in srgb, var(--ds-success) 28%, white);background:#f2faf5;border-radius:14px;padding:11px;color:#185c33;margin:10px 0;font-size:13px;line-height:1.45}
-    .visit-filter-panel{display:grid;grid-template-columns:1.4fr repeat(3,minmax(150px,1fr));gap:10px;margin:14px 0}
-    .visit-filter-panel input,.visit-filter-panel select,.visit-filter-panel button{margin:0}.visit-filter-panel .wide{grid-column:span 2}
+    .visit-filter-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0;min-width:0}
+    .visit-filter-panel input,.visit-filter-panel select,.visit-filter-panel button{margin:0;min-width:0;max-width:100%}.visit-filter-panel .wide{grid-column:span 2}
+    #clearVisitFilters{grid-column:1/-1;justify-self:start;overflow-wrap:normal}
     .visit-filter-summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 12px;color:var(--ds-text-muted);font-size:13px}
     .visit-planner{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0 18px}
     .tech-column{border-radius:18px;padding:12px;min-height:135px}
@@ -62,13 +65,13 @@
   <link rel="stylesheet" href="/ui/design-system.css">
 </head>
 <body data-required-role="ADMIN">
-  <main class="page">
+  <main class="page" data-cw-no-i18n data-cw-state-managed="manual">
     <div class="page-head">
       <div>
         <h1>Rondas</h1>
         <p>Uma ronda principal por dia e por tecnico, com apoio, substituicoes e visitas de outro dia controladas no planeador.</p>
       </div>
-      <div class="actions">
+      <div class="actions cw-global-actions">
         <button class="cw-v2-btn" type="button" data-cw-back data-cw-fallback="/admin-master-control">Voltar</button>
         <a class="cw-v2-btn" href="/admin-master-control">Centro de Operacoes</a>
       </div>
@@ -81,7 +84,7 @@
       <p id="coverageStatus" role="status" aria-live="polite">A consultar o planeamento…</p>
       <form id="coverageTransfer" class="coverage-form">
         <label>Novo técnico<select id="coverageTechnician" required><option value="">Selecionar técnico</option></select></label>
-        <label>Motivo da redistribuição<select id="coverageCause"><option>Ausência de técnico</option><option>Avaria de viatura</option><option>Falta de produtos químicos</option><option>Falta de material ou equipamento</option><option>Apoio à rota</option></select></label>
+        <label>Motivo da redistribuição<select id="coverageCause"><option value="Ausência de técnico">Ausência de técnico</option><option value="Avaria de viatura">Avaria de viatura</option><option value="Falta de produtos químicos">Falta de produtos químicos</option><option value="Falta de material ou equipamento">Falta de material ou equipamento</option><option value="Apoio à rota">Apoio à rota</option></select></label>
         <label>Informação para a gestão<textarea id="coverageReason" rows="2" maxlength="900" required minlength="5" placeholder="Ex.: viatura sem hipoclorito; confirmar reposição"></textarea></label>
         <button type="submit" class="cw-v2-btn primary">Pré-visualizar transferência</button>
       </form>

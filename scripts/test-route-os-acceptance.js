@@ -471,6 +471,150 @@ async function main() {
   process.exit(ok ? 0 : 1);
 }
 
+async function selectRoundLanguage(page,language){
+  const assert=require('node:assert/strict');
+  assert.equal(await page.locator('#cwLanguageSelect').count(),1,'Rounds forms need the existing global language selector');
+  const saved=page.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language===language);
+  await page.locator('#cwLanguageSelect').selectOption(language);
+  const response=await saved;assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,language});
+  await page.waitForFunction(value=>document.documentElement.lang===value,language);
+}
+
+async function checkRoundFormLanguages(page,round,pool,visits){
+  const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
+  const languages=['pt','en','fr','es','de'],headings=['Rondas','Rounds','Tournées','Rondas','Rundgänge'];
+  const expected=[
+    ['#createRoundBtn',['Criar ronda','Create round','Créer une tournée','Crear ronda','Rundgang erstellen']],
+    ['label[for="roundName"]',['Nome da ronda','Round name','Nom de la tournée','Nombre de la ronda','Name des Rundgangs']],
+    ['label[for="roundRecurrence"]',['Frequência','Frequency','Fréquence','Frecuencia','Häufigkeit']],
+    ['#roundRecurrence option[value="WEEKLY"],#extraRepeatMode option[value="weekly"]',['Semanal','Weekly','Hebdomadaire','Semanal','Wöchentlich']],
+    ['#roundRecurrence option[value="DAILY"]',['Diária — todos os dias','Daily - every day','Quotidienne - tous les jours','Diaria - todos los días','Täglich - jeden Tag']],
+    ['#roundRecurrence option[value="MONTHLY"]',['Mensal','Monthly','Mensuelle','Mensual','Monatlich']],
+    ['label[for="roundDay"],label[for="visitDayFilter"]',['Dia da semana','Day of week','Jour de la semaine','Día de la semana','Wochentag']],
+    ['label[for="roundMonthDay"]',['Dia do mês (1–31)','Day of month (1–31)','Jour du mois (1–31)','Día del mes (1–31)','Tag des Monats (1–31)']],
+    ['label[for="roundStartsOn"]',['Início (opcional)','Start (optional)','Début (facultatif)','Inicio (opcional)','Beginn (optional)']],
+    ['label[for="roundEndsOn"]',['Fim (opcional)','End (optional)','Fin (facultative)','Fin (opcional)','Ende (optional)']],
+    ['label[for="assignTechRound"],label[for="assignPoolRound"],label[for="visitRoundFilter"]',['Ronda','Round','Tournée','Ronda','Rundgang']],
+    ['label[for="assignTech"],label[for="extraTechnician"],label[for="visitTechnicianFilter"]',['Tecnico','Technician','Technicien','Técnico','Techniker']],
+    ['label[for="assignmentPeriod"]',['Validade','Validity','Validité','Validez','Gültigkeit']],
+    ['#assignmentPeriod option[value="RANGE"]',['De data X a data Y','From date X to date Y','De la date X à la date Y','De la fecha X a la fecha Y','Von Datum X bis Datum Y']],
+    ['#assignmentPeriod option[value="DAY"]',['Um dia','One day','Un jour','Un día','Ein Tag']],
+    ['#assignmentPeriod option[value="WEEK"]',['Uma semana (7 dias)','One week (7 days)','Une semaine (7 jours)','Una semana (7 días)','Eine Woche (7 Tage)']],
+    ['#assignmentPeriod option[value="MONTH"]',['Um mês','One month','Un mois','Un mes','Ein Monat']],
+    ['#assignmentPeriod option[value="PERMANENT"]',['Sempre, desde a data de início','Always, from the start date','Toujours, à partir de la date de début','Siempre, desde la fecha de inicio','Unbefristet ab dem Anfangsdatum']],
+    ['label[for="assignmentStart"]',['Data de início','Start date','Date de début','Fecha de inicio','Anfangsdatum']],
+    ['label[for="assignmentEnd"]',['Último dia incluído','Last day included','Dernier jour inclus','Último día incluido','Letzter eingeschlossener Tag']],
+    ['label[for="assignmentReason"]',['Motivo da atribuição','Assignment reason','Motif de l’affectation','Motivo de asignación','Grund der Zuweisung']],
+    ['#assignTechBtn',['Rever e atribuir ronda','Review and assign round','Vérifier et attribuer la tournée','Revisar y asignar ronda','Rundgang prüfen und zuweisen']],
+    ['#assignPoolBtn',['Atribuir piscina','Assign pool','Attribuer une piscine','Asignar piscina','Pool zuweisen']],
+    ['label[for="assignPool"],label[for="extraPool"]',['Piscina','Pool','Piscine','Piscina','Pool']],
+    ['label[for="assignPoolOrder"]',['Ordem','Order','Ordre','Orden','Reihenfolge']],
+    ['label[for="extraStart"]',['Data e hora','Date and time','Date et heure','Fecha y hora','Datum und Uhrzeit']],
+    ['label[for="extraRepeatCount"]',['Quantidade','Quantity','Quantité','Cantidad','Anzahl']],
+    ['label[for="extraRepeatMode"]',['Repeticao','Repetition','Répétition','Repetición','Wiederholung']],
+    ['#extraRepeatMode option[value="once"]',['Uma vez','Once','Une fois','Una vez','Einmal']],
+    ['#extraRepeatMode option[value="daily"]',['Todos os dias','Every day','Tous les jours','Todos los días','Jeden Tag']],
+    ['#visitDayFilter option[value=""]',['Todos os dias','All days','Tous les jours','Todos los días','Alle Tage']],
+    ['label[for="extraBillingMode"]',['Faturacao','Billing','Facturation','Facturación','Abrechnung']],
+    ['#extraBillingMode option[value="EXTRA"]',['Extra cobravel','Chargeable extra','Supplément facturable','Extra facturable','Kostenpflichtiger Zusatz']],
+    ['#extraBillingMode option[value="INCLUDED"]',['Incluida no contrato','Included in contract','Incluse dans le contrat','Incluida en el contrato','Im Vertrag enthalten']],
+    ['#extraBillingMode option[value="NO_CHARGE"]',['Sem cobranca','No charge','Sans facturation','Sin cobro','Kostenfrei']],
+    ['label[for="extraPrice"]',['Valor por visita extra','Price per extra visit','Prix par visite supplémentaire','Precio por visita extra','Preis je Zusatzbesuch']],
+    ['label[for="extraNotes"]',['Notas internas','Internal notes','Notes internes','Notas internas','Interne Notizen']],
+    ['#createExtraVisitBtn',['Criar visita extra','Create extra visit','Créer une visite supplémentaire','Crear visita extra','Zusatzbesuch erstellen']],
+    ['#generateWeekBtn',['Gerar visitas da semana','Generate weekly visits','Générer les visites de la semaine','Generar visitas de la semana','Wochenbesuche erzeugen']],
+    ['#forceGenerateBtn',['Verificar visitas em falta','Check missing visits','Vérifier les visites manquantes','Comprobar visitas faltantes','Fehlende Besuche prüfen']],
+    ['label[for="visitSearch"]',['Pesquisa','Search','Recherche','Búsqueda','Suche']],
+    ['label[for="visitDateFilter"]',['Dia','Day','Jour','Día','Tag']],
+    ['label[for="visitWeekFilter"]',['Semana','Week','Semaine','Semana','Woche']],
+    ['label[for="visitStatusFilter"]',['Estado','Status','État','Estado','Status']],
+    ['#visitStatusFilter option[value=""]',['Todos os estados','All statuses','Tous les états','Todos los estados','Alle Status']],
+    ['#visitStatusFilter option[value="alerts"]',['Com alertas','With alerts','Avec alertes','Con alertas','Mit Alarmen']],
+    ['#visitStatusFilter option[value="late"]',['Atrasadas','Overdue','En retard','Atrasadas','Überfällig']],
+    ['#visitStatusFilter option[value="pending"]',['Pendentes / em curso','Pending / in progress','En attente / en cours','Pendientes / en curso','Ausstehend / in Bearbeitung']],
+    ['#visitStatusFilter option[value="done"]',['Concluidas','Completed','Terminées','Completadas','Abgeschlossen']],
+    ['#visitStatusFilter option[value="extra"]',['Visitas extra','Extra visits','Visites supplémentaires','Visitas extra','Zusatzbesuche']],
+    ['#visitStatusFilter option[value="billable"]',['Extras cobraveis','Chargeable extras','Suppléments facturables','Extras facturables','Kostenpflichtige Zusätze']],
+    ['#clearVisitFilters',['Limpar filtros','Clear filters','Effacer les filtres','Limpiar filtros','Filter zurücksetzen']],
+    ['#coverageRefresh',['Verificar agora','Check now','Vérifier maintenant','Comprobar ahora','Jetzt prüfen']],
+    ['#coverageTransfer label:nth-of-type(1)',['Novo técnico','New technician','Nouveau technicien','Nuevo técnico','Neuer Techniker']],
+    ['#coverageTransfer label:nth-of-type(2)',['Motivo da redistribuição','Reassignment reason','Motif de réaffectation','Motivo de redistribución','Grund der Neuverteilung']],
+    ['#coverageTransfer label:nth-of-type(3)',['Informação para a gestão','Information for management','Informations pour la gestion','Información para la gestión','Informationen für die Verwaltung']],
+    ['#coverageTechnician option[value=""]',['Selecionar técnico','Select technician','Sélectionner un technicien','Seleccionar técnico','Techniker auswählen']],
+    ['#coverageTransfer button',['Pré-visualizar transferência','Preview transfer','Prévisualiser le transfert','Previsualizar transferencia','Übertragung prüfen']],
+    ['#coverageCause option:nth-child(1)',['Ausência de técnico','Technician absence','Absence du technicien','Ausencia de técnico','Abwesenheit des Technikers']],
+    ['#coverageCause option:nth-child(2)',['Avaria de viatura','Vehicle breakdown','Panne de véhicule','Avería del vehículo','Fahrzeugausfall']],
+    ['#coverageCause option:nth-child(3)',['Falta de produtos químicos','Missing chemicals','Manque de produits chimiques','Falta de productos químicos','Fehlende Chemikalien']],
+    ['#coverageCause option:nth-child(4)',['Falta de material ou equipamento','Missing materials or equipment','Manque de matériel ou d’équipement','Falta de material o equipo','Fehlendes Material oder Gerät']],
+    ['#coverageCause option:nth-child(5)',['Apoio à rota','Route support','Renfort de tournée','Apoyo a la ruta','Routenunterstützung']],
+    ['#visitTechnicianFilter option[value=""]',['Todos os tecnicos','All technicians','Tous les techniciens','Todos los técnicos','Alle Techniker']],
+    ['#visitRoundFilter option[value=""]',['Todas as rondas','All rounds','Toutes les tournées','Todas las rondas','Alle Rundgänge']],
+    ['#extraTechnician option[value=""]',['Sem tecnico definido','No technician assigned','Aucun technicien attribué','Sin técnico asignado','Kein Techniker zugewiesen']],
+    ['#extraPool option[value=""]',['Piscina / jacuzzi da visita extra','Pool / hot tub for extra visit','Piscine / jacuzzi de la visite supplémentaire','Piscina / jacuzzi de la visita extra','Pool / Whirlpool für den Zusatzbesuch']],
+  ];
+  const weekdays=[['Domingo','Segunda','Terca','Quarta','Quinta','Sexta','Sabado'],['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'],['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag']];
+  const attributes=[
+    ['#roundName','placeholder',['Nome da ronda','Round name','Nom de la tournée','Nombre de la ronda','Name des Rundgangs']],
+    ['#assignPoolOrder','placeholder',['Ordem','Order','Ordre','Orden','Reihenfolge']],
+    ['#extraRepeatCount','placeholder',['Quantas visitas','How many visits','Nombre de visites','Cuántas visitas','Anzahl der Besuche']],
+    ['#extraPrice','placeholder',['Valor por visita extra','Price per extra visit','Prix par visite supplémentaire','Precio por visita extra','Preis je Zusatzbesuch']],
+    ['#visitDateFilter','title',['Filtrar por dia','Filter by day','Filtrer par jour','Filtrar por día','Nach Tag filtern']],
+    ['#visitWeekFilter','title',['Filtrar por semana','Filter by week','Filtrer par semaine','Filtrar por semana','Nach Woche filtern']],
+  ];
+  const sql=async()=>JSON.stringify({round:await prisma.round.findUnique({where:{id:round.id},include:{technicians:true,pools:true,assignments:true}}),visits:await prisma.serviceVisit.findMany({where:{OR:[{id:{in:visits.map(visit=>visit.id)}},{poolId:pool.id}]},orderBy:{id:'asc'}}),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
+  const before=await sql(),requests=[];
+  const listen=request=>{if(new URL(request.url()).pathname.startsWith('/api/'))requests.push({method:request.method(),path:new URL(request.url()).pathname});};
+  await page.locator('#roundName').fill('Criar ronda <img src=x>');await page.locator('#extraNotes').fill('Rondas / Atualizar <b>draft literal</b>');
+  await page.locator('#extraPool').selectOption(String(pool.id));await page.locator('#coverageCause').selectOption('Falta de produtos químicos');
+  await page.evaluate(()=>{
+    document.getElementById('extraPrice').disabled=true;document.getElementById('createExtraVisitBtn').setAttribute('aria-busy','true');
+    window.qaRoundNodes=[...document.querySelectorAll('main :is(input,textarea,select,option,button,h1,h2,h3,label)')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));
+    window.qaRoundLiteral=[...document.querySelectorAll('#weekVisits,#visitPlanner,#coverageList,#visitReceiptsAdmin,#status,#coverageStatus,#visitFilterSummary')].map(node=>({node,markup:node.innerHTML}));
+  });
+  const fingerprint=()=>page.evaluate(()=>JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select')].filter(node=>node.id!=='cwLanguageSelect').map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,hidden:node.hidden,options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),busy:document.getElementById('createExtraVisitBtn').getAttribute('aria-busy'),links:[...document.querySelectorAll('main a')].map(node=>node.getAttribute('href'))}));
+  const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-form-languages');await fs.mkdir(output,{recursive:true});
+  page.on('request',listen);let textCases=0,geometryCases=0;
+  try{
+    for(const [index,language] of languages.entries()){
+      await selectRoundLanguage(page,language);
+      assert.equal(await page.locator('main h1').textContent(),headings[index]);assert.equal(await page.title(),'Cristal Water LDA - '+headings[index]);
+      for(const [selector,labels] of expected){const actual=await page.locator(selector).evaluateAll(nodes=>nodes.map(node=>[...node.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&child.nodeValue.trim())?.nodeValue.trim()));assert(actual.length>0,selector);assert(actual.every(value=>value===labels[index]),language+' '+selector+' '+JSON.stringify(actual));textCases+=actual.length;}
+      for(let day=0;day<7;day++)assert.deepEqual(await page.locator(`#roundDay option[value="${day}"],#visitDayFilter option[value="${day}"]`).allTextContents(),[weekdays[index][day],weekdays[index][day]]);
+      for(const [selector,attribute,labels] of attributes)assert.equal(await page.locator(selector).getAttribute(attribute),labels[index]);
+      for(const selector of ['#assignTechRound','#assignPoolRound'])assert.equal(await page.locator(selector+` option[value="${round.id}"]`).textContent(),weekdays[index][round.dayOfWeek]+' - '+round.name);
+      assert.equal(await page.locator(`#extraPool option[value="${pool.id}"]`).textContent(),pool.name+' - Cliente geração QA');
+      assert.equal(await fingerprint(),controls);assert(await page.evaluate(()=>qaRoundNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))));
+      assert.deepEqual(await page.evaluate(()=>qaRoundLiteral.filter(({node,markup})=>node.innerHTML!==markup).map(({node,markup})=>{const after=node.innerHTML;let index=0;while(index<markup.length&&markup[index]===after[index])index++;return {id:node.id,index,before:markup.slice(Math.max(0,index-60),index+180),after:after.slice(Math.max(0,index-60),index+180)};})),[],'Deferred operational producers remain literal');
+      for(const width of [320,390,1440]){
+        await page.setViewportSize({width,height:1000});await page.locator('#roundName').scrollIntoViewIfNeeded();
+        assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),language+'/'+width+' page overflow');
+        const geometry=await page.locator('.cols2>.card:first-child :is(h2,label,button),#coverageTransfer :is(label,button),.visit-filter-panel :is(input,select,button)').evaluateAll(nodes=>nodes.filter(node=>node.getClientRects().length).map(node=>{const box=node.getBoundingClientRect();return {text:node.firstChild?.textContent,width:box.width,left:box.left,right:box.right,viewport:innerWidth};}));
+        assert(geometry.every(box=>box.left>=-1&&box.right<=box.viewport+1),language+'/'+width+' '+JSON.stringify(geometry));
+        assert(await page.locator('#clearVisitFilters').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left&&line.right<=box.right)&&node.scrollWidth<=node.clientWidth;}),'Clear filter label fits '+language+'/'+width);
+        await page.screenshot({path:path.join(output,language+'-'+width+'.png'),caret:'initial'});geometryCases++;
+      }
+    }
+    const saved=page.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language==='fr');
+    await page.locator('#extraNotes').evaluate(node=>{node.focus();node.setSelectionRange(3,9);CristalI18n.applyLanguage('fr');});assert.equal((await saved).status(),200);
+    assert.deepEqual(await page.locator('#extraNotes').evaluate(node=>({focus:document.activeElement===node,start:node.selectionStart,end:node.selectionEnd})),{focus:true,start:3,end:9});assert.equal(await fingerprint(),controls);
+    // Foreign leaves, cloned nodes and changed attributes must not acquire ownership.
+    await page.evaluate(()=>{
+      const heading=document.querySelector('main h1');heading.replaceChildren(document.createTextNode('Rondas'));
+      const button=document.getElementById('createRoundBtn'),clone=button.cloneNode(true);clone.id='qaRoundClone';button.after(clone);button.firstChild.nodeValue='Criar ronda';
+      const literal=document.createElement('p');literal.textContent='Rondas';literal.id='qaRoundLiteral';heading.after(literal);
+      document.getElementById('roundName').setAttribute('placeholder','Nome da ronda');
+      window.qaRoundForeign=[heading,button,clone,literal].map(node=>({node,markup:node.outerHTML}));
+    });
+    for(const language of languages){await selectRoundLanguage(page,language);assert(await page.evaluate(()=>qaRoundForeign.every(({node,markup})=>node.outerHTML===markup)));assert.equal(await page.locator('#roundName').getAttribute('placeholder'),'Nome da ronda');assert.equal(await fingerprint(),controls);}
+    await selectRoundLanguage(page,'pt');
+    assert.deepEqual(requests.filter(request=>request.method==='GET'),[],'Changing language must not reload operational data');
+    assert.deepEqual(requests.filter(request=>request.method!=='PUT'||request.path!=='/api/settings/language/me'),[],'Only the existing language preference may be written');
+    assert.equal(await sql(),before,'Language changes must preserve exact native SQL rows and write/stock/receipt counts');
+    const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','coverage status and cards','receipts','dialogs','loading and errors','empty option fallbacks']};
+    await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS rounds form languages '+JSON.stringify(proof));
+  }finally{page.off('request',listen);}
+}
+
 async function testRoundAssignmentPeriods(adminUser){
   const assert=require('node:assert/strict');
   const business=require('../src/business/admin/RoundAssignmentBusiness');
@@ -526,6 +670,7 @@ async function testRoundAssignmentPeriods(adminUser){
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({...user,role:'ADMIN'}));},{token:authToken,user:adminUser||{}});
     const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
     await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    await selectRoundLanguage(page,'pt');
     await page.locator('#assignTechRound').selectOption(String(round.id));await page.locator('#assignTech').selectOption(String(b.id));
     await page.locator('#assignmentPeriod').selectOption('PERMANENT');assert(await page.locator('#assignmentEndField').isHidden());
     await page.locator('#assignmentStart').fill('2034-01-01');await page.locator('#assignmentReason').fill('Mudança permanente QA');
@@ -534,6 +679,8 @@ async function testRoundAssignmentPeriods(adminUser){
     await page.getByRole('dialog').waitFor();assert.match(await page.getByRole('dialog').textContent(),/sem fim/);
     await page.getByRole('dialog').getByRole('button',{name:/Cancelar/i}).click();
     assert.equal(await prisma.roundAssignment.count({where:{roundId:round.id}}),before);
+    assert.deepEqual(errors,[]);
+    await checkRoundFormLanguages(page,round,pool,[planned,started,after]);
     assert.deepEqual(errors,[]);
     await context.close();
   }finally{await browser.close();}
@@ -586,7 +733,7 @@ async function testVisitCoverage(adminUser){
   try{
     const context=await browser.newContext({viewport:{width:390,height:844}});
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));},{token:authToken,user:adminUser});
-    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});await selectRoundLanguage(page,'pt');
     await page.locator(`[data-transfer-visit="${pending.id}"]`).check();await page.locator('#coverageTechnician').selectOption(String(a.id));await page.locator('#coverageCause').selectOption({label:'Falta de produtos químicos'});await page.locator('#coverageReason').fill('Produto em falta confirmado; reposição na viatura');
     await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,b.id);
     await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Transferir',exact:true}).click();await page.waitForFunction(()=>document.getElementById('coverageStatus').textContent.includes('transferida(s)'));
@@ -627,7 +774,7 @@ async function testRecurrence(adminUser){
   try{
     const context=await browser.newContext({viewport:{width:390,height:844}});
     await context.addInitScript(({token,user})=>{for(const k of ['token','cristalwater_jwt'])localStorage.setItem(k,token);for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));},{token:authToken,user:adminUser});
-    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});await selectRoundLanguage(page,'pt');
     const name='Mensal criada no ecrã QA '+Date.now();await page.locator('#roundName').fill(name);await page.locator('#roundRecurrence').selectOption('MONTHLY');assert(await page.locator('#roundWeekField').isHidden());assert(await page.locator('#roundMonthField').isVisible());
     await page.locator('#roundMonthDay').fill('31');await page.locator('#roundStartsOn').fill('2032-02-01');await page.locator('#roundEndsOn').fill('2032-03-31');await page.locator('#createRoundBtn').click();
     await page.waitForFunction(name=>[...document.querySelectorAll('.round-card')].some(card=>card.textContent.includes(name)),name);
