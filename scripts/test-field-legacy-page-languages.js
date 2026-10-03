@@ -26,6 +26,7 @@ const copy = {
 const originalName = 'Guardar <b>José</b> — Online', originalNotes = 'Concluído <script>window.qaInjection=1</script> · 17,25 €';
 const fields = ['notes','ph','chlorine','alkalinity','salt','products'];
 let browser, completed = false;
+const releases=[];
 const deadline = setTimeout(() => { console.error('Legacy page language assertions did not finish'); process.exit(1); }, 90000);
 process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
 (async () => {
@@ -270,8 +271,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
       const interval=setInterval;window.setInterval=(fn,delay,...args)=>delay===15000?0:interval(fn,delay,...args);
       Object.defineProperty(navigator,'geolocation',{value:{watchPosition:()=>1,clearWatch(){}}});window.alert=()=>{};
     },{token:credential,actor,origin:new URL(base).origin});
-    const ownPage=await own.newPage(),ownErrors=[],ownWrites=[];ownPage.setDefaultTimeout(7000);
-    ownPage.on('pageerror',error=>ownErrors.push(error.message));ownPage.on('request',request=>{const path=new URL(request.url()).pathname;if(path.startsWith('/api/')&&path!=='/api/settings/language/me'&&request.method()!=='GET')ownWrites.push(request.url());});
+    const ownPage=await own.newPage(),ownErrors=[],ownWrites=[],ownReads=[];ownPage.setDefaultTimeout(7000);
+    ownPage.on('pageerror',error=>ownErrors.push(error.message));ownPage.on('request',request=>{const path=new URL(request.url()).pathname;if(!path.startsWith('/api/')||path==='/api/settings/language/me')return;(request.method()==='GET'?ownReads:ownWrites).push(path);});
     await ownPage.goto(base+'/technician.html',{waitUntil:'networkidle'});await ownPage.waitForFunction(id=>document.getElementById('notes-'+id),row.id);
     await ownPage.evaluate(()=>navigator.serviceWorker.ready);
     await waitBrowserState(ownPage,async expected=>{const cache=await caches.open(expected.version);for(const[url,source]of expected.files){const response=await cache.match(url);if(!response||await response.text()!==source)return false;}return true;},{version:cacheVersion,files:[['/technician.html','frontend/technician.html'],['/technician.js','frontend/technician.js'],['/cw-field-write-store.js','frontend/cw-field-write-store.js']].map(([url,file])=>[url,fs.readFileSync(file,'utf8')])});
@@ -316,11 +317,35 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     assert.equal(await bytes(),originalBytes);assert.equal(await ownPage.locator('#legacyFieldRecovery b').count(),0);
     await ownPage.clock.setFixedTime(expiry+1);
     assert.deepEqual(await ownPage.evaluate(async()=>{await updateOfflineBar();return[document.getElementById('legacyFieldRecovery').childElementCount,document.getElementById('offlineVisits').textContent,document.getElementById('offlinePhotos').textContent];}),[0,'',''],'Expired session must hide private pending controls and counts without touching saved requests');
+    assert.equal(await ownPage.evaluate(async()=>{await loadRoute();renderVisits();return document.getElementById('list').childElementCount;}),0,'Expired route producers must not restore private cached data or forms');
     assert.equal(await bytes(),originalBytes);assert.equal(ownWrites.length,writes);
     const renewed=jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'});await ownPage.clock.setFixedTime(Date.now());await ownPage.evaluate(({token,actor})=>CristalAuth.persistSession(token,actor),{token:renewed,actor});
-    await ownPage.reload({waitUntil:'domcontentloaded'});await ownPage.waitForFunction(()=>document.querySelectorAll('#legacyFieldRecovery button').length===3);assert.equal(await bytes(),originalBytes);assert.deepEqual(ownErrors,[]);assert.equal(ownWrites.length,writes);await own.close();
+    await ownPage.reload({waitUntil:'domcontentloaded'});await ownPage.waitForFunction(()=>document.querySelectorAll('#legacyFieldRecovery button').length===3);assert.equal(await bytes(),originalBytes);
+    // Transport is online for the native held GET, while the online event sees
+    // offline and cannot start an automatic send of the retained QA records.
+    await ownPage.evaluate(()=>Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>false}));
+    await own.setOffline(false);await ownPage.waitForLoadState('networkidle');
+    let releaseRoute;const routeGate=new Promise(resolve=>{releaseRoute=resolve;releases.push(resolve);});
+    await ownPage.route('**/api/visits/today?*',async route=>{
+      const response=await route.fetch(),data=await response.json();assert.equal(response.status(),200);assert.equal(response.headers()['cache-control'],'private, no-store');assert.equal(data.technicianId,person.id);
+      await ownPage.evaluate(()=>{window.qaExpiryRouteReady=true;});await routeGate;await route.fulfill({response}).catch(()=>{});
+    },{times:1});
+    await ownPage.evaluate(()=>{Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>true});window.qaExpiryRoutePromise=loadRoute();});
+    await ownPage.waitForFunction(()=>window.qaExpiryRouteReady===true);
+    await ownPage.clock.setFixedTime(jwt.decode(renewed).exp*1000+1);await ownPage.evaluate(()=>updateOfflineBar());
+    assert.equal(await ownPage.locator('#list').innerHTML(),'');releaseRoute();await ownPage.evaluate(()=>qaExpiryRoutePromise);
+    assert.equal(await ownPage.locator('#list').innerHTML(),'','Native late GET after expiry cannot restore private route forms');
+    const expiredReads=ownReads.length;
+    await ownPage.evaluate(async()=>{await loadRoute();renderVisits();await updateOfflineBar();});
+    assert.equal(await ownPage.locator('#list').innerHTML(),'');assert.equal(await ownPage.locator('#legacyFieldRecovery').innerHTML(),'');assert.equal(ownReads.length,expiredReads,'Expired direct producers cannot start another operational GET');
+    assert.equal(await bytes(),originalBytes);assert.equal(ownWrites.length,writes);
+    await ownPage.clock.setFixedTime(Date.now());await ownPage.evaluate(({token,actor})=>CristalAuth.persistSession(token,actor),{token:jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'}),actor});
+    await own.setOffline(true);await ownPage.reload({waitUntil:'domcontentloaded'});await ownPage.waitForFunction(()=>document.querySelectorAll('#legacyFieldRecovery button').length===3);
+    for(const field of fields)assert.equal(await ownPage.locator('#'+field+'-'+row.id).inputValue(),values[field]);
+    assert.equal(await bytes(),originalBytes);assert.deepEqual(ownErrors,[]);assert.equal(ownWrites.length,writes);await own.close();
+    console.log('PASS expired route '+person.role+'/'+principal+': direct cache/load/render blocked, real owner GET200 delivered late ignored, no new GET, renewal/reload preserves all six fields and pending bytes');
     console.log('PASS pending matrix '+person.role+'/'+principal+': native SQL identity, photo/completion/alert/GPS bytes, same owner, synchronous rapid return, late actual photo queue, exact offline reload, expiry and renewal');
   }
   assert.deepEqual(await matrixSql(),matrixBefore);
   completed=true;
-})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{try{await browser?.close();await prisma.$disconnect();}finally{clearTimeout(deadline);}});
+})().catch(error=>{console.error(error);process.exitCode=1;}).finally(async()=>{try{for(const release of releases)release();await browser?.close();await prisma.$disconnect();}finally{clearTimeout(deadline);}});

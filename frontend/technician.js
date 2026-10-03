@@ -559,8 +559,8 @@ function getAuthHeaders(){
 
 async function loadRoute() {
   const captured = legacyWriteSession, ticket = ++routeLoadRevision, day = todayRouteKey();
-  if (!window.CWFieldWriteStore.same(captured)) return;
-  const current = () => ticket === routeLoadRevision && day === todayRouteKey() && window.CWFieldWriteStore.same(captured);
+  if (!legacySessionCurrent()) { protectLegacyRouteSession(); return; }
+  const current = () => ticket === routeLoadRevision && day === todayRouteKey() && legacySessionCurrent();
   routeCacheWarning = '';
   try {
     if (!navigator.onLine) {
@@ -591,7 +591,7 @@ async function loadRoute() {
 // ======================================================
 
 function renderVisits() {
-  if (!window.CWFieldWriteStore.same(legacyWriteSession)) return;
+  if (!legacySessionCurrent()) { protectLegacyRouteSession(); return; }
   window.CWFieldInternalAlert?.setVisits(visits);
 
   const list =

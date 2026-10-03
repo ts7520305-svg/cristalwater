@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK559 - rota legada após expiração (2026-10-03)
+- Reproduzido cartão privado repintado a partir da cache após expiração; loadRoute/current/renderVisits reutilizam agora o predicado de sessão existente. Sem novo engine/latch/envio, mantendo contratos/dia/cache e dados guardados.
+- Quatro principais aprovados na recusa de releitura/pintura, GET nativo tardio e renovação/reload com bytes intactos. Cinco grupos nativos, cache319 exata, E2E dos três perfis e preflight23/23 aprovados; CI553/log/restauro conferidos, CI própria pendente. Próximo: reconciliação das fontes C06 com inventário original.
+
 ## TASK558 - expiração da barra de pendentes legada (2026-10-03)
 - Reproduzidos três botões privados após exp do JWT; proteção da vista usa agora exp capturado/store.same/isSessionExpired existentes, sem alterar as filas/envios. Dados preservados e recuperação após reautenticação/reload.
 - Quatro principais PIN/USER/Técnico/Chefe aprovados com fotografia binária/conclusão/alerta/GPS, troca rápida, resultado real tardio, cache318/reload offline e UUID/hash/bytes/SQL intactos. Cinco grupos nativos, E2E dos três perfis e preflight23/23 aprovados; produtor da lista após expiração fica para559. CI própria pendente.
