@@ -175,12 +175,17 @@ function orderByOptimize(points, start) {
 }
 
 async function main() {
+  const groupStarted=Date.now(),phaseTimings=[];let phaseStarted=groupStarted;
+  const mark=phase=>{const now=Date.now();phaseTimings.push({phase,ms:now-phaseStarted});phaseStarted=now;};
   const adminLogin = await request("POST", "/api/auth/login", {email: process.env.ADMIN_EMAIL, password: process.env.ADMIN_PASSWORD});
   if (adminLogin.status !== 200 || !adminLogin.body?.token) throw new Error(`Admin login failed: ${adminLogin.status}`);
   authToken = adminLogin.body.token;
   await testRoundAssignmentPeriods(adminLogin.body.user);
+  mark('round assignments and native language matrix');
   await testVisitCoverage(adminLogin.body.user);
+  mark('coverage journey');
   await testRecurrence(adminLogin.body.user);
+  mark('recurrence journey');
   const startedAt = Date.now();
   const suffix = uniqueSuffix();
   const pin = await availablePin();
@@ -468,6 +473,7 @@ async function main() {
     )
   );
 
+  mark('route workday and completion journey');console.log('QA Route OS phases '+JSON.stringify({totalMs:Date.now()-groupStarted,phases:phaseTimings}));
   process.exit(ok ? 0 : 1);
 }
 
@@ -481,13 +487,14 @@ async function selectRoundLanguage(page,language){
 }
 
 async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
+  const languageStarted=Date.now(),languageTimings=[];let phaseStarted=languageStarted;
   const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
   const languages=['pt','en','fr','es','de'],headings=['Rondas','Rounds','Tournées','Rondas','Rundgänge'];
   const plannerUnassigned=['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen'],plannerNumber=['Tecnico #{id}','Technician #{id}','Technicien #{id}','Técnico #{id}','Techniker #{id}'],plannerDrop=['Arraste visitas para aqui','Drag visits here','Glissez les visites ici','Arrastra visitas aquí','Besuche hierher ziehen'];
   const chipKinds={SERVICE:['Ronda','Round','Tournée','Ronda','Rundgang'],EXTRA:['Extra','Extra','Supplément','Extra','Zusatz']};
   const assignmentCopy={NORMAL:['Normal','Normal','Normal','Normal','Normal'],SUPPORT:['Ajuda / apoio','Help / support','Aide / renfort','Ayuda / apoyo','Hilfe / Unterstützung'],SUBSTITUTION:['Substituicao','Substitution','Remplacement','Sustitución','Vertretung'],OTHER_DAY:['Ronda de outro dia','Round from another day','Tournée d’un autre jour','Ronda de otro día','Rundgang eines anderen Tages'],RESCHEDULE:['Reagendada','Rescheduled','Replanifiée','Reprogramada','Neu geplant'],UNASSIGNED:['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen']};
   const tableHeadings=[['Data','Date','Date','Fecha','Datum'],['Cliente','Client','Client','Cliente','Kunde'],['Piscina','Pool','Piscine','Piscina','Pool'],['Tecnico','Technician','Technicien','Técnico','Techniker'],['Tipo / cobranca','Type / billing','Type / facturation','Tipo / facturación','Typ / Abrechnung'],['Estado','Status','État','Estado','Status'],['Editar','Edit','Modifier','Editar','Bearbeiten']];
-  const tableAria=['Lista editavel de visitas da semana','Editable weekly visits list','Liste modifiable des visites de la semaine','Lista editable de visitas de la semana','Bearbeitbare Liste der Wochenbesuche'];
+  const tableAria=['Lista editavel de visitas da semana','Editable weekly visits list','Liste modifiable des visites de la semaine','Lista editable de visitas de la semana','Bearbeitbare Liste der Wochenbesuche'],tableActionMeasurements=[];
   const now=new Date(),ago=days=>new Date(now.getTime()-days*86400000),tomorrow=new Date(now.getTime()+86400000);
   const coverageClient=await prisma.client.create({data:{name:'Rondas',active:true}}),coverageTechnician=await prisma.technician.create({data:{name:'Rondas',active:true}});
   const coveragePools=[];
@@ -632,9 +639,12 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
   const fingerprint=()=>page.evaluate(()=>JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select')].filter(node=>node.id!=='cwLanguageSelect').map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,hidden:node.hidden,options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),busy:document.getElementById('createExtraVisitBtn').getAttribute('aria-busy'),links:[...document.querySelectorAll('main a')].map(node=>node.getAttribute('href'))}));
   const controls=await fingerprint(),output=path.join(__dirname,'../reports/field-visual/round-coverage-languages');await fs.mkdir(output,{recursive:true});
   page.on('request',listen);let textCases=0,geometryCases=0;
+  const preparationMs=Date.now()-phaseStarted;
   try{
     for(const [index,language] of languages.entries()){
+      phaseStarted=Date.now();let tableMs=0;
       await selectRoundLanguage(page,language);
+      const switchMs=Date.now()-phaseStarted;phaseStarted=Date.now();
       if(language==='en'){
         const ownCheckbox=page.locator(`[data-coverage-pool="${pool.id}"] [data-transfer-visit]`).first();
         assert.equal(await ownCheckbox.count(),1,'Native own coverage visit must be present');
@@ -662,6 +672,7 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
       assert.equal(await page.locator(`#extraPool option[value="${pool.id}"]`).textContent(),pool.name+' - Cliente geração QA');
       assert.equal(await fingerprint(),controls);assert(await page.evaluate(()=>qaRoundNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))));
       assert.deepEqual(await page.evaluate(()=>qaRoundLiteral.map(({node,markup})=>({node,markup,after:node.id==='visitPlanner'?qaRoundPlannerMarkup():node.id==='weekVisits'?qaRoundWeekMarkup():node.innerHTML})).filter(({markup,after})=>after!==markup).map(({node,markup,after})=>{let index=0;while(index<markup.length&&markup[index]===after[index])index++;return {id:node.id,index,before:markup.slice(Math.max(0,index-60),index+180),after:after.slice(Math.max(0,index-60),index+180)};})),[],'All non-owned planner/table markup and deferred operational producers remain literal');
+      const stateMs=Date.now()-phaseStarted;phaseStarted=Date.now();
       for(const width of [320,390,1440]){
         await page.setViewportSize({width,height:1000});await page.locator('#roundName').scrollIntoViewIfNeeded();
         assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),language+'/'+width+' page overflow');
@@ -672,12 +683,36 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
         assert(await page.locator(`#visitPlanner [data-technician-id="${summarySources.emptyTechnician.id}"]`).evaluate(node=>{const box=node.getBoundingClientRect();return box.left>=0&&box.right<=innerWidth+1&&[...node.querySelectorAll('h4,.empty')].every(child=>{const range=document.createRange();range.selectNodeContents(child);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);});}),'Planner fallback and empty hint fit '+language+'/'+width);
         assert(await page.locator(`#visitPlanner .visit-chip[data-kind="EXTRA"][data-id="${summarySources.plannerExtra.id}"]`).evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node.children[2]);return box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Native extra metadata fits '+language+'/'+width);
         assert(await page.evaluate(ids=>ids.every(id=>{const node=document.querySelector(`#visitPlanner .visit-chip[data-kind="SERVICE"][data-id="${id}"]`),box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node.children[2]);return box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1&&line.top>=box.top-1&&line.bottom<=box.bottom+1);}),summarySources.modeFixtures.map(row=>row.id)),'All six native assignment suffixes fit '+language+'/'+width);
-        assert(await page.locator('#weekVisits').evaluate(root=>{const scroll=root.querySelector('.table-scroll'),saved=scroll.scrollLeft;try{return [...root.querySelectorAll('thead th')].every(node=>{scroll.scrollLeft+=node.getBoundingClientRect().left-scroll.getBoundingClientRect().left;const box=node.getBoundingClientRect(),frame=scroll.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return frame.left>=0&&frame.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=frame.left-1&&line.right<=frame.right+1&&line.left>=box.left-1&&line.right<=box.right+1&&line.top>=box.top-1&&line.bottom<=box.bottom+1);});}finally{scroll.scrollLeft=saved;}}),'Seven native table headings fit horizontal scroll '+language+'/'+width);
+        const tableStarted=Date.now(),tableMeasured=await page.locator('#weekVisits').evaluate(root=>{
+          const scroll=root.querySelector('.table-scroll'),saved=scroll.scrollLeft,actions=[];
+          const bounds=node=>{const box=node.getBoundingClientRect();return{left:box.left,right:box.right,top:box.top,bottom:box.bottom,width:box.width,height:box.height,clientWidth:node.clientWidth,scrollWidth:node.scrollWidth};};
+          try{
+            const headingsFit=[...root.querySelectorAll('thead th')].every(node=>{scroll.scrollLeft+=node.getBoundingClientRect().left-scroll.getBoundingClientRect().left;const box=node.getBoundingClientRect(),frame=scroll.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return frame.left>=0&&frame.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=frame.left-1&&line.right<=frame.right+1&&line.left>=box.left-1&&line.right<=box.right+1&&line.top>=box.top-1&&line.bottom<=box.bottom+1);});
+            for(const position of ['maxScroll','columnAligned']){
+              scroll.scrollLeft=scroll.scrollWidth;
+              if(position==='columnAligned')scroll.scrollLeft+=root.querySelector('thead th:last-child').getBoundingClientRect().left-scroll.getBoundingClientRect().left;
+              for(const node of root.querySelectorAll('[data-save-visit]')){
+                const row=node.closest('tr'),box=bounds(node),group=bounds(node.closest('.table-actions')),cell=bounds(node.closest('td')),table=bounds(node.closest('table')),frame=bounds(scroll),style=getComputedStyle(node),range=document.createRange();range.selectNodeContents(node);
+                const lines=[...range.getClientRects()].map(line=>({left:line.left,right:line.right,top:line.top,bottom:line.bottom})),inside=container=>lines.length>0&&lines.every(line=>line.left>=container.left-1&&line.right<=container.right+1&&line.top>=container.top-1&&line.bottom<=container.bottom+1);
+                const tableStyle=getComputedStyle(node.closest('table'));
+                actions.push({position,kind:row.dataset.kind,id:row.dataset.id,text:node.textContent,scrollLeft:scroll.scrollLeft,maxScroll:scroll.scrollWidth-scroll.clientWidth,box,group,cell,table,frame,lines,tableStyle:{display:tableStyle.display,width:tableStyle.width,maxWidth:tableStyle.maxWidth,overflowX:tableStyle.overflowX,tableLayout:tableStyle.tableLayout},style:{display:style.display,whiteSpace:style.whiteSpace,overflowX:style.overflowX,overflowY:style.overflowY,padding:style.padding,margin:style.margin},internalFits:inside(box)&&inside(group)&&inside(cell)&&node.scrollWidth<=node.clientWidth+1,visibleFits:frame.left>=0&&frame.right<=innerWidth+1&&lines.every(line=>line.left>=frame.left-1&&line.right<=frame.right+1)});
+              }
+            }
+            // Keep every native box in the browser; transport failures and aggregates only.
+            (window.qaRoundActionMeasurements??=[]).push(...actions);
+            return{headingsFit,rowCount:root.querySelectorAll('tbody tr').length,actions:{count:actions.length,kinds:[...new Set(actions.map(row=>row.kind))],failures:actions.filter(row=>!row.internalFits||!row.visibleFits||row.tableStyle.overflowX!=='visible'||row.text!=='Guardar alteracoes'),sample:actions[0]}};
+          }finally{scroll.scrollLeft=saved;}
+        });
+        assert(tableMeasured.headingsFit,'Seven native table headings fit horizontal scroll '+language+'/'+width);
+        tableActionMeasurements.push({language,width,...tableMeasured.actions});assert(tableMeasured.actions.count>0);assert.equal(tableMeasured.actions.count,tableMeasured.rowCount*2,'Measure both positions of every native editable row');assert.deepEqual(tableMeasured.actions.failures,[],'Every native save action fits internally and its horizontally scrolled column '+language+'/'+width);
+        tableMs+=Date.now()-tableStarted;
         await page.locator(`[data-coverage-pool="${coveragePools[0].id}"]`).scrollIntoViewIfNeeded();
         assert(await page.locator('#coverageList [data-coverage-copy]').evaluateAll(nodes=>nodes.every(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return [...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);})),language+'/'+width+' coverage text fits');
         await page.screenshot({path:path.join(output,language+'-'+width+'.png'),caret:'initial'});geometryCases++;
       }
+      languageTimings.push({language,switchMs,stateMs,geometryMs:Date.now()-phaseStarted,tableMs});
     }
+    phaseStarted=Date.now();
     const saved=page.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language==='fr');
     await page.locator('#extraNotes').evaluate(node=>{node.focus();node.setSelectionRange(3,9);CristalI18n.applyLanguage('fr');});assert.equal((await saved).status(),200);
     assert.deepEqual(await page.locator('#extraNotes').evaluate(node=>({focus:document.activeElement===node,start:node.selectionStart,end:node.selectionEnd})),{focus:true,start:3,end:9});assert.equal(await fingerprint(),controls);
@@ -702,9 +737,29 @@ async function checkRoundFormLanguages(page,round,pool,visits,summarySources){
     assert.equal(await plannerSql(),plannerBefore,'Planner technician SQL rows and total count remain exact');
     const proof={ok:true,languages,widths:[320,390,1440],textCases,geometryCases,coverageFlags:[...actualFlags].sort(),coverageRows:coverageData.rows.length,ownCoveragePools:coveragePools.map(pool=>pool.id),coverageReadOnlyReady:true,mainReadOnlyReady:true,unassignedWarning:{count:warningEntries.length,ownRound:summarySources.warningRound.id,languageCases:5,geometryCases:15,capturedApiNames:true},filterSummary:{counts:summaryCounts,languageCases:5,actualPageApiSources:true},realAdminPage:true,successPayloadMocks:false,nodeIdentity:true,optionValues:true,drafts:true,focusAndCaret:true,foreignOwnership:true,zeroOperationalReads:true,zeroBusinessWrites:true,sqlUnchanged:true,deferred:['planner rows','main write and validation feedback','coverage transfer feedback','receipts','dialogs','empty option fallbacks']};
     proof.planner={languageCases:5,geometryCases:15,nativeTechnicians:summarySources.technicians.length,emptyTechnician:summarySources.emptyTechnician.id,literalTechnician:summarySources.literalTechnician.id,actualPageApiSources:true,allNonOwnedMarkupCompared:true};
-    proof.planner.chipKinds={languageCases:5,extraGeometryCases:15,kinds:['SERVICE','EXTRA'],ownExtra:summarySources.plannerExtra.id,datesRemainLiteral:true,assignmentCodesUnchanged:true,allNonOwnedMarkupCompared:true};proof.planner.assignments={languageCases:5,geometryCases:15,codes:summarySources.modeFixtures.map(row=>row.code),fixtures:summarySources.modeFixtures.map(row=>row.id),nativeSourceRows:summarySources.week.length,allOriginalCyclesRetained:true,dateKindAndNonOwnedMarkupRetained:true};proof.planner.table={languageCases:5,geometryCases:15,foreignCases:5,headings:7,accessibleLabel:true,allNonOwnedMarkupCompared:true,editableRowsUnchanged:true};proof.deferred[0]='planner chip date fallback; table rows/options';
+    proof.planner.chipKinds={languageCases:5,extraGeometryCases:15,kinds:['SERVICE','EXTRA'],ownExtra:summarySources.plannerExtra.id,datesRemainLiteral:true,assignmentCodesUnchanged:true,allNonOwnedMarkupCompared:true};proof.planner.assignments={languageCases:5,geometryCases:15,codes:summarySources.modeFixtures.map(row=>row.code),fixtures:summarySources.modeFixtures.map(row=>row.id),nativeSourceRows:summarySources.week.length,allOriginalCyclesRetained:true,dateKindAndNonOwnedMarkupRetained:true};proof.planner.table={languageCases:5,geometryCases:15,foreignCases:5,headings:7,accessibleLabel:true,allNonOwnedMarkupCompared:true,editableRowsUnchanged:true,saveActions:{measurements:tableActionMeasurements.reduce((sum,row)=>sum+row.count,0),positions:['maxScroll','columnAligned'],kinds:[...new Set(tableActionMeasurements.flatMap(row=>row.kinds))],allInternalAndVisible:tableActionMeasurements.every(row=>!row.failures.length),allNativeBoxesRetained:true,transportCycles:tableActionMeasurements.length,neverClicked:true}};proof.deferred[0]='planner chip date fallback; table rows/options';
+    console.log('QA native rounds matrix phases '+JSON.stringify({totalMs:Date.now()-languageStarted,preparationMs,languages:languageTimings,foreignAndFinalMs:Date.now()-phaseStarted}));
     await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS rounds form languages '+JSON.stringify(proof));
   }finally{page.off('request',listen);}
+}
+
+async function reportOptionalAssets(page,label){
+  const resources=await page.evaluate(base=>performance.getEntriesByType('resource').filter(entry=>new URL(entry.name).origin!==base).map(entry=>{const url=new URL(entry.name);return{origin:url.origin,path:url.pathname,ms:entry.duration};}),new URL(BASE).origin);
+  console.log('QA Route OS optional assets '+JSON.stringify({page:label,resources}));
+}
+
+async function openRoundsWithFilter(page,search){
+  const assert=require('node:assert/strict');let release;const gate=new Promise(resolve=>{release=resolve;});
+  const pattern='**/api/round-planner/week',hold=async route=>{const response=await route.fetch();assert.equal(response.status(),200);await gate;await route.fulfill({response});};
+  await page.route(pattern,hold);
+  try{
+    const navigation=page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});navigation.catch(()=>{});
+    try{
+      await page.waitForFunction(()=>Boolean(document.getElementById('assignmentStart')?.value),null,{timeout:7000});
+      await page.locator('#visitSearch').fill(search);assert.equal(await page.locator('#visitSearch').inputValue(),search);
+    }finally{release();}
+    await navigation;
+  }finally{release();await page.unroute(pattern,hold);}
 }
 
 async function testRoundAssignmentPeriods(adminUser){
@@ -767,7 +822,8 @@ async function testRoundAssignmentPeriods(adminUser){
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({...user,role:'ADMIN'}));},{token:authToken,user:adminUser||{}});
     const page=await context.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));
     const weekRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/round-planner/week'),extrasRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/extra-visits'),roundsRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/rounds'),techniciansRead=page.waitForResponse(response=>new URL(response.url()).pathname==='/api/technicians');
-    await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});
+    await openRoundsWithFilter(page,pool.name);
+    await reportOptionalAssets(page,'round assignments');
     const weekReply=await weekRead,extrasReply=await extrasRead;assert.equal(weekReply.status(),200);assert.equal(extrasReply.status(),200);
     const roundsReply=await roundsRead;assert.equal(roundsReply.status(),200);const roundsPayload=await roundsReply.json();assert.equal(roundsPayload.ok,true);assert(Array.isArray(roundsPayload.rounds));
     const techniciansReply=await techniciansRead;assert.equal(techniciansReply.status(),200);
@@ -839,7 +895,7 @@ async function testVisitCoverage(adminUser){
   try{
     const context=await browser.newContext({viewport:{width:390,height:844}});
     await context.addInitScript(({token,user})=>{for(const key of ['token','cristalwater_jwt'])localStorage.setItem(key,token);for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify(user));},{token:authToken,user:adminUser});
-    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});await selectRoundLanguage(page,'pt');
+    const page=await context.newPage();await openRoundsWithFilter(page,pool.name);await reportOptionalAssets(page,'coverage transfer');await selectRoundLanguage(page,'pt');
     await page.locator(`[data-transfer-visit="${pending.id}"]`).check();await page.locator('#coverageTechnician').selectOption(String(a.id));await page.locator('#coverageCause').selectOption({label:'Falta de produtos químicos'});await page.locator('#coverageReason').fill('Produto em falta confirmado; reposição na viatura');
     await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Cancelar',exact:true}).click();assert.equal((await prisma.serviceVisit.findUnique({where:{id:pending.id}})).technicianId,b.id);
     await page.locator('#coverageTransfer button').click();await page.getByRole('dialog').getByRole('button',{name:'Transferir',exact:true}).click();await page.waitForFunction(()=>document.getElementById('coverageStatus').textContent.includes('transferida(s)'));
@@ -880,7 +936,7 @@ async function testRecurrence(adminUser){
   try{
     const context=await browser.newContext({viewport:{width:390,height:844}});
     await context.addInitScript(({token,user})=>{for(const k of ['token','cristalwater_jwt'])localStorage.setItem(k,token);for(const k of ['user','cristalwater_user'])localStorage.setItem(k,JSON.stringify(user));},{token:authToken,user:adminUser});
-    const page=await context.newPage();await page.goto(BASE+'/admin-rounds',{waitUntil:'networkidle'});await selectRoundLanguage(page,'pt');
+    const page=await context.newPage();await openRoundsWithFilter(page,pool.name);await reportOptionalAssets(page,'recurrence');await selectRoundLanguage(page,'pt');
     const name='Mensal criada no ecrã QA '+Date.now();await page.locator('#roundName').fill(name);await page.locator('#roundRecurrence').selectOption('MONTHLY');assert(await page.locator('#roundWeekField').isHidden());assert(await page.locator('#roundMonthField').isVisible());
     await page.locator('#roundMonthDay').fill('31');await page.locator('#roundStartsOn').fill('2032-02-01');await page.locator('#roundEndsOn').fill('2032-03-31');await page.locator('#createRoundBtn').click();
     await page.waitForFunction(name=>[...document.querySelectorAll('.round-card')].some(card=>card.textContent.includes(name)),name);
