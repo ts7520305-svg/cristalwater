@@ -238,6 +238,7 @@ const routeUi = (() => {
   const value = (key, params = {}) => { const entry = Object.freeze({ key, params: Object.freeze({ ...params }) }); entries.add(entry); return entry; };
   function text(entry, language = document.documentElement.lang || 'pt') {
     if (!entry || typeof entry !== 'object' || !entries.has(entry)) return String(entry ?? '');
+    if (entry.key === 'session') return window.CWFieldWriteStore.message('sessionPreserved', language);
     const index = Math.max(0, languages.indexOf(String(language).toLowerCase().split('-')[0]));
     return copy[entry.key][index].replace(/\{(\w+)\}/g, (_, key) => text(entry.params[key], language));
   }
@@ -300,6 +301,22 @@ const routeBox = document.getElementById("route");
 const suggestionsBox = document.getElementById("suggestions");
 const statusBox = document.getElementById("statusBox");
 const refreshBtn = document.getElementById("refreshBtn");
+const routeStore = window.CWFieldWriteStore, capturedRouteSession = routeStore?.session();
+let routeRead = null, routeRevision = 0, routeBlocked = false, routeExpires = 0;
+try {
+  const claim = JSON.parse(atob(capturedRouteSession.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (typeof claim.exp === 'number') routeExpires = claim.exp * 1000;
+} catch (_) { /* An unreadable session cannot authorize a route read. */ }
+
+function protectRoute() {
+  if (routeBlocked) return false;
+  if (routeStore?.same(capturedRouteSession) && Number.isFinite(routeExpires) && routeExpires > Date.now() && !window.CristalAuth?.isSessionExpired()) return true;
+  routeBlocked = true; ++routeRevision; routeRead?.abort();
+  for (const box of [routeBox, suggestionsBox]) { routeUi.clearTree(box); box?.replaceChildren(); }
+  if (refreshBtn) refreshBtn.disabled = true;
+  setStatus(routeUi.value('session'), 'error');
+  return false;
+}
 
 function userData() {
   try {
@@ -420,6 +437,7 @@ function renderSuggestions(visits, unavailable = false) {
 }
 
 async function loadRoute() {
+  if (!protectRoute()) return;
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
 
   const technicianId = Number(userData().technicianId || userData().id || 0);
@@ -429,6 +447,8 @@ async function loadRoute() {
     return;
   }
 
+  const revision = ++routeRevision, read = new AbortController();
+  routeRead?.abort(); routeRead = read;
   setStatus(routeUi.value('loading'));
   if (refreshBtn) refreshBtn.disabled = true;
 
@@ -437,8 +457,11 @@ async function loadRoute() {
       technicianId: String(technicianId),
       date: todayDateValue(),
     });
-    const data = await parseResponse(await fetch(`${API}/technician/today?${query.toString()}`));
-    if(data.complete!==true||!Array.isArray(data.visits)||data.total!==data.visits.length)throw routeUi.ownError('incomplete');
+    const response = await fetch(`${API}/technician/today?${query.toString()}`, { cache: 'no-store', headers: { Authorization: 'Bearer ' + capturedRouteSession.token }, signal: read.signal });
+    if (!protectRoute() || revision !== routeRevision) return;
+    const data = await parseResponse(response);
+    if (!protectRoute() || revision !== routeRevision) return;
+    if(data.complete!==true||data.technicianId!==capturedRouteSession.technicianId||!Array.isArray(data.visits)||data.total!==data.visits.length)throw routeUi.ownError('incomplete');
     const visits = data.visits;
 
     renderRoute(visits);
@@ -450,14 +473,19 @@ async function loadRoute() {
       setStatus(routeUi.value('noStops'), "warning");
     }
   } catch (error) {
+    if (!protectRoute() || revision !== routeRevision) return;
     renderRoute([], true);
     renderSuggestions([], true);
     setStatus(routeUi.fromError(error), "error");
   } finally {
-    if (refreshBtn) refreshBtn.disabled = false;
+    if (routeRead === read) routeRead = null;
+    if (refreshBtn && protectRoute() && revision === routeRevision) refreshBtn.disabled = false;
   }
 }
 
 if (refreshBtn) refreshBtn.addEventListener("click", loadRoute);
 
+for (const event of ['cw:session-change', 'storage', 'focus', 'pageshow']) window.addEventListener(event, protectRoute);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) protectRoute(); });
+setInterval(protectRoute, 1000);
 loadRoute();
