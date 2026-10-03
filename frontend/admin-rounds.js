@@ -170,7 +170,8 @@ const roundCopy = (() => {
     if(!attribute&&!leaf)return;
     if(node.tagName==='OPTION'&&!node.hasAttribute('value'))node.setAttribute('value',node.value);
     const rendered = render();
-    if(attribute)node.setAttribute(attribute,rendered);else leaf.nodeValue=rendered;
+    if(attribute){if(node.getAttribute(attribute)!==rendered)node.setAttribute(attribute,rendered);}
+    else if(leaf.nodeValue!==rendered)leaf.nodeValue=rendered;
     const entries=bindings.get(node)||new Map();entries.set(attribute,{render,rendered,leaf,children:[...node.childNodes]});bindings.set(node,entries);
   }
   function paint() {

@@ -469,7 +469,20 @@ async function checkCoverageStatus(admin) {
     const mainHeld=async()=>{const deadline=Date.now()+7000;while(!mainHeldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(mainHeldReply,'Actual planner GET must reach latency gate');};
     const navigation=coveragePage.goto(base+'/admin-rounds',{waitUntil:'networkidle'});navigation.catch(()=>{});
     try{await coveragePage.waitForFunction(()=>Boolean(document.getElementById('assignmentStart')?.value),null,{timeout:7000});await coveragePage.locator('#visitSearch').fill(pool.name);assert.equal(await coveragePage.locator('#visitSearch').inputValue(),pool.name);}finally{initialFilterReady();}
-    await navigation;await ready();languageSelect=await coveragePage.locator('#cwLanguageSelect').elementHandle();assert(languageSelect,'Native language selector must exist before retaining its handle');await choose('en');
+    await navigation;await ready();languageSelect=await coveragePage.locator('#cwLanguageSelect').elementHandle();assert(languageSelect,'Native language selector must exist before retaining its handle');
+    await coveragePage.evaluate(()=>{
+      const button=document.getElementById('coverageRefresh'),leaf=[...button.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim());
+      if(!leaf)throw Error('Native owned refresh text must exist');
+      const records=[];window.qaRefreshMutationProbe={button,leaf,records,observer:new MutationObserver(batch=>records.push(...batch))};
+      qaRefreshMutationProbe.observer.observe(leaf,{characterData:true,characterDataOldValue:true});
+    });
+    await choose('en');
+    const refreshMutationProof=await coveragePage.evaluate(()=>{
+      const {button,leaf,records,observer}=qaRefreshMutationProbe;records.push(...observer.takeRecords());observer.disconnect();delete window.qaRefreshMutationProbe;
+      return{writes:records.length,sameValueWrites:records.filter(record=>record.oldValue===record.target.nodeValue).length,originalLeafRetained:leaf.parentNode===button&&button.isConnected};
+    });
+    assert(refreshMutationProof.originalLeafRetained);console.log('QA native refresh mutation proof '+JSON.stringify(refreshMutationProof));
+    assert.equal(refreshMutationProof.sameValueWrites,0,'Native language selection must not redundantly rewrite its private refresh text');
     assert.equal(await coveragePage.locator('#coverageStatus').textContent(),expectedReady(1),'Native ready feedback must follow actual EN selection');
     console.log('QA native rounds read feedback '+JSON.stringify({text:await coveragePage.locator('#status').textContent(),language:'en'}));
     assert.deepEqual(routeFailures,[],'Native API response preparation must succeed before language assertions');
