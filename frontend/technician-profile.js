@@ -126,6 +126,7 @@ const profileUi = (() => {
   const value = key => { const entry = Object.freeze({ key }); entries.add(entry); return entry; };
   function text(entry) {
     if (!entry || typeof entry !== 'object' || !entries.has(entry)) return String(entry ?? '');
+    if (entry.key === 'sessionPreserved') return window.CWFieldWriteStore.message('sessionPreserved');
     const language = String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0];
     return copy[entry.key][Math.max(0, languages.indexOf(language))];
   }
@@ -154,6 +155,20 @@ const profileUi = (() => {
 
 const statusBox = document.getElementById("statusBox");
 const profileGrid = document.getElementById("profileGrid");
+const profileStore = window.CWFieldWriteStore, profileSession = profileStore?.session();
+let profileBlocked = false, profileExpires = 0;
+try {
+  const claim = JSON.parse(atob(profileSession.token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  if (typeof claim.exp === 'number') profileExpires = claim.exp * 1000;
+} catch (_) { /* An unreadable session cannot authorize profile fields. */ }
+
+function protectProfile() {
+  if (profileBlocked) return false;
+  if (profileStore?.same(profileSession) && Number.isFinite(profileExpires) && profileExpires > Date.now() && !window.CristalAuth?.isSessionExpired()) return true;
+  profileBlocked = true; profileUi.clearTree(profileGrid); profileGrid.replaceChildren();
+  setStatus(profileUi.value('sessionPreserved'), 'error');
+  return false;
+}
 
 function setStatus(message, tone = "") {
   if (!statusBox) return;
@@ -186,6 +201,7 @@ function field(label, value) {
 }
 
 function renderProfile(user) {
+  if (!protectProfile()) return;
   if (!profileGrid) return;
   const role = String(user.role || "").toUpperCase() || "TECHNICIAN";
   const fields = [
@@ -205,10 +221,14 @@ function renderProfile(user) {
 }
 
 function loadProfile() {
+  if (!protectProfile()) return;
   if (!window.CristalAuth?.requireAuth("TECHNICIAN")) return;
   const user = userData();
   renderProfile(user);
   setStatus(profileUi.value('loaded'));
 }
 
+for (const event of ['cw:session-change', 'storage', 'focus', 'pageshow']) window.addEventListener(event, protectProfile);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) protectProfile(); });
+setInterval(protectProfile, 1000);
 loadProfile();

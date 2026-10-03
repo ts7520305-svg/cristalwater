@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## TASK555 - perfil técnico e sessão (2026-10-03)
+- Seis campos locais do perfil limpam ao mudar/expirar sessão e não repintam até reload. Store/mensagem existentes reutilizados; fontes literais, contactos ocultos e 17 entradas de idioma anteriores preservados.
+- Grupo nativo dos quatro principais, cache315 byte a byte/reload frio offline, E2E dos três perfis e preflight23/23 aprovados, sem GET/escrita operacional novos. CI550/restauro conferidos, aceitação do novo SHA pendente.
+
+## TASK554 - rota técnica e leituras privadas (2026-10-03)
+- Rota/sugestões limpam no evento de sessão, abortam GET e permanecem fechadas até reload; respostas de outro owner recusadas, query/datas/idiomas preservados.
+- Grupo nativo aprovado nos quatro principais, incluindo expiração e cache314/reload frio offline; E2E dos três perfis, preflight23/23 e sintaxe695/308/45 aprovados. CI do commit8986473 ainda pendente.
+
 ## TASK553 - histórico e sessão ativa (2026-10-03)
 - Histórico usa identidade e mensagem do store existente: limpa dados privados e aborta leituras na troca/expiração da sessão, recusa owner incorreto e respostas tardias; só reload recupera a conta própria.
 - Ensaio nativo aprovado nos quatro principais PIN/USER/Técnico/Chefe, cinco idiomas, cache313/reload frio offline e snapshots SQL/outbox intactos. E2E dos três perfis e preflight23/23 aprovados; CI547/restauro conferidos, CI do novo SHA pendente. Sem alteração de API/schema/dados.

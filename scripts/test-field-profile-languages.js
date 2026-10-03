@@ -2,6 +2,7 @@
 require('../src/loadEnv')();
 const assert = require('node:assert/strict'), fs = require('node:fs/promises');
 const jwt = require('jsonwebtoken'), { chromium } = require('playwright');
+const waitBrowserState = require('./fixtures/wait-browser-state');
 const { prisma } = require('../src/prismaClient'), { getJwtSecret } = require('../src/utils/jwtSecret');
 if (process.env.NODE_ENV !== 'test' || process.env.QA_MODE !== 'true' || process.env.QA_ENVIRONMENT_SAFE !== 'true' || process.env.EXTERNAL_NOTIFICATIONS_ENABLED !== 'false') throw Error('Isolated QA with external operations disabled required');
 const base = process.env.CW_BASE_URL || 'http://127.0.0.1:3002';
@@ -11,11 +12,23 @@ const fieldIds = ['notes','ph','chlorine','alkalinity','salt','orp','temperature
 let browser, completed = false, checks = 0, scenarios = 0;
 const deadline = setTimeout(() => { console.error('Profile language scenario incomplete'); process.exit(1); }, 110000);
 process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
+async function switchProfile(page, token, user) {
+  return page.evaluate(({token,user}) => {
+    const keys=['token','cristalwater_jwt','adminToken','user','cristalwater_user'],saved=keys.map(key=>localStorage.getItem(key));
+    for(const key of keys.slice(0,3))localStorage.setItem(key,token);
+    for(const key of keys.slice(3))localStorage.setItem(key,JSON.stringify(user));
+    dispatchEvent(new CustomEvent('cw:session-change'));
+    const changed=document.getElementById('profileGrid').childElementCount;
+    keys.forEach((key,i)=>saved[i]===null?localStorage.removeItem(key):localStorage.setItem(key,saved[i]));
+    dispatchEvent(new CustomEvent('cw:session-change'));
+    return {changed,returned:document.getElementById('profileGrid').childElementCount};
+  },{token,user});
+}
 (async () => {
   const now = Date.now(), parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(now));
   const day = ['year','month','day'].map(name => parts.find(part => part.type === name).value).join('-'), scheduledAt = new Date(day + 'T12:00:00.000Z');
   const vehicle = await prisma.vehicle.create({ data: { plate: 'PROFILE-LANG-' + now, active: true } });
-  const tech = await prisma.technician.create({ data: { name: 'Profile owner <b>{day}</b>', vehicleId: vehicle.id, active: true } });
+  const tech = await prisma.technician.create({ data: { name: 'Profile owner <b>{day}</b>', email: 'profile-tech-'+now+'@qa.test', vehicleId: vehicle.id, active: true } });
   const client = await prisma.client.create({ data: { name: 'Profile client', active: true } });
   const pools = await Promise.all(['REGULAR','EXTRA'].map(type => prisma.pool.create({ data: { clientId: client.id, name: type + ' profile <b>{date}</b>', active: true } })));
   const maxima = await Promise.all([prisma.serviceVisit.aggregate({ _max: { id: true } }), prisma.extraVisit.aggregate({ _max: { id: true } })]);
@@ -29,7 +42,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
 
   const token = jwt.sign({ id: tech.id, role: 'TECHNICIAN' }, getJwtSecret(), { expiresIn: '1h' });
   const source = { id: tech.id, technicianId: tech.id, role: 'TECHNICIAN', name: 'Session source <b>{name}</b> & <img src=x>', zone: 'ZONE-' + 'x'.repeat(95), phone: '+351 999 123 456', privateNote: 'Unexposed <b>{phone}</b>' };
-  const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', role: 'TEAM_LEADER', active: true } });
+  const leader = await prisma.technician.create({ data: { name: 'Actual profile team leader', email: 'profile-leader-'+now+'@qa.test', role: 'TEAM_LEADER', active: true } });
+  const associatedUsers=await Promise.all([tech,leader].map(person=>prisma.user.create({data:{email:person.email,name:person.name,role:person.role,password:'unused',active:true}})));
   const leaderToken = jwt.sign({ id: leader.id, role: 'TEAM_LEADER' }, getJwtSecret(), { expiresIn: '1h' });
   browser = await chromium.launch({ headless: true, executablePath: process.env.CW_CHROMIUM_PATH, args: ['--no-sandbox','--disable-dev-shm-usage'] });
   const database = () => Promise.all([
@@ -38,7 +52,8 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     prisma.transportGuide.findUnique({ where: { id: guide.id } }), prisma.fieldWriteRequest.count(), prisma.stockMovement.count(),
     prisma.technicalHistory.findMany({ where: { poolId: { in: pools.map(pool => pool.id) } }, orderBy: { id: 'asc' } }),
     prisma.notification.findMany({ orderBy: { id: 'asc' } }),
-    prisma.technician.findMany({ where: { id: { in: [tech.id, leader.id] } }, orderBy: { id: 'asc' } })
+    prisma.technician.findMany({ where: { id: { in: [tech.id, leader.id] } }, orderBy: { id: 'asc' } }),
+    prisma.user.findMany({where:{id:{in:associatedUsers.map(user=>user.id)}},orderBy:{id:'asc'}})
   ]);
   async function makeContext(credential, user) {
     const context = await browser.newContext({ viewport: { width: 390, height: 1400 }, timezoneId: 'Europe/Lisbon' });
@@ -155,13 +170,27 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   await page.evaluate(() => { const saved = ['user','cristalwater_user'].map(key => localStorage.getItem(key)); localStorage.setItem('cristalwater_user','{broken'); const parsed = userData(); for (const [index,key] of ['user','cristalwater_user'].entries()) localStorage.setItem(key,saved[index]); renderProfile(parsed); });
   await matrix({ name: 'original-malformed-parser-empty-fallbacks',user: {},rawStatus: words.loaded[0],widths: [320] });
   await openProfile(source); await page.evaluate(() => navigator.serviceWorker.ready); await page.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await page.waitForFunction(async () => { const cache = await caches.open([...await caches.keys()].find(key => key.startsWith('cristalwater-field-'))); return !!await cache.match('/technician-profile') && !!await cache.match('/technician-profile.js'); });
+  const profileBefore=await page.locator('#profileGrid').innerHTML(),profileRequests=requests.length,profileDb=await database(),profileRaw=await raw();
+  await page.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));assert.equal(await page.locator('#profileGrid').innerHTML(),profileBefore);assert.equal(requests.length,profileRequests);
+  const privacy=await switchProfile(page,leaderToken,{id:leader.id,role:leader.role});
+  assert.deepEqual(privacy,{changed:0,returned:0},'Private profile fields must clear in the session event and remain closed after rapid return');
+  await page.evaluate(()=>{loadProfile();renderProfile(userData());});assert.equal(await page.locator('#profileGrid').innerHTML(),'');assert.equal(requests.length,profileRequests);
+  for(const width of [320,390,1440]){await page.setViewportSize({width,height:1400});for(const language of languages){await locale(language);assert.equal(await page.locator('#statusBox').textContent(),await page.evaluate(language=>CWFieldWriteStore.message('sessionPreserved',language),language));assert.equal(await page.locator('#profileGrid').innerHTML(),'');assert(await page.locator('#statusBox').evaluate(node=>node.scrollWidth<=node.clientWidth+1));}}
+  assert.deepEqual(await raw(),profileRaw);assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),profileDb);
+  await openProfile(source);assert.equal(await page.locator('#profileGrid .field').count(),6);
+  const cacheVersion=(await fs.readFile('frontend/sw.js','utf8')).match(/const CACHE = '([^']+)'/)[1];
+  await waitBrowserState(page,async expected=>{const cache=await caches.open(expected.version);for(const [url,source]of expected.files){const response=await cache.match(url);if(!response||await response.text()!==source)return false;}return true;},{version:cacheVersion,files:await Promise.all([['/technician-profile','frontend/technician-profile.html'],['/technician-profile.js','frontend/technician-profile.js'],['/cw-field-write-store.js','frontend/cw-field-write-store.js']].map(async([url,file])=>[url,await fs.readFile(file,'utf8')]))});
   const beforeOffline = await raw(),dbOffline = await database();
   await context.setOffline(true); await page.reload({ waitUntil: 'domcontentloaded' }); await page.waitForFunction(() => window.CristalI18n && document.querySelectorAll('#profileGrid .field').length === 6); await matrix({ name: 'actual-cached-profile-offline' });
+  assert.deepEqual(await switchProfile(page,leaderToken,{id:leader.id,role:leader.role}),{changed:0,returned:0});assert.equal(await page.locator('#statusBox').textContent(),await page.evaluate(()=>CWFieldWriteStore.message('sessionPreserved')));
+  await page.evaluate(()=>{loadProfile();renderProfile(userData());});assert.equal(await page.locator('#profileGrid').innerHTML(),'');
+  await page.reload({waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.CristalI18n&&document.querySelectorAll('#profileGrid .field').length===6);assert.equal(await page.locator('#profileGrid .field b').first().textContent(),source.name);
   assert.deepEqual(await raw(),beforeOffline); assert.deepEqual(await pending(),originalPending); assert.deepEqual(await database(),dbOffline);
   for (const type of ['REGULAR','EXTRA']) { await openField(type); assert.deepEqual(await page.evaluate(ids => ids.map(id => { const node = document.getElementById(id); return [id,node.value,node.checked]; }),fieldIds),visitFields[type]); assert.equal(await page.evaluate(() => CWFieldDaySnapshot().confirmedAt),null); }
   assert.deepEqual(await pending(),originalPending);
   const draftKey = 'cwFieldVisitDrafts:v2:TECH:' + tech.id; assert.equal((await raw())[draftKey],profileEntryStorage[draftKey]);
+  await page.goto(base+'/technician-profile',{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>document.querySelectorAll('#profileGrid .field').length===6);await page.clock.setFixedTime(now+3600001);
+  assert(await page.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('profileGrid').childElementCount===0;}));assert.deepEqual(await pending(),originalPending);assert.deepEqual(await database(),dbOffline);
   assert.deepEqual(errors,[]); assert(requests.filter(request => !['GET','HEAD'].includes(request.method)).every(request => request.path === '/api/settings/language/me' && request.method === 'PUT'));
   await context.close();
   // A separate context with no registered worker selects the QA source before the final producer call.
@@ -210,5 +239,18 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
     if (process.env.CW_PROFILE_CAPTURE && width === 320 && language === 'de') await leaderPage.locator('main').screenshot({ path: process.env.CW_PROFILE_CAPTURE + '/actual-team-leader-de-320.png' });
   }}
   assert.deepEqual(leaderErrors,[]); scenarios++; await leaderContext.close();
-  console.log('PASS profile language result ' + JSON.stringify({ checks,scenarios,ownedEntries: 17,languages: 5,originalProfileSourceFallbacks: true,readOnly: true,contactsNeverExposed: true,techAndTeamLeader: true,typedDraftFields: 13,immutablePending: 2,realCachedProfileOffline: true,foreignLeavesLiteral: true,noOperationalWrites: true })); completed = true;
+  const sessionDb=await database();
+  for(const [person,user]of [[tech,associatedUsers[0]],[leader,associatedUsers[1]],[leader,null]]){
+    const actor=user?{id:user.id,userId:user.id,technicianId:person.id,role:person.role,principalType:'USER',name:person.name}:{id:person.id,role:person.role,name:person.name},credential=jwt.sign(actor,getJwtSecret(),{expiresIn:'1h'}),own=await makeContext(credential,actor),ownPage=await own.newPage(),ownErrors=[],ownRequests=[];
+    ownPage.on('pageerror',e=>ownErrors.push(e.message));ownPage.on('request',r=>{if(new URL(r.url()).pathname.startsWith('/api/'))ownRequests.push(r.method());});
+    await ownPage.goto(base+'/technician-profile',{waitUntil:'networkidle'});assert.equal(await ownPage.locator('#profileGrid .field').count(),6);assert.equal(await ownPage.locator('#profileGrid .field').nth(2).locator('b').textContent(),String(person.id));
+    const before=await ownPage.locator('#profileGrid').innerHTML(),first=ownRequests.length;await ownPage.evaluate(()=>dispatchEvent(new CustomEvent('cw:session-change')));assert.equal(await ownPage.locator('#profileGrid').innerHTML(),before);assert.equal(ownRequests.length,first);
+    const foreign=person.id===tech.id?leader:tech;assert.deepEqual(await switchProfile(ownPage,person.id===tech.id?leaderToken:token,{id:foreign.id,role:foreign.role}),{changed:0,returned:0});
+    await ownPage.evaluate(()=>{loadProfile();renderProfile(userData());});assert.equal(await ownPage.locator('#profileGrid').innerHTML(),'');assert.equal(ownRequests.length,first);assert.equal(await ownPage.locator('#statusBox').textContent(),await ownPage.evaluate(()=>CWFieldWriteStore.message('sessionPreserved')));
+    await ownPage.reload({waitUntil:'networkidle'});assert.equal(await ownPage.locator('#profileGrid .field b').first().textContent(),person.name);assert.equal(await ownPage.locator('#profileGrid .field').nth(2).locator('b').textContent(),String(person.id));
+    await ownPage.clock.setFixedTime(Date.now()+3600001);assert(await ownPage.evaluate(()=>{dispatchEvent(new Event('focus'));return document.getElementById('profileGrid').childElementCount===0;}));await ownPage.evaluate(()=>{loadProfile();renderProfile(userData());});assert.equal(await ownPage.locator('#profileGrid').innerHTML(),'');assert.deepEqual(ownErrors,[]);assert(ownRequests.every(method=>method==='GET'));await own.close();
+    console.log('PASS profile '+person.role+'/'+(user?'USER':'TECHNICIAN')+': native principal, same-account preservation, synchronous rapid-return closure, own reload, expiry and no profile GET');
+  }
+  assert.deepEqual(await database(),sessionDb);
+  console.log('PASS profile language result ' + JSON.stringify({ checks,scenarios,ownedEntries: 18,languages: 5,sessionPrincipals:4,originalProfileSourceFallbacks: true,readOnly: true,contactsNeverExposed: true,techAndTeamLeader: true,typedDraftFields: 13,immutablePending: 2,realCachedProfileOffline: true,exactDeclaredCache:cacheVersion,foreignLeavesLiteral: true,noOperationalWrites: true })); completed = true;
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(async () => { clearTimeout(deadline); await browser?.close(); await prisma.$disconnect(); });
