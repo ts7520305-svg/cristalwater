@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## TASK549–550 - sessão GPS e fixtures E2E (2026-10-03)
+- Página/helper GPS reagem imediatamente ao evento de sessão existente; preservam pontos pendentes e abortam o POST antigo sem alterar payload, API ou permissões. Validado com SQL/browser nativos, callbacks tardios e saída/regresso rápido.
+- Fixture E2E existente usa PINs livres e produtos/faturas próprios por execução; duas execuções completas Admin/Técnico/Cliente na mesma QA passaram, sem apagar dados antigos nem enfraquecer guards/assertions.
+- CI544 aprovada com 387 grupos e restauro conferido; CI543 falhou num timeout de prontidão de equipamento, ainda por explicar. Não representa release, merge ou deploy em produção.
+
 ## TASK547–548 - rota e aceitação SQL local (2026-10-03)
 - Sugestão de rota Admin com 35 entradas PT/EN/FR/ES/DE; preservados seleção, nomes literais, dados, destinos, API e ausência de escritas de planeamento.
 - PostgreSQL16 QA isolado preparado; 43 migrações aditivas, mapas/API, seis fluxos operacionais e E2E nativo dos três perfis aprovados. CI integrada dos novos SHAs ainda pendente.

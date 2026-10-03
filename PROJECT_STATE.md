@@ -1,15 +1,15 @@
 # Cristal Water — estado oficial de desenvolvimento
 
-Atualizado: 2026-10-03 01:04 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
+Atualizado: 2026-10-03 01:23 (Europe/Lisbon). Este ficheiro é o checkpoint operacional oficial. O GitHub é a fonte oficial do código. Ler este ficheiro antes das entradas históricas de `docs/product/CURRENT_WORK_CHECKPOINT.md`.
 
 ## Versão e referências
 
 - Repositório: `ts7520305-svg/cristalwater`.
 - Branch de desenvolvimento: `work/field-readiness-20260915-simulation`.
-- Último commit validado localmente e publicado: `848077fc25b0f238d979f7f2ac3bb48dcad4837c` (TASK548), árvore `b7be41501a9707a229f907c429ed098ff8eb39a6`; SHA/árvore do GitHub conferidos após push. CI `37079621846` em execução; aceitação integrada ainda pendente. TASK549 pronta para publicação. Código de produto anterior547: `56ac2b8c9f490e76eed305e6686cceabb6cfa528`, árvore `b543bcbdd0b7d48b2889f3d31bd0331670a5decf`, CI37079201848/job111075769105 pendente.
+- Último commit validado localmente e publicado: `2c755ae202852a234d9ba03c09357ac368730946` (TASK549), árvore `0060a679ce46851b89ac826a510665cd795e7c6e`; SHA/árvore do GitHub conferidos após push. CI `37080617375` em execução; aceitação integrada ainda pendente. TASK550 validada localmente e pronta para publicação, apenas isolamento das fixtures E2E existentes.
 - HEAD auditado no início: `88a13d86fd7cee245eeade32053d017d378ed29f` (TASK538).
-- Último commit com CI integrado concluído e log conferido: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02` (TASK542), run `37073275970`, job `111057417195`, success. Log confirma SHA, 387 grupos distintos/code0, unitários1409/1409, técnicos4/4 e restauro de128 tabelas/51 ficheiros com linhas/hashes iguais. TASK540/541 também success/logs/restauros conferidos; TASK537–539 conservam as provas anteriores.
-- TASK543 (`bfe82be`, run `37074953256`, job `111062639350`), TASK544 (`e5b2075`, run `37075670653`, job `111064906269`), TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`), TASK546 (`e3497a6`, run `37077034871`, job `111069139406`), TASK547/548 acima continuam `in_progress` na consulta das01:03, sem falha reportada. Não transferir aceitação542 para543–548.
+- Último commit com CI integrado concluído e log conferido: `e5b2075c7e0cbec01e459ad856158d54df318b7c` (TASK544), run `37075670653`, job `111064906269`, success. Logs/steps conferidos às01:21: 387 grupos distintos/code0, unitários1409/1409, técnicos4/4, sintaxe695/308/45 e restauro de128 tabelas/51 ficheiros com linhas/hashes iguais. TASK540–542 também success/logs/restauros conferidos; TASK537–539 conservam as provas anteriores.
+- CI543 (`bfe82be`, run `37074953256`, job `111062639350`) terminou failure: 386/387 grupos aprovados; `test-field-equipment-form-languages.js` excedeu waitForFunction7s em open/linha30, chamado pelo ciclo inicial/linha42. Restauro skipped, não aceite. O mesmo comando nativo passou localmente sem alterações às assertions/prazos; causa do timeout ainda não estabelecida. TASK545 (`3e56fe3`, run `37076553416`, job `111067649288`), TASK546 (`e3497a6`, run `37077034871`, job `111069139406`) e TASK547–549 continuam in_progress na consulta das01:20. Não transferir aceitação544 para esses SHAs nem apagar a falha543.
 - `package.json`: 22.6.7. `CHANGELOG.md` histórico: V23.2.5; `frontend/VERSION.txt`: V22.6.5. São rótulos divergentes, não prova da versão instalada. Identificar releases pelo SHA até conciliação explícita.
 - Branch padrão: `feature/technicians-v25`; diverge desta branch (3 commits exclusivos na padrão, 740 exclusivos na branch de trabalho no início). Não fazer merge automático; conferir os três commits antes da integração final.
 
@@ -31,6 +31,7 @@ Publicações desta retoma, todas na branch autorizada:
 | 546 | `e3497a65789d8e962004f4f8633e603136030cde` | `2241293b6e37db93b5cea44b9feabef9f3ca0489` | `37077034871` |
 | 547 | `56ac2b8c9f490e76eed305e6686cceabb6cfa528` | `b543bcbdd0b7d48b2889f3d31bd0331670a5decf` | `37079201848` |
 | 548 | `848077fc25b0f238d979f7f2ac3bb48dcad4837c` | `b7be41501a9707a229f907c429ed098ff8eb39a6` | `37079621846` |
+| 549 | `2c755ae202852a234d9ba03c09357ac368730946` | `0060a679ce46851b89ac826a510665cd795e7c6e` | `37080617375` |
 
 As entradas abaixo conservam o estado histórico no momento da publicação; o estado corrente de CI é o da secção Versão e referências.
 
@@ -43,6 +44,10 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 - TASK542 publicada: `b73a04ce31c986cdd769cf4feb4c1eae4a08bb02`, árvore `47f766a49b2a2fa7bf1c06156512e2ec759934cb`, [CI37073275970](https://github.com/ts7520305-svg/cristalwater/actions/runs/37073275970) em execução. `technician-new-client` ganhou cópia própria PT/EN/FR/ES/DE para permissões, rascunho, envio, política, GPS, campos, placeholders e opções visíveis. O contrato de dados do write-store foi preservado: `poolType` continua a enviar/validar `Privada`, `Condomínio`, `Hotel`, `Jacuzzi`; payload, UUID/requestId, recibos, endpoints e schema não mudaram. O seletor global de idioma passa a ter destino local no cabeçalho da página.
 
 ## Testes realizados nesta sessão
+
+- TASK550: fixture E2E agora atribui PINs livres usando o serviço nativo de comparação, e usa namespace de execução para produtos/unidades de inventário, produto químico, número e nome da fatura. Seletores de recuperação/cargas/devoluções são limitados ao lembrete/movimento criado nesta execução. Nenhuma fixture anterior apagada/desativada, nenhum guard de auth/stock enfraquecido, nenhuma alteração de API/schema/produto; assertions de quantidades, bytes da fatura, replays e ausência de duplicados preservadas.
+- Gates550: duas execuções consecutivas do comando E2E nativo na mesma PostgreSQL QA preservada passaram Técnico móvel, Cliente móvel e Admin desktop, ambas failures[] e sem erros de API iniciais. Incluem carga/receção/devolução de química, fotografia/fecho offline, stock concorrente, portal/anexos e transferência/consumo/compra após resposta perdida. Técnicos4/4, node--check final e diff-check aprovados. Unitários1403 aprovados/2 skipped/4 falhas Windows de backup já conhecidas; preflight23/23 permanece prova549 e sintaxe completa695/308/45 prova547, não repetidos para esta tarefa só de fixtures.
+- Preparação550: namespace inicial de PIN/inventário não bastava; o backend recusou corretamente três saldos CENTRAL de HIPOCLORITO DE SÓDIO/L de ensaios anteriores (STOCK_BALANCE_AMBIGUOUS). Os primeiros ensaios excederam a espera de recuperação de carga e falharam, não foram aceites. Namespace do produto químico resolveu a colisão sem reconciliar nem remover dados antigos. A CI543 falhou entretanto em prontidão de equipamento, não no E2E; logs lidos e repetição local do grupo original passou. Próxima551: investigar com evidência reproduzível a prontidão/seleção de equipamento, mantendo o prazo7s e as assertions existentes.
 
 - TASK549 / C06-012: produtor GPS já traduzido e grupos existentes aprovados antes da alteração; não se duplicou a tradução. Nova asserção síncrona reproduziu gpsRetryBtn ainda ativo no evento cw:session-change. Ligado somente esse evento às rotinas checkGpsSession/checkSession existentes na página/helper; tracking para, controlos/KPIs limpam, POST é abortado imediatamente. Mesmo principal conserva tracking. Payload, UUID/bytes, API/SQL/schema, timers e permissões não mudaram.
 - Gates549: grupos GPS-page-languages, GPS-languages e GPS-flow aprovados com API/PostgreSQL reais, cinco idiomas/320/390/1440, snapshots/recibos/GPS antigo/proximidade/identidades colidentes, handover e Cliente pausado. Extensão passa callbacks tardios de leitura/watch, saída/regresso rápido no mesmo evento e resposta realmente gravada em SQL: aborto nativo mantém o ponto até replay, sem quarto track nem dados na outra conta. Controlo negativo com helper548 via fixture de fonte falha no aborto10s; positivo final/cache311 passa. Preflight23/23, técnicos4/4, oito JS/sintaxe/diff-check aprovados; unitários1403/2 skipped/4 falhas Windows idênticas. Sintaxe completa695/308/45 é prova547; nesta tarefa sem backend foi verificada a sintaxe dos oito JS alterados.
@@ -89,7 +94,7 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 
 - Memória sem titular na ficha: TASK539 publicada e CI concluído com success; manter a evidência por SHA e não extrapolar para isolamento global.
 - Outras páginas ainda usam memória genérica por pathname; não declarar isolamento global por uma correção desta ficha.
-- CI540–542 success, com logs e restauros conferidos; CI543–548 pendentes. Exigir resultado/log/restauro do SHA respetivo antes de aceitação integrada.
+- CI540–542 e544 success, com logs e restauros conferidos; CI543 failure em prontidão de equipamento, restauro skipped; CI545–549 pendentes. Exigir resultado/log/restauro do SHA respetivo antes de aceitação integrada. Quatro falhas Windows de symlink/modo de backup continuam sem correção/dispensa.
 - Inventário C06–C10 e C14 ainda aberto, incluindo idiomas/PDF, política de datas e acesso a anexos legados.
 - Dados reais, fornecedores externos, IA no equipamento alvo, backup externo, VPS e pilotos dependem das condições C15–C32; CI não substitui essas provas.
 
@@ -103,7 +108,7 @@ As entradas abaixo conservam o estado histórico no momento da publicação; o e
 
 ## PRÓXIMA TAREFA EXATA
 
-TASK550: conferir conclusão/logs/restauro de CI543–549 e corrigir falhas reais primeiro. Tornar a fixture E2E existente repetível na mesma QA: PIN fixo e chaves globais de stock/fatura colidem com dados de execuções anteriores. Reutilizar o serviço de comparação de PIN existente e namespace de execução para chaves QA; preservar assertions/prazos/fluxos/API e todos os dados anteriores. Executar E2E dos três perfis duas vezes na mesma base para provar isolamento. Depois retomar inventário C06 existente sem duplicar produtores já traduzidos. Conferir commits novos antes de editar.
+TASK551: conferir commits novos e conclusão/logs/restauro de CI545–550. Investigar primeiro o timeout real de prontidão de equipamento em CI543: observar contexto, evento cw:field-visit-selected, refresh e leituras nativas no grupo existente; reproduzir a causa antes de corrigir produto. Não aumentar7s, retirar assertions nem declarar resolvido por um sucesso local. Se necessário, acrescentar diagnóstico limitado ao ensaio, preservando todos os casos. Depois retomar inventário C06 existente sem duplicar produtores já traduzidos. TASK550 passou duas vezes na mesma QA preservada.
 
 Outras páginas ainda usam memória genérica; o intake usa rascunho próprio e a ficha usa memória isolada. Não alegar isolamento global. O runner integrado conserva 387 grupos; preflight browser tem 23 scripts.
 
@@ -111,4 +116,4 @@ Integração futura: os três commits exclusivos da branch padrão alteram apena
 
 ## Ponto exato de paragem desta sessão
 
-TASK547/548 publicadas/validadas localmente, SHAs/árvores acima; TASK549 corrigida/validada e em publicação. CI540–542 e restauros conferidos; CI543–548 pendentes na consulta das01:03. Preflight23 scripts, runner387 grupos intacto. PostgreSQL QA local e backend3002 ativos somente para estes ensaios; não são produção. Próxima550 concreta acima. Sem merge/deploy/mensagens a clientes.
+TASK547–549 publicadas/validadas localmente, SHAs/árvores acima; TASK550 corrigida/validada e em publicação. CI540–542/544 e restauros conferidos; CI543 failure investigada mas sem causa estabelecida; CI545–549 pendentes na consulta das01:20. Preflight23 scripts, runner387 grupos intacto. PostgreSQL QA local e backend3002 ativos somente para estes ensaios; não são produção. Próxima551 concreta acima. Sem merge/deploy/mensagens a clientes.
