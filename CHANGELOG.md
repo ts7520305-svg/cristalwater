@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK568 - contraste local do botão de cobertura (2026-10-03)
+- Antes do CSS,45 medições nativas confirmaram hover1,72:1 nos cinco idiomas/três larguras; base/foco16,17 e contorno3px sem falha. Apenas #coverageRefresh:hover ganha texto branco: hover9,38:1, fundo/dimensões/outline/handlers/valores/prazos intactos. Cache324/quatro expectativas atualizadas.
+- Admin completo75,77s abaixo120s,45 contrastes/55 estados/10 autoria/SQL/bytes/nós/foco/drafts preservados, zero GET/escrita de negócio por idioma/hover/foco e capturas mobile/desktop revistas. Preflight23/E2E completo324/técnicos/seis JS/diff-check aprovados; quatro limitações unitárias Windows mantidas. CI própria necessária; última aceitação integrada564, falhas543/562/E2E565 preservadas. Próxima569 só resumo read-only visitFilterSummary; C06/restantes produtores abertos.
+
 ## TASK567 - feedback read-only de cobertura em cinco idiomas (2026-10-03)
 - Negativo nativo confirmou ready PT sob EN; cinco entradas/134 chaves e bindings privados localizam loading/ready/erro do GET, preservando count, scope/detalhes recebidos literais/inertes, $&/HTML, nós e guardas/15s/transferência/API/schema. Cache323 e quatro expectativas atualizadas.
 - Admin66,05s/55 estados/geometrias/10 autoria e Route OS66,16s/247 cartões/oito códigos/todos os casos anteriores aprovados abaixo120s. Preparação usa filtros UI reais da própria visita/piscina, sem apagar dados ou truncar cobertura; snapshot integral/nós/foco/caret/drafts/valores/SQL/zero leituras ou escrita de negócio por idioma preservados. Preflight23/E2E dos três perfis/técnicos/oito JS aprovados, quatro limitações Windows mantidas. Ensaios loading15s/226,51s/Route OS132,48s anteriores não aceites e registados. CI564/log387/restauro128 tabelas/51 ficheiros conferidos; própria pendente. Próxima568 verifica contraste hover/focus de coverageRefresh antes de alterar cores; C06/restantes produtores ainda abertos.

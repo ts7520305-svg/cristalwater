@@ -213,7 +213,7 @@ async function checkCoverageStatus(admin) {
   const reads=[],businessWrites=[],preferences=[],pageErrors=[],routeFailures=[];
   const detail='A verificar as visitas… <img src=x onerror=alert(1)> $& {count} '+ 'x'.repeat(90);
   let coverageContext,coveragePage,coverageMode='normal',heldReply,latestCoverage,statusVisit,states=0,geometry=0,foreign=0;
-  const matrixTimings=[];
+  const matrixTimings=[],refreshContrasts=[];
   const sql=async()=>JSON.stringify({records:await raw(),visit:await prisma.serviceVisit.findUnique({where:{id:statusVisit.id}}),counts:await counts(),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
   const output=path.join(__dirname,'../reports/field-visual/round-coverage-status-languages'),filter='coverage-status-'+randomUUID();
   try {
@@ -242,6 +242,37 @@ async function checkCoverageStatus(admin) {
     // Compare every original byte in the browser; do not transport huge markup.
     const snapshot=save=>coveragePage.evaluate(save=>{const value=JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select,main button')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,busy:node.getAttribute('aria-busy'),options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),links:[...document.querySelectorAll('main a[href]')].map(node=>node.getAttribute('href')),pools:[...document.querySelectorAll('#coverageList h3')].map(node=>node.textContent),deferred:[...document.querySelectorAll('#status,#visitFilterSummary,#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>[node.id,node.innerHTML]),tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)),bytes:Object.keys(localStorage).filter(key=>/^cwField|^cw:tech/.test(key)).sort().map(key=>[key,localStorage.getItem(key)])});if(save){window.qaCoverageSnapshot=value;return value.length;}return value===qaCoverageSnapshot;},save);
     const capture=()=>coveragePage.evaluate(()=>{window.qaCoverageNodes=[...document.querySelectorAll('main,main *')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));});
+    async function checkRefreshContrast(language,width) {
+      const button=coveragePage.locator('#coverageRefresh'),count=reads.length;
+      await button.scrollIntoViewIfNeeded();
+      await coveragePage.evaluate(()=>{const node=document.activeElement;window.qaRefreshFocus={node,start:node.selectionStart,end:node.selectionEnd};node.blur();});
+      await coveragePage.mouse.move(0,0);
+      let baseBox;
+      for(const state of ['base','hover','focus-visible']) {
+        if(state==='hover')await button.hover();
+        if(state==='focus-visible'){await coveragePage.mouse.move(0,0);await button.focus();await coveragePage.keyboard.press('Tab');await coveragePage.keyboard.press('Shift+Tab');}
+        await button.evaluate(async node=>{await Promise.all(node.getAnimations().map(animation=>animation.finished.catch(()=>{})));});
+        const measured=await button.evaluate((node,state)=>{
+          const rgba=value=>{const parts=value.match(/[\d.]+/g).map(Number);if(parts.length===3)parts.push(1);return parts;};
+          const blend=(front,back)=>front.slice(0,3).map((channel,index)=>channel*front[3]+back[index]*(1-front[3]));
+          const layers=[];let current=node;
+          while(current){const style=getComputedStyle(current);if(style.opacity!=='1'||style.backgroundImage!=='none')throw new Error('Contrast requires opaque controls and solid background layers');const color=rgba(style.backgroundColor);layers.push(color);if(color[3]===1)break;current=current.parentElement;}
+          let background=[255,255,255];for(const layer of layers.reverse())background=blend(layer,background);
+          const style=getComputedStyle(node),foreground=blend(rgba(style.color),background);
+          const luminance=rgb=>rgb.map(value=>{value/=255;return value<=0.04045?value/12.92:((value+0.055)/1.055)**2.4;}).reduce((sum,value,index)=>sum+value*[0.2126,0.7152,0.0722][index],0);
+          const light=luminance(foreground),dark=luminance(background),box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);
+          return {state,color:style.color,background:style.backgroundColor,effectiveBackground:background,ratio:(Math.max(light,dark)+0.05)/(Math.min(light,dark)+0.05),focusVisible:node.matches(':focus-visible'),hover:node.matches(':hover'),box:{x:box.x,width:box.width,height:box.height},fits:box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1),outline:{style:style.outlineStyle,width:style.outlineWidth}};
+        },state);
+        const proof={language,width,...measured};refreshContrasts.push(proof);console.log('QA coverage refresh contrast '+JSON.stringify(proof));
+        assert(measured.fits,'Coverage refresh label must fit '+language+'/'+width);
+        if(state==='base'){baseBox=measured.box;assert(!measured.hover&&!measured.focusVisible);}else assert.deepEqual(measured.box,baseBox,'Hover and focus keep the original button dimensions');
+        if(state==='hover')assert(measured.hover);
+        if(state==='focus-visible'){assert(measured.focusVisible);assert.notEqual(measured.outline.style,'none');assert(parseFloat(measured.outline.width)>0);}
+        if(language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,'refresh-'+state+'-'+language+'-'+width+'.png'),caret:'initial'});
+      }
+      await coveragePage.evaluate(()=>{const {node,start,end}=qaRefreshFocus;if(node.isConnected){node.focus({preventScroll:true});if(typeof start==='number'&&typeof end==='number')node.setSelectionRange(start,end);}});
+      assert.equal(reads.length,count,'Hover and keyboard focus must not read operations');assert.equal(await snapshot(false),true,'Contrast checks preserve all original control and pending bytes');
+    }
     async function matrix(kind,render,widths=[320,390,1440]) {
       await capture();const snapshotChars=await snapshot(true);
       const started=Date.now();
@@ -253,6 +284,7 @@ async function checkCoverageStatus(admin) {
           await coveragePage.locator('#coverageStatus').scrollIntoViewIfNeeded();
           assert(await coveragePage.locator('#coverageStatus').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return document.documentElement.scrollWidth<=innerWidth+1&&box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Coverage message fits '+kind+'/'+language+'/'+width);
           if(['ready','loading','error'].includes(kind)&&language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,kind+'-'+language+'-'+width+'.png'),caret:'initial'});geometry++;
+        if(kind==='ready')await checkRefreshContrast(language,width);
         states++;
       }}
       const timing={kind,widths,snapshotChars,ms:Date.now()-started};matrixTimings.push(timing);console.log('QA coverage matrix time '+JSON.stringify(timing));
@@ -285,7 +317,8 @@ async function checkCoverageStatus(admin) {
       await coveragePage.evaluate(()=>qaCoverageForeign[1].node.remove());
     }
     assert.deepEqual(await sql(),before);assert.deepEqual(pageErrors,[]);assert.deepEqual(routeFailures,[]);assert.deepEqual(businessWrites,[]);assert(preferences.every(body=>Object.keys(body).length===1&&languages.includes(body.language)));
-    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
+    assert.equal(refreshContrasts.length,45);assert(refreshContrasts.every(item=>item.ratio>=4.5),'All 45 native coverage refresh contrasts must reach 4.5:1');
+    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,refreshContrastCases:refreshContrasts.length,minRefreshContrast:Math.min(...refreshContrasts.map(item=>item.ratio)),nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
   } finally {heldReply?.();await coverageContext?.close();if(statusVisit)await prisma.serviceVisit.delete({where:{id:statusVisit.id}});}
 }
 (async () => {
