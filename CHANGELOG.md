@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## TASK551 - fixture temporal de equipamentos (2026-10-03)
+- Reproduzido o timeout de prontidão ao atravessar a meia-noite de Lisboa; visitas do dia anterior são corretamente excluídas da ronda seguinte.
+- Ensaio existente alinhado a um dia QA passado com relógio progressivo; dois grupos completos passaram, incluindo intervalos reais, offline e proteção de conta. Produto, assertions, prazo7s e runner387 preservados; CI do novo SHA ainda necessária.
+
 ## TASK549–550 - sessão GPS e fixtures E2E (2026-10-03)
 - Página/helper GPS reagem imediatamente ao evento de sessão existente; preservam pontos pendentes e abortam o POST antigo sem alterar payload, API ou permissões. Validado com SQL/browser nativos, callbacks tardios e saída/regresso rápido.
 - Fixture E2E existente usa PINs livres e produtos/faturas próprios por execução; duas execuções completas Admin/Técnico/Cliente na mesma QA passaram, sem apagar dados antigos nem enfraquecer guards/assertions.
