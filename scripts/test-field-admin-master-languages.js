@@ -201,6 +201,93 @@ async function checkVisitsDashboard(admin) {
     if(fixtureVisits.length)await prisma.serviceVisit.deleteMany({where:{id:{in:fixtureVisits.map(v=>v.id)}}});
   }
 }
+async function checkCoverageStatus(admin) {
+  const copy = {
+    loading: ['A verificar as visitas…','Checking visits…','Vérification des visites…','Comprobando visitas…','Besuche werden geprüft…'],
+    ready: [' piscina(s) a verificar.',' pool(s) to review.',' piscine(s) à vérifier.',' piscina(s) por revisar.',' Pool(s) zu prüfen.'],
+    automatic: ['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'],
+    manual: ['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'],
+    error: ['Não foi possível atualizar: ','Could not refresh: ','Impossible d’actualiser : ','No se pudo actualizar: ','Aktualisierung nicht möglich: '],
+    stale: ['. A informação anterior pode estar desatualizada.','. Previous information may be out of date.','. Les informations précédentes peuvent être obsolètes.','. La información anterior puede estar desactualizada.','. Die bisherigen Informationen können veraltet sein.'],
+  };
+  const reads=[],businessWrites=[],preferences=[],pageErrors=[],routeFailures=[];
+  const detail='A verificar as visitas… <img src=x onerror=alert(1)> $& {count} '+ 'x'.repeat(90);
+  let coverageContext,coveragePage,coverageMode='normal',heldReply,latestCoverage,statusVisit,states=0,geometry=0,foreign=0;
+  const matrixTimings=[];
+  const sql=async()=>JSON.stringify({records:await raw(),visit:await prisma.serviceVisit.findUnique({where:{id:statusVisit.id}}),counts:await counts(),writes:await prisma.fieldWriteRequest.count(),stock:await prisma.stockMovement.count(),receipts:await prisma.operationalReminder.count()});
+  const output=path.join(__dirname,'../reports/field-visual/round-coverage-status-languages'),filter='coverage-status-'+randomUUID();
+  try {
+    statusVisit=await prisma.serviceVisit.create({data:{clientId:client.id,poolId:pool.id,technicianId:technician.id,date:new Date(),plannedDate:new Date(),status:'PLANNED',notes:filter}});
+    const before=await sql();await fs.mkdir(output,{recursive:true});
+    coverageContext=await browser.newContext({viewport:{width:320,height:1000},serviceWorkers:'block'});
+    await coverageContext.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
+    await coverageContext.addInitScript(({token,id})=>{
+      for(const key of ['token','cristalwater_jwt','adminToken'])localStorage.setItem(key,token);
+      for(const key of ['user','cristalwater_user'])localStorage.setItem(key,JSON.stringify({id,role:'ADMIN'}));
+      localStorage.setItem('cwFieldOutbox:coverage-status','pending original work <img src=x>');
+    },{token,id:admin.id});
+    await coverageContext.route('**/api/rounds/coverage',async route=>{
+      if(coverageMode==='http')return route.fulfill({status:503,json:{ok:false,message:detail}});
+      try {
+        const response=await route.fetch();assert.equal(response.status(),200);assert.equal(route.request().headers().authorization,'Bearer '+token);
+        latestCoverage=await response.json();assert(latestCoverage.rows.some(row=>row.poolId===pool.id),'Own pool must appear in actual coverage GET');
+        if(coverageMode==='hold')await new Promise(resolve=>{heldReply=resolve;});
+        await route.fulfill({response}).catch(()=>{});
+      } catch(error) {routeFailures.push(redact(error.message));await route.abort().catch(()=>{});}
+    });
+    coveragePage=await coverageContext.newPage();coveragePage.setDefaultTimeout(7000);coveragePage.on('pageerror',error=>pageErrors.push(error.message));
+    coveragePage.on('request',request=>{const url=new URL(request.url());if(url.origin!==base||!url.pathname.startsWith('/api/'))return;const entry={method:request.method(),path:url.pathname};if(entry.method==='GET')reads.push(entry);else if(entry.method==='PUT'&&entry.path==='/api/settings/language/me')preferences.push(request.postDataJSON());else if(entry.method!=='HEAD')businessWrites.push(entry);});
+    const choose=async language=>{const saved=coveragePage.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language===language);await coveragePage.locator('#cwLanguageSelect').selectOption(language);const response=await saved;assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,language});await coveragePage.waitForFunction(value=>document.documentElement.lang===value,language);};
+    const expectedReady=index=>latestCoverage.rows.length+copy.ready[index]+' '+latestCoverage.scope+' '+(latestCoverage.automaticAlertsEnabled?copy.automatic[index]:copy.manual[index]);
+    // Compare every original byte in the browser; do not transport huge markup.
+    const snapshot=save=>coveragePage.evaluate(save=>{const value=JSON.stringify({controls:[...document.querySelectorAll('main input,main textarea,main select,main button')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({id:node.id,value:node.value,checked:node.checked,disabled:node.disabled,busy:node.getAttribute('aria-busy'),options:node.options?[...node.options].map(option=>({value:option.value,selected:option.selected,disabled:option.disabled})):null})),links:[...document.querySelectorAll('main a[href]')].map(node=>node.getAttribute('href')),pools:[...document.querySelectorAll('#coverageList h3')].map(node=>node.textContent),deferred:[...document.querySelectorAll('#status,#visitFilterSummary,#weekVisits,#visitPlanner,#visitReceiptsAdmin')].map(node=>[node.id,node.innerHTML]),tokens:['token','cristalwater_jwt','adminToken'].map(key=>localStorage.getItem(key)),bytes:Object.keys(localStorage).filter(key=>/^cwField|^cw:tech/.test(key)).sort().map(key=>[key,localStorage.getItem(key)])});if(save){window.qaCoverageSnapshot=value;return value.length;}return value===qaCoverageSnapshot;},save);
+    const capture=()=>coveragePage.evaluate(()=>{window.qaCoverageNodes=[...document.querySelectorAll('main,main *')].filter(node=>node.id!=='cwLanguageSelect'&&!node.closest('.cw-lang-switch')).map(node=>({node,children:[...node.childNodes]}));});
+    async function matrix(kind,render,widths=[320,390,1440]) {
+      await capture();const snapshotChars=await snapshot(true);
+      const started=Date.now();
+      for(const width of widths) {await coveragePage.setViewportSize({width,height:1000});for(const [index,language]of languages.entries()) {
+        const count=reads.length;await choose(language);
+        const actual=await coveragePage.evaluate(()=>{const node=document.getElementById('coverageStatus');return{text:node.textContent,role:node.getAttribute('role'),live:node.getAttribute('aria-live'),images:node.querySelectorAll('img').length,sameNodes:qaCoverageNodes.every(({node,children})=>node.isConnected&&node.childNodes.length===children.length&&children.every((child,i)=>node.childNodes[i]===child))};});
+        assert.equal(actual.text,render(index),kind+'/'+language+' owns only its message prefix');assert.deepEqual({role:actual.role,live:actual.live,images:actual.images,sameNodes:actual.sameNodes},{role:'status',live:'polite',images:0,sameNodes:true});
+        assert.equal(reads.length,count,'Language must not re-read operations');assert.equal(await snapshot(false),true,'All captured form, markup, token and pending bytes must remain equal');
+          await coveragePage.locator('#coverageStatus').scrollIntoViewIfNeeded();
+          assert(await coveragePage.locator('#coverageStatus').evaluate(node=>{const box=node.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);return document.documentElement.scrollWidth<=innerWidth+1&&box.left>=0&&box.right<=innerWidth+1&&[...range.getClientRects()].every(line=>line.left>=box.left-1&&line.right<=box.right+1);}),'Coverage message fits '+kind+'/'+language+'/'+width);
+          if(['ready','loading','error'].includes(kind)&&language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,kind+'-'+language+'-'+width+'.png'),caret:'initial'});geometry++;
+        states++;
+      }}
+      const timing={kind,widths,snapshotChars,ms:Date.now()-started};matrixTimings.push(timing);console.log('QA coverage matrix time '+JSON.stringify(timing));
+    }
+    const refresh=async()=>{await coveragePage.locator('#coverageRefresh').click();};
+    const ready=()=>coveragePage.waitForFunction(()=>document.querySelectorAll('#coverageList article').length>0&&!document.getElementById('coverageStatus').textContent.includes('…'));
+    const held=async()=>{const deadline=Date.now()+7000;while(!heldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(heldReply,'Actual coverage GET must reach latency gate');};
+    await coveragePage.goto(base+'/admin-rounds',{waitUntil:'networkidle'});await ready();await choose('en');
+    assert.equal(await coveragePage.locator('#coverageStatus').textContent(),expectedReady(1),'Native ready feedback must follow actual EN selection');
+    await coveragePage.locator('#visitSearch').fill(filter);
+    assert.deepEqual(await coveragePage.locator('#weekVisits tbody tr').evaluateAll(nodes=>nodes.map(node=>[node.dataset.kind,Number(node.dataset.id)])),[['SERVICE',statusVisit.id]],'Real UI filter must retain exactly the own SQL visit without pruning data');
+    await coveragePage.locator('#coverageReason').fill('Atualizar <b>literal draft</b>');await coveragePage.locator('#roundName').fill('A verificar as visitas…');await coveragePage.locator('#coverageCause').selectOption('Falta de produtos químicos');
+    await coveragePage.locator(`[data-transfer-visit="${statusVisit.id}"]`).check();
+    await coveragePage.evaluate(()=>{document.getElementById('extraPrice').disabled=true;document.getElementById('createExtraVisitBtn').setAttribute('aria-busy','true');});
+    await matrix('ready',expectedReady);
+    for(const width of [320,390,1440]) {await coveragePage.setViewportSize({width,height:1000});coverageMode='hold';await refresh();await held();await matrix('loading',index=>copy.loading[index],[width]);heldReply();heldReply=null;coverageMode='normal';await ready();}
+    coverageMode='http';await refresh();await coveragePage.waitForFunction(detail=>document.getElementById('coverageStatus').textContent.includes(detail),detail);await matrix('error',index=>copy.error[index]+detail+copy.stale[index]);
+    coverageMode='normal';await refresh();await ready();await matrix('recovered',expectedReady,[320]);
+    await coveragePage.evaluate(()=>{const input=document.getElementById('coverageReason');input.focus();input.setSelectionRange(3,9);});await snapshot(true);
+    const saved=coveragePage.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language==='fr');await coveragePage.evaluate(()=>CristalI18n.applyLanguage('fr'));assert.equal((await saved).status(),200);
+    assert.deepEqual(await coveragePage.locator('#coverageReason').evaluate(node=>({focus:document.activeElement===node,start:node.selectionStart,end:node.selectionEnd})),{focus:true,start:3,end:9});assert.equal(await snapshot(false),true);
+    const timeoutDetail=await coveragePage.evaluate(async()=>{const signal=AbortSignal.timeout(0);await new Promise(resolve=>signal.addEventListener('abort',resolve,{once:true}));return signal.reason.message;});
+    coverageMode='hold';const failed=coveragePage.waitForEvent('requestfailed',{predicate:request=>new URL(request.url()).pathname==='/api/rounds/coverage',timeout:16000});failed.catch(()=>{});const started=Date.now();await refresh();await held();
+    await coveragePage.waitForFunction(detail=>document.getElementById('coverageStatus').textContent.includes(detail),timeoutDetail,{timeout:16000});await failed;assert(Date.now()-started>=14000,'Original 15000ms production deadline must actually elapse');
+    await matrix('timeout',index=>copy.error[index]+timeoutDetail+copy.stale[index],[320]);heldReply();heldReply=null;coverageMode='normal';await refresh();await ready();
+    for(const replacement of [false,true]) {
+      await choose('de');await refresh();await ready();
+      await coveragePage.evaluate(replacement=>{const node=document.getElementById('coverageStatus'),clone=node.cloneNode(true);clone.removeAttribute('id');node.after(clone);if(replacement)node.replaceChildren(document.createTextNode(node.textContent));else node.firstChild.nodeValue='A verificar as visitas…';window.qaCoverageForeign=[node,clone].map(node=>({node,markup:node.outerHTML}));},replacement);
+      for(const language of languages){const count=reads.length;await choose(language);assert(await coveragePage.evaluate(()=>qaCoverageForeign.every(({node,markup})=>node.outerHTML===markup)));assert.equal(reads.length,count);foreign++;}
+      await coveragePage.evaluate(()=>qaCoverageForeign[1].node.remove());
+    }
+    assert.deepEqual(await sql(),before);assert.deepEqual(pageErrors,[]);assert.deepEqual(routeFailures,[]);assert.deepEqual(businessWrites,[]);assert(preferences.every(body=>Object.keys(body).length===1&&languages.includes(body.language)));
+    const proof={languages,widths:[320,390,1440],states,geometry,foreign,matrixTimings,nativeRows:latestCoverage.rows.length,ownFilteredVisit:statusVisit.id,realUiFilterWithoutDataPruning:true,rawScope:latestCoverage.scope,nativeSuccess:true,successPayloadMocks:false,original15000msDeadline:true,literalErrorsInert:true,nodeIdentity:true,focusCaret:true,selectionDraftsDisabledBusyBytes:true,zeroLanguageReads:true,zeroBusinessWrites:true,sqlUnchanged:true};console.log('PASS coverage status native languages '+JSON.stringify(proof));return proof;
+  } finally {heldReply?.();await coverageContext?.close();if(statusVisit)await prisma.serviceVisit.delete({where:{id:statusVisit.id}});}
+}
 (async () => {
   const admin = await prisma.user.findUniqueOrThrow({where:{email:process.env.ADMIN_EMAIL}});
   token = jwt.sign({id:admin.id,role:'ADMIN',principalType:'USER'},getJwtSecret(),{expiresIn:'1h'});
@@ -312,7 +399,8 @@ async function checkVisitsDashboard(admin) {
   await select('de');await page.reload({waitUntil:'networkidle'});await ready();assert.equal(await page.locator('h1').textContent(),expected.title[4]);assert.equal(await page.locator('#cwLanguageSelect').inputValue(),'de');
   assert.equal(await page.locator('#todayList img').count(),0);assert.deepEqual(errors,[]);assert.deepEqual(routeErrors,[]);assert.deepEqual(writes,[]);assert.deepEqual(await raw(),records);assert.deepEqual(await counts(),before);
   const visitsDashboard = await checkVisitsDashboard(admin);
-  const proof={ok:true,realAuthenticatedPage:true,successPayloadMocks:false,controlledGetFailures:['503 literal server text','malformed JSON','HTTP fallback','12000ms deadline'],languages,widths:[320,390,1440],readyCases,stateCases,searchCases,ownershipCases,nodeIdentityRetained:true,focusAndCaretRetained:true,literalNamesMessagesAndRecordBytes:true,zeroBusinessWrites:true,apiPaths:[...new Set(requests)],states:stateProof,visitsDashboard};
+  const coverageStatus = await checkCoverageStatus(admin);
+  const proof={ok:true,realAuthenticatedPage:true,successPayloadMocks:false,controlledGetFailures:['503 literal server text','malformed JSON','HTTP fallback','12000ms deadline'],languages,widths:[320,390,1440],readyCases,stateCases,searchCases,ownershipCases,nodeIdentityRetained:true,focusAndCaretRetained:true,literalNamesMessagesAndRecordBytes:true,zeroBusinessWrites:true,apiPaths:[...new Set(requests)],states:stateProof,visitsDashboard,coverageStatus};
   await fs.writeFile(path.join(output,'results.json'),JSON.stringify(proof,null,2)+'\n');console.log('PASS command centre native languages '+JSON.stringify(proof));
 })().catch(async error=>{console.error(redact(error.stack || error));if(page)console.error('Command centre state',await page.locator('#metrics').textContent().catch(()=>null));process.exitCode=1;}).finally(async()=>{
   closing=true;release();await page?.unrouteAll({behavior:'ignoreErrors'});await browser?.close();

@@ -131,6 +131,11 @@ const roundCopy = (() => {
     coverageReturn: ['Combinar regresso','Arrange return visit','Organiser une nouvelle visite','Coordinar regreso','Rückbesuch vereinbaren'],
     coveragePlan: ['Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.','Check the rounds below and generate weekly visits after confirming the plan.','Vérifiez les tournées ci-dessous et générez les visites de la semaine après confirmation du planning.','Comprueba las rondas siguientes y genera las visitas semanales tras confirmar el plan.','Die Rundgänge unten prüfen und nach Bestätigung der Planung Wochenbesuche erzeugen.'],
     coverageSelectVisit: ['Selecionar visita {id}','Select visit {id}','Sélectionner la visite {id}','Seleccionar visita {id}','Besuch {id} auswählen'],
+    coverageLoading: ['A verificar as visitas…','Checking visits…','Vérification des visites…','Comprobando visitas…','Besuche werden geprüft…'],
+    coverageReady: ['{count} piscina(s) a verificar.','{count} pool(s) to review.','{count} piscine(s) à vérifier.','{count} piscina(s) por revisar.','{count} Pool(s) zu prüfen.'],
+    coverageAutomatic: ['Avisos ao escritório verificados automaticamente de hora a hora.','Office alerts checked automatically once an hour.','Alertes au bureau vérifiées automatiquement toutes les heures.','Avisos a la oficina revisados automáticamente cada hora.','Bürohinweise werden automatisch stündlich geprüft.'],
+    coverageManual: ['Avisos automáticos desativados neste ambiente; utilize Verificar agora.','Automatic alerts disabled in this environment; use Check now.','Alertes automatiques désactivées dans cet environnement ; utilisez Vérifier maintenant.','Avisos automáticos desactivados en este entorno; utiliza Comprobar ahora.','Automatische Hinweise sind in dieser Umgebung deaktiviert; Jetzt prüfen verwenden.'],
+    coverageRefreshError: ['Não foi possível atualizar: {error}. A informação anterior pode estar desatualizada.','Could not refresh: {error}. Previous information may be out of date.','Impossible d’actualiser : {error}. Les informations précédentes peuvent être obsolètes.','No se pudo actualizar: {error}. La información anterior puede estar desactualizada.','Aktualisierung nicht möglich: {error}. Die bisherigen Informationen können veraltet sein.'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -1215,8 +1220,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   let revision=0;
   const message=()=>document.getElementById('coverageStatus');
+  function writeCoverageMessage(render){
+    const node=message();roundCopy.forget(node);node.style.overflowWrap='anywhere';node.textContent=render();roundCopy.bind(node,render);
+  }
   async function refresh(){
-    const own=++revision,token=localStorage.getItem('token');message().textContent='A verificar as visitas…';
+    const own=++revision,token=localStorage.getItem('token');writeCoverageMessage(()=>roundCopy.text('coverageLoading'));
     try{
       const data=await fetchJSON('/api/rounds/coverage',{cache:'no-store',signal:AbortSignal.timeout(15000)});
       if(own!==revision||token!==localStorage.getItem('token'))return;
@@ -1227,8 +1235,9 @@ window.addEventListener("DOMContentLoaded", () => {
       document.getElementById('coverageList').innerHTML=data.rows.map(row=>`<article class="coverage-pool" data-coverage-pool="${row.poolId}"><h3>${escapeHtml(row.poolName)}</h3><p>${escapeHtml(row.clientName)} · ${row.lastCompleted?'Última conclusão: '+new Date(row.lastCompleted).toLocaleDateString('pt-PT'):'Sem conclusão registada'}</p><p>${row.flags.map(flag=>escapeHtml(labels[flag])).join(' · ')}</p>${row.visits.map(visit=>`<label class="coverage-visit">${visit.canTransfer?`<input type="checkbox" data-transfer-visit="${visit.id}" aria-label="Selecionar visita ${visit.id}">`:''}<span>Visita #${visit.id} · ${visit.plannedDate?new Date(visit.plannedDate).toLocaleDateString('pt-PT'):'Sem data'} · ${escapeHtml(visit.technicianName||'Por atribuir')}<br>${visit.issues.map(flag=>escapeHtml(labels[flag])).join(' · ')||'Agendada'}${visit.canTransfer?'':' · Acompanhamento individual necessário'}</span></label>`).join('')}${row.visits.some(v=>v.issues.includes('INCOMPLETE'))?'<a href="/admin-alerts#incompleteFollowups">Combinar regresso</a>':''}${row.flags.includes('NOT_SCHEDULED_TODAY')?'<p>Verifique as rondas abaixo e utilize Gerar semana após confirmar o planeamento.</p>':''}</article>`).join('');
       for(const row of data.rows)bindCoverageCard(document.querySelector(`[data-coverage-pool="${row.poolId}"]`),row);
       document.getElementById('visitReceiptsAdmin').innerHTML=(data.receipts||[]).map(row=>`<p data-admin-receipt="${row.id}"><strong>${escapeHtml(row.poolName)} · #${row.visitId}</strong> · ${escapeHtml(row.technicianName)} · ${({PENDING:'Por confirmar pelo técnico',RECEIVED:'Receção confirmada',RECEIVED_PREVIOUS:'Receção confirmada numa atribuição anterior',SUPERSEDED:'Atribuição substituída',CLOSED:'Visita encerrada sem confirmação de receção'})[row.state]}${row.receivedAt?' · '+new Date(row.receivedAt).toLocaleString('pt-PT'):''}</p>`).join('')||'<p>Sem transferências com confirmação registada.</p>';
-      message().textContent=`${data.rows.length} piscina(s) a verificar. ${data.scope} ${data.automaticAlertsEnabled?'Avisos ao escritório verificados automaticamente de hora a hora.':'Avisos automáticos desativados neste ambiente; utilize Verificar agora.'}`;
-    }catch(error){if(own===revision&&token===localStorage.getItem('token'))message().textContent=`Não foi possível atualizar: ${error.message}. A informação anterior pode estar desatualizada.`;}
+      const count=String(data.rows.length),scope=data.scope,automatic=data.automaticAlertsEnabled;
+      writeCoverageMessage(()=>roundCopy.text('coverageReady').replace('{count}',()=>count)+' '+scope+' '+roundCopy.text(automatic?'coverageAutomatic':'coverageManual'));
+    }catch(error){if(own===revision&&token===localStorage.getItem('token')){const detail=error.message;writeCoverageMessage(()=>roundCopy.text('coverageRefreshError').replace('{error}',()=>detail));}}
   }
   document.getElementById('coverageRefresh').addEventListener('click',refresh);
   document.getElementById('coverageTransfer').addEventListener('submit',async event=>{
