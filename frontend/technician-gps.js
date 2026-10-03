@@ -111,6 +111,7 @@ function checkGpsSession() {
   invalidated = true; gpsClient.stop(); setKpiCopy('changed'); setStatusCopy('session'); controls();
 }
 startBtn?.addEventListener('click', startTracking); sendNowBtn?.addEventListener('click', sendNow); document.getElementById('gpsRetryBtn')?.addEventListener('click', confirmGps);
+window.addEventListener('cw:session-change', checkGpsSession);
 window.addEventListener('storage', checkGpsSession); window.addEventListener('focus', checkGpsSession); setInterval(checkGpsSession, 500);
 window.addEventListener('pagehide', () => { lifecycle++; watching = acquiring = confirming = false; gpsClient.stop(); });
 window.addEventListener('pageshow', () => { checkGpsSession(); controls(); });

@@ -162,5 +162,6 @@
   window.CWGps = { session, same, save, send, flush, start, stop, status };
   function checkSession() { if (watchingSession && !same(watchingSession)) stop(); if (sendingSession && !same(sendingSession)) { controller?.abort(); notice('sessionChanged'); } }
   window.addEventListener('pagehide', () => { stop(); controller?.abort(); });
+  window.addEventListener('cw:session-change', checkSession);
   window.addEventListener('storage', checkSession); window.addEventListener('focus', checkSession); setInterval(checkSession, 500);
 })();

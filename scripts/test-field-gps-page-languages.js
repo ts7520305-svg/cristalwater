@@ -144,11 +144,34 @@ process.on('exit', code => { if (!code && !completed) process.exitCode = 1; });
   console.log('PASS changing language during a held real confirmation does not send again; lost-response retry uses identical UUID/payload/auth with one history row; older/current acknowledgements, accuracy and original measurement time render accurately');
 
   await context.setOffline(true); await page.locator('#sendNowBtn').click(); await emit(Date.now() + 2000); await idle(); const pending = await stored(); assert.equal(pending.length, 1);
-  await page.evaluate(({ token, id }) => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'TECHNICIAN' })); }, { token: credential(other.id), id: other.id });
+  const sameAccount=await page.evaluate(()=>{const before=qaGps.cleared.length;window.dispatchEvent(new CustomEvent('cw:session-change'));return{cleared:qaGps.cleared.length-before,start:startBtn.disabled,send:sendNowBtn.disabled,retry:gpsRetryBtn.disabled};});
+  assert.deepEqual(sameAccount,{cleared:0,start:true,send:false,retry:false});
+  await page.locator('#sendNowBtn').click();
+  const immediate=await page.evaluate(({ token, id }) => {
+    CristalAuth.persistSession(token,{id,role:'TECHNICIAN'});window.dispatchEvent(new CustomEvent('cw:session-change'));
+    return{disabled:['startBtn','sendNowBtn','gpsRetryBtn'].map(id=>document.getElementById(id).disabled),accuracy:accuracyKpi.textContent,last:lastKpi.textContent,cleared:qaGps.cleared.length};
+  }, { token: credential(other.id), id: other.id });
+  assert.deepEqual(immediate.disabled,[true,true,true]);assert.equal(immediate.accuracy,'—');assert.equal(immediate.last,'—');assert(immediate.cleared>0,'Native tracking stops during the session event');
   await page.waitForFunction(() => ['startBtn', 'sendNowBtn', 'gpsRetryBtn'].every(id => document.getElementById(id).disabled)); await matrix('session', 'changed'); assert.deepEqual(await stored(), pending);
   await page.evaluate(({ token, id }) => { for (const key of ['token', 'cristalwater_jwt']) localStorage.setItem(key, token); for (const key of ['user', 'cristalwater_user']) localStorage.setItem(key, JSON.stringify({ id, role: 'TECHNICIAN' })); }, { token, id: tech.id });
+  const requestCount=requests.length;await emit(Date.now()+3000);await page.evaluate(()=>qaGps.watchers.at(-1).success({coords:{latitude:38,longitude:-9,accuracy:8},timestamp:Date.now()}));
+  assert.equal(requests.length,requestCount);assert.deepEqual(await stored(),pending);
   await matrix('session', 'changed'); await page.reload({ waitUntil: 'networkidle' }); await instrument(); await idle(); await matrix('pendingCount', 'pending', { count: 1 }); assert.deepEqual(await stored(), pending);
   assert.equal(await prisma.technicianTrack.count({ where: { technicianId: other.id } }), 0); assert.equal((await database()).tracks.length, 2);
+  await context.setOffline(false);await page.waitForLoadState('networkidle');
+  let releaseSession,enteredSession;const sessionGate=new Promise(resolve=>{releaseSession=resolve;releases.push(resolve);}),sessionStarted=new Promise(resolve=>{enteredSession=resolve;});
+  await page.route(endpoint,async route=>{const response=await route.fetch();enteredSession();await sessionGate;await route.fulfill({response}).catch(()=>{});});
+  await page.locator('#gpsRetryBtn').click();await sessionStarted;assert.deepEqual(await stored(),pending);assert.equal((await database()).tracks.length,3);
+  const aborted=page.waitForEvent('requestfailed',{predicate:request=>request.url()===endpoint,timeout:10000});
+  const rapid=await page.evaluate(({token,otherToken,id,otherId})=>{
+    CristalAuth.persistSession(otherToken,{id:otherId,role:'TECHNICIAN'});window.dispatchEvent(new CustomEvent('cw:session-change'));
+    const disabled=['startBtn','sendNowBtn','gpsRetryBtn'].map(id=>document.getElementById(id).disabled);
+    CristalAuth.persistSession(token,{id,role:'TECHNICIAN'});window.dispatchEvent(new CustomEvent('cw:session-change'));return disabled;
+  },{token,otherToken:credential(other.id),id:tech.id,otherId:other.id});
+  releaseSession();await aborted;await page.unroute(endpoint);assert.deepEqual(rapid,[true,true,true]);assert.deepEqual(await stored(),pending);
+  assert.equal(await prisma.technicianTrack.count({where:{technicianId:other.id}}),0);assert.equal((await database()).tracks.length,3);
+  await page.reload({waitUntil:'networkidle'});await page.locator('#gpsRetryBtn').click();await idle();assert.deepEqual(await stored(),[]);assert.equal((await database()).tracks.length,3);
+  console.log('PASS same-account session event retains tracking; account change synchronously locks/clears/stops GPS; delayed current/watch callbacks and a real committed response after rapid leave/return preserve the pending point until exact replay, without duplicate SQL tracks');
   assert.equal(await page.locator('#gpsStatus b').count(), 0); assert.deepEqual(errors, []);
   console.log('PASS account change disables the same controls in all languages and preserves the exact pending point; restoring credentials does not unlock the old page, and cached reopen recovers only the original account');
   completed = true;
