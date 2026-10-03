@@ -144,6 +144,7 @@ const roundCopy = (() => {
     assignBeforeVisits: ['. Associa um tecnico antes de gerar ou executar visitas.','. Assign a technician before generating or carrying out visits.','. Attribuez un technicien avant de générer ou effectuer des visites.','. Asigna un técnico antes de generar o realizar visitas.','. Vor dem Erzeugen oder Ausführen von Besuchen einen Techniker zuweisen.'],
     plannerUnassigned: ['Sem tecnico','Unassigned','Sans technicien','Sin técnico','Nicht zugewiesen'],
     plannerDrop: ['Arraste visitas para aqui','Drag visits here','Glissez les visites ici','Arrastra visitas aquí','Besuche hierher ziehen'],
+    plannerExtra: ['Extra','Extra','Supplément','Extra','Zusatz'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -846,7 +847,11 @@ function renderPlanner(visits = filterVisits()){
   }
   for(const hint of box.querySelectorAll('.tech-drop > .empty'))roundCopy.bind(hint,'plannerDrop');
 
+  const visitsById = new Map(visits.map(visit => [`${visit.kind}-${visit.id}`,visit]));
   box.querySelectorAll(".visit-chip").forEach((chip) => {
+    const visit = visitsById.get(`${chip.dataset.kind}-${chip.dataset.id}`),date = getVisitDate(visit);
+    const prefix = date ? date.toLocaleString("pt-PT") : "Sem data",suffix = assignmentLabel(visit.assignmentMode);
+    roundCopy.bind(chip.children[2], () => `${prefix} - ${roundCopy.text(visit.kind === "EXTRA" ? 'plannerExtra' : 'round')} - ${suffix}`);
     chip.addEventListener("dragstart", (event) => {
       event.dataTransfer.setData("text/plain", JSON.stringify({ kind: chip.dataset.kind, id: chip.dataset.id }));
       event.dataTransfer.effectAllowed = "move";
