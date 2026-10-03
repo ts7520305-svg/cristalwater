@@ -718,10 +718,12 @@
   }
 
   function translateTextNodes(language) {
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+    // TreeWalker does not filter its root; excluded elements reject descendants.
+    if (shouldSkipElement(document.body)) return;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
       acceptNode(node) {
+        if (node.nodeType === Node.ELEMENT_NODE) return shouldSkipElement(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
         if (!normalizeText(node.nodeValue)) return NodeFilter.FILTER_REJECT;
-        if (shouldSkipElement(node.parentElement)) return NodeFilter.FILTER_REJECT;
         return NodeFilter.FILTER_ACCEPT;
       },
     });
