@@ -132,6 +132,9 @@ async function checkVisitsDashboard(admin) {
     const records = await prisma.serviceVisit.findMany({where:{id:{in:fixtureVisits.map(v=>v.id)}},include:{photos:true},orderBy:{id:'asc'}}), before = await nativeCounts();
     const native = await fetch(base+'/api/visits/today',{headers:{Authorization:'Bearer '+token}});assert.equal(native.status,200);assert.match(native.headers.get('cache-control'),/private.*no-store/);
     const nativeData = await native.json(), nativeRows = Array.isArray(nativeData)?nativeData:nativeData.visits;assert(Array.isArray(nativeRows));for(const v of fixtureVisits)assert(nativeRows.some(row=>row.id===v.id),'Own fixture appears in native daily GET');
+    const queriedRows=nativeRows.filter(row=>[row.client?.name,row.pool?.name,row.technicianName,row.notes,row.status||(row.endAt?'DONE':'IN_PROGRESS')].join(' ').toLowerCase().includes('atualizar'));
+    for(const fixture of fixtureVisits)assert(queriedRows.some(row=>row.id===fixture.id),'Literal native search retains every owned visit without excluding matching historical rows');
+    console.log('PRECONDITION visits dashboard literal filter '+JSON.stringify({nativeRows:nativeRows.length,matchedRows:queriedRows.length,ownedRows:fixtureVisits.length,historicalMatches:queriedRows.length-fixtureVisits.length,unprunedNativePayload:true}));
     dashboardContext = await browser.newContext({viewport:{width:320,height:1000},serviceWorkers:'block'});
     await dashboardContext.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
     await dashboardContext.addInitScript(({token,id})=>{
@@ -158,8 +161,8 @@ async function checkVisitsDashboard(admin) {
     assert.equal(await dashboardPage.locator('main h1').textContent(),dashboardCopy.title[4],'Own dashboard title must follow actual DE language selection');
     assert(contrasts.every(item=>item.ratio>=4.5),'Dashboard copy and controls need readable contrast: '+JSON.stringify(contrasts.filter(item=>item.ratio<4.5)));
     await dashboardPage.locator('#searchInput').fill('Atualizar');
-    assert.equal(await dashboardPage.locator('#visits article').count(),3);
-    const expectedDates = await dashboardPage.evaluate(rows=>rows.flatMap(row=>[row.startAt?new Date(row.startAt).toLocaleString('pt-PT'):'-',row.endAt?new Date(row.endAt).toLocaleString('pt-PT'):'-']),nativeRows.filter(row=>fixtureVisits.some(v=>v.id===row.id)));
+    assert.equal(await dashboardPage.locator('#visits article').count(),queriedRows.length);
+    const expectedDates = await dashboardPage.evaluate(rows=>rows.flatMap(row=>[row.startAt?new Date(row.startAt).toLocaleString('pt-PT'):'-',row.endAt?new Date(row.endAt).toLocaleString('pt-PT'):'-']),queriedRows);
     assert.deepEqual(await dashboardPage.locator('#visits article').evaluateAll(nodes=>nodes.flatMap(node=>[node.querySelectorAll('.value')[2].textContent,node.querySelectorAll('.value')[3].textContent])),expectedDates);
     await dashboardPage.waitForFunction(()=>[...document.querySelectorAll('#visits img')].every(img=>img.complete&&img.naturalWidth>0));
     await dashboardPage.evaluate(()=>{window.qaVisitNodes=[...document.querySelectorAll('main h1,.page-head p,.page-actions button,.toolbar input,.toolbar select,.toolbar option,#visits article,#visits .label,#visits .value,#visits img,#visits p b')].map(node=>({node,first:node.firstChild,children:[...node.childNodes]}));});
@@ -183,7 +186,7 @@ async function checkVisitsDashboard(admin) {
     }
     await dashboardPage.evaluate(()=>{const field=document.getElementById('searchInput');field.focus();field.setSelectionRange(2,6);CristalI18n.applyLanguage('fr');});
     assert.deepEqual(await dashboardPage.locator('#searchInput').evaluate(node=>({focus:document.activeElement===node,value:node.value,start:node.selectionStart,end:node.selectionEnd})),{focus:true,value:'Atualizar',start:2,end:6});
-    for(const status of ['DONE','IN_PROGRESS']) {await dashboardPage.locator('#statusFilter').selectOption(status);assert.equal(await dashboardPage.locator('#visits article').count(),1);const filtered=await snapshot();for(const language of languages){await choose(language);assert.equal(await snapshot(),filtered);}}
+    for(const status of ['DONE','IN_PROGRESS']) {await dashboardPage.locator('#statusFilter').selectOption(status);assert.equal(await dashboardPage.locator('#visits article').count(),queriedRows.filter(row=>(row.status||(row.endAt?'DONE':'IN_PROGRESS'))===status).length);const filtered=await snapshot();for(const language of languages){await choose(language);assert.equal(await snapshot(),filtered);}}
     await dashboardPage.locator('#searchInput').fill('no-native-visit-'+randomUUID());
     const captureFeedback = () => dashboardPage.evaluate(()=>{window.qaVisitFeedback=[...document.querySelectorAll('#visits .card,#visits h3,#visits p')].map(node=>({node,first:node.firstChild,children:[...node.childNodes]}));});
     const sameFeedback = () => dashboardPage.evaluate(()=>qaVisitFeedback.every(({node,first,children})=>node.isConnected&&node.firstChild===first&&node.childNodes.length===children.length&&children.every((child,index)=>node.childNodes[index]===child)));
@@ -647,6 +650,9 @@ async function checkCoverageStatus(admin) {
   assert.equal(await page.locator('h1').textContent(),expected.title[4]);assert.equal(await page.locator('#cwLanguageSelect').count(),1);
   assert(await page.locator('#todayList').textContent().then(text=>text.includes('Críticos')&&text.includes('Atualizar')&&text.includes('Prioridades')));
   assert(await page.locator('#technicalPropagationList').textContent().then(text=>text.includes('Não foi possível carregar os dados.')));
+  const literalVisits=await page.locator('#todayList b').allTextContents(),literalHistory=await page.locator('#technicalPropagationList b').allTextContents();
+  assert.equal(await page.locator('#todayList [data-edit-visit="'+visit.id+'"]').count(),1,'Own native visit must be present even when literal names repeat');
+  assert.equal(await page.locator('#technicalPropagationList').getByText('Piscina #'+pool.id+' · '+history.type,{exact:true}).count(),1,'Own native history must be present even when literal messages repeat');
   await page.evaluate(()=>{
     document.getElementById('visitEditNotes').value='pending original notes <img src=x>';
     document.getElementById('visitEditReason').value='Atualizar';document.getElementById('visitEditReason').disabled=true;
@@ -665,7 +671,7 @@ async function checkCoverageStatus(admin) {
     assert.deepEqual(missingAliases, []);
     assert(await page.evaluate(()=>qaCommandNodes.every(item=>item.node.isConnected&&item.node.firstChild===item.text&&item.node.childNodes.length===item.children.length&&item.children.every((node,i)=>item.node.childNodes[i]===node))));
     assert.equal(await fingerprint(),originalFingerprint);assert.equal(requests.length,reads);
-    assert.equal(await page.locator('#todayList b').filter({hasText:'Críticos'}).count(),1);assert.equal(await page.locator('#technicalPropagationList b').filter({hasText:'Não foi possível carregar os dados.'}).count(),1);
+    assert.deepEqual(await page.locator('#todayList b').allTextContents(),literalVisits);assert.deepEqual(await page.locator('#technicalPropagationList b').allTextContents(),literalHistory);
     for(const width of [320,390,1440]) {
       await page.setViewportSize({width,height:1000});await page.locator('h1').scrollIntoViewIfNeeded();
       assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Page fits '+languages[i]+'/'+width);
