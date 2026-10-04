@@ -161,6 +161,12 @@ const roundCopy = (() => {
     tableLate: ['atrasada','overdue','en retard','atrasada','überfällig'],
     tableFilteredEmpty: ['Nenhuma visita corresponde aos filtros escolhidos.','No visits match the selected filters.','Aucune visite ne correspond aux filtres choisis.','Ninguna visita coincide con los filtros elegidos.','Keine Besuche entsprechen den gewählten Filtern.'],
     tableTotalEmpty: ['Ainda nao existem visitas geradas para esta semana.','No visits have been generated for this week yet.','Aucune visite n’a encore été générée pour cette semaine.','Todavía no se han generado visitas para esta semana.','Für diese Woche wurden noch keine Besuche erstellt.'],
+    visitPlanned: ['Planeada','Planned','Planifiée','Planificada','Geplant'],
+    visitOnRoute: ['A caminho','On the way','En route','En camino','Unterwegs'],
+    visitInProgress: ['Em execucao','In progress','En cours','En curso','In Bearbeitung'],
+    visitDone: ['Concluida','Completed','Terminée','Completada','Abgeschlossen'],
+    visitBlocked: ['Retida / impedida','Held / blocked','Retenue / bloquée','Retenida / impedida','Blockiert'],
+    visitCancelled: ['Cancelada','Cancelled','Annulée','Cancelada','Storniert'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -953,6 +959,8 @@ function renderVisits(){
   const headingKeys = ['tableDate','tableClient','pool','technician','tableTypeBilling','status','tableEdit'];
   box.querySelectorAll('thead th').forEach((node,index)=>roundCopy.bind(node,headingKeys[index]));
   roundCopy.bind(box.querySelector('.table-scroll'),'editableVisitList','aria-label');
+  const statusKeys = {PLANNED:'visitPlanned',ON_ROUTE:'visitOnRoute',IN_PROGRESS:'visitInProgress',DONE:'visitDone',BLOCKED:'visitBlocked',RESCHEDULED:'chipReschedule',CANCELLED:'visitCancelled'};
+  box.querySelectorAll('tbody [data-field="status"] option').forEach(node=>roundCopy.bind(node,statusKeys[node.value]));
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
   box.querySelectorAll('tbody tr').forEach((row,index)=>{
