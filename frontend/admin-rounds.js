@@ -175,6 +175,7 @@ const roundCopy = (() => {
     visitAssignmentLabel: ["Modo de atribuicao da visita {pool}","Visit assignment mode {pool}","Mode d’attribution de la visite {pool}","Modo de asignación de la visita {pool}","Zuweisungsmodus des Besuchs {pool}"],
     visitStatusLabel: ["Estado da visita {pool}","Visit status {pool}","État de la visite {pool}","Estado de la visita {pool}","Status des Besuchs {pool}"],
     visitOperationalReason: ["Motivo operacional","Operational reason","Motif opérationnel","Motivo operativo","Betrieblicher Grund"],
+    visitPricePlaceholder: ["Valor","Amount","Montant","Importe","Betrag"],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -980,6 +981,7 @@ function renderVisits(){
     const pool=String(visitPoolName(filteredVisits[index]));
     for(const [field,key] of Object.entries(visitFieldLabels))roundCopy.bind(row.querySelector(`[data-field="${field}"]`),()=>roundCopy.text(key).replace('{pool}',()=>pool),'aria-label');
     roundCopy.bind(row.querySelector('[data-field="assignmentMode"]'),'visitOperationalReason','title');
+    roundCopy.bind(row.querySelector('[data-field="unitPrice"]'),'visitPricePlaceholder','placeholder');
   });
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
