@@ -248,6 +248,8 @@ async function checkCoverageStatus(admin) {
   const lateMeasurements=[],lateRecoveryMeasurements=[];
   const tableEmptyCopy=['Nenhuma visita corresponde aos filtros escolhidos.','No visits match the selected filters.','Aucune visite ne correspond aux filtres choisis.','Ninguna visita coincide con los filtros elegidos.','Keine Besuche entsprechen den gewählten Filtern.'];
   let emptyCases=0,emptyGeometry=0,emptyForeign=0,emptyRecovered=0;
+  const totalEmptyCopy=['Ainda nao existem visitas geradas para esta semana.','No visits have been generated for this week yet.','Aucune visite n’a encore été générée pour cette semaine.','Todavía no se han generado visitas para esta semana.','Für diese Woche wurden noch keine Besuche erstellt.'];
+  let totalEmptyProof;
   const expectedLateLabels=(parts,index)=>parts.map(({prefix,late,...part})=>({...part,text:prefix+(late?' - '+lateCopy[index]:'')}));
   const modeFilter='assignment-copy-'+randomUUID(),modeFixtures=[];let latestWeek;
   let initialFilterReady;const initialFilterGate=new Promise(resolve=>{initialFilterReady=resolve;});
@@ -475,8 +477,41 @@ async function checkCoverageStatus(admin) {
     const readAgain=()=>coveragePage.evaluate(()=>{window.qaMainRead=loadAll();});
     const readSettled=()=>coveragePage.evaluate(()=>window.qaMainRead);
     const mainHeld=async()=>{const deadline=Date.now()+7000;while(!mainHeldReply&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));assert(mainHeldReply,'Actual planner GET must reach latency gate');};
+    async function checkInitialTotalEmpty() {
+      await ready();
+      const deadline=Date.now()+7000;while(!latestWeek&&Date.now()<deadline)await new Promise(resolve=>setTimeout(resolve,20));
+      assert(Array.isArray(latestWeek)&&latestWeek.length>0,'Retain the complete actual GET200 before the native initial-empty producer');
+      const sourceBytes=JSON.stringify(latestWeek),sqlBefore=await sql(),selector=await coveragePage.locator('#cwLanguageSelect').elementHandle();assert(selector);
+      const selectEmpty=async language=>{const saved=coveragePage.waitForResponse(response=>response.url().endsWith('/api/settings/language/me')&&response.request().method()==='PUT'&&response.request().postDataJSON().language===language);await selector.selectOption(language);const response=await saved;assert.equal(response.status(),200);assert.deepEqual(await response.json(),{ok:true,language});await coveragePage.waitForFunction(language=>document.documentElement.lang===language,language);};
+      const captureEmpty=()=>coveragePage.evaluate(()=>{
+        const node=document.querySelector('#weekVisits > .empty'),input=document.getElementById('visitSearch');
+        if(!node||state.visits.length||state.extraVisits.length||allPlannerVisits().length||filterVisits().length)throw Error('Expected actual initial total-empty producer before the retained GET is consumed');
+        input.focus();input.setSelectionRange(3,7);
+        window.qaInitialEmpty={node,children:[...node.childNodes],attributes:JSON.stringify([...node.attributes].map(a=>[a.name,a.value])),bytes:JSON.stringify({visits:state.visits,extras:state.extraVisits,tokens:['token','cristalwater_jwt','adminToken'].map(k=>localStorage.getItem(k)),pending:localStorage.getItem('cwFieldOutbox:coverage-status'),input:input.value}),input};
+      });
+      const inspectEmpty=()=>coveragePage.evaluate(()=>{const s=qaInitialEmpty;return{text:s.node.textContent,intact:s.node.isConnected&&document.querySelector('#weekVisits > .empty')===s.node&&s.node.childNodes.length===s.children.length&&s.children.every((n,i)=>s.node.childNodes[i]===n)&&JSON.stringify([...s.node.attributes].map(a=>[a.name,a.value]))===s.attributes,bytes:JSON.stringify({visits:state.visits,extras:state.extraVisits,tokens:['token','cristalwater_jwt','adminToken'].map(k=>localStorage.getItem(k)),pending:localStorage.getItem('cwFieldOutbox:coverage-status'),input:s.input.value})===s.bytes,focus:document.activeElement===s.input&&s.input.selectionStart===3&&s.input.selectionEnd===7,zeroRows:!state.visits.length&&!state.extraVisits.length&&!allPlannerVisits().length&&!filterVisits().length};});
+      await captureEmpty();let cases=0,geometry=0,foreign=0,recovered=0;
+      for(const width of [320,390,1440]){await coveragePage.setViewportSize({width,height:1000});for(const [index,language]of languages.entries()){
+        const readsBefore=reads.length;await selectEmpty(language);const actual=await inspectEmpty();
+        if(language==='en')console.log('QA native initial total empty '+JSON.stringify({language,width,heldGetRows:latestWeek.length,...actual}));
+        assert.deepEqual(actual,{text:totalEmptyCopy[index],intact:true,bytes:true,focus:true,zeroRows:true},language+' native total-empty leaf follows language without consuming or changing retained API data');assert.equal(reads.length,readsBefore);cases++;
+        assert(await coveragePage.evaluate(()=>{const node=qaInitialEmpty.node;node.scrollIntoView({block:'nearest',behavior:'instant'});const box=node.getBoundingClientRect(),frame=node.parentNode.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(node);const lines=[...range.getClientRects()];return lines.length>0&&node.scrollWidth<=node.clientWidth+1&&box.left>=0&&box.right<=innerWidth+1&&lines.every(line=>[box,frame].every(b=>line.left>=b.left-1&&line.right<=b.right+1&&line.top>=b.top-1&&line.bottom<=b.bottom+1));}),'Initial total-empty text fits '+language+'/'+width);geometry++;
+        if(language==='de'&&[320,1440].includes(width))await coveragePage.screenshot({path:path.join(output,'table-total-empty-'+language+'-'+width+'.png'),caret:'initial'});
+      }}
+      await coveragePage.evaluate(()=>{const node=qaInitialEmpty.node;node.hidden=true;node.style.display='none';node.parentNode.after(node);window.qaInitialEmptyForeignNodes=[node];});
+      await coveragePage.locator('#visitSearch').fill(pool.name+'-initial-empty');await captureEmpty();
+      await coveragePage.evaluate(()=>{const node=qaInitialEmpty.node;node.hidden=true;node.style.display='none';node.parentNode.after(node);qaInitialEmptyForeignNodes.push(node);});
+      for(const replacement of [false,true]){
+        await coveragePage.evaluate(({replacement,text})=>{const node=qaInitialEmptyForeignNodes[Number(replacement)],clone=node.cloneNode(true);node.after(clone);if(replacement)node.replaceChildren(document.createTextNode(node.textContent));else node.firstChild.nodeValue=text;window.qaInitialEmptyForeign=[node,clone].map(node=>({node,markup:node.outerHTML}));},{replacement,text:totalEmptyCopy[0]});
+        for(const language of languages){const readsBefore=reads.length;await selectEmpty(language);assert(await coveragePage.evaluate(()=>qaInitialEmptyForeign.every(({node,markup})=>node.isConnected&&node.outerHTML===markup)),'Actual initial total-empty leaves and clones retain foreign PT/same-byte replacement text');assert.equal(reads.length,readsBefore);foreign++;}
+      }
+      await coveragePage.locator('#visitSearch').fill(pool.name);await captureEmpty();
+      for(const [index,language]of languages.entries()){const readsBefore=reads.length;await selectEmpty(language);assert.deepEqual(await inspectEmpty(),{text:totalEmptyCopy[index],intact:true,bytes:true,focus:true,zeroRows:true},language+' fresh native initial total-empty producer regains ownership');assert.equal(reads.length,readsBefore);recovered++;}
+      assert.equal(JSON.stringify(latestWeek),sourceBytes);assert.equal(await sql(),sqlBefore);assert.equal(cases,15);assert.equal(geometry,15);assert.equal(foreign,10);assert.equal(recovered,5);assert.deepEqual(businessWrites,[]);assert.deepEqual(pageErrors,[]);
+      totalEmptyProof={cases,geometry,foreign,recoveredCases:recovered,widths:[320,390,1440],heldGetRows:latestWeek.length,transientBeforeRealGetConsumed:true,notLoadedEmptyAgenda:true,successPayloadMocks:false,allApiRowsRetained:true,nativeSearchProducer:true,nodesBytesFocusCaretAndSqlRetained:true,zeroLanguageReads:true,zeroBusinessWrites:true};console.log('PASS native initial total-empty languages '+JSON.stringify(totalEmptyProof));
+    }
     const navigation=coveragePage.goto(base+'/admin-rounds',{waitUntil:'networkidle'});navigation.catch(()=>{});
-    try{await coveragePage.waitForFunction(()=>Boolean(document.getElementById('assignmentStart')?.value),null,{timeout:7000});await coveragePage.locator('#visitSearch').fill(pool.name);assert.equal(await coveragePage.locator('#visitSearch').inputValue(),pool.name);}finally{initialFilterReady();}
+    try{await coveragePage.waitForFunction(()=>Boolean(document.getElementById('assignmentStart')?.value),null,{timeout:7000});await coveragePage.locator('#visitSearch').fill(pool.name);assert.equal(await coveragePage.locator('#visitSearch').inputValue(),pool.name);await checkInitialTotalEmpty();}finally{initialFilterReady();}
     await navigation;await ready();languageSelect=await coveragePage.locator('#cwLanguageSelect').elementHandle();assert(languageSelect,'Native language selector must exist before retaining its handle');
     await coveragePage.evaluate(()=>{
       const button=document.getElementById('coverageRefresh'),leaf=[...button.childNodes].find(node=>node.nodeType===Node.TEXT_NODE&&node.nodeValue.trim());
@@ -641,6 +676,7 @@ async function checkCoverageStatus(admin) {
     plannerProof.table.saveActions.originalMeasurements=90;plannerProof.table.saveActions.additionalLateExtraMeasurements=10;
     plannerProof.table.lateSuffix={cases:lateCases,foreign:lateForeign,recoveredCases:5,measurements:100,recoveryMeasurements:210,initialMeasurements:initialLateGeometry.count,widths:[320,390,1440],positions:['maxScroll','columnAligned'],kinds:['SERVICE','EXTRA'],literalPrefix:literalRound.name,extraPrefix:'Visita extra',futureExtraUnchanged:true,classesPredicatesIdsAndNodesRetained:true,allNativeBoxesRetained:true,allNonOwnedMarkupCompared:true};
     plannerProof.table.filteredEmpty={cases:emptyCases,geometry:emptyGeometry,foreign:emptyForeign,recoveredCases:emptyRecovered,widths:[320,390,1440],originalZeroResultCyclesRetained:true,sourceTotal:nativeTotal,apiDataNotPruned:true,nodesChildrenClassesAndPredicatesRetained:true,actualProducerLeavesRetainedForOwnership:true,recoveredLeafRetainedHidden:true,allNativeBoxesRetained:true,allNonOwnedMarkupCompared:true,totalEmptyBranchDeferred:true};
+    plannerProof.table.totalEmpty=totalEmptyProof;
     plannerProof.nativeCollection={foreign:foreignCollection,recovery:recoveryCollection,matrix:{cycles:states,calls:stateCollectionCalls,previousCalls:states*2,snapshotComparedInState:true,allOriginalAssertionsRetained:true}};
     plannerProof.nativeCollection.retainedHandles={geometryCapturedPerMatrix:true,languageSelections:languageStages.length,nativeSelectOption:true,visibleEnabledAndStableGuardsRetained:true,uniqueConnectedSelector:true,allOriginalWaitsScrollsAndCapturesRetained:true};
     plannerProof.table.badges={cases:badgeCases,geometry:badgeGeometry,foreign:badgeForeign,recoveredCases:5,normalWidths:[320,390,1440],alertWidths:[390,1440],actualAlertLeavesRetainedForOwnership:true,classesAndPredicatesRetained:true,allNonOwnedMarkupCompared:true};
