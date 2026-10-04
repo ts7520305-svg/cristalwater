@@ -143,6 +143,10 @@ async function browserProbe(f) {
     await context.addInitScript(({ token, id, origin }) => { if (location.origin !== origin) return; for (const k of ['token', 'cristalwater_jwt', 'adminToken']) localStorage.setItem(k, token); for (const k of ['user', 'cristalwater_user']) localStorage.setItem(k, JSON.stringify({ id, role: 'ADMIN' })); }, { token: sign({ id: f.admin, role: 'ADMIN', principalType: 'USER' }), id: f.admin, origin: new URL(base).origin });
     const page = await context.newPage(), errors = [], writes = []; page.setDefaultTimeout(30000);
     const observe = p => { p.on('pageerror', e => errors.push(e.message)); p.on('request', r => { if (r.url().startsWith(base + '/api/') && !['GET', 'HEAD', 'OPTIONS'].includes(r.method())) writes.push(r.method() + ' ' + new URL(r.url()).pathname); }); }; observe(page);
+    // Keep the static day oracle stable while timers and native events continue.
+    const plannerClock = new Date();
+    assert.equal(key(plannerClock), f.day, 'Fixture and browser begin on the same civil day');
+    await page.clock.setFixedTime(plannerClock);
     mark('planner-open');
     const start = performance.now(); await page.goto(base + '/admin-rounds', { waitUntil: 'networkidle' });
     await page.waitForFunction(() => document.getElementById('status')?.textContent.includes('carregadas com sucesso'));
@@ -154,6 +158,7 @@ async function browserProbe(f) {
     // extras have no ID ordering contract, so compare exact unique sets here.
     const plannerKeys = rows => rows.map(r => (r.kind === 'REGULAR' ? 'SERVICE' : 'EXTRA') + ':' + r.id).sort();
     exact(await rowKeys(), plannerKeys(expected), 'planner DOM');
+    await page.evaluate(() => { window.qaAgendaSourceBytes = JSON.stringify({ visits: state.visits, extras: state.extraVisits }); });
     const loadMs = performance.now() - start;
     for (const status of ['extra', '', 'extra', '']) { await page.locator('#visitStatusFilter').selectOption(status); exact(await rowKeys(), plannerKeys(status ? expected.filter(r => r.kind === 'EXTRA') : expected), 'planner repeated filter'); }
     // Chromium date fill already emits the native change event. Measure it and
@@ -165,6 +170,8 @@ async function browserProbe(f) {
     await page.locator('#visitDateFilter').fill(''); exact(await rowKeys(), plannerKeys(expected), 'planner restored');
     const dateChanges = await page.evaluate(() => qaAgendaDateChanges);
     assert.deepEqual(dateChanges, [f.day, ''], 'Clearing the actual date updates the complete original set');
+    assert.equal(await page.evaluate(() => Date.now()), +plannerClock, 'Planner date stays anchored through both native date changes');
+    assert(await page.evaluate(() => qaAgendaSourceBytes === JSON.stringify({ visits: state.visits, extras: state.extraVisits })), 'Native date filters retain every byte of both original API collections');
     mark('planner-date-changes-verified', { changes: dateChanges.length });
     assert.equal(await page.locator('#weekVisits img').count(), 0);
     const cdp = await context.newCDPSession(page); await cdp.send('Performance.enable'); const metrics = await cdp.send('Performance.getMetrics');
@@ -204,6 +211,7 @@ async function browserProbe(f) {
       }, 100);
     }, { token: sign({ id: f.techs[0].id, role: 'TECHNICIAN' }), tech: f.techs[0], origin: new URL(base).origin });
     const field = await techContext.newPage(); field.setDefaultTimeout(20000); observe(field);
+    await field.clock.setFixedTime(plannerClock);
     const expectedTech = technicianRows(f), techStart = performance.now(); mark('technician-open', { expectedRows: expectedTech.length });
     // The exact route and DOM assertions below define field readiness.
     try { await field.goto(base + '/technician-field-mode', { waitUntil: 'domcontentloaded' }); }
@@ -225,6 +233,7 @@ async function browserProbe(f) {
     assert(technicianHeapMiB < 256); assert(technicianMs < 30000); assert.deepEqual(errors, []); assert.deepEqual(writes, []);
     const readinessTraffic = await field.evaluate(() => { clearInterval(qaAgendaTrafficTimer); return { ...qaAgendaTraffic }; });
     assert(readinessTraffic.started > 0 && readinessTraffic.completed > 0, 'Continuous reads exercised during field readiness');
+    assert.equal(await field.evaluate(() => Date.now()), +plannerClock, 'Technician readiness retains the same fixture day while reads and timers continue');
     mark('technician-verified', { rows: expectedTech.length, readinessTraffic });
     await field.locator('#visitList [data-visit-index]').last().scrollIntoViewIfNeeded(); await field.screenshot({ path: path.join(folder, 'technician-390.png') });
     return { mode: 'UI', pools: f.pools.length, plannerRows: expected.length, plannerLoadMs: Math.round(loadMs * 10) / 10, plannerJsHeapMiB: plannerHeapMiB, dayRows: seen.length, dayPages: pages, dayTraversalMs: Math.round(dayTraversalMs * 10) / 10, technicianRows: expectedTech.length, technicianLoadAndNavigationMs: Math.round(technicianMs * 10) / 10, technicianJsHeapMiB: technicianHeapMiB, exactIds: true, repeatedFilters: true, dateChangeEvents: dateChanges.length, pageErrors: errors.length, writes: writes.length, readinessTraffic, phases };
