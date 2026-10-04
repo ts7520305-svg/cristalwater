@@ -966,6 +966,8 @@ function renderVisits(){
   box.querySelectorAll('tbody [data-field="billingMode"] option').forEach(node=>roundCopy.bind(node,billingKeys[node.value]));
   const assignmentKeys = {NORMAL:'chipNormal',SUPPORT:'chipSupport',SUBSTITUTION:'chipSubstitution',OTHER_DAY:'chipOtherDay',RESCHEDULE:'visitAssignmentReschedule',UNASSIGNED:'plannerUnassigned'};
   box.querySelectorAll('tbody [data-field="assignmentMode"] option').forEach(node=>roundCopy.bind(node,assignmentKeys[node.value]));
+  const unnamedTechnicians = state.technicians.flatMap((tech,index)=>tech.name?[]:[{index:index+1,id:String(tech.id)}]);
+  box.querySelectorAll('tbody [data-field="technicianId"]').forEach(select=>{roundCopy.bind(select.options[0],'plannerUnassigned');unnamedTechnicians.forEach(({index,id})=>roundCopy.bind(select.options[index],()=>roundCopy.text('technicianNumber').replace('{id}',id)));});
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
   box.querySelectorAll('tbody tr').forEach((row,index)=>{
