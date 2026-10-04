@@ -167,6 +167,7 @@ const roundCopy = (() => {
     visitDone: ['Concluida','Completed','Terminée','Completada','Abgeschlossen'],
     visitBlocked: ['Retida / impedida','Held / blocked','Retenue / bloquée','Retenida / impedida','Blockiert'],
     visitCancelled: ['Cancelada','Cancelled','Annulée','Cancelada','Storniert'],
+    visitAssignmentReschedule: ['Reagendamento','Rescheduling','Replanification','Reprogramación','Neuplanung'],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -963,6 +964,8 @@ function renderVisits(){
   box.querySelectorAll('tbody [data-field="status"] option').forEach(node=>roundCopy.bind(node,statusKeys[node.value]));
   const billingKeys = {EXTRA:'billable',INCLUDED:'included',NO_CHARGE:'noCharge'};
   box.querySelectorAll('tbody [data-field="billingMode"] option').forEach(node=>roundCopy.bind(node,billingKeys[node.value]));
+  const assignmentKeys = {NORMAL:'chipNormal',SUPPORT:'chipSupport',SUBSTITUTION:'chipSubstitution',OTHER_DAY:'chipOtherDay',RESCHEDULE:'visitAssignmentReschedule',UNASSIGNED:'plannerUnassigned'};
+  box.querySelectorAll('tbody [data-field="assignmentMode"] option').forEach(node=>roundCopy.bind(node,assignmentKeys[node.value]));
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
   box.querySelectorAll('tbody tr').forEach((row,index)=>{
