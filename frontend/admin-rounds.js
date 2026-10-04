@@ -168,6 +168,13 @@ const roundCopy = (() => {
     visitBlocked: ['Retida / impedida','Held / blocked','Retenue / bloquée','Retenida / impedida','Blockiert'],
     visitCancelled: ['Cancelada','Cancelled','Annulée','Cancelada','Storniert'],
     visitAssignmentReschedule: ['Reagendamento','Rescheduling','Replanification','Reprogramación','Neuplanung'],
+    visitDateLabel: ["Data da visita {pool}","Visit date {pool}","Date de la visite {pool}","Fecha de la visita {pool}","Datum des Besuchs {pool}"],
+    visitTechnicianLabel: ["Tecnico da visita {pool}","Visit technician {pool}","Technicien de la visite {pool}","Técnico de la visita {pool}","Techniker des Besuchs {pool}"],
+    visitBillingLabel: ["Modo de faturacao da visita {pool}","Visit billing mode {pool}","Mode de facturation de la visite {pool}","Modo de facturación de la visita {pool}","Abrechnungsmodus des Besuchs {pool}"],
+    visitAmountLabel: ["Valor da visita {pool}","Visit amount {pool}","Montant de la visite {pool}","Importe de la visita {pool}","Betrag des Besuchs {pool}"],
+    visitAssignmentLabel: ["Modo de atribuicao da visita {pool}","Visit assignment mode {pool}","Mode d’attribution de la visite {pool}","Modo de asignación de la visita {pool}","Zuweisungsmodus des Besuchs {pool}"],
+    visitStatusLabel: ["Estado da visita {pool}","Visit status {pool}","État de la visite {pool}","Estado de la visita {pool}","Status des Besuchs {pool}"],
+    visitOperationalReason: ["Motivo operacional","Operational reason","Motif opérationnel","Motivo operativo","Betrieblicher Grund"],
   };
   const bindings = new Map();
   const text = key => copy[key][Math.max(0,languages.indexOf(String(document.documentElement.lang || 'pt').toLowerCase().split('-')[0]))];
@@ -181,13 +188,13 @@ const roundCopy = (() => {
     const rendered = render();
     if(attribute){if(node.getAttribute(attribute)!==rendered)node.setAttribute(attribute,rendered);}
     else if(leaf.nodeValue!==rendered)leaf.nodeValue=rendered;
-    const entries=bindings.get(node)||new Map();entries.set(attribute,{render,rendered,leaf,children:[...node.childNodes]});bindings.set(node,entries);
+    const entries=bindings.get(node)||new Map();entries.set(attribute,{render,rendered,leaf,ownedAttribute:attribute?node.getAttributeNode(attribute):null,children:[...node.childNodes]});bindings.set(node,entries);
   }
   function paint() {
     for(const [node,entries] of bindings) {
       if(!node.isConnected){bindings.delete(node);continue;}
       for(const [attribute,entry] of entries) {
-        if(attribute?node.getAttribute(attribute)!==entry.rendered:entry.leaf.parentNode!==node||entry.leaf.nodeValue!==entry.rendered||node.childNodes.length!==entry.children.length||entry.children.some((child,index)=>node.childNodes[index]!==child)){entries.delete(attribute);continue;}
+        if(attribute?node.getAttributeNode(attribute)!==entry.ownedAttribute||node.getAttribute(attribute)!==entry.rendered:entry.leaf.parentNode!==node||entry.leaf.nodeValue!==entry.rendered||node.childNodes.length!==entry.children.length||entry.children.some((child,index)=>node.childNodes[index]!==child)){entries.delete(attribute);continue;}
         bind(node,entry.render,attribute);
       }
       if(!entries.size)bindings.delete(node);
@@ -968,6 +975,12 @@ function renderVisits(){
   box.querySelectorAll('tbody [data-field="assignmentMode"] option').forEach(node=>roundCopy.bind(node,assignmentKeys[node.value]));
   const unnamedTechnicians = state.technicians.flatMap((tech,index)=>tech.name?[]:[{index:index+1,id:String(tech.id)}]);
   box.querySelectorAll('tbody [data-field="technicianId"]').forEach(select=>{roundCopy.bind(select.options[0],'plannerUnassigned');unnamedTechnicians.forEach(({index,id})=>roundCopy.bind(select.options[index],()=>roundCopy.text('technicianNumber').replace('{id}',id)));});
+  const visitFieldLabels = {date:'visitDateLabel',technicianId:'visitTechnicianLabel',billingMode:'visitBillingLabel',unitPrice:'visitAmountLabel',assignmentMode:'visitAssignmentLabel',status:'visitStatusLabel'};
+  box.querySelectorAll('tbody tr').forEach((row,index)=>{
+    const pool=String(visitPoolName(filteredVisits[index]));
+    for(const [field,key] of Object.entries(visitFieldLabels))roundCopy.bind(row.querySelector(`[data-field="${field}"]`),()=>roundCopy.text(key).replace('{pool}',()=>pool),'aria-label');
+    roundCopy.bind(row.querySelector('[data-field="assignmentMode"]'),'visitOperationalReason','title');
+  });
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
   box.querySelectorAll('tbody tr').forEach((row,index)=>{
