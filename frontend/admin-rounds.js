@@ -961,6 +961,8 @@ function renderVisits(){
   roundCopy.bind(box.querySelector('.table-scroll'),'editableVisitList','aria-label');
   const statusKeys = {PLANNED:'visitPlanned',ON_ROUTE:'visitOnRoute',IN_PROGRESS:'visitInProgress',DONE:'visitDone',BLOCKED:'visitBlocked',RESCHEDULED:'chipReschedule',CANCELLED:'visitCancelled'};
   box.querySelectorAll('tbody [data-field="status"] option').forEach(node=>roundCopy.bind(node,statusKeys[node.value]));
+  const billingKeys = {EXTRA:'billable',INCLUDED:'included',NO_CHARGE:'noCharge'};
+  box.querySelectorAll('tbody [data-field="billingMode"] option').forEach(node=>roundCopy.bind(node,billingKeys[node.value]));
   box.querySelectorAll('tbody tr .ds-badge.is-muted').forEach(node=>roundCopy.bind(node,'tableNormalRound'));
   box.querySelectorAll('tbody tr .ds-badge.is-danger').forEach(node=>roundCopy.bind(node,'tableWithAlert'));
   box.querySelectorAll('tbody tr').forEach((row,index)=>{
